@@ -17,6 +17,7 @@ class Admin extends React.Component {
     render() {
         return (
             <ScrollView style={styles.viewPrinc}>
+                <View style={{ marginTop: 20 }} />
                 <View style={styles.viewLinha}>
                     <TouchableOpacity 
                         style={{ flex: 1 }} 

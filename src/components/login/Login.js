@@ -172,15 +172,15 @@ class Login extends React.Component {
                                         <Image source={key} style={styles.imageStyle} />
                                     </TouchableOpacity>
                                 </View>
-                            </View>
-                            <View style={styles.loginBtn}>
-                                <TouchableOpacity 
-                                    onPress={() => this.onPressEnterBtn()}
-                                >
-                                    <View style={styles.menu}>
-                                        {this.renderAnimLogin()}
-                                    </View>
-                                </TouchableOpacity>
+                                <View style={styles.loginBtn}>
+                                    <TouchableOpacity 
+                                        onPress={() => this.onPressEnterBtn()}
+                                    >
+                                        <View style={styles.menu}>
+                                            {this.renderAnimLogin()}
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     </ScrollView>

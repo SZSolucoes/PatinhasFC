@@ -95,7 +95,7 @@ export default class Routes extends React.Component {
                                             fontWeight: 'bold'
                                         }}
                                     >
-                                        Informativos
+                                        Info
                                     </Text>}
                                 </View>
                             )} 
