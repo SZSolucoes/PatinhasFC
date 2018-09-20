@@ -7,6 +7,7 @@ import ReduxThunk from 'redux-thunk';
 import Axios from 'axios';
 import { decode, encode } from 'base-64';
 import firebase from 'firebase';
+import _ from 'lodash';
 
 import Routes from './Routes';
 import reducers from './reducers';
@@ -30,8 +31,16 @@ class App extends React.Component {
 
         YellowBox.ignoreWarnings([
             'Warning: isMounted(...) is deprecated', 
-            'Module RCTImageLoader'
+            'Module RCTImageLoader',
+            'Setting a timer'
         ]);
+
+        const consoleWarn = _.clone(console);
+        console.warn = message => {
+            if (message.indexOf('Setting a timer') <= -1) {
+                consoleWarn.warn(message);
+            }
+        };
     }
 
     componentDidMount() {

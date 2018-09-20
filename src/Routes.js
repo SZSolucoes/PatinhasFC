@@ -39,7 +39,7 @@ export default class Routes extends React.Component {
                         component={Login}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft} 
-                        //initial
+                        initial
                         hideNavBar
                     />
                     {/*   Activity Principal de Tabs   */}
@@ -155,7 +155,7 @@ export default class Routes extends React.Component {
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
-                        initial
+                        //initial
                     />
                 </Scene>
             </Router>

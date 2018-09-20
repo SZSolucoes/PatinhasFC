@@ -164,6 +164,7 @@ class Login extends React.Component {
                                         onChangeText={password => 
                                             this.props.modificaPassword(password)}
                                         value={this.props.password}
+                                        onSubmitEditing={() => this.onPressEnterBtn()}
                                     />
                                     <TouchableOpacity
                                         onPressIn={() => this.props.modificaHidePw(false)}

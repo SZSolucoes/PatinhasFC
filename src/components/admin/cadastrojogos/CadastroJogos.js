@@ -51,6 +51,8 @@ class CadastroJogos extends React.Component {
 
     onPressSelectImg() {
         ImagePicker.openPicker({
+            width: 600,
+            height: 400,
             cropping: true,
             includeBase64: true,
             mediaType: 'photo'
@@ -72,6 +74,7 @@ class CadastroJogos extends React.Component {
     onPressConfirmar() {
         this.setState({ loading: true });
 
+        const { titulo, data, descricao } = this.state;
         const b64File = this.b64Str;
         const contentTp = this.contentType;
 
@@ -82,6 +85,8 @@ class CadastroJogos extends React.Component {
             };
 
             const storageRef = firebase.storage().ref();
+            const databaseRef = firebase.database().ref();
+
             const Blob = RNFetchBlob.polyfill.Blob;
 
             const glbXMLHttpRequest = global.XMLHttpRequest;
@@ -95,6 +100,7 @@ class CadastroJogos extends React.Component {
             const fileName = b64.encode(new Date().getTime().toString());
             const imgExt = contentTp.slice(contentTp.indexOf('/') + 1);
             const imgRef = storageRef.child(`jogos/${fileName}.${imgExt}`);
+            const dbJogosRef = databaseRef.child('jogos');
 
             Blob.build(b64File, { type: `${contentTp};BASE64` })
                 .then((blob) => { 
@@ -105,10 +111,13 @@ class CadastroJogos extends React.Component {
                     uploadBlob.close();
                     return imgRef.getDownloadURL();
                 })
-                .then((url) => {
-                    console.log(url); 
-                    this.setState({ loading: false });
-                })
+                .then((url) => dbJogosRef.push({
+                    titulo, 
+                    data, 
+                    descricao,
+                    imagem: url
+                }))
+                .then(() => this.setState({ loading: false }))
                 .catch((error) => {
                     console.log(error);
                     global.XMLHttpRequest = glbXMLHttpRequest;
@@ -152,7 +161,7 @@ class CadastroJogos extends React.Component {
                         containerStyle={styles.inputContainer}
                         returnKeyType={'next'}
                         inputStyle={[styles.text, styles.input]} 
-                        onChangeText={() => console.log('oi')}
+                        onChangeText={(value) => this.setState({ titulo: value })}
                         underlineColorAndroid={'transparent'}
                         onSubmitEditing={() => this.focusInField('descricao')}
                     />
@@ -202,7 +211,7 @@ class CadastroJogos extends React.Component {
                         selectTextOnFocus
                         containerStyle={styles.inputContainer}
                         inputStyle={[styles.text, styles.input]} 
-                        onChangeText={() => console.log('oi')}
+                        onChangeText={(value) => this.setState({ descricao: value })}
                         underlineColorAndroid={'transparent'}
                         multiline 
                     />
@@ -226,7 +235,7 @@ class CadastroJogos extends React.Component {
                                     Selecionar imagem
                                 </FormLabel> 
                             </View>
-                            <View style={[styles.viewImageSelect, { height: 150 }]}>
+                            <View style={[styles.viewImageSelect, { height: 200 }]}>
                                 { 
                                     this.state.imgJogoUri && 
                                     (<Image 
@@ -234,6 +243,7 @@ class CadastroJogos extends React.Component {
                                         style={{
                                             flex: 1,
                                             alignSelf: 'stretch',
+                                            resizeMode: 'stretch',
                                             width: undefined,
                                             height: undefined
                                             }}
