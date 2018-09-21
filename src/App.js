@@ -32,15 +32,9 @@ class App extends React.Component {
         YellowBox.ignoreWarnings([
             'Warning: isMounted(...) is deprecated', 
             'Module RCTImageLoader',
-            'Setting a timer'
+            'Setting a timer',
+            'Deprecation warning: value provided is not in a recognized'
         ]);
-
-        const consoleWarn = _.clone(console);
-        console.warn = message => {
-            if (message.indexOf('Setting a timer') <= -1) {
-                consoleWarn.warn(message);
-            }
-        };
     }
 
     componentDidMount() {

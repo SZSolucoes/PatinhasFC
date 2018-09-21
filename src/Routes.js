@@ -3,17 +3,23 @@ import { Router, Scene } from 'react-native-router-flux';
 import { 
     StyleSheet,
     Text,
-    View
+    View,
+    AsyncStorage,
+    StatusBar
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 
+import AlertScl from './components/tools/AlertScl';
 import Login from './components/login/Login';
 import Jogos from './components/jogos/Jogos';
 import Informativos from './components/informativos/Informativos';
 import Profile from './components/profile/Profile';
 import Admin from './components/admin/Admin';
 import CadastroJogos from './components/admin/cadastrojogos/CadastroJogos';
-import { colorAppS } from './utils/constantes';
+import { colorAppS, colorAppP } from './utils/constantes';
+
+import { store } from './App';
+import SplashScreenAnim from './components/animations/SplashScreenAnim';
 
 export default class Routes extends React.Component {
 
@@ -21,13 +27,56 @@ export default class Routes extends React.Component {
         super(props);
 
         this.onBackAndroidHdl = this.onBackAndroidHdl.bind(this);
+        this.renderRouter = this.renderRouter.bind(this);
+
+        this.state = {
+            logged: false,
+            loading: true,
+            timingNotEnd: true
+        };
+    }
+
+    componentDidMount() {
+        setTimeout(() => this.setState({ timingNotEnd: false }), 10000);
+        AsyncStorage.getItem('username')
+        .then((userName) => {
+            if (userName) {
+                AsyncStorage.getItem('password')
+                .then((password) => {
+                    if (password) {
+                        store.dispatch({
+                            type: 'modifica_username_login',
+                            payload: userName
+                        });
+                        store.dispatch({
+                            type: 'modifica_password_login',
+                            payload: password
+                        });
+
+                        this.setState({
+                            logged: true,
+                            loading: false,
+                        });
+                    } else {
+                        this.setState({
+                            loading: false,
+                        });
+                    }
+                });
+            } else {
+                this.setState({
+                    loading: false,
+                });
+            }
+        }
+        );
     }
 
     onBackAndroidHdl() {
         return true;
     }
 
-    render() {
+    renderRouter() {
         return (
             <Router backAndroidHandler={this.onBackAndroidHdl}>
                 <Scene 
@@ -39,7 +88,7 @@ export default class Routes extends React.Component {
                         component={Login}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft} 
-                        initial
+                        initial={!this.state.logged}
                         hideNavBar
                     />
                     {/*   Activity Principal de Tabs   */}
@@ -48,13 +97,13 @@ export default class Routes extends React.Component {
                         tabs 
                         hideNavBar
                         swipeEnabled
-                        //initial
+                        initial={this.state.logged}
                         showLabel={false}
                         tabBarStyle={styles.mainTabBar}
                         lazy={false}
                     >  
                         <Scene 
-                            key='Jogos' 
+                            key='jogos' 
                             component={Jogos} 
                             hideNavBar
                             icon={({ focused }) => (
@@ -77,7 +126,7 @@ export default class Routes extends React.Component {
                             )} 
                         />
                         <Scene 
-                            key='Informativos' 
+                            key='informativos' 
                             component={Informativos} 
                             hideNavBar
                             icon={({ focused }) => (
@@ -101,7 +150,7 @@ export default class Routes extends React.Component {
                             )} 
                         /> 
                         <Scene 
-                            key='Perfil' 
+                            key='perfil' 
                             component={Profile} 
                             hideNavBar
                             icon={({ focused }) => (
@@ -124,7 +173,7 @@ export default class Routes extends React.Component {
                             )} 
                         /> 
                         <Scene 
-                            key='Admin'
+                            key='admin'
                             component={Admin} 
                             hideNavBar
                             icon={({ focused }) => (
@@ -155,17 +204,31 @@ export default class Routes extends React.Component {
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
-                        //initial
                     />
                 </Scene>
             </Router>
+        );
+    }
+
+    render() {
+        if (this.state.loading || this.state.timingNotEnd) {
+            return (
+                <SplashScreenAnim />
+            );
+        }
+        return (
+            <View style={{ flex: 1 }}>
+                <AlertScl />
+                {this.renderRouter()}
+            </View>
+            
         );
     }
 }
 
 const styles = StyleSheet.create({
     header: {
-        backgroundColor: '#EE8215'
+        backgroundColor: colorAppS
     },
     title: {
         color: 'white',

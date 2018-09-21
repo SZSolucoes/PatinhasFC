@@ -1,5 +1,5 @@
 import firebase from 'firebase';
-import { Alert } from 'react-native';
+import { Alert, AsyncStorage } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 
 export const modificaUsername = (value) => ({
@@ -42,15 +42,19 @@ export const doLogin = (params) => dispatch => {
         payload: true
     });
     firebase.auth().signInWithEmailAndPassword(params.email, params.password)
-    .then(() => onLoginSuccess(dispatch))
+    .then(() => onLoginSuccess(dispatch, params))
     .catch((error) => onLoginError(dispatch, error));
 };
 
-const onLoginSuccess = (dispatch) => {
+const onLoginSuccess = (dispatch, params) => {
     dispatch({
         type: 'modifica_indicator_login',
         payload: false
     });
+
+    AsyncStorage.setItem('username', params.email);
+    AsyncStorage.setItem('password', params.password);
+
     Actions.mainTabBar();
 };
 

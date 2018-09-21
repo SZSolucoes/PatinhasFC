@@ -19,11 +19,12 @@ import {
     Button, 
     Icon
 } from 'react-native-elements';
+import Moment from 'moment';
 import b64 from 'base-64';
 
 import ImagePicker from 'react-native-image-crop-picker';
 import DatePicker from 'react-native-datepicker';
-//import { Buffer } from 'buffer';
+import { showAlert } from '../../../utils/store';
 
 class CadastroJogos extends React.Component {
 
@@ -32,11 +33,12 @@ class CadastroJogos extends React.Component {
 
         this.state = {
             isTitValid: false,
-            isDescValid: false,
             contentType: '',
             imgJogoUri: null,
             imgPath: '',
-            data: '',
+            titulo: '',
+            data: new Date(),
+            descricao: '',
             loading: false
         };
 
@@ -58,7 +60,6 @@ class CadastroJogos extends React.Component {
             mediaType: 'photo'
           }).then(image => {
             if (image) {
-                //const buf64 = new Buffer(image.data, 'binary').toString('base64');
                 let contentType = '';
                 if (image.mime) {
                     contentType = image.mime;
@@ -77,6 +78,27 @@ class CadastroJogos extends React.Component {
         const { titulo, data, descricao } = this.state;
         const b64File = this.b64Str;
         const contentTp = this.contentType;
+        let dataStr = '';
+
+        if (!(titulo)) {
+            this.setState({
+                isTitValid: !titulo,
+                loading: false
+            });
+            this.scrollView.scrollTo({
+                y: 0,
+                duration: 2000,
+                animated: true
+              });
+            return;
+        }
+
+        if (data instanceof Date) {
+            dataStr = data.toLocaleDateString();
+            dataStr = Moment(dataStr).format('DD/MM/YYYY');
+        } else {
+            dataStr = data;
+        }
 
         // Upload de imagem e dados
         if (b64File) {
@@ -113,13 +135,15 @@ class CadastroJogos extends React.Component {
                 })
                 .then((url) => dbJogosRef.push({
                     titulo, 
-                    data, 
+                    data: dataStr, 
                     descricao,
                     imagem: url
                 }))
-                .then(() => this.setState({ loading: false }))
-                .catch((error) => {
-                    console.log(error);
+                .then(() => {
+                    this.setState({ loading: false });
+                    showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
+                })
+                .catch(() => {
                     global.XMLHttpRequest = glbXMLHttpRequest;
                     global.Blob = glbBlob;
 
@@ -128,9 +152,34 @@ class CadastroJogos extends React.Component {
                     }
 
                     this.setState({ loading: false });
+                    showAlert(
+                        'danger', 
+                        'Ops!', 
+                        'Ocorreu um erro ao cadastrar o jogo.'
+                    );
                 });  
         } else {
-            this.setState({ loading: false });
+            const databaseRef = firebase.database().ref();
+            const dbJogosRef = databaseRef.child('jogos');
+
+            dbJogosRef.push({
+                titulo, 
+                data: dataStr, 
+                descricao,
+                imagem: ''
+            })
+            .then(() => {
+                this.setState({ loading: false });
+                showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
+            })
+            .catch(() => {
+                this.setState({ loading: false });
+                showAlert(
+                    'danger', 
+                    'Ops!', 
+                    'Ocorreu um erro ao cadastrar o jogo.'
+                );
+            });  
         }
     }
     
@@ -153,21 +202,22 @@ class CadastroJogos extends React.Component {
 
     render() {
         return (
-            <ScrollView style={styles.viewPrinc}>
+            <ScrollView style={styles.viewPrinc} ref={(ref) => { this.scrollView = ref; }}>
                 <Card containerStyle={styles.card}>
                     <FormLabel labelStyle={styles.text}>TÍTULO</FormLabel>
                     <FormInput
                         selectTextOnFocus
                         containerStyle={styles.inputContainer}
                         returnKeyType={'next'}
-                        inputStyle={[styles.text, styles.input]} 
+                        inputStyle={[styles.text, styles.input]}
+                        value={this.state.titulo}
                         onChangeText={(value) => this.setState({ titulo: value })}
                         underlineColorAndroid={'transparent'}
-                        onSubmitEditing={() => this.focusInField('descricao')}
+                        onSubmitEditing={() => this.inputDate.onPressDate()}
                     />
                     { 
                         this.state.isTitValid &&
-                        <FormValidationMessage>Error message</FormValidationMessage> 
+                        <FormValidationMessage>Campo obrigatório</FormValidationMessage> 
                     }
                     <FormLabel labelStyle={styles.text}>DATA</FormLabel>
                     <View 
@@ -184,6 +234,7 @@ class CadastroJogos extends React.Component {
                         }) }]}
                     >
                         <DatePicker
+                            ref={(ref) => { this.inputDate = ref; }}
                             style={[styles.inputContainer, { flex: 1 }]}
                             date={this.state.data}
                             mode='date'
@@ -196,13 +247,12 @@ class CadastroJogos extends React.Component {
                                 dateInput: StyleSheet.flatten(styles.dateInput),
                                 dateText: StyleSheet.flatten(styles.dateText)
                             }}
-                            onDateChange={(date) => { this.setState({ data: date }); }}
+                            onDateChange={(date) => { 
+                                this.setState({ data: date }); 
+                                this.descricao.focus();
+                            }}
                         />
                     </View>
-                    { 
-                        this.state.isDescValid && 
-                        <FormValidationMessage>Error message</FormValidationMessage> 
-                    }
                     <FormLabel labelStyle={styles.text}>DESCRIÇÃO</FormLabel>
                     <FormInput
                         ref={(ref) => {
@@ -211,14 +261,12 @@ class CadastroJogos extends React.Component {
                         selectTextOnFocus
                         containerStyle={styles.inputContainer}
                         inputStyle={[styles.text, styles.input]} 
+                        value={this.state.descricao}
                         onChangeText={(value) => this.setState({ descricao: value })}
                         underlineColorAndroid={'transparent'}
                         multiline 
                     />
-                    { 
-                        this.state.isDescValid && 
-                        <FormValidationMessage>Error message</FormValidationMessage> 
-                    }
+                    <FormLabel labelStyle={styles.text}>IMAGEM DE EXIBIÇÃO</FormLabel>
                     <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
                         <TouchableOpacity
                             onPress={() => this.onPressSelectImg()}

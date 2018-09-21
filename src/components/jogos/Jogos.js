@@ -5,13 +5,15 @@ import {
     StyleSheet,
     ImageBackground,
     Platform,
-    TouchableOpacity
+    TouchableOpacity,
+    Text
 } from 'react-native';
 import firebase from 'firebase';
 import _ from 'lodash';
 
 import { connect } from 'react-redux';
-import { Card } from 'react-native-elements';
+import { Card, Divider } from 'react-native-elements';
+import LoadingBallAnim from '../animations/LoadingBallAnim';
 import Versus from './Versus';
 import imgCampoJogos from '../../imgs/campojogos.jpg';
 import imgEstadio from '../../imgs/estadio.jpg';
@@ -22,16 +24,24 @@ class Jogos extends React.Component {
         super(props);
 
         this.startOrStopFBJogosListener = this.startOrStopFBJogosListener.bind(this);
+        this.renderListItens = this.renderListItens.bind(this);
+        this.removeImagem = this.removeImagem.bind(this);
 
         this.state = { listJogos: [] };
     }
 
     componentDidMount() {
-        setTimeout(() => this.startOrStopFBJogosListener(true), 1000);
+        this.startOrStopFBJogosListener(true);
     }
 
     componentWillUnmount() {
-        setTimeout(() => this.startOrStopFBJogosListener(false), 1000);
+        this.startOrStopFBJogosListener(false);
+    }
+
+    removeImagem(url) {
+        console.log(url);
+        //const imgRef = firebase.storage().refFromURL(url);
+        //imgRef.delete();
     }
 
     startOrStopFBJogosListener(startOrStop) {
@@ -46,6 +56,44 @@ class Jogos extends React.Component {
         }
     }
 
+    renderListItens() {
+        return (
+            <ScrollView style={{ flex: 1 }}>
+                { 
+                    this.state.listJogos.map((item, index) => (
+                        <View key={index}>
+                            <TouchableOpacity
+                                onPress={() => this.removeImagem(item.imagem)}
+                            >
+                                <Card 
+                                    title={item.titulo ? item.titulo : ' '} 
+                                    containerStyle={[styles.card, styles.shadowCard]}
+                                    image={item.imagem ? 
+                                        { uri: item.imagem } : imgEstadio}
+                                    featuredSubtitle={
+                                        item.descricao ? item.descricao : ' '}
+                                >
+                                    <Text style={styles.textData}>
+                                        {item.data ? item.data : ' '}
+                                    </Text>
+                                    <Divider
+                                        style={{
+                                            marginTop: 5,
+                                            marginBottom: 5,
+                                            height: 2
+                                        }}
+                                    />
+                                    <Versus />
+                                </Card>   
+                            </TouchableOpacity>
+                            <View style={{ marginBottom: 10 }} />
+                        </View>
+                    ))
+                }
+            </ScrollView>
+        );
+    }
+
     render() {
         return (
             <View style={styles.viewPrinc}>
@@ -57,30 +105,12 @@ class Jogos extends React.Component {
                         resizeMode: 'contain'
                     }}
                 >
-                    <ScrollView style={{ flex: 1 }}>
-                        { 
-                            this.state.listJogos.map((item, index) => {
-                                return (
-                                    <View key={index}>
-                                        <TouchableOpacity
-                                            onPress={() => false}
-                                        >
-                                            <Card 
-                                                title={item.titulo} 
-                                                containerStyle={[styles.card, styles.shadowCard]}
-                                                image={item.imagem ? 
-                                                    { uri: item.imagem } : imgEstadio}
-                                                featuredSubtitle={item.descricao}
-                                            >
-                                                <Versus />
-                                            </Card>   
-                                        </TouchableOpacity>
-                                        <View style={{ marginBottom: 10 }} />
-                                    </View>
-                                );
-                            })
-                        }
-                    </ScrollView>
+                    { 
+                        this.state.listJogos.length ?
+                        (this.renderListItens())
+                        :
+                        (<LoadingBallAnim />)
+                    }
                 </ImageBackground>
             </View>
         );
@@ -104,11 +134,18 @@ const styles = StyleSheet.create({
                 elevation: 2
             }
         })
+    },
+    textData: {
+        textAlign: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'black'
     }
 });
 
-const mapStateToProps = () => ({
-    
+const mapStateToProps = (state) => ({
+    username: state.LoginReducer.username,
+    password: state.LoginReducer.password
 });
 
 export default connect(mapStateToProps, {})(Jogos);
