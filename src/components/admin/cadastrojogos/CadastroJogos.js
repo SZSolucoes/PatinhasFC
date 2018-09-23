@@ -5,26 +5,22 @@ import {
     StyleSheet,
     Platform,
     TouchableOpacity,
-    Image
+    Text
 } from 'react-native';
 
 import { connect } from 'react-redux';
-import firebase from 'firebase';
-import RNFetchBlob from 'rn-fetch-blob';
 import { 
-    FormLabel, 
-    FormInput, 
-    FormValidationMessage, 
     Card, 
-    Button, 
-    Icon
+    Icon,
+    SearchBar,
+    Divider
 } from 'react-native-elements';
-import Moment from 'moment';
-import b64 from 'base-64';
 
-import ImagePicker from 'react-native-image-crop-picker';
-import DatePicker from 'react-native-datepicker';
-import { showAlert } from '../../../utils/store';
+import ModalDropdown from 'react-native-modal-dropdown';
+import { colorAppS } from '../../../utils/constantes';
+import Versus from '../../jogos/Versus';
+import imgEstadio from '../../../imgs/estadio.jpg';
+import JogoEdit from './JogoEdit';
 
 class CadastroJogos extends React.Component {
 
@@ -32,284 +28,195 @@ class CadastroJogos extends React.Component {
         super(props);
 
         this.state = {
-            isTitValid: false,
-            contentType: '',
-            imgJogoUri: null,
-            imgPath: '',
-            titulo: '',
-            data: new Date(),
-            descricao: '',
-            loading: false
+            dropWidth: 0,
+            modalOpt: 'Cadastrar',
+            itemEdit: {},
+            idxMdl: 0
         };
 
-        this.b64Str = '';
-        this.contentType = '';
+        this.scrollView = null;
 
-        this.onPressSelectImg = this.onPressSelectImg.bind(this);
-        this.onPressConfirmar = this.onPressConfirmar.bind(this);
-        this.setImgProperties = this.setImgProperties.bind(this);
-        this.focusInField = this.focusInField.bind(this);
+        this.renderEditar = this.renderEditar.bind(this);
+        this.renderSwitchType = this.renderSwitchType.bind(this);
     }
 
-    onPressSelectImg() {
-        ImagePicker.openPicker({
-            width: 600,
-            height: 400,
-            cropping: true,
-            includeBase64: true,
-            mediaType: 'photo'
-          }).then(image => {
-            if (image) {
-                let contentType = '';
-                if (image.mime) {
-                    contentType = image.mime;
+    renderEditar() {
+        return (
+            <Card containerStyle={styles.card}>
+                <SearchBar
+                    round
+                    lightTheme
+                    containerStyle={{ 
+                        backgroundColor: 'transparent',
+                        borderTopWidth: 0, 
+                        borderBottomWidth: 0
+                    }}
+                    searchIcon={{ size: 26 }}
+                    onChangeText={() => true}
+                    onClear={() => true}
+                    placeholder='Buscar jogo...' 
+                />
+                { 
+                    this.props.listJogos.map((item, index) => (
+                        <View key={index}>
+                            <TouchableOpacity
+                                onPress={() => this.setState({ 
+                                    modalOpt: 'Em Edição', 
+                                    itemEdit: item 
+                                })}
+                            >
+                                <Card 
+                                    title={item.titulo ? item.titulo : ' '} 
+                                    containerStyle={styles.card}
+                                    image={item.imagem ? 
+                                        { uri: item.imagem } : imgEstadio}
+                                    featuredSubtitle={
+                                        item.descricao ? item.descricao : ' '}
+                                >
+                                    <Text style={styles.textData}>
+                                        {item.data ? item.data : ' '}
+                                    </Text>
+                                    <Divider
+                                        style={{
+                                            marginTop: 5,
+                                            marginBottom: 5,
+                                            height: 2
+                                        }}
+                                    />
+                                    <Versus />
+                                </Card>   
+                            </TouchableOpacity>
+                            <View style={{ marginBottom: 10 }} />
+                        </View>
+                    ))
                 }
-                this.setImgProperties(image.data, contentType);
-                this.setState({ 
-                    imgJogoUri: `data:${image.mime};base64,${image.data}`
-                }); 
-            }
-          }).catch(() => false);
+            </Card>
+        );
     }
 
-    onPressConfirmar() {
-        this.setState({ loading: true });
-
-        const { titulo, data, descricao } = this.state;
-        const b64File = this.b64Str;
-        const contentTp = this.contentType;
-        let dataStr = '';
-
-        if (!(titulo)) {
-            this.setState({
-                isTitValid: !titulo,
-                loading: false
-            });
-            this.scrollView.scrollTo({
-                y: 0,
-                duration: 2000,
-                animated: true
-              });
-            return;
-        }
-
-        if (data instanceof Date) {
-            dataStr = data.toLocaleDateString();
-            dataStr = Moment(dataStr).format('DD/MM/YYYY');
-        } else {
-            dataStr = data;
-        }
-
-        // Upload de imagem e dados
-        if (b64File) {
-            const metadata = {
-                contentType: contentTp
-            };
-
-            const storageRef = firebase.storage().ref();
-            const databaseRef = firebase.database().ref();
-
-            const Blob = RNFetchBlob.polyfill.Blob;
-
-            const glbXMLHttpRequest = global.XMLHttpRequest;
-            const glbBlob = global.Blob;
-
-            let uploadBlob = null;
-
-            global.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
-            global.Blob = Blob;
-
-            const fileName = b64.encode(new Date().getTime().toString());
-            const imgExt = contentTp.slice(contentTp.indexOf('/') + 1);
-            const imgRef = storageRef.child(`jogos/${fileName}.${imgExt}`);
-            const dbJogosRef = databaseRef.child('jogos');
-
-            Blob.build(b64File, { type: `${contentTp};BASE64` })
-                .then((blob) => { 
-                    uploadBlob = blob;
-                    return imgRef.put(blob, metadata);
-                })
-                .then(() => {
-                    uploadBlob.close();
-                    return imgRef.getDownloadURL();
-                })
-                .then((url) => dbJogosRef.push({
-                    titulo, 
-                    data: dataStr, 
-                    descricao,
-                    imagem: url
-                }))
-                .then(() => {
-                    this.setState({ loading: false });
-                    showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
-                })
-                .catch(() => {
-                    global.XMLHttpRequest = glbXMLHttpRequest;
-                    global.Blob = glbBlob;
-
-                    if (uploadBlob) {
-                        uploadBlob.close();
-                    }
-
-                    this.setState({ loading: false });
-                    showAlert(
-                        'danger', 
-                        'Ops!', 
-                        'Ocorreu um erro ao cadastrar o jogo.'
-                    );
-                });  
-        } else {
-            const databaseRef = firebase.database().ref();
-            const dbJogosRef = databaseRef.child('jogos');
-
-            dbJogosRef.push({
-                titulo, 
-                data: dataStr, 
-                descricao,
-                imagem: ''
-            })
-            .then(() => {
-                this.setState({ loading: false });
-                showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
-            })
-            .catch(() => {
-                this.setState({ loading: false });
-                showAlert(
-                    'danger', 
-                    'Ops!', 
-                    'Ocorreu um erro ao cadastrar o jogo.'
-                );
-            });  
-        }
-    }
-    
-    setImgProperties(b64Str, mime) {
-        this.b64Str = b64Str;
-        this.contentType = mime;
-    }
-    
-    focusInField(field) {
-        switch (field) {
-            case 'data':
-                this.data.focus();
-                break;
-            case 'descricao':
-                this.descricao.focus();
-                break;
+    renderSwitchType(modalOpt) {
+        switch (modalOpt) {
+            case 'Cadastrar':
+                return (<JogoEdit scrollView={() => this.scrollView} />);
+            case 'Editar':
+                return this.renderEditar();
+            case 'Em Edição':
+                return (
+                    <JogoEdit 
+                        scrollView={() => this.scrollView}
+                        titulo={this.state.itemEdit.titulo}
+                        data={this.state.itemEdit.data}
+                        descricao={this.state.itemEdit.descricao}
+                        imgUrl={this.state.itemEdit.imagem}
+                        keyItem={this.state.itemEdit.key}
+                    />);
             default:
+                return (<JogoEdit scrollView={() => this.scrollView} />);
         }
     }
 
     render() {
         return (
-            <ScrollView style={styles.viewPrinc} ref={(ref) => { this.scrollView = ref; }}>
-                <Card containerStyle={styles.card}>
-                    <FormLabel labelStyle={styles.text}>TÍTULO</FormLabel>
-                    <FormInput
-                        selectTextOnFocus
-                        containerStyle={styles.inputContainer}
-                        returnKeyType={'next'}
-                        inputStyle={[styles.text, styles.input]}
-                        value={this.state.titulo}
-                        onChangeText={(value) => this.setState({ titulo: value })}
-                        underlineColorAndroid={'transparent'}
-                        onSubmitEditing={() => this.inputDate.onPressDate()}
-                    />
-                    { 
-                        this.state.isTitValid &&
-                        <FormValidationMessage>Campo obrigatório</FormValidationMessage> 
-                    }
-                    <FormLabel labelStyle={styles.text}>DATA</FormLabel>
+            <ScrollView 
+                style={styles.viewPrinc} 
+                ref={(ref) => { this.scrollView = ref; }}
+                keyboardShouldPersistTaps={'handled'}
+            >
+                <View style={{ flexDirection: 'row' }}>
                     <View 
-                        style={[styles.inputContainer, { 
-                            flex: 1, 
-                            flexDirection: 'row',
-                            ...Platform.select({
-                            android: {
-                                marginHorizontal: 16
-                            },
-                            ios: {
-                                marginHorizontal: 20
-                            }
-                        }) }]}
+                        style={{ flex: 1 }}
+                        onLayout={
+                            (event) =>
+                                this.setState({
+                                    dropWidth: event.nativeEvent.layout.width
+                        })}
+                    />
+                    <Card
+                        containerStyle={
+                            this.state.modalOpt !== 'Em Edição' ?
+                            styles.dropCard : styles.dropCardRed
+                        }
                     >
-                        <DatePicker
-                            ref={(ref) => { this.inputDate = ref; }}
-                            style={[styles.inputContainer, { flex: 1 }]}
-                            date={this.state.data}
-                            mode='date'
-                            format='DD/MM/YYYY'
-                            confirmBtnText='Ok'
-                            cancelBtnText='Cancelar'
-                            placeholder=' '
-                            showIcon={false}
-                            customStyles={{
-                                dateInput: StyleSheet.flatten(styles.dateInput),
-                                dateText: StyleSheet.flatten(styles.dateText)
-                            }}
-                            onDateChange={(date) => { 
-                                this.setState({ data: date }); 
-                                this.descricao.focus();
-                            }}
-                        />
-                    </View>
-                    <FormLabel labelStyle={styles.text}>DESCRIÇÃO</FormLabel>
-                    <FormInput
-                        ref={(ref) => {
-                            this.descricao = ref;
-                        }}
-                        selectTextOnFocus
-                        containerStyle={styles.inputContainer}
-                        inputStyle={[styles.text, styles.input]} 
-                        value={this.state.descricao}
-                        onChangeText={(value) => this.setState({ descricao: value })}
-                        underlineColorAndroid={'transparent'}
-                        multiline 
-                    />
-                    <FormLabel labelStyle={styles.text}>IMAGEM DE EXIBIÇÃO</FormLabel>
-                    <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
-                        <TouchableOpacity
-                            onPress={() => this.onPressSelectImg()}
-                        >
-                            <View style={styles.viewImageSelect}>
-                                <Icon 
-                                    name='folder-image' 
-                                    type='material-community' 
-                                    size={34} color='#9E9E9E' 
-                                />
-                                <FormLabel 
-                                    labelStyle={[styles.text, { marginTop: 0, marginBottom: 0 }]}
-                                >
-                                    Selecionar imagem
-                                </FormLabel> 
-                            </View>
-                            <View style={[styles.viewImageSelect, { height: 200 }]}>
-                                { 
-                                    this.state.imgJogoUri && 
-                                    (<Image 
-                                        source={{ uri: this.state.imgJogoUri }}
+                        { 
+                            this.state.dropWidth && this.state.modalOpt !== 'Em Edição' ?
+                            (
+                                <View style={{ flexDirection: 'row' }}>
+                                    <ModalDropdown
+                                        ref={(ref) => { this.modalDropRef = ref; }}
                                         style={{
-                                            flex: 1,
-                                            alignSelf: 'stretch',
-                                            resizeMode: 'stretch',
-                                            width: undefined,
-                                            height: undefined
+                                            width: this.state.dropWidth - 1
+                                        }}
+                                        textStyle={styles.dropModalBtnText}
+                                        options={['Cadastrar', 'Editar']}
+                                        onSelect={(index, value) => {
+                                            this.setState({
+                                                modalOpt: value,
+                                                idxMdl: parseInt(index, 10)
+                                            });
+                                        }}
+                                        defaultIndex={this.state.idxMdl}
+                                        defaultValue={this.state.modalOpt}
+                                    />
+                                    <Icon
+                                        pointerEvents={'none'}
+                                        containerStyle={{
+                                            left: 0,
+                                            top: 0,
+                                            right: 0,
+                                            bottom: 0, 
+                                            position: 'absolute', 
+                                            zIndex: 1,
+                                            alignItems: 'flex-end',
+                                            paddingRight: 5
+
+                                        }}
+                                        name='arrow-down-thick' 
+                                        type='material-community' 
+                                        size={26} color='white' 
+                                    />
+                                </View>
+                            )
+                            :
+                            (
+                                <TouchableOpacity 
+                                    onPress={() => {
+                                        this.setState({
+                                        modalOpt: 'Editar',
+                                        idxMdl: 1
+                                    }); 
+                                }}
+                                >
+                                    <Text 
+                                        style={[styles.dropModalBtnText, { marginHorizontal: 40 }]}
+                                    >
+                                        {this.state.modalOpt !== 'Em Edição' ? ' ' : 'Em Edição'}
+                                    </Text>
+                                    {
+                                        this.state.modalOpt === 'Em Edição' && 
+                                        <Icon
+                                            pointerEvents={'none'}
+                                            containerStyle={{
+                                                left: 0,
+                                                top: 0,
+                                                right: 0,
+                                                bottom: 0, 
+                                                position: 'absolute', 
+                                                zIndex: 1,
+                                                alignItems: 'flex-start',
+                                                paddingRight: 5
+
                                             }}
-                                    />)
-                                }
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                    <Button 
-                        small
-                        loading={this.state.loading}
-                        disabled={this.state.loading}
-                        loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
-                        title={this.state.loading ? ' ' : 'Confirmar'} 
-                        buttonStyle={{ width: '100%', marginVertical: 30 }}
-                        onPress={() => this.onPressConfirmar()}
-                    />
-                </Card>
+                                            name='arrow-left-thick' 
+                                            type='material-community' 
+                                            size={26} color='white' 
+                                        />
+                                    }
+                                </TouchableOpacity>
+                            )
+                        }
+                    </Card>
+                </View>
+                {this.renderSwitchType(this.state.modalOpt)}
             </ScrollView>
         );
     }
@@ -364,11 +271,40 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'black',
         textAlign: 'left'
+    },
+    dropCard: { 
+        backgroundColor: colorAppS,
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        padding: 0,
+    },
+    dropCardRed: { 
+        backgroundColor: 'red',
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        padding: 0,
+    },
+    dropModalBtnText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginVertical: 8
+    },
+    textData: {
+        textAlign: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'black'
     }
 });
 
-const mapStateToProps = () => ({
-    
+const mapStateToProps = (state) => ({
+    listJogos: state.JogosReducer.listJogos
 });
 
 export default connect(mapStateToProps, {})(CadastroJogos);

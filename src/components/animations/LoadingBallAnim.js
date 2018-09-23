@@ -117,40 +117,40 @@ export default class LoadingBallAnim extends React.Component {
                 <Animated.Image 
                     source={imgBall} 
                     style={{ 
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         transform: [{ translateY: this.ballAnimOne }]
                     }}
                 />
                 <Animated.Image 
                     source={imgBall} 
                     style={{ 
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         transform: [{ translateY: this.ballAnimTwo }]
                     }}
                 />
                 <Animated.Image 
                     source={imgBall} 
                     style={{ 
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         transform: [{ translateY: this.ballAnimThree }]
                     }}
                 />
                 <Animated.Image 
                     source={imgBall} 
                     style={{ 
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         transform: [{ translateY: this.ballAnimFour }]
                     }}
                 />
                 <Animated.Image 
                     source={imgBall} 
                     style={{ 
-                        width: 60,
-                        height: 60,
+                        width: 50,
+                        height: 50,
                         transform: [{ translateY: this.ballAnimFive }]
                     }}
                 />

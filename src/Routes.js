@@ -4,8 +4,7 @@ import {
     StyleSheet,
     Text,
     View,
-    AsyncStorage,
-    StatusBar
+    AsyncStorage
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 
@@ -16,7 +15,7 @@ import Informativos from './components/informativos/Informativos';
 import Profile from './components/profile/Profile';
 import Admin from './components/admin/Admin';
 import CadastroJogos from './components/admin/cadastrojogos/CadastroJogos';
-import { colorAppS, colorAppP } from './utils/constantes';
+import { colorAppS } from './utils/constantes';
 
 import { store } from './App';
 import SplashScreenAnim from './components/animations/SplashScreenAnim';
@@ -199,11 +198,12 @@ export default class Routes extends React.Component {
                     {/* ####################################### */}
                     <Scene 
                         key={'cadastroJogos'}
-                        title={'Cadastro de Jogos'} 
+                        title={'Jogos'} 
                         component={CadastroJogos}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
+                        //initial
                     />
                 </Scene>
             </Router>

@@ -12,11 +12,13 @@ import firebase from 'firebase';
 import _ from 'lodash';
 
 import { connect } from 'react-redux';
+import { Actions } from 'react-native-router-flux';
 import { Card, Divider } from 'react-native-elements';
 import LoadingBallAnim from '../animations/LoadingBallAnim';
 import Versus from './Versus';
-import imgCampoJogos from '../../imgs/campojogos.jpg';
+import imgCampoJogos from '../../imgs/campojogos.png';
 import imgEstadio from '../../imgs/estadio.jpg';
+import { modificaListJogos } from '../../actions/JogosActions';
 
 class Jogos extends React.Component {
 
@@ -26,8 +28,6 @@ class Jogos extends React.Component {
         this.startOrStopFBJogosListener = this.startOrStopFBJogosListener.bind(this);
         this.renderListItens = this.renderListItens.bind(this);
         this.removeImagem = this.removeImagem.bind(this);
-
-        this.state = { listJogos: [] };
     }
 
     componentDidMount() {
@@ -45,10 +45,19 @@ class Jogos extends React.Component {
     }
 
     startOrStopFBJogosListener(startOrStop) {
+        const user = firebase.auth().currentUser;
+
+        if (!user) {
+            Actions.replace('login');
+            return;
+        }
+
         if (startOrStop) {
             const databaseRef = firebase.database().ref();
             this.dbJogosRef = databaseRef.child('jogos').on('value', (snapshot) => {
-                this.setState({ listJogos: _.values(snapshot.val()) });
+                this.props.modificaListJogos(
+                    _.map(snapshot.val(), (value, key) => ({ key, ...value }))
+                ); 
             });
         } else {
             const databaseRef = firebase.database().ref();
@@ -60,7 +69,7 @@ class Jogos extends React.Component {
         return (
             <ScrollView style={{ flex: 1 }}>
                 { 
-                    this.state.listJogos.map((item, index) => (
+                    this.props.listJogos.map((item, index) => (
                         <View key={index}>
                             <TouchableOpacity
                                 onPress={() => this.removeImagem(item.imagem)}
@@ -106,7 +115,7 @@ class Jogos extends React.Component {
                     }}
                 >
                     { 
-                        this.state.listJogos.length ?
+                        this.props.listJogos.length ?
                         (this.renderListItens())
                         :
                         (<LoadingBallAnim />)
@@ -123,7 +132,10 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     },
     card: {
-        padding: 0
+        padding: 0,
+        margin: 0,
+        marginHorizontal: 10,
+        marginVertical: 15
     },
     shadowCard: {
         ...Platform.select({
@@ -145,7 +157,10 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     username: state.LoginReducer.username,
-    password: state.LoginReducer.password
+    password: state.LoginReducer.password,
+    listJogos: state.JogosReducer.listJogos
 });
 
-export default connect(mapStateToProps, {})(Jogos);
+export default connect(mapStateToProps, {
+    modificaListJogos
+})(Jogos);

@@ -30,7 +30,7 @@ class Admin extends React.Component {
                             <View style={styles.viewIconText}>
                                 <Icon name='soccer-field' type='material-community' size={34} />
                                 <View style={{ marginTop: 10 }} />
-                                <Text style={styles.text}>Cadastro de jogos</Text>
+                                <Text style={styles.text}>Jogos</Text>
                             </View>
                         </Card>
                     </TouchableOpacity>
@@ -120,6 +120,7 @@ class Admin extends React.Component {
                         </Card>
                     </TouchableOpacity>
                 </View>
+                <View style={{ marginBottom: 40 }} />
             </ScrollView>
         );
     }

@@ -33,7 +33,8 @@ class App extends React.Component {
             'Warning: isMounted(...) is deprecated', 
             'Module RCTImageLoader',
             'Setting a timer',
-            'Deprecation warning: value provided is not in a recognized'
+            'Deprecation warning: value provided is not in a recognized',
+            'Require cycle:'
         ]);
     }
 
