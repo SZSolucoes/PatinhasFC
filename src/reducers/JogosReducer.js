@@ -1,5 +1,6 @@
 const INITIAL_STATE = {
-    listJogos: []
+    listJogos: [],
+    itemSelected: {}
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -9,10 +10,16 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 listJogos: [...action.payload] 
             };
+        case 'modifica_itemselected_jogos':
+            return { 
+                ...state, 
+                itemSelected: { ...action.payload }
+            };
         case 'modifica_clean_jogos':
             return {
                 ...state,
-                listJogos: []
+                listJogos: [],
+                itemSelected: {}
             };
         default:
             return state;

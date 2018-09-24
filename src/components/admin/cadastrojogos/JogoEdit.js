@@ -42,8 +42,8 @@ class JogoEdit extends React.Component {
             scrollView: props.scrollView ? props.scrollView : null
         };
 
-        this.b64Str = '';
-        this.contentType = '';
+        this.b64Str = props.b64Str ? props.b64Str : '';
+        this.contentType = props.contentType ? props.contentType : '';
 
         this.onPressSelectImg = this.onPressSelectImg.bind(this);
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
@@ -64,10 +64,23 @@ class JogoEdit extends React.Component {
                 if (image.mime) {
                     contentType = image.mime;
                 }
-                this.setImgProperties(image.data, contentType);
-                this.setState({ 
-                    imgJogoUri: `data:${image.mime};base64,${image.data}`
-                }); 
+               
+                if (this.props.keyItem) {
+                    this.setImgProperties(image.data, contentType);
+                    this.setState({ 
+                        imgJogoUri: `data:${image.mime};base64,${image.data}`
+                    });
+                } else {
+                    this.setImgProperties(image.data, contentType);
+                    this.setState({ 
+                        imgJogoUri: `data:${image.mime};base64,${image.data}`
+                    });
+                    this.props.onChangeSuperState({ 
+                        imgJogoUri: `data:${image.mime};base64,${image.data}`,
+                        b64Str: image.data,
+                        contentType
+                    });
+                }
             }
           }).catch(() => false);
     }
@@ -252,7 +265,14 @@ class JogoEdit extends React.Component {
                     returnKeyType={'next'}
                     inputStyle={[styles.text, styles.input]}
                     value={this.state.titulo}
-                    onChangeText={(value) => this.setState({ titulo: value })}
+                    onChangeText={(value) => {
+                        if (this.props.keyItem) {
+                            this.setState({ titulo: value });
+                        } else {
+                            this.setState({ titulo: value });
+                            this.props.onChangeSuperState({ titulo: value });
+                        }
+                    }}
                     underlineColorAndroid={'transparent'}
                     onSubmitEditing={() => this.inputDate.onPressDate()}
                 />
@@ -288,9 +308,15 @@ class JogoEdit extends React.Component {
                             dateInput: StyleSheet.flatten(styles.dateInput),
                             dateText: StyleSheet.flatten(styles.dateText)
                         }}
-                        onDateChange={(date) => { 
-                            this.setState({ data: date }); 
-                            this.descricao.focus();
+                        onDateChange={(date) => {
+                            if (this.props.keyItem) {
+                                this.setState({ data: date }); 
+                                this.descricao.focus();
+                            } else {
+                                this.setState({ data: date }); 
+                                this.props.onChangeSuperState({ data: date });
+                                this.descricao.focus();
+                            }
                         }}
                     />
                 </View>
@@ -303,7 +329,14 @@ class JogoEdit extends React.Component {
                     containerStyle={styles.inputContainer}
                     inputStyle={[styles.text, styles.input]} 
                     value={this.state.descricao}
-                    onChangeText={(value) => this.setState({ descricao: value })}
+                    onChangeText={(value) => {
+                        if (this.props.keyItem) {
+                            this.setState({ descricao: value });
+                        } else {
+                            this.setState({ descricao: value });
+                            this.props.onChangeSuperState({ descricao: value });
+                        }
+                    }}
                     underlineColorAndroid={'transparent'}
                     multiline 
                 />

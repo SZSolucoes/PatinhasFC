@@ -3,6 +3,7 @@ const INITIAL_STATE = {
     theme: 'success',
     title: '',
     subtitle: '',
+    remove: false
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -27,13 +28,19 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 subtitle: action.payload 
             };
+        case 'modifica_remove_alertscl':
+            return { 
+                ...state, 
+                remove: action.payload 
+            };
         case 'modifica_clean_login':
             return {
                 ...state,
                 showAlertScl: false,
                 theme: 'info',
                 title: '',
-                subtitle: ''
+                subtitle: '',
+                remove: false
             };
         default:
             return state;

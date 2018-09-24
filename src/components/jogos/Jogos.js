@@ -59,6 +59,13 @@ class Jogos extends React.Component {
                     _.map(snapshot.val(), (value, key) => ({ key, ...value }))
                 ); 
             });
+            databaseRef.child('jogos').once('value', (snapshot) => {
+                if (!this.props.listJogos.length) {
+                    this.props.modificaListJogos(
+                        _.map(snapshot.val(), (value, key) => ({ key, ...value }))
+                    ); 
+                }
+            });
         } else {
             const databaseRef = firebase.database().ref();
             databaseRef.child('jogos').off('value', this.dbJogosRef);

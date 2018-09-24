@@ -18,9 +18,11 @@ import {
 
 import ModalDropdown from 'react-native-modal-dropdown';
 import { colorAppS } from '../../../utils/constantes';
+import { showAlert } from '../../../utils/store';
 import Versus from '../../jogos/Versus';
-import imgEstadio from '../../../imgs/estadio.jpg';
 import JogoEdit from './JogoEdit';
+import { modificaItemSelected } from '../../../actions/JogosActions';
+import { modificaRemocao } from '../../../actions/AlertSclActions';
 
 class CadastroJogos extends React.Component {
 
@@ -31,13 +33,32 @@ class CadastroJogos extends React.Component {
             dropWidth: 0,
             modalOpt: 'Cadastrar',
             itemEdit: {},
-            idxMdl: 0
+            idxMdl: 0,
+            titulo: '',
+            data: '',
+            descricao: '',
+            imagem: '',
+            b64Str: '',
+            contentType: '',
+            imgJogoUri: ''
         };
 
         this.scrollView = null;
 
         this.renderEditar = this.renderEditar.bind(this);
         this.renderSwitchType = this.renderSwitchType.bind(this);
+        this.onPressEditRemove = this.onPressEditRemove.bind(this);
+        this.onChangeSuperState = this.onChangeSuperState.bind(this);
+    }
+
+    onPressEditRemove(item) {
+        this.props.modificaRemocao(true);
+        this.props.modificaItemSelected(item);
+        showAlert('danger', 'Remover!', 'Confirma a remoção do jogo selecionado ?');
+    }
+
+    onChangeSuperState(newState) {
+        this.setState({ ...newState });
     }
 
     renderEditar() {
@@ -57,38 +78,80 @@ class CadastroJogos extends React.Component {
                     placeholder='Buscar jogo...' 
                 />
                 { 
-                    this.props.listJogos.map((item, index) => (
-                        <View key={index}>
-                            <TouchableOpacity
-                                onPress={() => this.setState({ 
-                                    modalOpt: 'Em Edição', 
-                                    itemEdit: item 
-                                })}
-                            >
+                    this.props.listJogos.map((item, index) => {
+                        const titulo = item.titulo ? item.titulo : ' ';
+                        const data = item.data ? item.data : ' ';
+                        let tituloConcat = '';
+
+                        if (titulo) {
+                            tituloConcat = titulo;
+                        }
+                        if (data) {
+                            tituloConcat += ` - ${data}`;
+                        }
+
+                        return (
+                            <View key={index}>
                                 <Card 
-                                    title={item.titulo ? item.titulo : ' '} 
+                                    title={tituloConcat} 
                                     containerStyle={styles.card}
-                                    image={item.imagem ? 
-                                        { uri: item.imagem } : imgEstadio}
-                                    featuredSubtitle={
-                                        item.descricao ? item.descricao : ' '}
                                 >
-                                    <Text style={styles.textData}>
-                                        {item.data ? item.data : ' '}
-                                    </Text>
+                                    <Versus />
                                     <Divider
                                         style={{
-                                            marginTop: 5,
-                                            marginBottom: 5,
-                                            height: 2
+                                            marginVertical: 10
                                         }}
                                     />
-                                    <Versus />
-                                </Card>   
-                            </TouchableOpacity>
-                            <View style={{ marginBottom: 10 }} />
-                        </View>
-                    ))
+                                    <View 
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row', 
+                                            alignItems: 'center', 
+                                        }}
+                                    >
+                                        <View 
+                                            style={{ 
+                                                flex: 1, 
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}
+                                        >
+                                            <TouchableOpacity
+                                                onPress={() => this.setState({ 
+                                                    modalOpt: 'Em Edição', 
+                                                    itemEdit: item 
+                                                })}
+                                            >
+                                                <Icon
+                                                    name='square-edit-outline' 
+                                                    type='material-community' 
+                                                    size={34} color='green' 
+                                                />   
+                                            </TouchableOpacity>
+                                        </View>
+                                        <View 
+                                            style={{ 
+                                                flex: 1, 
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}
+                                        >
+                                            <TouchableOpacity
+                                                onPress={() => this.onPressEditRemove(item)}
+                                            >
+                                                <Icon
+                                                    name='delete' 
+                                                    type='material-community' 
+                                                    size={34} color='red' 
+                                                />
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </Card>
+                                <View style={{ marginBottom: 10 }} />
+                            </View>
+                        );
+                    })
                 }
             </Card>
         );
@@ -97,7 +160,18 @@ class CadastroJogos extends React.Component {
     renderSwitchType(modalOpt) {
         switch (modalOpt) {
             case 'Cadastrar':
-                return (<JogoEdit scrollView={() => this.scrollView} />);
+                return (
+                    <JogoEdit 
+                        scrollView={() => this.scrollView}
+                        titulo={this.state.titulo}
+                        data={this.state.data}
+                        descricao={this.state.descricao}
+                        b64Str={this.state.b64Str}
+                        contentType={this.state.contentType}
+                        imgJogoUri={this.state.imgJogoUri}
+                        onChangeSuperState={(value) => this.onChangeSuperState(value)}
+                    />
+                );
             case 'Editar':
                 return this.renderEditar();
             case 'Em Edição':
@@ -111,17 +185,24 @@ class CadastroJogos extends React.Component {
                         keyItem={this.state.itemEdit.key}
                     />);
             default:
-                return (<JogoEdit scrollView={() => this.scrollView} />);
+                return (
+                    <JogoEdit 
+                        scrollView={() => this.scrollView}
+                        titulo={this.state.titulo}
+                        data={this.state.data}
+                        descricao={this.state.descricao}
+                        b64Str={this.state.b64Str}
+                        contentType={this.state.contentType}
+                        imgJogoUri={this.state.imgJogoUri}
+                        onChangeSuperState={(value) => this.onChangeSuperState(value)}
+                    />
+                );
         }
     }
 
     render() {
         return (
-            <ScrollView 
-                style={styles.viewPrinc} 
-                ref={(ref) => { this.scrollView = ref; }}
-                keyboardShouldPersistTaps={'handled'}
-            >
+            <View style={styles.viewPrinc}>
                 <View style={{ flexDirection: 'row' }}>
                     <View 
                         style={{ flex: 1 }}
@@ -147,6 +228,7 @@ class CadastroJogos extends React.Component {
                                             width: this.state.dropWidth - 1
                                         }}
                                         textStyle={styles.dropModalBtnText}
+                                        dropdownTextStyle={{ fontSize: 16 }}
                                         options={['Cadastrar', 'Editar']}
                                         onSelect={(index, value) => {
                                             this.setState({
@@ -189,7 +271,7 @@ class CadastroJogos extends React.Component {
                                     <Text 
                                         style={[styles.dropModalBtnText, { marginHorizontal: 40 }]}
                                     >
-                                        {this.state.modalOpt !== 'Em Edição' ? ' ' : 'Em Edição'}
+                                        {this.state.modalOpt !== 'Em Edição' ? ' ' : 'Voltar'}
                                     </Text>
                                     {
                                         this.state.modalOpt === 'Em Edição' && 
@@ -216,8 +298,22 @@ class CadastroJogos extends React.Component {
                         }
                     </Card>
                 </View>
-                {this.renderSwitchType(this.state.modalOpt)}
-            </ScrollView>
+                <Divider
+                    style={{
+                        marginTop: 10,
+                        marginHorizontal: 15,
+                        height: 2,
+                        backgroundColor: colorAppS,
+                    }}
+                />
+                <ScrollView 
+                    style={{ flex: 1 }} 
+                    ref={(ref) => { this.scrollView = ref; }}
+                    keyboardShouldPersistTaps={'handled'}
+                >
+                    {this.renderSwitchType(this.state.modalOpt)}
+                </ScrollView>
+            </View>
         );
     }
 }
@@ -290,7 +386,7 @@ const styles = StyleSheet.create({
     },
     dropModalBtnText: {
         color: 'white',
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'center',
         marginVertical: 8
@@ -307,4 +403,7 @@ const mapStateToProps = (state) => ({
     listJogos: state.JogosReducer.listJogos
 });
 
-export default connect(mapStateToProps, {})(CadastroJogos);
+export default connect(mapStateToProps, {
+    modificaItemSelected,
+    modificaRemocao
+})(CadastroJogos);

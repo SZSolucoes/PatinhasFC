@@ -39,6 +39,7 @@
 		B492583B852547E796E2C0A2 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7A199EB6A4B042A7A83A1755 /* Entypo.ttf */; };
 		E540EC15CC674DFA8A5C65AC /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9CD7ACEBD35B44118E2E6912 /* SimpleLineIcons.ttf */; };
 		F58EF302C20B470EB3B91F1D /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 125EF8F8F7E943AE850C09EB /* libRNVectorIcons.a */; };
+		27428C65496F42298A34DCD0 /* libLRDRCTSimpleToast.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1664251E04AB4C9DA4BC0E55 /* libLRDRCTSimpleToast.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -371,6 +372,8 @@
 		E54DB1418066417D8ADE9093 /* FontAwesome5_Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Regular.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Regular.ttf"; sourceTree = "<group>"; };
 		F89AC72B68C04C95BB2E5097 /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		F9BF1A1B7D2A4241954B2714 /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
+		8B1FC724F92D484CA1ACE8EB /* LRDRCTSimpleToast.xcodeproj */ = {isa = PBXFileReference; name = "LRDRCTSimpleToast.xcodeproj"; path = "../node_modules/react-native-simple-toast/ios/LRDRCTSimpleToast.xcodeproj"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = wrapper.pb-project; explicitFileType = undefined; includeInIndex = 0; };
+		1664251E04AB4C9DA4BC0E55 /* libLRDRCTSimpleToast.a */ = {isa = PBXFileReference; name = "libLRDRCTSimpleToast.a"; path = "libLRDRCTSimpleToast.a"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = archive.ar; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -393,6 +396,7 @@
 				F58EF302C20B470EB3B91F1D /* libRNVectorIcons.a in Frameworks */,
 				26FD51E309A6431590A17D9E /* libRNSVG.a in Frameworks */,
 				2628C873CC70BE244EB0B74B /* libPods-PatinhasFC.a in Frameworks */,
+				27428C65496F42298A34DCD0 /* libLRDRCTSimpleToast.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -568,6 +572,7 @@
 				139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */,
 				3DBBBC9761AF43F0B48C1ADF /* RNVectorIcons.xcodeproj */,
 				1EE25B7CA86A4859B1285F7C /* RNSVG.xcodeproj */,
+				8B1FC724F92D484CA1ACE8EB /* LRDRCTSimpleToast.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1178,6 +1183,7 @@
 					"$(inherited)",
 					"$(SRCROOT)..\node_modules\neact-native-vector-iconsRNVectorIconsManager",
 					"$(SRCROOT)..\node_modules\neact-native-svgios/**",
+					"$(SRCROOT)\..\node_modules\react-native-simple-toast\ios\LRDRCTSimpleToast",
 				);
 				INFOPLIST_FILE = PatinhasFC/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1189,6 +1195,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.szs.PatinhasFC;
 				PRODUCT_NAME = PatinhasFC;
 				VERSIONING_SYSTEM = "apple-generic";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/PatinhasFC\"",
+				);
 			};
 			name = Debug;
 		};
@@ -1203,6 +1213,7 @@
 					"$(inherited)",
 					"$(SRCROOT)..\node_modules\neact-native-vector-iconsRNVectorIconsManager",
 					"$(SRCROOT)..\node_modules\neact-native-svgios/**",
+					"$(SRCROOT)\..\node_modules\react-native-simple-toast\ios\LRDRCTSimpleToast",
 				);
 				INFOPLIST_FILE = PatinhasFC/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1214,6 +1225,10 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.szs.PatinhasFC;
 				PRODUCT_NAME = PatinhasFC;
 				VERSIONING_SYSTEM = "apple-generic";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/PatinhasFC\"",
+				);
 			};
 			name = Release;
 		};
