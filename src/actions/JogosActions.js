@@ -9,3 +9,18 @@ export const modificaItemSelected = (value) => ({
     payload: value
 });
 
+export const modificaAnimatedHeigth = (value) => ({
+    type: 'modifica_animatedheight_jogos',
+    payload: value
+});
+
+export const modificaFilterStr = (value) => ({
+    type: 'modifica_filterstr_jogos',
+    payload: value
+});
+
+export const modificaFilterLoad = (value) => ({
+    type: 'modifica_filterload_jogos',
+    payload: value
+});
+

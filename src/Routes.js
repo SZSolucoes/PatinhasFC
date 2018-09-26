@@ -4,9 +4,12 @@ import {
     StyleSheet,
     Text,
     View,
-    AsyncStorage
+    AsyncStorage,
+    Animated,
+    Dimensions
 } from 'react-native';
 import { Icon } from 'react-native-elements';
+import { connect } from 'react-redux';
 
 import AlertScl from './components/tools/AlertScl';
 import Login from './components/login/Login';
@@ -15,23 +18,29 @@ import Informativos from './components/informativos/Informativos';
 import Profile from './components/profile/Profile';
 import Admin from './components/admin/Admin';
 import CadastroJogos from './components/admin/cadastrojogos/CadastroJogos';
+import Usuarios from './components/admin/usuarios/Usuarios';
 import { colorAppS } from './utils/constantes';
 
 import { store } from './App';
 import SplashScreenAnim from './components/animations/SplashScreenAnim';
+import AnimScene from './components/tools/AnimatedScene';
 
-export default class Routes extends React.Component {
+const AnimatedScene = Animated.createAnimatedComponent(AnimScene);
+
+class Routes extends React.Component {
 
     constructor(props) {
         super(props);
 
         this.onBackAndroidHdl = this.onBackAndroidHdl.bind(this);
         this.renderRouter = this.renderRouter.bind(this);
+        this.doTabAnimation = this.doTabAnimation.bind(this);
 
         this.state = {
             logged: false,
-            loading: true,
-            timingNotEnd: true
+            loading: false,
+            timingNotEnd: false,
+            animHeigth: new Animated.Value(0)
         };
     }
 
@@ -71,8 +80,39 @@ export default class Routes extends React.Component {
         );
     }
 
+    shouldComponentUpdate(nextProps, nextStates) {
+        if (nextProps.animatedHeigth !== this.props.animatedHeigth) {
+            this.doTabAnimation(nextProps.animatedHeigth);
+            return false;
+        }
+        return nextProps !== this.props || nextStates !== this.state;
+    }
+
     onBackAndroidHdl() {
         return true;
+    }
+
+    doTabAnimation(animatedHeigth) {
+        if (animatedHeigth === 1) {
+            Animated.timing(
+                this.state.animHeigth, 
+                {
+                    toValue: 100,
+                    useNativeDriver: true,
+                    delay: 200
+                }
+            ).start();
+        } else {
+            const toValue = animatedHeigth ? Dimensions.get('screen').height : 0;
+            Animated.spring(
+                this.state.animHeigth, 
+                {
+                    toValue,
+                    useNativeDriver: true,
+                    bounciness: 2
+                }
+            ).start();
+        }
     }
 
     renderRouter() {
@@ -87,20 +127,23 @@ export default class Routes extends React.Component {
                         component={Login}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft} 
-                        initial={!this.state.logged}
+                        //initial={!this.state.logged}
                         hideNavBar
                     />
                     {/*   Activity Principal de Tabs   */}
-                    <Scene 
+                    <AnimatedScene 
                         key='mainTabBar' 
                         tabs 
                         hideNavBar
                         swipeEnabled
-                        initial={this.state.logged}
+                        //initial={this.state.logged}
                         showLabel={false}
-                        tabBarStyle={styles.mainTabBar}
+                        tabBarStyle={
+                            [styles.mainTabBar, 
+                            { transform: [{ translateY: this.state.animHeigth }] }]
+                        }
                         lazy={false}
-                    >  
+                    >
                         <Scene 
                             key='jogos' 
                             component={Jogos} 
@@ -194,7 +237,7 @@ export default class Routes extends React.Component {
                                 </View>
                             )} 
                         /> 
-                    </Scene>
+                    </AnimatedScene>
                     {/* ####################################### */}
                     <Scene 
                         key={'cadastroJogos'}
@@ -204,6 +247,15 @@ export default class Routes extends React.Component {
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         //initial
+                    />
+                    <Scene 
+                        key={'usuarios'}
+                        title={'Usuários'} 
+                        component={Usuarios}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        initial
                     />
                 </Scene>
             </Router>
@@ -243,6 +295,16 @@ const styles = StyleSheet.create({
         elevation: 4,
         borderTopWidth: 1,
         borderTopColor: 'rgba(0, 0, 0, 0.3)',
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0
     }
 });
+
+const mapStateToProps = (state) => ({
+    animatedHeigth: state.JogosReducer.animatedHeigth
+});
+
+export default connect(mapStateToProps)(Routes);
 

@@ -20,12 +20,16 @@ class Versus extends React.PureComponent {
                     source={imgBrasaoCasa} 
                     style={styles.imgBrasao} 
                 />
-                <Text h1 style={styles.text}>0</Text>
+                <Text h1 style={styles.text}>
+                    {this.props.placarCasa ? this.props.placarCasa : '0'}
+                </Text>
                 <Image 
                     source={imgX} 
                     style={{ resizeMode: 'contain', flex: 1, width: 30, height: 30 }} 
                 />
-                <Text h1 style={styles.text}>0</Text>
+                <Text h1 style={styles.text}>
+                    {this.props.placarVisit ? this.props.placarVisit : '0'}
+                </Text>
                 <Image 
                     source={imgBrasaoVisit} 
                     style={styles.imgBrasao} 

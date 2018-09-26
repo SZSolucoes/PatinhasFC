@@ -4,7 +4,7 @@ import {
     StyleSheet,
     Platform,
     TouchableOpacity,
-    Image
+    Picker
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -21,73 +21,32 @@ import {
 import Moment from 'moment';
 import b64 from 'base-64';
 
-import ImagePicker from 'react-native-image-crop-picker';
 import DatePicker from 'react-native-datepicker';
 import { showAlert } from '../../../utils/store';
 
-class JogoEdit extends React.Component {
+class UsuarioEdit extends React.Component {
 
     constructor(props) {
         super(props);
 
         this.state = {
-            isTitValid: props.isTitValid ? props.isTitValid : false,
-            contentType: props.contentType ? props.contentType : '',
-            imgJogoUri: props.imgJogoUri ? props.imgJogoUri : null,
-            imgPath: props.imgPath ? props.imgPath : '',
-            titulo: props.titulo ? props.titulo : '',
+            isEmailValid: props.isEmailValid ? props.isEmailValid : false,
+            email: props.email ? props.email : '',
+            senha: props.senha ? props.senha : '',
             data: props.data ? props.data : new Date(),
-            descricao: props.descricao ? props.descricao : '',
+            tipoPerfil: props.tipoPerfil ? props.tipoPerfil : '',
             loading: props.loading ? props.loading : false,
-            scrollView: props.scrollView ? props.scrollView : null
+            scrollView: props.scrollView ? props.scrollView : null,
+            secureOn: true,
         };
 
-        this.b64Str = props.b64Str ? props.b64Str : '';
-        this.contentType = props.contentType ? props.contentType : '';
-
-        this.onPressSelectImg = this.onPressSelectImg.bind(this);
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
-        this.setImgProperties = this.setImgProperties.bind(this);
-    }
-
-    onPressSelectImg() {
-        ImagePicker.openPicker({
-            width: 600,
-            height: 400,
-            cropping: true,
-            includeBase64: true,
-            mediaType: 'photo'
-          }).then(image => {
-            if (image) {
-                let contentType = '';
-                if (image.mime) {
-                    contentType = image.mime;
-                }
-               
-                if (this.props.keyItem) {
-                    this.setImgProperties(image.data, contentType);
-                    this.setState({ 
-                        imgJogoUri: `data:${image.mime};base64,${image.data}`
-                    });
-                } else {
-                    this.setImgProperties(image.data, contentType);
-                    this.setState({ 
-                        imgJogoUri: `data:${image.mime};base64,${image.data}`
-                    });
-                    this.props.onChangeSuperState({ 
-                        imgJogoUri: `data:${image.mime};base64,${image.data}`,
-                        b64Str: image.data,
-                        contentType
-                    });
-                }
-            }
-          }).catch(() => false);
     }
 
     onPressConfirmar() {
         this.setState({ loading: true });
 
-        const { titulo, data, descricao, scrollView } = this.state;
+        const { titulo, data, scrollView } = this.state;
         const { keyItem, imgUrl } = this.props;
         const b64File = this.b64Str;
         const contentTp = this.contentType;
@@ -153,14 +112,12 @@ class JogoEdit extends React.Component {
                     if (keyItem) {
                         return dbJogosRef.update({
                             titulo, 
-                            data: dataStr, 
-                            descricao,
+                            data: dataStr,
                             imagem: url });
                     }
                     return dbJogosRef.push({
                             titulo, 
-                            data: dataStr, 
-                            descricao,
+                            data: dataStr,
                             imagem: url,
                             placarCasa: '0',
                             placarVisit: '0' 
@@ -202,8 +159,7 @@ class JogoEdit extends React.Component {
             if (keyItem) {
                 dbJogosRef.update({
                     titulo, 
-                    data: dataStr, 
-                    descricao 
+                    data: dataStr
                 })
                 .then(() => {
                     this.setState({ loading: false });
@@ -220,8 +176,7 @@ class JogoEdit extends React.Component {
             } else {
                 dbJogosRef.push({
                     titulo, 
-                    data: dataStr, 
-                    descricao,
+                    data: dataStr,
                     imagem: '',
                     placarCasa: '0',
                     placarVisit: '0'  
@@ -242,37 +197,66 @@ class JogoEdit extends React.Component {
         }
     }
     
-    setImgProperties(b64Str, mime) {
-        this.b64Str = b64Str;
-        this.contentType = mime;
-    }
-    
     render() {
         return (
             <Card containerStyle={styles.card}>
-                <FormLabel labelStyle={styles.text}>TÍTULO</FormLabel>
+                <FormLabel labelStyle={styles.text}>EMAIL</FormLabel>
                 <FormInput
                     selectTextOnFocus
                     containerStyle={styles.inputContainer}
                     returnKeyType={'next'}
                     inputStyle={[styles.text, styles.input]}
-                    value={this.state.titulo}
+                    value={this.state.email}
                     onChangeText={(value) => {
                         if (this.props.keyItem) {
-                            this.setState({ titulo: value });
+                            this.setState({ email: value });
                         } else {
-                            this.setState({ titulo: value });
-                            this.props.onChangeSuperState({ titulo: value });
+                            this.setState({ email: value });
+                            this.props.onChangeSuperState({ email: value });
                         }
                     }}
                     underlineColorAndroid={'transparent'}
-                    onSubmitEditing={() => this.inputDate.onPressDate()}
+                    onSubmitEditing={() => this.inputSenha.focus()}
                 />
                 { 
-                    this.state.isTitValid &&
+                    this.state.isEmailValid &&
                     <FormValidationMessage>Campo obrigatório</FormValidationMessage> 
                 }
-                <FormLabel labelStyle={styles.text}>DATA</FormLabel>
+                <FormLabel labelStyle={styles.text}>SENHA</FormLabel>
+                <View>
+                    <FormInput
+                        selectTextOnFocus
+                        autoCorrect={false}
+                        secureTextEntry={this.state.secureOn}
+                        ref={(ref) => { this.inputSenha = ref; }}
+                        containerStyle={styles.inputContainer}
+                        returnKeyType={'next'}
+                        inputStyle={[styles.text, styles.input]}
+                        value={this.state.senha}
+                        onChangeText={(value) => {
+                            if (this.props.keyItem) {
+                                this.setState({ senha: value });
+                            } else {
+                                this.setState({ senha: value });
+                                this.props.onChangeSuperState({ senha: value });
+                            }
+                        }}
+                        underlineColorAndroid={'transparent'}
+                        onSubmitEditing={() => this.inputDate.onPressDate()}
+                    />
+                    <TouchableOpacity 
+                        style={styles.eye}
+                        onPressIn={() => this.setState({ secureOn: false })}
+                        onPressOut={() => this.setState({ secureOn: true })}
+                    >
+                        <Icon
+                            name='eye' 
+                            type='material-community' 
+                            size={24} color='#9E9E9E' 
+                        />
+                    </TouchableOpacity>
+                </View>
+                <FormLabel labelStyle={styles.text}>DATA ANIVERSÁRIO</FormLabel>
                 <View 
                     style={[styles.inputContainer, { 
                         flex: 1, 
@@ -303,68 +287,37 @@ class JogoEdit extends React.Component {
                         onDateChange={(date) => {
                             if (this.props.keyItem) {
                                 this.setState({ data: date }); 
-                                this.descricao.focus();
                             } else {
                                 this.setState({ data: date }); 
                                 this.props.onChangeSuperState({ data: date });
-                                this.descricao.focus();
                             }
                         }}
                     />
                 </View>
-                <FormLabel labelStyle={styles.text}>DESCRIÇÃO</FormLabel>
-                <FormInput
-                    ref={(ref) => {
-                        this.descricao = ref;
-                    }}
-                    selectTextOnFocus
-                    containerStyle={styles.inputContainer}
-                    inputStyle={[styles.text, styles.input]} 
-                    value={this.state.descricao}
-                    onChangeText={(value) => {
-                        if (this.props.keyItem) {
-                            this.setState({ descricao: value });
-                        } else {
-                            this.setState({ descricao: value });
-                            this.props.onChangeSuperState({ descricao: value });
+                <FormLabel labelStyle={styles.text}>PERFIL</FormLabel>
+                <View
+                    style={[styles.inputContainer, { 
+                        flex: 1, 
+                        flexDirection: 'row',
+                        ...Platform.select({
+                        android: {
+                            marginHorizontal: 16
+                        },
+                        ios: {
+                            marginHorizontal: 20
                         }
-                    }}
-                    underlineColorAndroid={'transparent'}
-                    multiline 
-                />
-                <FormLabel labelStyle={styles.text}>IMAGEM DE EXIBIÇÃO</FormLabel>
-                <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
-                    <TouchableOpacity
-                        onPress={() => this.onPressSelectImg()}
+                    }) }]}
+                >
+                    <Picker
+                        ref={(ref) => { this.inputTipoPerfil = ref; }}
+                        selectedValue={this.state.tipoPerfil}
+                        style={{ height: 50, width: '105%', marginLeft: -4 }}
+                        onValueChange={(value) => this.setState({ tipoPerfil: value })}
                     >
-                        <View style={styles.viewImageSelect}>
-                            <Icon 
-                                name='folder-image' 
-                                type='material-community' 
-                                size={34} color='#9E9E9E' 
-                            />
-                            <FormLabel 
-                                labelStyle={[styles.text, { marginTop: 0, marginBottom: 0 }]}
-                            >
-                                Selecionar imagem
-                            </FormLabel> 
-                        </View>
-                        <View style={[styles.viewImageSelect, { height: 200 }]}>
-                            { 
-                                this.state.imgJogoUri && 
-                                (<Image 
-                                    source={{ uri: this.state.imgJogoUri }}
-                                    style={{
-                                        flex: 1,
-                                        alignSelf: 'stretch',
-                                        resizeMode: 'stretch',
-                                        width: undefined,
-                                        height: undefined
-                                        }}
-                                />)
-                            }
-                        </View>
-                    </TouchableOpacity>
+                        <Picker.Item label={'Sócio'} value={'socio'} />
+                        <Picker.Item label={'Sócio Patrimonial'} value={'sociopatrim'} />
+                        <Picker.Item label={'Sócio Contribuinte'} value={'sociocontrib'} />
+                    </Picker>
                 </View>
                 <Button 
                     small
@@ -424,6 +377,13 @@ const styles = StyleSheet.create({
                 justifyContent: 'center'
             }
         })
+    },
+    eye: { 
+        position: 'absolute', 
+        right: 0, 
+        marginHorizontal: 20,
+        marginTop: 5,
+        zIndex: 1
     }
 });
 
@@ -431,4 +391,4 @@ const mapStateToProps = () => ({
     
 });
 
-export default connect(mapStateToProps, {})(JogoEdit);
+export default connect(mapStateToProps, {})(UsuarioEdit);

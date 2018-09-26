@@ -23,6 +23,7 @@ class Informativos extends React.Component {
             <View style={styles.viewPrinc}>
                 <Campo />
                 <Campo renderSide='visitantes' />
+                <View style={{ marginBottom: 100 }} />
             </View>
         );
     }

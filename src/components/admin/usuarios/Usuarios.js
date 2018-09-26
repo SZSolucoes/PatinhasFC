@@ -20,13 +20,9 @@ import _ from 'lodash';
 import ModalDropdown from 'react-native-modal-dropdown';
 import { colorAppS } from '../../../utils/constantes';
 import { showAlert } from '../../../utils/store';
-import Versus from '../../jogos/Versus';
-import JogoEdit from './JogoEdit';
-import { modificaItemSelected } from '../../../actions/JogosActions';
-import { modificaRemocao } from '../../../actions/AlertSclActions';
-import { modificaFilterStr, modificaFilterLoad } from '../../../actions/CadastroJogosActions';
+import UsuarioEdit from './UsuarioEdit';
 
-class CadastroJogos extends React.Component {
+class Usuarios extends React.Component {
 
     constructor(props) {
         super(props);
@@ -96,10 +92,6 @@ class CadastroJogos extends React.Component {
                         title={tituloConcat} 
                         containerStyle={styles.card}
                     >
-                        <Versus
-                            placarCasa={placarCasa} 
-                            placarVisit={placarVisit}  
-                        />
                         <Divider
                             style={{
                                 marginVertical: 10
@@ -212,7 +204,7 @@ class CadastroJogos extends React.Component {
         switch (modalOpt) {
             case 'Cadastrar':
                 return (
-                    <JogoEdit 
+                    <UsuarioEdit 
                         scrollView={() => this.scrollView}
                         titulo={this.state.titulo}
                         data={this.state.data}
@@ -227,7 +219,7 @@ class CadastroJogos extends React.Component {
                 return this.renderEditar();
             case 'Em Edição':
                 return (
-                    <JogoEdit 
+                    <UsuarioEdit 
                         scrollView={() => this.scrollView}
                         titulo={this.state.itemEdit.titulo}
                         data={this.state.itemEdit.data}
@@ -237,7 +229,7 @@ class CadastroJogos extends React.Component {
                     />);
             default:
                 return (
-                    <JogoEdit 
+                    <UsuarioEdit 
                         scrollView={() => this.scrollView}
                         titulo={this.state.titulo}
                         data={this.state.data}
@@ -372,7 +364,7 @@ class CadastroJogos extends React.Component {
                     ref={(ref) => { this.scrollView = ref; }}
                     keyboardShouldPersistTaps={'handled'}
                 >
-                    {this.renderSwitchType(this.state.modalOpt)}
+                    { this.renderSwitchType(this.state.modalOpt) }
                 </ScrollView>
             </View>
         );
@@ -467,8 +459,5 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-    modificaItemSelected,
-    modificaRemocao,
-    modificaFilterStr, 
-    modificaFilterLoad
-})(CadastroJogos);
+
+})(Usuarios);

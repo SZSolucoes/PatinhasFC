@@ -74,6 +74,7 @@ class Profile extends React.Component {
                         buttonStyle={{ width: '100%', marginVertical: 20 }}
                         onPress={() => this.onPressLogout()}
                     />
+                    <View style={{ marginBottom: 100 }} />
                 </ParallaxScrollView>
             </View>
         );

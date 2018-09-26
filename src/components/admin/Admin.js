@@ -54,7 +54,7 @@ class Admin extends React.Component {
                 <View style={styles.viewLinha}>
                     <TouchableOpacity 
                         style={{ flex: 1 }} 
-                        onPress={() => false}
+                        onPress={() => Actions.usuarios()}
                     >
                         <Card 
                             containerStyle={{ flex: 1 }}
@@ -120,7 +120,7 @@ class Admin extends React.Component {
                         </Card>
                     </TouchableOpacity>
                 </View>
-                <View style={{ marginBottom: 40 }} />
+                <View style={{ marginBottom: 100 }} />
             </ScrollView>
         );
     }
