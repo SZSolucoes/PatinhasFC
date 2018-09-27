@@ -26,6 +26,7 @@ import {
     modificaFilterStr,
     modificaFilterLoad
 } from '../../actions/JogosActions';
+import { modificaListUsuarios } from '../../actions/UsuariosActions';
 import { colorAppT } from '../../utils/constantes';
 
 class Jogos extends React.Component {
@@ -145,6 +146,11 @@ class Jogos extends React.Component {
                     _.map(snapshot.val(), (value, key) => ({ key, ...value }))
                 ); 
             });
+            this.dbUsuariosRef = databaseRef.child('usuarios').on('value', (snapshot) => {
+                this.props.modificaListUsuarios(
+                    _.map(snapshot.val(), (value, key) => ({ key, ...value }))
+                ); 
+            });
             databaseRef.child('jogos').once('value', (snapshot) => {
                 if (!this.props.listJogos.length) {
                     this.props.modificaListJogos(
@@ -152,9 +158,17 @@ class Jogos extends React.Component {
                     ); 
                 }
             });
+            databaseRef.child('usuarios').once('value', (snapshot) => {
+                if (!this.props.listUsuarios.length) {
+                    this.props.modificaListUsuarios(
+                        _.map(snapshot.val(), (value, key) => ({ key, ...value }))
+                    ); 
+                }
+            });
         } else {
             const databaseRef = firebase.database().ref();
             databaseRef.child('jogos').off('value', this.dbJogosRef);
+            databaseRef.child('usuarios').off('value', this.dbUsuariosRef);
         }
     }
 
@@ -367,6 +381,7 @@ const mapStateToProps = (state) => ({
     username: state.LoginReducer.username,
     password: state.LoginReducer.password,
     listJogos: state.JogosReducer.listJogos,
+    listUsuarios: state.UsuariosReducer.listUsuarios,
     filterStr: state.JogosReducer.filterStr,
     filterLoad: state.JogosReducer.filterLoad
 });
@@ -375,5 +390,6 @@ export default connect(mapStateToProps, {
     modificaListJogos,
     modificaAnimatedHeigth,
     modificaFilterStr,
-    modificaFilterLoad
+    modificaFilterLoad,
+    modificaListUsuarios
 })(Jogos);

@@ -7,7 +7,6 @@ import ReduxThunk from 'redux-thunk';
 import Axios from 'axios';
 import { decode, encode } from 'base-64';
 import firebase from 'firebase';
-import _ from 'lodash';
 
 import Routes from './Routes';
 import reducers from './reducers';

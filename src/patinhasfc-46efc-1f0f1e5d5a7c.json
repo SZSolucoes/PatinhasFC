@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "patinhasfc-46efc",
+  "private_key_id": "1f0f1e5d5a7ccddd6464af7458a8aec14266a855",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCOfb2rBtDTqh6h\nLKKuYCSv1HbEhQm/W8bSStAhbWCgYeeuGam9kIpSCMvCBkcbgr9Wxkjipe8F4bj0\npocG69CiXjSvKquIfwLxKmjr++OgTnOnOY1+Dv5ZKABVKCwz28jEpp/XGK1v4Zpc\nk0ZILMbHBag2sZR4GrVsNzgLfAF4/8au9xYBSTdldBkRI05Amybnh0jxgdZCbLXx\nf2j9PtAJxrFBcpYGYNA2A9pB0ob4KlO5EGuwBzxuKWuMkXN4PRkgMxWv7BLHl264\nOZjN/LKXZ8u4N1VVf3vZrdjGj8E0oGfkdwmWLe4epAAbqUpVXfeVFLcQadURQSop\n0ClFdvYXAgMBAAECggEALgmtWtFAbmr0K4IG680vfUnpt7P+QsAN3IsEdRBoXFlV\nqBgtkgxdzISABOfPWLGlTY2SJfyT3jQgdJdLYC6XwaYrYn8oXdkfo7jenoRLdtNy\nJZEASL7iaf71II5yvayg0Py+/xm/i7r6CzggSJiC/vGyeD1m6WlDvbuXlYpS1Xte\n+EU2i8GEjFDtweXdsjAVkpANaacT0uDFW4FxNOp7j4oCR1GAUmma6JPGOUSNl8F0\nggNdEA88iQqNjkENCFQijmNtPk24RqJfk7ro8MtHG8Asbaxvl0yCPJ0o3nxFi5iv\nbRT1+lYdxxMm/wU7EaGEEfrt5nUSKrphnXRzC76J8QKBgQDHTAbqLw9JioouuKKu\nEE5gFBnwGfST1iGt75xTNJnS5CVmlzzHgyD6Awj4PeIhOVsCHbOFgPrDQ0kyEOlj\njQGlCFRGf/Cva/pqFEhFCc06IASsGlAIsip/4rAWeirRMCO1Uzn0gbAAtii7prTy\nK4ex2M8dscqUL2rnVKENdSSrJwKBgQC3CDZl80qtGNO0heeuDJnK/sMk5RAATBcW\n+LHsre9zl7RcHOSGGcC2XrajHEwNs780pUjHy+UYUSuAeM1NUDx5+xWQO2CUoF4R\npFeA/6jcjZ4JNbaiRMyHpTKP9C8QaIRf2avWltbZGcOnz3zgNspZZl9Q5bwAguZI\nQEVB7mTzkQKBgExG6eKZjlVMQ+Tr37+VGBont2Gw3W3zp8JFkeQ6nqEblsD0I1wM\n8QMfRECWlsS2igF+UqZHHjK7vvj9hgYHAtkiHfc5omnRfu84wgxCWxzjAkbIb1dU\nsXVu0oxXx6l2rkQJDYZqWG19Sou/m0OQq4fC/kpUML+Ugmr1dgqLijRDAoGAV341\ngsaqC9SyXrkj5q9fVQozfo+A9qNo5jI720fKDxeVv/KPywrEdGkSJSaBtIsX+7KG\n9/sfqGAky2TzvuF8B1NfG3NG18VRMl289o0/yy5nPT/P7gG1Q6JUaTvww4cywB7t\nZcb1LRKD1NP6fbOzRskJB0LKe/QW4LLYaIvs9gECgYEAtWrkK10IVjxT4kJwA4Qp\noJ+fgys+88qJVrGtj+Xz45zzr4wXcrpGHr0wycf97UrpepDKJdarLSo22WYa1b/O\nBlslKPongrbJ4BndTSJIL/nopgRzCH7fGvDkggA3tpWifO8jcoNgnFh+ukFGymkD\nS2QbASgYd2N1MYHpwtgf8CQ=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-274bu@patinhasfc-46efc.iam.gserviceaccount.com",
+  "client_id": "117021438694166268213",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-274bu%40patinhasfc-46efc.iam.gserviceaccount.com"
+}

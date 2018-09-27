@@ -25,7 +25,7 @@ class Versus extends React.PureComponent {
                 </Text>
                 <Image 
                     source={imgX} 
-                    style={{ resizeMode: 'contain', flex: 1, width: 30, height: 30 }} 
+                    style={{ resizeMode: 'contain', flex: 1, width: 20, height: 20 }} 
                 />
                 <Text h1 style={styles.text}>
                     {this.props.placarVisit ? this.props.placarVisit : '0'}

@@ -5,7 +5,8 @@ import {
     StyleSheet,
     Platform,
     TouchableOpacity,
-    Text
+    Text,
+    Switch
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -13,14 +14,25 @@ import {
     Card, 
     Icon,
     SearchBar,
-    Divider
+    Divider,
+    List,
+    ListItem
 } from 'react-native-elements';
 import _ from 'lodash';
+import b64 from 'base-64';
 
 import ModalDropdown from 'react-native-modal-dropdown';
 import { colorAppS } from '../../../utils/constantes';
 import { showAlert } from '../../../utils/store';
 import UsuarioEdit from './UsuarioEdit';
+import {
+    modificaFilterStr,
+    modificaFilterLoad,
+    modificaItemSelected,
+    modificaFlagDisableUser
+} from '../../../actions/UsuariosActions';
+import { modificaRemocao } from '../../../actions/AlertSclActions';
+import imgAvatar from '../../../imgs/perfiluserimg.png';
 
 class Usuarios extends React.Component {
 
@@ -32,13 +44,11 @@ class Usuarios extends React.Component {
             modalOpt: 'Cadastrar',
             itemEdit: {},
             idxMdl: 0,
-            titulo: '',
+            email: '',
+            senha: '',
+            nome: '',
             data: '',
-            descricao: '',
-            imagem: '',
-            b64Str: '',
-            contentType: '',
-            imgJogoUri: ''
+            tipoPerfil: ''
         };
 
         this.scrollView = null;
@@ -47,130 +57,133 @@ class Usuarios extends React.Component {
         this.renderSwitchType = this.renderSwitchType.bind(this);
         this.onPressEditRemove = this.onPressEditRemove.bind(this);
         this.onChangeSuperState = this.onChangeSuperState.bind(this);
-        this.renderListJogosEdit = this.renderListJogosEdit.bind(this);
-        this.onFilterJogosEdit = this.onFilterJogosEdit.bind(this);
+        this.renderListUsuariosEdit = this.renderListUsuariosEdit.bind(this);
+        this.onFilterUsuariosEdit = this.onFilterUsuariosEdit.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
+        this.renderIcons = this.renderIcons.bind(this);
     }
 
     onPressEditRemove(item) {
-        this.props.modificaRemocao(true);
         this.props.modificaItemSelected(item);
-        showAlert('danger', 'Remover!', 'Confirma a remoção do jogo selecionado ?');
+        this.props.modificaFlagDisableUser(true);
+        this.props.modificaRemocao(true);
+        if (item.userDisabled && item.userDisabled === 'true') {
+            showAlert('danger', 'Habilitar!', 'Deseja habilitar o usuário selecionado ?');
+        } else {
+            showAlert('danger', 'Desabilitar!', 'Deseja desabilitar o usuário selecionado ?');
+        }
     }
 
     onChangeSuperState(newState) {
         this.setState({ ...newState });
     }
 
-    onFilterJogosEdit(jogos, filterStr) {
-        return _.filter(jogos, (jogo) => (
-                jogo.titulo.includes(filterStr) ||
-                jogo.descricao.includes(filterStr) ||
-                jogo.data.includes(filterStr) ||
-                `${jogo.placarCasa}x${jogo.placarVisit}`.includes(filterStr)
+    onFilterUsuariosEdit(usuarios, filterStr) {
+        return _.filter(usuarios, (usuario) => (
+                usuario.email.includes(filterStr) ||
+                usuario.dtnasc.includes(filterStr) ||
+                usuario.tipoPerfil.includes(filterStr) ||
+                usuario.nome.includes(filterStr)
         ));
     }
 
-    renderListJogosEdit(jogos) {
-        const jogosView = jogos.map((item, index) => {
-            const titulo = item.titulo ? item.titulo : ' ';
-            const data = item.data ? item.data : ' ';
-            const placarCasa = item.placarCasa ? item.placarCasa : '0'; 
-            const placarVisit = item.placarVisit ? item.placarVisit : '0';
-            let tituloConcat = '';
-
-            if (titulo) {
-                tituloConcat = titulo;
-            }
-            if (data) {
-                tituloConcat += ` - ${data}`;
-            }
-
-            return (
-                <View key={index}>
-                    <Card 
-                        title={tituloConcat} 
-                        containerStyle={styles.card}
+    renderIcons(item) {
+        return (
+            <View 
+                style={{ 
+                    flex: 0.5, 
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}
+            >
+                <View 
+                    style={{ 
+                        flex: 1, 
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() => {
+                            this.scrollView.scrollTo({
+                                y: 0,
+                                duration: 0,
+                                animated: false
+                            });
+                            this.setState({ 
+                                modalOpt: 'Em Edição', 
+                                itemEdit: item 
+                            });
+                        }}
                     >
-                        <Divider
-                            style={{
-                                marginVertical: 10
-                            }}
-                        />
-                        <View 
-                            style={{ 
-                                flex: 1, 
-                                flexDirection: 'row', 
-                                alignItems: 'center', 
-                            }}
-                        >
-                            <View 
-                                style={{ 
-                                    flex: 1, 
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        this.scrollView.scrollTo({
-                                            y: 0,
-                                            duration: 0,
-                                            animated: false
-                                        });
-                                        this.setState({ 
-                                            modalOpt: 'Em Edição', 
-                                            itemEdit: item 
-                                        });
-                                    }}
-                                >
-                                    <Icon
-                                        name='square-edit-outline' 
-                                        type='material-community' 
-                                        size={34} color='green' 
-                                    />   
-                                </TouchableOpacity>
-                            </View>
-                            <View 
-                                style={{ 
-                                    flex: 1, 
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <TouchableOpacity
-                                    onPress={() => this.onPressEditRemove(item)}
-                                >
-                                    <Icon
-                                        name='delete' 
-                                        type='material-community' 
-                                        size={34} color='red' 
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </Card>
-                    <View style={{ marginBottom: 10 }} />
+                        <Icon
+                            name='square-edit-outline' 
+                            type='material-community' 
+                            size={30} color='green' 
+                        />   
+                    </TouchableOpacity>
                 </View>
+                <View 
+                    style={{ 
+                        flex: 1, 
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >     
+                    <Switch 
+                        value={item.userDisabled === 'false'}
+                        onValueChange={() => this.onPressEditRemove(item)}
+                    />
+                </View>
+            </View>
+        );
+    }
+
+    renderListUsuariosEdit(usuarios) {
+        let usuariosView = null;
+
+        if (usuarios.length) {
+            usuariosView = (
+                <List containerStyle={{ marginBottom: 20 }}>
+                {
+                    usuarios.map((item, index) => {
+                        const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
+                        return (
+                            <ListItem
+                                roundAvatar
+                                avatar={imgAvt}
+                                key={index}
+                                title={item.nome}
+                                subtitle={item.email}
+                                rightIcon={(
+                                    this.renderIcons(item)
+                                )}
+                            />
+                        );
+                    })
+                }
+                </List>
             );
-        });
+        }
+
         setTimeout(() => this.props.modificaFilterLoad(false), 1000);
-        return jogosView;
+        return usuariosView;
     }
 
     renderBasedFilterOrNot() {
-        const { listJogos, filterStr } = this.props;
-        let jogosView = null;
-        if (listJogos) {
+        const { listUsuarios, filterStr } = this.props;
+        let usuariosView = null;
+        if (listUsuarios) {
             if (filterStr) {
-                jogosView = this.renderListJogosEdit(
-                    this.onFilterJogosEdit(listJogos, filterStr)
+                usuariosView = this.renderListUsuariosEdit(
+                    this.onFilterUsuariosEdit(listUsuarios, filterStr)
                 );
             } else {
-                jogosView = this.renderListJogosEdit(listJogos);
+                usuariosView = this.renderListUsuariosEdit(listUsuarios);
             }
         }
-        return jogosView;
+        return usuariosView;
     }
 
     renderEditar() {
@@ -193,7 +206,7 @@ class Usuarios extends React.Component {
                         this.props.modificaFilterLoad(true);
                     }}
                     onClear={() => this.props.modificaFilterStr('')}
-                    placeholder='Buscar jogo...' 
+                    placeholder='Buscar usuário...' 
                 />
                 { this.renderBasedFilterOrNot() }
             </Card>
@@ -206,12 +219,11 @@ class Usuarios extends React.Component {
                 return (
                     <UsuarioEdit 
                         scrollView={() => this.scrollView}
-                        titulo={this.state.titulo}
+                        email={this.state.email}
+                        senha={this.state.senha}
+                        nome={this.state.nome}
                         data={this.state.data}
-                        descricao={this.state.descricao}
-                        b64Str={this.state.b64Str}
-                        contentType={this.state.contentType}
-                        imgJogoUri={this.state.imgJogoUri}
+                        tipoPerfil={this.state.tipoPerfil}
                         onChangeSuperState={(value) => this.onChangeSuperState(value)}
                     />
                 );
@@ -221,22 +233,22 @@ class Usuarios extends React.Component {
                 return (
                     <UsuarioEdit 
                         scrollView={() => this.scrollView}
-                        titulo={this.state.itemEdit.titulo}
+                        email={this.state.itemEdit.email}
+                        senha={this.state.itemEdit.senha}
+                        nome={this.state.itemEdit.nome}
                         data={this.state.itemEdit.data}
-                        descricao={this.state.itemEdit.descricao}
-                        imgUrl={this.state.itemEdit.imagem}
-                        keyItem={this.state.itemEdit.key}
+                        tipoPerfil={this.state.itemEdit.tipoPerfil}
+                        keyItem={b64.encode(this.state.itemEdit.email)}
                     />);
             default:
                 return (
                     <UsuarioEdit 
                         scrollView={() => this.scrollView}
-                        titulo={this.state.titulo}
+                        email={this.state.email}
+                        senha={this.state.senha}
+                        nome={this.state.nome}
                         data={this.state.data}
-                        descricao={this.state.descricao}
-                        b64Str={this.state.b64Str}
-                        contentType={this.state.contentType}
-                        imgJogoUri={this.state.imgJogoUri}
+                        tipoPerfil={this.state.tipoPerfil}
                         onChangeSuperState={(value) => this.onChangeSuperState(value)}
                     />
                 );
@@ -453,11 +465,15 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-    listJogos: state.JogosReducer.listJogos,
-    filterStr: state.CadastroJogosReducer.filterStr,
-    filterLoad: state.CadastroJogosReducer.filterLoad
+    listUsuarios: state.UsuariosReducer.listUsuarios,
+    filterStr: state.UsuariosReducer.filterStr,
+    filterLoad: state.UsuariosReducer.filterLoad
 });
 
 export default connect(mapStateToProps, {
-
+    modificaFilterStr,
+    modificaFilterLoad,
+    modificaItemSelected,
+    modificaRemocao,
+    modificaFlagDisableUser
 })(Usuarios);

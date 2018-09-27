@@ -38,8 +38,8 @@ class Routes extends React.Component {
 
         this.state = {
             logged: false,
-            loading: false,
-            timingNotEnd: false,
+            loading: true,
+            timingNotEnd: true,
             animHeigth: new Animated.Value(0)
         };
     }
@@ -127,7 +127,7 @@ class Routes extends React.Component {
                         component={Login}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft} 
-                        //initial={!this.state.logged}
+                        initial={!this.state.logged}
                         hideNavBar
                     />
                     {/*   Activity Principal de Tabs   */}
@@ -136,7 +136,7 @@ class Routes extends React.Component {
                         tabs 
                         hideNavBar
                         swipeEnabled
-                        //initial={this.state.logged}
+                        initial={this.state.logged}
                         showLabel={false}
                         tabBarStyle={
                             [styles.mainTabBar, 
@@ -255,7 +255,7 @@ class Routes extends React.Component {
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
-                        initial
+                        //initial
                     />
                 </Scene>
             </Router>

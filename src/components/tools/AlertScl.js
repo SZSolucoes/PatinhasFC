@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { connect } from 'react-redux';
 import firebase from 'firebase';
+import b64 from 'base-64';
 
 import {
   SCLAlert,
@@ -18,6 +19,57 @@ class AlertScl extends React.Component {
         super(props);
 
         this.onPressConfRemov = this.onPressConfRemov.bind(this);
+        this.onPressDisableUser = this.onPressDisableUser.bind(this);
+    }
+
+    onPressDisableUser() {
+        const { itemUserSelected } = this.props;
+        const userDisabled = itemUserSelected.userDisabled && 
+                            itemUserSelected.userDisabled === 'false' ? 'true' : 'false';
+
+        const dbUsuarioRef = firebase.database().ref()
+        .child(`usuarios/${b64.encode(itemUserSelected.email)}`);
+
+        dbUsuarioRef.update({
+            userDisabled
+        })
+        .then(() => {
+            this.setState({ loading: false });
+            if (userDisabled === 'true') {
+                Toast.show('Usuário desabilitado com sucesso.', Toast.LONG);
+            } else {
+                Toast.show('Usuário habilitado com sucesso.', Toast.LONG);
+            }
+        })
+        .catch(() => {
+            this.setState({ loading: false });
+            if (userDisabled === 'true') {
+                Toast.show('Falha ao desabilitar usuário.', Toast.LONG);
+            } else {
+                Toast.show('Falha ao habilitar usuário.', Toast.LONG);
+            }
+        });  
+
+        store.dispatch({
+            type: 'modifica_showalertscl_alertscl',
+            payload: false
+        });
+
+        store.dispatch({
+            type: 'modifica_itemselected_usuarios',
+            payload: {}
+        });
+        
+        setTimeout(() => {
+            store.dispatch({
+                type: 'modifica_remove_alertscl',
+                payload: false
+            });
+            store.dispatch({
+                type: 'modifica_flagdisableuser_usuarios',
+                payload: false
+            });
+        }, 1000);
     }
 
     onPressConfRemov() {
@@ -40,14 +92,18 @@ class AlertScl extends React.Component {
             type: 'modifica_showalertscl_alertscl',
             payload: false
         });
-        store.dispatch({
-            type: 'modifica_remove_alertscl',
-            payload: false
-        });
+
         store.dispatch({
             type: 'modifica_itemselected_jogos',
             payload: {}
         }); 
+
+        setTimeout(() => {
+            store.dispatch({
+                type: 'modifica_remove_alertscl',
+                payload: false
+            });
+        }, 1000);
     }
 
     render() {
@@ -92,7 +148,12 @@ class AlertScl extends React.Component {
                     <View>
                         <SCLAlertButton 
                             theme={this.props.theme} 
-                            onPress={() => this.onPressConfRemov()}
+                            onPress={() => { 
+                                if (this.props.flagDisableUser) {
+                                    return this.onPressDisableUser();
+                                }
+                                return this.onPressConfRemov(); 
+                            }}
                         >
                             Confirmar
                         </SCLAlertButton>
@@ -114,7 +175,6 @@ class AlertScl extends React.Component {
                     </View>
                     )
                 }
-                
             </SCLAlert>  
         );
     }
@@ -127,7 +187,9 @@ const mapStateToProps = (state) => ({
     title: state.AlertSclReducer.title,
     subtitle: state.AlertSclReducer.subtitle,
     remove: state.AlertSclReducer.remove,
-    itemSelected: state.JogosReducer.itemSelected
+    itemSelected: state.JogosReducer.itemSelected,
+    itemUserSelected: state.UsuariosReducer.itemSelected,
+    flagDisableUser: state.UsuariosReducer.flagDisableUser
 });
 
 export default connect(mapStateToProps)(AlertScl);

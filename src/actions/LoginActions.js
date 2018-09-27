@@ -1,6 +1,9 @@
 import firebase from 'firebase';
-import { Alert, AsyncStorage } from 'react-native';
+import Moment from 'moment';
+import b64 from 'base-64';
+import { AsyncStorage } from 'react-native';
 import { Actions } from 'react-native-router-flux';
+import { showAlert } from '../utils/store';
 
 export const modificaUsername = (value) => ({
     type: 'modifica_username_login',
@@ -41,21 +44,68 @@ export const doLogin = (params) => dispatch => {
         type: 'modifica_indicator_login',
         payload: true
     });
-    firebase.auth().signInWithEmailAndPassword(params.email, params.password)
-    .then(() => onLoginSuccess(dispatch, params))
+
+    const authRef = firebase.auth();
+    
+    authRef.signInWithEmailAndPassword(params.email, params.password)
+    .then(() => onLoginSuccess(dispatch, params, authRef))
     .catch((error) => onLoginError(dispatch, error));
 };
 
-const onLoginSuccess = (dispatch, params) => {
-    dispatch({
-        type: 'modifica_indicator_login',
-        payload: false
+const onLoginSuccess = (dispatch, params, authRef) => {
+    const dbUsuarioRef = firebase.database().ref().child(`usuarios/${b64.encode(params.email)}`);
+    const dataAtual = Moment(new Date().toLocaleString()).format('DD/MM/YYYY HH:mm:ss');
+    dbUsuarioRef.once('value', (snapshot) => { 
+        if (!snapshot.val()) {
+            dbUsuarioRef.set({
+                uid: authRef.currentUser.uid,
+                userDisabled: 'false',
+                email: params.email,
+                senha: params.password,
+                nome: '',
+                dtnasc: '', 
+                tipoPerfil: 'socio',
+                imgAvatar: '',
+                imgBackground: '',
+                level: '1',
+                telefone: '',
+                endereco: '',
+                dataCadastro: dataAtual,
+                dataHoraUltimoLogin: '',
+                jogosParticipados: '',
+                jogosEscalados: '',
+                vitorias: '',
+                derrotas: '',
+                gols: '',
+                faltas: '',
+                cartoesAmarelos: '',
+                cartoesVermelhos: '',
+                posicao: ''
+            })
+            .then(() => true)
+            .catch(() => true);
+        }
+
+        if (snapshot.val() && 
+            snapshot.val().userDisabled && 
+            snapshot.val().userDisabled === 'true') {
+            dispatch({
+                type: 'modifica_indicator_login',
+                payload: false
+            });
+            showAlert('warning', 'Aviso!', 'Usuário desativado.');
+        } else {
+            dispatch({
+                type: 'modifica_indicator_login',
+                payload: false
+            });
+        
+            AsyncStorage.setItem('username', params.email);
+            AsyncStorage.setItem('password', params.password);
+        
+            Actions.mainTabBar();
+        }
     });
-
-    AsyncStorage.setItem('username', params.email);
-    AsyncStorage.setItem('password', params.password);
-
-    Actions.mainTabBar();
 };
 
 const onLoginError = (dispatch, error) => {
@@ -65,16 +115,16 @@ const onLoginError = (dispatch, error) => {
     });
     switch (error.code) {
         case 'auth/invalid-email':
-            Alert.alert('Patinhas FC', 'E-mail inválido.');
+            showAlert('warning', 'Aviso!', 'Email inválido.');
             break;
         case 'auth/user-disabled':
-            Alert.alert('Patinhas FC', 'E-mail informado não existe.');
+            showAlert('warning', 'Aviso!', 'Email informado não existe.');
             break;
         case 'auth/user-not-found':
-            Alert.alert('Patinhas FC', 'E-mail não cadastrado.');
+            showAlert('warning', 'Aviso!', 'Email não cadastrado.');
             break;
         case 'auth/wrong-password':
-            Alert.alert('Patinhas FC', 'E-mail ou senha incorretos.');
+            showAlert('warning', 'Aviso!', 'Email ou senha incorretos.');
             break;
         default:
     }
