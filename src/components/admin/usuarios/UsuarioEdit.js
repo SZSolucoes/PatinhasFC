@@ -70,7 +70,10 @@ class UsuarioEdit extends React.Component {
             return;
         }
 
+        const databaseRef = firebase.database().ref();
+        const auth = firebase.auth();
         dataAtual = Moment(new Date().toLocaleString()).format('DD/MM/YYYY HH:mm:ss');
+        const emailUser64 = b64.encode(email);
 
         if (data instanceof Date) {
             dataStr = data.toLocaleDateString();
@@ -79,14 +82,13 @@ class UsuarioEdit extends React.Component {
             dataStr = data;
         }
 
-        const databaseRef = firebase.database().ref();
-        const dbJogosRef = keyItem ? 
+        const dbUsuariosRef = keyItem ? 
         databaseRef.child(`usuarios/${keyItem}`) 
         : 
-        databaseRef.child(`usuarios/${b64.encode(email)}`);
+        databaseRef.child(`usuarios/${emailUser64}`);
 
         if (keyItem) {
-            dbJogosRef.update({
+            dbUsuariosRef.update({
                 email,
                 senha,
                 nome,
@@ -106,10 +108,9 @@ class UsuarioEdit extends React.Component {
                 );
             });  
         } else {
-            firebase.auth().createUserWithEmailAndPassword(email, senha)
-            .then((user) =>
-                dbJogosRef.set({
-                    uid: user.uid,
+            auth.createUserWithEmailAndPassword(email, senha)
+            .then(() => {
+                const newUser = {
                     userDisabled: 'false',
                     email,
                     senha,
@@ -132,7 +133,8 @@ class UsuarioEdit extends React.Component {
                     cartoesAmarelos: '',
                     cartoesVermelhos: '',
                     posicao: ''
-                })
+                };
+                dbUsuariosRef.set({ ...newUser })
                 .then(() => {
                     this.setState({ loading: false });
                     showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
@@ -144,8 +146,8 @@ class UsuarioEdit extends React.Component {
                         'Ops!', 
                         'Ocorreu um erro ao cadastrar o usuário.'
                     );
-                })
-            )
+                });
+            })
             .catch((error) => {
                 switch (error.code) {
                     case 'auth/email-already-in-use':

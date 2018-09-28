@@ -178,6 +178,8 @@ class JogoEdit extends React.Component {
                     } else {
                         showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
                     }
+                    global.XMLHttpRequest = glbXMLHttpRequest;
+                    global.Blob = glbBlob;
                 })
                 .catch(() => {
                     global.XMLHttpRequest = glbXMLHttpRequest;

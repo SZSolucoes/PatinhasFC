@@ -6,7 +6,9 @@ const INITIAL_STATE = {
     urlServer: '',
     hidePw: true,
     showLogoLogin: true,
-    indicator: false
+    indicator: false,
+    userLogged: {},
+    userLevel: '1'
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -51,6 +53,16 @@ export default (state = INITIAL_STATE, action) => {
                 ...state,
                 indicator: action.payload,
             };
+        case 'modifica_userlogged_login':
+            return {
+                ...state,
+                userLogged: { ...action.payload },
+            };
+        case 'modifica_userlevel_login':
+            return {
+                ...state,
+                userLevel: action.payload
+            };
         case 'modifica_clean_login':
             return {
                 ...state,
@@ -59,7 +71,9 @@ export default (state = INITIAL_STATE, action) => {
                 modalVisible: false,
                 hidePw: true,
                 showLogoLogin: true,
-                indicator: false
+                indicator: false,
+                userLogged: {},
+                userLevel: '1'
             };
         default:
             return state;

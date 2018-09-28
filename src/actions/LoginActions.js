@@ -35,6 +35,11 @@ export const modificaUserToken = (value) => ({
     payload: value
 });
 
+export const modificaUserLogged = (value) => ({
+    type: 'modifica_userlogged_login',
+    payload: value
+});
+
 export const modificaCleanLogin = () => ({
     type: 'modifica_clean_login'
 });
@@ -48,17 +53,18 @@ export const doLogin = (params) => dispatch => {
     const authRef = firebase.auth();
     
     authRef.signInWithEmailAndPassword(params.email, params.password)
-    .then(() => onLoginSuccess(dispatch, params, authRef))
+    .then(() => onLoginSuccess(dispatch, params))
     .catch((error) => onLoginError(dispatch, error));
 };
 
-const onLoginSuccess = (dispatch, params, authRef) => {
+const onLoginSuccess = (dispatch, params) => {
     const dbUsuarioRef = firebase.database().ref().child(`usuarios/${b64.encode(params.email)}`);
     const dataAtual = Moment(new Date().toLocaleString()).format('DD/MM/YYYY HH:mm:ss');
-    dbUsuarioRef.once('value', (snapshot) => { 
-        if (!snapshot.val()) {
-            dbUsuarioRef.set({
-                uid: authRef.currentUser.uid,
+    let usuarioLogged = {};
+    dbUsuarioRef.once('value', (snapshot) => {
+        const snapVal = snapshot.val();
+        if (!snapVal) {
+            usuarioLogged = {
                 userDisabled: 'false',
                 email: params.email,
                 senha: params.password,
@@ -81,20 +87,30 @@ const onLoginSuccess = (dispatch, params, authRef) => {
                 cartoesAmarelos: '',
                 cartoesVermelhos: '',
                 posicao: ''
-            })
+            };
+
+            dbUsuarioRef.set({ ...usuarioLogged })
             .then(() => true)
             .catch(() => true);
         }
 
-        if (snapshot.val() && 
-            snapshot.val().userDisabled && 
-            snapshot.val().userDisabled === 'true') {
+        if (snapVal && 
+            snapVal.userDisabled && 
+            snapVal.userDisabled === 'true') {
             dispatch({
                 type: 'modifica_indicator_login',
                 payload: false
             });
             showAlert('warning', 'Aviso!', 'Usuário desativado.');
         } else {
+            dispatch({
+                type: 'modifica_userlogged_login',
+                payload: snapVal || {}
+            });
+            dispatch({
+                type: 'modifica_userlevel_login',
+                payload: snapVal && snapVal.level ? snapVal.level : '1'
+            });
             dispatch({
                 type: 'modifica_indicator_login',
                 payload: false

@@ -35,6 +35,7 @@ class Routes extends React.Component {
         this.onBackAndroidHdl = this.onBackAndroidHdl.bind(this);
         this.renderRouter = this.renderRouter.bind(this);
         this.doTabAnimation = this.doTabAnimation.bind(this);
+        this.renderAdminTab = this.renderAdminTab.bind(this);
 
         this.state = {
             logged: false,
@@ -115,6 +116,208 @@ class Routes extends React.Component {
         }
     }
 
+    renderAdminTab() {
+        const { userLevel } = this.props;
+        if (userLevel && userLevel === '0') {
+            return (
+                <AnimatedScene 
+                    key='mainTabBar' 
+                    tabs 
+                    hideNavBar
+                    swipeEnabled
+                    initial={this.state.logged}
+                    showLabel={false}
+                    tabBarStyle={
+                        [styles.mainTabBar, 
+                        { transform: [{ translateY: this.state.animHeigth }] }]
+                    }
+                    lazy={false}
+                >
+                    <Scene 
+                        key='jogos' 
+                        component={Jogos} 
+                        hideNavBar
+                        icon={({ focused }) => (
+                            <View>
+                                <Icon
+                                    color={focused ? 'white' : 'black'}
+                                    name='soccer'
+                                    type='material-community'
+                                />
+                                { focused && 
+                                <Text
+                                    style={{
+                                        color: focused ? 'white' : 'black',
+                                        fontWeight: 'bold'
+                                    }}
+                                >
+                                    Jogos
+                                </Text>}
+                            </View>
+                        )} 
+                    />
+                    <Scene 
+                        key='informativos' 
+                        component={Informativos} 
+                        hideNavBar
+                        icon={({ focused }) => (
+                            <View>
+                                <Icon
+                                    color={focused ? 'white' : 'black'}
+                                    name='clipboard'
+                                    type='font-awesome'
+                                    size={22}
+                                />
+                                { focused && 
+                                <Text
+                                    style={{
+                                        color: focused ? 'white' : 'black',
+                                        fontWeight: 'bold'
+                                    }}
+                                >
+                                    Info
+                                </Text>}
+                            </View>
+                        )} 
+                    /> 
+                    <Scene 
+                        key='perfil' 
+                        component={Profile} 
+                        hideNavBar
+                        icon={({ focused }) => (
+                            <View>
+                                <Icon
+                                    color={focused ? 'white' : 'black'}
+                                    name='user'
+                                    type='font-awesome'
+                                />
+                                { focused && 
+                                <Text
+                                    style={{
+                                        color: focused ? 'white' : 'black',
+                                        fontWeight: 'bold'
+                                    }}
+                                >
+                                    Perfil
+                                </Text>}
+                            </View>
+                        )} 
+                    /> 
+                    <Scene 
+                        key='admin'
+                        component={Admin} 
+                        hideNavBar
+                        icon={({ focused }) => (
+                            <View>
+                                <Icon
+                                    color={focused ? 'white' : 'black'}
+                                    name='lock'
+                                    type='font-awesome'
+                                />
+                                { focused && 
+                                <Text
+                                    style={{
+                                        color: focused ? 'white' : 'black',
+                                        fontWeight: 'bold'
+                                    }}
+                                >
+                                    Admin
+                                </Text>}
+                            </View>
+                        )} 
+                    />
+                </AnimatedScene>
+            );
+        }
+
+        return (
+            <AnimatedScene 
+                key='mainTabBar' 
+                tabs 
+                hideNavBar
+                swipeEnabled
+                initial={this.state.logged}
+                showLabel={false}
+                tabBarStyle={
+                    [styles.mainTabBar, 
+                    { transform: [{ translateY: this.state.animHeigth }] }]
+                }
+                lazy={false}
+            >
+                <Scene 
+                    key='jogos' 
+                    component={Jogos} 
+                    hideNavBar
+                    icon={({ focused }) => (
+                        <View>
+                            <Icon
+                                color={focused ? 'white' : 'black'}
+                                name='soccer'
+                                type='material-community'
+                            />
+                            { focused && 
+                            <Text
+                                style={{
+                                    color: focused ? 'white' : 'black',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Jogos
+                            </Text>}
+                        </View>
+                    )} 
+                />
+                <Scene 
+                    key='informativos' 
+                    component={Informativos} 
+                    hideNavBar
+                    icon={({ focused }) => (
+                        <View>
+                            <Icon
+                                color={focused ? 'white' : 'black'}
+                                name='clipboard'
+                                type='font-awesome'
+                                size={22}
+                            />
+                            { focused && 
+                            <Text
+                                style={{
+                                    color: focused ? 'white' : 'black',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Info
+                            </Text>}
+                        </View>
+                    )} 
+                /> 
+                <Scene 
+                    key='perfil' 
+                    component={Profile} 
+                    hideNavBar
+                    icon={({ focused }) => (
+                        <View>
+                            <Icon
+                                color={focused ? 'white' : 'black'}
+                                name='user'
+                                type='font-awesome'
+                            />
+                            { focused && 
+                            <Text
+                                style={{
+                                    color: focused ? 'white' : 'black',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                Perfil
+                            </Text>}
+                        </View>
+                    )} 
+                />
+            </AnimatedScene>
+        );
+    }
+
     renderRouter() {
         return (
             <Router backAndroidHandler={this.onBackAndroidHdl}>
@@ -131,113 +334,9 @@ class Routes extends React.Component {
                         hideNavBar
                     />
                     {/*   Activity Principal de Tabs   */}
-                    <AnimatedScene 
-                        key='mainTabBar' 
-                        tabs 
-                        hideNavBar
-                        swipeEnabled
-                        initial={this.state.logged}
-                        showLabel={false}
-                        tabBarStyle={
-                            [styles.mainTabBar, 
-                            { transform: [{ translateY: this.state.animHeigth }] }]
-                        }
-                        lazy={false}
-                    >
-                        <Scene 
-                            key='jogos' 
-                            component={Jogos} 
-                            hideNavBar
-                            icon={({ focused }) => (
-                                <View>
-                                    <Icon
-                                        color={focused ? 'white' : 'black'}
-                                        name='soccer'
-                                        type='material-community'
-                                    />
-                                    { focused && 
-                                    <Text
-                                        style={{
-                                            color: focused ? 'white' : 'black',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Jogos
-                                    </Text>}
-                                </View>
-                            )} 
-                        />
-                        <Scene 
-                            key='informativos' 
-                            component={Informativos} 
-                            hideNavBar
-                            icon={({ focused }) => (
-                                <View>
-                                    <Icon
-                                        color={focused ? 'white' : 'black'}
-                                        name='clipboard'
-                                        type='font-awesome'
-                                        size={22}
-                                    />
-                                    { focused && 
-                                    <Text
-                                        style={{
-                                            color: focused ? 'white' : 'black',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Info
-                                    </Text>}
-                                </View>
-                            )} 
-                        /> 
-                        <Scene 
-                            key='perfil' 
-                            component={Profile} 
-                            hideNavBar
-                            icon={({ focused }) => (
-                                <View>
-                                    <Icon
-                                        color={focused ? 'white' : 'black'}
-                                        name='user'
-                                        type='font-awesome'
-                                    />
-                                    { focused && 
-                                    <Text
-                                        style={{
-                                            color: focused ? 'white' : 'black',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Perfil
-                                    </Text>}
-                                </View>
-                            )} 
-                        /> 
-                        <Scene 
-                            key='admin'
-                            component={Admin} 
-                            hideNavBar
-                            icon={({ focused }) => (
-                                <View>
-                                    <Icon
-                                        color={focused ? 'white' : 'black'}
-                                        name='lock'
-                                        type='font-awesome'
-                                    />
-                                    { focused && 
-                                    <Text
-                                        style={{
-                                            color: focused ? 'white' : 'black',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Admin
-                                    </Text>}
-                                </View>
-                            )} 
-                        /> 
-                    </AnimatedScene>
+                    
+                    { this.renderAdminTab() } 
+                    
                     {/* ####################################### */}
                     <Scene 
                         key={'cadastroJogos'}
@@ -303,7 +402,8 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-    animatedHeigth: state.JogosReducer.animatedHeigth
+    animatedHeigth: state.JogosReducer.animatedHeigth,
+    userLevel: state.LoginReducer.userLevel
 });
 
 export default connect(mapStateToProps)(Routes);

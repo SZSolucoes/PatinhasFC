@@ -16,6 +16,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import { Card, Divider, SearchBar, Avatar } from 'react-native-elements';
+import { startFbListener, stopFbListener } from '../../utils/firebaseListeners';
 import LoadingBallAnim from '../animations/LoadingBallAnim';
 import Versus from './Versus';
 import imgCampoJogos from '../../imgs/campojogos.png';
@@ -24,10 +25,12 @@ import {
     modificaListJogos, 
     modificaAnimatedHeigth,
     modificaFilterStr,
-    modificaFilterLoad
+    modificaFilterLoad,
+    modificaUserLogged
 } from '../../actions/JogosActions';
 import { modificaListUsuarios } from '../../actions/UsuariosActions';
 import { colorAppT } from '../../utils/constantes';
+import perfilUserImg from '../../imgs/perfiluserimg.png';
 
 class Jogos extends React.Component {
 
@@ -132,6 +135,7 @@ class Jogos extends React.Component {
     }
 
     startOrStopFBJogosListener(startOrStop) {
+        const { username } = this.props;
         const user = firebase.auth().currentUser;
 
         if (!user) {
@@ -140,35 +144,13 @@ class Jogos extends React.Component {
         }
 
         if (startOrStop) {
-            const databaseRef = firebase.database().ref();
-            this.dbJogosRef = databaseRef.child('jogos').on('value', (snapshot) => {
-                this.props.modificaListJogos(
-                    _.map(snapshot.val(), (value, key) => ({ key, ...value }))
-                ); 
-            });
-            this.dbUsuariosRef = databaseRef.child('usuarios').on('value', (snapshot) => {
-                this.props.modificaListUsuarios(
-                    _.map(snapshot.val(), (value, key) => ({ key, ...value }))
-                ); 
-            });
-            databaseRef.child('jogos').once('value', (snapshot) => {
-                if (!this.props.listJogos.length) {
-                    this.props.modificaListJogos(
-                        _.map(snapshot.val(), (value, key) => ({ key, ...value }))
-                    ); 
-                }
-            });
-            databaseRef.child('usuarios').once('value', (snapshot) => {
-                if (!this.props.listUsuarios.length) {
-                    this.props.modificaListUsuarios(
-                        _.map(snapshot.val(), (value, key) => ({ key, ...value }))
-                    ); 
-                }
-            });
+            startFbListener('jogos');
+            startFbListener('usuarios');
+            startFbListener('usuario', { email: username });
         } else {
-            const databaseRef = firebase.database().ref();
-            databaseRef.child('jogos').off('value', this.dbJogosRef);
-            databaseRef.child('usuarios').off('value', this.dbUsuariosRef);
+            stopFbListener('jogos');
+            stopFbListener('usuarios');
+            stopFbListener('usuario');
         }
     }
 
@@ -275,6 +257,8 @@ class Jogos extends React.Component {
     }
 
     render() {
+        const { userLogged } = this.props;
+        const userImg = userLogged.imgAvatar ? { uri: userLogged.imgAvatar } : perfilUserImg;
         return (
             <View style={styles.viewPrinc}>
                 <ImageBackground
@@ -305,7 +289,7 @@ class Jogos extends React.Component {
                                     small
                                     rounded
                                     title={'GO'}
-                                    source={{ uri: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg' }}
+                                    source={userImg}
                                     onPress={() => Keyboard.dismiss()}
                                     activeOpacity={0.7}
                                 /> 
@@ -383,7 +367,8 @@ const mapStateToProps = (state) => ({
     listJogos: state.JogosReducer.listJogos,
     listUsuarios: state.UsuariosReducer.listUsuarios,
     filterStr: state.JogosReducer.filterStr,
-    filterLoad: state.JogosReducer.filterLoad
+    filterLoad: state.JogosReducer.filterLoad,
+    userLogged: state.LoginReducer.userLogged
 });
 
 export default connect(mapStateToProps, {
@@ -391,5 +376,6 @@ export default connect(mapStateToProps, {
     modificaAnimatedHeigth,
     modificaFilterStr,
     modificaFilterLoad,
-    modificaListUsuarios
+    modificaListUsuarios,
+    modificaUserLogged
 })(Jogos);

@@ -10,14 +10,6 @@ import Campo from '../campo/Campo';
 
 class Informativos extends React.Component {
 
-    componentDidMount() {
-        console.log('informativos montou');
-    }
-
-    componentWillUnmount() {
-        console.log('informativos desmontou');
-    }
-
     render() {
         return (
             <View style={styles.viewPrinc}>
