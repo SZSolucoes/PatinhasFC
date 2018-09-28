@@ -1,7 +1,8 @@
+
+import { AsyncStorage } from 'react-native';
 import firebase from 'firebase';
 import Moment from 'moment';
 import b64 from 'base-64';
-import { AsyncStorage } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 import { showAlert } from '../utils/store';
 
@@ -143,6 +144,7 @@ const onLoginError = (dispatch, error) => {
             showAlert('warning', 'Aviso!', 'Email ou senha incorretos.');
             break;
         default:
+            showAlert('warning', 'Aviso!', 'Falha de conexão.');
     }
 };
 

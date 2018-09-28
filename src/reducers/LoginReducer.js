@@ -8,7 +8,8 @@ const INITIAL_STATE = {
     showLogoLogin: true,
     indicator: false,
     userLogged: {},
-    userLevel: '1'
+    userLevel: '1',
+    conInfo: ''
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -63,6 +64,11 @@ export default (state = INITIAL_STATE, action) => {
                 ...state,
                 userLevel: action.payload
             };
+        case 'modifica_coninfo_login':
+            return {
+                ...state,
+                conInfo: action.payload
+            };
         case 'modifica_clean_login':
             return {
                 ...state,
@@ -73,7 +79,8 @@ export default (state = INITIAL_STATE, action) => {
                 showLogoLogin: true,
                 indicator: false,
                 userLogged: {},
-                userLevel: '1'
+                userLevel: '1',
+                conInfo: ''
             };
         default:
             return state;

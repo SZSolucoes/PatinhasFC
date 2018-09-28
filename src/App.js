@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { YellowBox, AsyncStorage } from 'react-native';
+import { YellowBox, AsyncStorage, NetInfo } from 'react-native';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import ReduxThunk from 'redux-thunk';
@@ -27,7 +27,9 @@ class App extends React.Component {
     constructor(props) {
         super(props);
 
-        Axios.defaults.timeout = 120000; // Timeout default para o Axios
+        this.onNetInfoChanged = this.onNetInfoChanged.bind(this);
+
+        Axios.defaults.timeout = 80000; // Timeout default para o Axios
 
         YellowBox.ignoreWarnings([
             'Warning: isMounted(...) is deprecated', 
@@ -36,9 +38,7 @@ class App extends React.Component {
             'Deprecation warning: value provided is not in a recognized',
             'Require cycle:'
         ]);
-    }
 
-    render() {
         firebase.initializeApp({
             apiKey: 'AIzaSyBlCoHh_en9YwIGB2HRVQ4oWxjw3613jf4',
             authDomain: 'patinhasfc-46efc.firebaseapp.com',
@@ -69,6 +69,27 @@ class App extends React.Component {
                 } 
             }
         ), 1000);
+        
+        NetInfo.addEventListener(
+            'connectionChange',
+            this.onNetInfoChanged
+        );
+    }
+
+    onNetInfoChanged(conInfo) {
+        if (conInfo.type === 'none' || 
+            conInfo.type === 'unknown' || 
+            conInfo.type === 'wifi' || 
+            conInfo.type === 'cellular' || 
+            conInfo.effectiveType === 'unknown') {
+                store.dispatch({
+                    type: 'modifica_coninfo_login',
+                    payload: conInfo
+                });
+            }
+    }
+
+    render() {
         return (
             <Provider store={store}>
                 <Routes />

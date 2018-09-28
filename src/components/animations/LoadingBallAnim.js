@@ -4,7 +4,7 @@ import {
     StyleSheet,
     Animated,
     Easing,
-    Dimensions
+    Dimensions,
 } from 'react-native';
 
 import imgBall from '../../imgs/bolaanim.png';
@@ -12,6 +12,9 @@ import imgBall from '../../imgs/bolaanim.png';
 export default class LoadingBallAnim extends React.Component {
     constructor(props) {
         super(props);
+
+        this.viewAnim = new Animated.Value(0);
+        this.animViewTimeout = null;
         
         this.ballAnimOne = new Animated.Value(0);
         this.ballAnimOneRotX = new Animated.Value(0);
@@ -31,6 +34,8 @@ export default class LoadingBallAnim extends React.Component {
         this.ballFiveTime = null;
         
         this.doAnim = this.doAnim.bind(this);
+        this.renderBalls = this.renderBalls.bind(this);
+        this.renderNetDown = this.renderNetDown.bind(this);
 
         this.animBallOne = this.animBallOne.bind(this);
         this.animBallOneRotX = this.animBallOneRotX.bind(this);
@@ -39,6 +44,10 @@ export default class LoadingBallAnim extends React.Component {
         this.animBallThree = this.animBallThree.bind(this);
         this.animBallFour = this.animBallFour.bind(this);
         this.animBallFive = this.animBallFive.bind(this);
+
+        this.state = {
+            animsOn: true
+        };
     }
 
     componentDidMount() {
@@ -46,6 +55,15 @@ export default class LoadingBallAnim extends React.Component {
             -100,
             Dimensions.get('screen').height
         );
+        this.animViewTimeout = setTimeout(() => {
+            this.ballOneTime.stop();
+            this.ballTwoTime.stop();
+            this.ballThreeTime.stop();
+            this.ballFourTime.stop();
+            this.ballFiveTime.stop();
+            this.setState({ animsOn: false });
+            this.animNetView(-100, Dimensions.get('screen').height / 2.5, 3000);
+        }, 15000);
     }
 
     componentWillUnmount() {
@@ -54,6 +72,7 @@ export default class LoadingBallAnim extends React.Component {
         this.ballThreeTime.stop();
         this.ballFourTime.stop();
         this.ballFiveTime.stop();
+        clearTimeout(this.animViewTimeout);
     }
 
     doAnim(initValue, toValue) {
@@ -64,6 +83,17 @@ export default class LoadingBallAnim extends React.Component {
         this.animBallThree(initValue, toValue, 1500);
         this.animBallFour(initValue, toValue, 5000);
         this.animBallFive(initValue, toValue, 6000);
+    }
+
+    animNetView(initValue, toValue, duration) {
+        this.viewAnim.setValue(initValue);
+
+        Animated.timing(this.viewAnim, {
+            toValue,
+            duration,
+            easing: Easing.linear,
+            useNativeDriver: true
+        }).start();
     }
 
     animBallOne(initValue, toValue, duration) {
@@ -138,12 +168,7 @@ export default class LoadingBallAnim extends React.Component {
         this.ballFiveTime.start(() => { this.animBallFive(initValue, toValue, duration); });
     }
 
-    render() {
-        /* const ballOneRotXInterp = this.ballAnimOneRotX.interpolate({
-            inputRange: [0, 1],
-            outputRange: ['0deg', '360deg']
-        }); */
-
+    renderBalls() {
         return (
             <View style={styles.viewPrinc}>
                 <Animated.Image 
@@ -190,6 +215,47 @@ export default class LoadingBallAnim extends React.Component {
                 />
             </View>
         );
+    }
+
+    renderNetDown() {
+        return (
+            <Animated.View
+                style={{ 
+                    flex: 1, 
+                    alignItems: 'center', 
+                    transform: [{ translateY: this.viewAnim }]
+                }}
+            >
+                <Animated.Image 
+                    source={imgBall} 
+                    style={{ 
+                        width: 50,
+                        height: 50
+                    }}
+                />
+                <Animated.Text 
+                    style={{ 
+                        color: 'white',
+                        fontSize: 24,
+                        fontWeight: 'bold',
+                        opacity: this.viewAnim.interpolate({
+                            inputRange: [
+                                Dimensions.get('screen').height / 5, 
+                                Dimensions.get('screen').height / 2.5
+                            ],
+                            outputRange: [0, 1]
+                        }) 
+                    }}
+                >
+                    Sem conexão
+                </Animated.Text>
+            </Animated.View>
+        ); 
+    }
+
+    render() {
+        const viewChoosed = this.state.animsOn ? this.renderBalls() : this.renderNetDown();
+        return viewChoosed;
     }
 }
 

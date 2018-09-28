@@ -11,10 +11,10 @@ import {
     ActivityIndicator,
     Text,
     Platform,
-    ImageBackground,
-    Alert
+    ImageBackground
 } from 'react-native';
 import { connect } from 'react-redux';
+import { showAlert } from '../../utils/store';
 
 import imgLogo from '../../imgs/patinhasfclogo.png';
 import imgCampoLogo from '../../imgs/campologo.jpg';
@@ -65,7 +65,7 @@ class Login extends React.Component {
         if (username && password) {
             this.props.doLogin({ email: username, password });
         } else {
-            Alert.alert('Patinhas FC', 'É necessário informar usuário e senha válidos.');
+            showAlert('warning', 'Aviso!', 'É necessário informar usuário e senha válidos.');
         }
     }
 
