@@ -8,6 +8,7 @@ import {
     Text
 } from 'react-native';
 
+import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { 
     Card, 
@@ -18,7 +19,7 @@ import {
 import _ from 'lodash';
 
 import ModalDropdown from 'react-native-modal-dropdown';
-import { colorAppS } from '../../../utils/constantes';
+import { colorAppS, colorAppF } from '../../../utils/constantes';
 import { showAlert } from '../../../utils/store';
 import Versus from '../../jogos/Versus';
 import JogoEdit from './JogoEdit';
@@ -54,6 +55,7 @@ class CadastroJogos extends React.Component {
         this.renderListJogosEdit = this.renderListJogosEdit.bind(this);
         this.onFilterJogosEdit = this.onFilterJogosEdit.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
+        this.checkConInfo = this.checkConInfo.bind(this);
     }
 
     onPressEditRemove(item) {
@@ -73,6 +75,17 @@ class CadastroJogos extends React.Component {
                 jogo.data.includes(filterStr) ||
                 `${jogo.placarCasa}x${jogo.placarVisit}`.includes(filterStr)
         ));
+    }
+
+    checkConInfo(funExec) {
+        if (this.props.conInfo.type === 'none' ||
+            this.props.conInfo.type === 'unknown'
+        ) {
+            Toast.show('Sem conexão.', Toast.SHORT);
+            return false;
+        }
+
+        return funExec();
     }
 
     renderListJogosEdit(jogos) {
@@ -147,7 +160,9 @@ class CadastroJogos extends React.Component {
                                 }}
                             >
                                 <TouchableOpacity
-                                    onPress={() => this.onPressEditRemove(item)}
+                                    onPress={() => this.checkConInfo(
+                                        () => this.onPressEditRemove(item)
+                                    )}
                                 >
                                     <Icon
                                         name='delete' 
@@ -382,7 +397,7 @@ class CadastroJogos extends React.Component {
 const styles = StyleSheet.create({
     viewPrinc: {
         flex: 1,
-        backgroundColor: '#EEEEEE'
+        backgroundColor: colorAppF
     },
     text: {
         fontSize: 14,
@@ -463,7 +478,8 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => ({
     listJogos: state.JogosReducer.listJogos,
     filterStr: state.CadastroJogosReducer.filterStr,
-    filterLoad: state.CadastroJogosReducer.filterLoad
+    filterLoad: state.CadastroJogosReducer.filterLoad,
+    conInfo: state.LoginReducer.conInfo
 });
 
 export default connect(mapStateToProps, {

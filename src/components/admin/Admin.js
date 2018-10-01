@@ -8,11 +8,30 @@ import {
     TouchableOpacity
 } from 'react-native';
 
+import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Card, Icon } from 'react-native-elements';
 import { Actions } from 'react-native-router-flux';
+import { colorAppF } from '../../utils/constantes';
 
 class Admin extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.checkConInfo = this.checkConInfo.bind(this);
+    }
+
+    checkConInfo(funExec) {
+        if (this.props.conInfo.type === 'none' ||
+            this.props.conInfo.type === 'unknown'
+        ) {
+            Toast.show('Sem conexão.', Toast.SHORT);
+            return false;
+        }
+
+        return funExec();
+    }
 
     render() {
         return (
@@ -97,9 +116,10 @@ class Admin extends React.Component {
                             wrapperStyle={{ flex: 1 }}
                         >
                             <View style={styles.viewIconText}>
-                                <Icon name='history' type='material-community' size={34} />
-                                <View style={{ marginTop: 10 }} />
-                                <Text style={styles.text}>Histórico</Text>
+                                <View style={{ marginTop: 2 }} />
+                                <Icon name='clipboard' type='font-awesome' size={26} />
+                                <View style={{ marginTop: 15 }} />
+                                <Text style={styles.text}>Informativos</Text>
                             </View>
                         </Card>
                     </TouchableOpacity>
@@ -112,10 +132,9 @@ class Admin extends React.Component {
                             wrapperStyle={{ flex: 1 }}
                         >
                             <View style={styles.viewIconText}>
-                                <View style={{ marginTop: 2 }} />
-                                <Icon name='clipboard' type='font-awesome' size={26} />
-                                <View style={{ marginTop: 15 }} />
-                                <Text style={styles.text}>Informativos</Text>
+                                <Icon name='history' type='material-community' size={34} />
+                                <View style={{ marginTop: 10 }} />
+                                <Text style={styles.text}>Histórico</Text>
                             </View>
                         </Card>
                     </TouchableOpacity>
@@ -129,7 +148,7 @@ class Admin extends React.Component {
 const styles = StyleSheet.create({
     viewPrinc: {
         flex: 1,
-        backgroundColor: '#EEEEEE'
+        backgroundColor: colorAppF
     },
     viewLinha: {
         flex: 1,
@@ -156,8 +175,8 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = () => ({
-    
+const mapStateToProps = (state) => ({
+    conInfo: state.LoginReducer.conInfo
 });
 
 export default connect(mapStateToProps, {})(Admin);

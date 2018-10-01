@@ -9,6 +9,7 @@ import {
     Switch
 } from 'react-native';
 
+import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { 
     Card, 
@@ -22,7 +23,7 @@ import _ from 'lodash';
 import b64 from 'base-64';
 
 import ModalDropdown from 'react-native-modal-dropdown';
-import { colorAppS } from '../../../utils/constantes';
+import { colorAppS, colorAppF } from '../../../utils/constantes';
 import { showAlert } from '../../../utils/store';
 import UsuarioEdit from './UsuarioEdit';
 import {
@@ -61,6 +62,7 @@ class Usuarios extends React.Component {
         this.onFilterUsuariosEdit = this.onFilterUsuariosEdit.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.renderIcons = this.renderIcons.bind(this);
+        this.checkConInfo = this.checkConInfo.bind(this);
     }
 
     onPressEditRemove(item) {
@@ -85,6 +87,17 @@ class Usuarios extends React.Component {
                 usuario.tipoPerfil.includes(filterStr) ||
                 usuario.nome.includes(filterStr)
         ));
+    }
+
+    checkConInfo(funExec) {
+        if (this.props.conInfo.type === 'none' ||
+            this.props.conInfo.type === 'unknown'
+        ) {
+            Toast.show('Sem conexão.', Toast.SHORT);
+            return false;
+        }
+
+        return funExec();
     }
 
     renderIcons(item) {
@@ -133,7 +146,7 @@ class Usuarios extends React.Component {
                 >     
                     <Switch 
                         value={item.userDisabled === 'false'}
-                        onValueChange={() => this.onPressEditRemove(item)}
+                        onValueChange={() => this.checkConInfo(() => this.onPressEditRemove(item))}
                     />
                 </View>
             </View>
@@ -386,7 +399,7 @@ class Usuarios extends React.Component {
 const styles = StyleSheet.create({
     viewPrinc: {
         flex: 1,
-        backgroundColor: '#EEEEEE'
+        backgroundColor: colorAppF
     },
     text: {
         fontSize: 14,
@@ -467,7 +480,8 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => ({
     listUsuarios: state.UsuariosReducer.listUsuarios,
     filterStr: state.UsuariosReducer.filterStr,
-    filterLoad: state.UsuariosReducer.filterLoad
+    filterLoad: state.UsuariosReducer.filterLoad,
+    conInfo: state.LoginReducer.conInfo
 });
 
 export default connect(mapStateToProps, {

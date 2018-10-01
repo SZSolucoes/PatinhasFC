@@ -62,7 +62,7 @@ export default class LoadingBallAnim extends React.Component {
             this.ballFourTime.stop();
             this.ballFiveTime.stop();
             this.setState({ animsOn: false });
-            this.animNetView(-100, Dimensions.get('screen').height / 2.5, 3000);
+            this.animNetView(-100, Dimensions.get('window').height / 2, 3000);
         }, 15000);
     }
 

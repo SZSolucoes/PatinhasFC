@@ -7,6 +7,7 @@ import {
     Image
 } from 'react-native';
 
+import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import firebase from 'firebase';
 import RNFetchBlob from 'rn-fetch-blob';
@@ -24,6 +25,7 @@ import b64 from 'base-64';
 import ImagePicker from 'react-native-image-crop-picker';
 import DatePicker from 'react-native-datepicker';
 import { showAlert } from '../../../utils/store';
+import { colorAppF } from '../../../utils/constantes';
 
 class JogoEdit extends React.Component {
 
@@ -48,6 +50,7 @@ class JogoEdit extends React.Component {
         this.onPressSelectImg = this.onPressSelectImg.bind(this);
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
         this.setImgProperties = this.setImgProperties.bind(this);
+        this.checkConInfo = this.checkConInfo.bind(this);
     }
 
     onPressSelectImg() {
@@ -248,6 +251,17 @@ class JogoEdit extends React.Component {
         this.b64Str = b64Str;
         this.contentType = mime;
     }
+
+    checkConInfo(funExec) {
+        if (this.props.conInfo.type === 'none' ||
+            this.props.conInfo.type === 'unknown'
+        ) {
+            Toast.show('Sem conexão.', Toast.SHORT);
+            return false;
+        }
+
+        return funExec();
+    }
     
     render() {
         return (
@@ -374,8 +388,26 @@ class JogoEdit extends React.Component {
                     disabled={this.state.loading}
                     loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                     title={this.state.loading ? ' ' : 'Confirmar'} 
-                    buttonStyle={{ width: '100%', marginVertical: 30 }}
-                    onPress={() => this.onPressConfirmar()}
+                    buttonStyle={{ width: '100%', marginTop: 30 }}
+                        onPress={() => this.checkConInfo(() => this.onPressConfirmar())}
+                />
+                <Button 
+                    small
+                    loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
+                    title={'Limpar'} 
+                    buttonStyle={{ width: '100%', marginVertical: 10 }}
+                    onPress={() => {
+                        this.b64Str = '';
+                        this.contentType = '';
+                        this.setState({
+                            contentType: '',
+                            imgJogoUri: null,
+                            imgPath: '',
+                            titulo: '',
+                            data: new Date(),
+                            descricao: '',
+                        });
+                    }}
                 />
             </Card>
         );
@@ -385,7 +417,7 @@ class JogoEdit extends React.Component {
 const styles = StyleSheet.create({
     viewPrinc: {
         flex: 1,
-        backgroundColor: '#EEEEEE'
+        backgroundColor: colorAppF
     },
     text: {
         fontSize: 14,
@@ -429,8 +461,8 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = () => ({
-    
+const mapStateToProps = (state) => ({
+    conInfo: state.LoginReducer.conInfo
 });
 
 export default connect(mapStateToProps, {})(JogoEdit);

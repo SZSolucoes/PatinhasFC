@@ -13,6 +13,7 @@ import {
 import firebase from 'firebase';
 import _ from 'lodash';
 
+import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import { Card, Divider, SearchBar, Avatar } from 'react-native-elements';
@@ -42,6 +43,7 @@ class Jogos extends React.Component {
         this.onScrollView = this.onScrollView.bind(this);
         this.onScrollViewTools = this.onScrollViewTools.bind(this);
         this.onFilterJogos = this.onFilterJogos.bind(this);
+        this.onPressCardGame = this.onPressCardGame.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.renderCardsJogos = this.renderCardsJogos.bind(this);
         this.onKeyboardShow = this.onKeyboardShow.bind(this);
@@ -79,6 +81,11 @@ class Jogos extends React.Component {
     onKeyboardHide() {
         this.KeyboardIsOpened = false;
         this.props.modificaAnimatedHeigth(false);
+    }
+
+    onPressCardGame() {
+        // ... Lógica para abrir tela de jogo...
+        return false;
     }
 
     onScrollView(currentOffset, direction) {
@@ -145,10 +152,12 @@ class Jogos extends React.Component {
 
         if (startOrStop) {
             startFbListener('jogos');
+            startFbListener('infos');
             startFbListener('usuarios');
             startFbListener('usuario', { email: username });
         } else {
             stopFbListener('jogos');
+            stopFbListener('infos');
             stopFbListener('usuarios');
             stopFbListener('usuario');
         }
@@ -181,7 +190,16 @@ class Jogos extends React.Component {
             return (
                 <View key={index}>
                     <TouchableOpacity
-                        onPress={() => true}
+                        onPress={() => {
+                            if (this.props.conInfo.type === 'none' ||
+                                this.props.conInfo.type === 'unknown'
+                            ) {
+                                Toast.show('Sem conexão.', Toast.SHORT);
+                                return false;
+                            }
+
+                            return this.onPressCardGame();
+                        }}
                     >
                         <Card 
                             title={titulo} 
@@ -368,7 +386,8 @@ const mapStateToProps = (state) => ({
     listUsuarios: state.UsuariosReducer.listUsuarios,
     filterStr: state.JogosReducer.filterStr,
     filterLoad: state.JogosReducer.filterLoad,
-    userLogged: state.LoginReducer.userLogged
+    userLogged: state.LoginReducer.userLogged,
+    conInfo: state.LoginReducer.conInfo
 });
 
 export default connect(mapStateToProps, {

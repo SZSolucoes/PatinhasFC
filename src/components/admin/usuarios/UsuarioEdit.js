@@ -7,6 +7,7 @@ import {
     Picker
 } from 'react-native';
 
+import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import firebase from 'firebase';
 import { 
@@ -22,6 +23,7 @@ import b64 from 'base-64';
 
 import DatePicker from 'react-native-datepicker';
 import { showAlert } from '../../../utils/store';
+import { colorAppF } from '../../../utils/constantes';
 
 class UsuarioEdit extends React.Component {
 
@@ -42,6 +44,7 @@ class UsuarioEdit extends React.Component {
         };
 
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
+        this.checkConInfo = this.checkConInfo.bind(this);
     }
 
     onPressConfirmar() {
@@ -174,6 +177,17 @@ class UsuarioEdit extends React.Component {
                 }
             }); 
         }
+    }
+
+    checkConInfo(funExec) {
+        if (this.props.conInfo.type === 'none' ||
+            this.props.conInfo.type === 'unknown'
+        ) {
+            Toast.show('Sem conexão.', Toast.SHORT);
+            return false;
+        }
+
+        return funExec();
     }
     
     render() {
@@ -336,7 +350,7 @@ class UsuarioEdit extends React.Component {
                         loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                         title={this.state.loading ? ' ' : 'Confirmar'} 
                         buttonStyle={{ width: '100%', marginTop: 30 }}
-                        onPress={() => this.onPressConfirmar()}
+                        onPress={() => this.checkConInfo(() => this.onPressConfirmar())}
                     />
                     <Button 
                         small
@@ -361,7 +375,7 @@ class UsuarioEdit extends React.Component {
 const styles = StyleSheet.create({
     viewPrinc: {
         flex: 1,
-        backgroundColor: '#EEEEEE'
+        backgroundColor: colorAppF
     },
     text: {
         fontSize: 14,
@@ -412,8 +426,8 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = () => ({
-    
+const mapStateToProps = (state) => ({
+    conInfo: state.LoginReducer.conInfo
 });
 
 export default connect(mapStateToProps, {})(UsuarioEdit);

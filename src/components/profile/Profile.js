@@ -6,6 +6,7 @@ import {
     Dimensions
 } from 'react-native';
 
+import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import * as Progress from 'react-native-progress';
@@ -28,6 +29,7 @@ class Profile extends React.Component {
 
         this.onPressLogout = this.onPressLogout.bind(this);
         this.onPressUserImg = this.onPressUserImg.bind(this);
+        this.checkConInfo = this.checkConInfo.bind(this);
 
         this.state = {
             progress: 0
@@ -87,7 +89,7 @@ class Profile extends React.Component {
                         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                         if (progress === 1) {
                             this.setState({ progress: 0.85 }); 
-                        } else if (progress === 0){
+                        } else if (progress === 0) {
                             this.setState({ progress: 0.10 }); 
                         } else {
                             this.setState({ progress }); 
@@ -134,6 +136,17 @@ class Profile extends React.Component {
           }).catch(() => false);
     }
 
+    checkConInfo(funExec) {
+        if (this.props.conInfo.type === 'none' ||
+            this.props.conInfo.type === 'unknown'
+        ) {
+            Toast.show('Sem conexão.', Toast.SHORT);
+            return false;
+        }
+
+        return funExec();
+    }
+
     render() {
         const { userLogged } = this.props;
         const userImg = userLogged.imgAvatar ? { uri: userLogged.imgAvatar } : perfilUserImg;
@@ -144,8 +157,12 @@ class Profile extends React.Component {
         return (
             <View style={styles.viewPrinc}>
                 <ParallaxScrollView
-                    onPressBackgroundImg={() => this.onPressUserImg('userBg')}
-                    onPressUserImg={() => this.onPressUserImg('userImg')}
+                    onPressBackgroundImg={() => this.checkConInfo(
+                        () => this.onPressUserImg('userBg')
+                    )}
+                    onPressUserImg={() => this.checkConInfo(
+                        () => this.onPressUserImg('userImg')
+                    )}
                     userImage={userImg}
                     backgroundSource={imgBg}
                     userName={username}
@@ -176,25 +193,33 @@ class Profile extends React.Component {
                             key={'Amigos'}
                             title={'Amigos'}
                             leftIcon={{ name: 'account-multiple', type: 'material-community' }}
-                            onPress={() => showAlertDesenv()}
+                            onPress={() => this.checkConInfo(
+                                () => showAlertDesenv()
+                            )}
                         />
                         <ListItem
                             key={'Notificações'}
                             title={'Notificações'}
                             leftIcon={{ name: 'bell', type: 'material-community' }}
-                            onPress={() => showAlertDesenv()}
+                            onPress={() => this.checkConInfo(
+                                () => showAlertDesenv()
+                            )}
                         />
                         <ListItem
                             key={'Editar Perfil'}
                             title={'Editar Perfil'}
                             leftIcon={{ name: 'account', type: 'material-community' }}
-                            onPress={() => showAlertDesenv()}
+                            onPress={() => this.checkConInfo(
+                                () => showAlertDesenv()
+                            )}
                         />
                         <ListItem
                             key={'Configurações'}
                             title={'Configurações'}
                             leftIcon={{ name: 'settings', type: 'material-community' }}
-                            onPress={() => showAlertDesenv()}
+                            onPress={() => this.checkConInfo(
+                                () => showAlertDesenv()
+                            )}
                         />
                     </List>
                     <Button 
@@ -219,7 +244,8 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     userLogged: state.LoginReducer.userLogged,
-    username: state.LoginReducer.username
+    username: state.LoginReducer.username,
+    conInfo: state.LoginReducer.conInfo
 });
 
 export default connect(mapStateToProps, {})(Profile);

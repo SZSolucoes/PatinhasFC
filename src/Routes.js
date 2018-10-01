@@ -90,6 +90,10 @@ class Routes extends React.Component {
     }
 
     onBackAndroidHdl() {
+        store.dispatch({
+            type: 'modifica_startupordownanim_info',
+            payload: 'down'
+        });
         return true;
     }
 

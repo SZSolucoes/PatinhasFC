@@ -5,10 +5,12 @@ import b64 from 'base-64';
 import { store } from '../App';
 
 let jogosListener = null;
+let infosListener = null;
 let usuariosListener = null;
 let usuarioListener = null;
 
 let jogosListenerOn = false;
+let infosListenerOn = false;
 let usuariosListenerOn = false;
 let usuarioListenerOn = false;
 
@@ -27,6 +29,19 @@ export const startFbListener = (name, params) => {
                     });      
                 });
                 jogosListenerOn = true;
+            }
+            break;
+        case 'infos':
+            // LISTENER FIREBASE JOGOS
+            if (!infosListener || (infosListener && !infosListenerOn)) {
+                infosListener = databaseRef.child('informativos');
+                infosListener.on('value', (snapshot) => {
+                    store.dispatch({
+                        type: 'modifica_listinfos_info',
+                        payload: _.map(snapshot.val(), (value, key) => ({ key, ...value }))
+                    });      
+                });
+                infosListenerOn = true;
             }
             break;
         case 'usuarios':
@@ -73,6 +88,12 @@ export const stopFbListener = (name) => {
             if (jogosListener) {
                 jogosListener.off();
                 jogosListenerOn = false;
+            }
+            break;
+        case 'infos':
+            if (infosListener) {
+                infosListener.off();
+                infosListenerOn = false;
             }
             break;
         case 'usuarios':
