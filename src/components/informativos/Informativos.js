@@ -5,9 +5,14 @@ import {
     StyleSheet,
     TouchableOpacity,
     Image,
-    Text
+    Text,
+    TouchableWithoutFeedback,
+    Linking
 } from 'react-native';
+import firebase from 'firebase';
+import b64 from 'base-64';
 import { connect } from 'react-redux';
+import _ from 'lodash';
 import { Card, ListItem, Icon } from 'react-native-elements';
 import InfoActions from './InfoActions';
 import Coment from './Coment';
@@ -21,11 +26,56 @@ class Informativos extends React.Component {
     constructor(props) {
         super(props);
 
+        this.dbFbRef = firebase.database().ref();
+
         this.renderInfos = this.renderInfos.bind(this);
         this.renderDots = this.renderDots.bind(this);
         this.renderArticle = this.renderArticle.bind(this);
         this.renderActions = this.renderActions.bind(this);
         this.comentsUpOrDown = this.comentsUpOrDown.bind(this);
+        this.onPressLikeBtn = this.onPressLikeBtn.bind(this);
+    }
+    
+    onPressLikeBtn(likeOrDeslike, item) {
+        const { userLogged } = this.props;
+        const b64UserKey = b64.encode(userLogged.email);
+        const itemListLikes = item.listLikes ? item.listLikes : [];
+        if (likeOrDeslike === 'like') {
+            const isPushed = _.findIndex(
+                itemListLikes, (itemInfo) => itemInfo.push && itemInfo.push === 'push'
+            );
+            let newArray = [];
+            if (isPushed !== -1) {
+                const auxArr = [...itemListLikes];
+                if (isPushed !== -1) {
+                    auxArr.splice(isPushed, 1);
+                }
+                newArray = [...auxArr, { key: b64UserKey }];
+            } else {
+                newArray = [...itemListLikes, { key: b64UserKey }];
+            }
+            this.dbFbRef.child(`informativos/${item.key}`).update({
+                listLikes: newArray
+            })
+            .then(() => true)
+            .catch(() => true); 
+        } else {
+            const newArray = [...itemListLikes];
+            const indexPushed = _.findIndex(
+                itemListLikes, (itemInfo) => itemInfo.key === b64UserKey
+            );
+            if (indexPushed !== -1) {
+                newArray.splice(indexPushed, 1);
+                if (newArray.length === 0) {
+                    newArray.push({ push: 'push' });
+                }
+                this.dbFbRef.child(`informativos/${item.key}`).update({
+                    listLikes: newArray
+                })
+                .then(() => true)
+                .catch(() => true); 
+            }
+        }
     }
 
     comentsUpOrDown(upOrDown = 'down') {
@@ -37,6 +87,10 @@ class Informativos extends React.Component {
             <InfoActions 
                 item={item} 
                 comentsUpOrDown={(upOrDown) => this.comentsUpOrDown(upOrDown)}
+                onPressLikeBtn={
+                    (likeOrDeslike, itemInfo) => this.onPressLikeBtn(likeOrDeslike, itemInfo)
+                }
+                userLogged={this.props.userLogged}
             />
         );
     }
@@ -49,7 +103,7 @@ class Informativos extends React.Component {
                 }}
             >
                 { 
-                    item.imgArticle && 
+                    !!item.imgArticle && 
                     <Image
                         resizeMode="cover"
                         style={{ 
@@ -62,22 +116,38 @@ class Informativos extends React.Component {
                     />
                 }
                 {
-                    item.textArticle &&
-                    <View
-                        style={{
-                            paddingVertical: 10,
-                            paddingHorizontal: 5,
-                            borderLeftWidth: 1,
-                            borderRightWidth: 1,
-                            borderBottomWidth: 1,
-                            borderColor: colorAppF
-                        }}
-                    >
-                        <Text style={styles.textArticle}>
-                            { item.textArticle }
-                        </Text>
-                    </View>
+                    (!!item.textArticle || !!item.linkArticle) &&
+                        <TouchableWithoutFeedback
+                            onPress={
+                                () => !!item.linkArticle && Linking.openURL(item.linkArticle) 
+                            }
+                        >
+                            <View
+                                style={{
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 5,
+                                    borderLeftWidth: 1,
+                                    borderRightWidth: 1,
+                                    borderBottomWidth: 1,
+                                    borderColor: colorAppF
+                                }}
+                            >
+                                {
+                                    !!item.textArticle &&
+                                    <Text style={styles.textArticle}>
+                                        { item.textArticle }
+                                    </Text>
+                                }
+                                {
+                                    !!item.linkArticle &&
+                                    <Text style={{ color: '#A2A2A2' }}>
+                                        { item.linkArticle }
+                                    </Text>
+                                }
+                            </View>
+                        </TouchableWithoutFeedback>
                 }
+               
             </View>
         );
     }
@@ -114,10 +184,10 @@ class Informativos extends React.Component {
                             />
                         </View>
                         { 
-                            item.descArticle &&
+                            !!item.descPost &&
                             <View style={{ marginHorizontal: 10 }}>
                                 <Text>
-                                    { item.descArticle }
+                                    { item.descPost }
                                 </Text>
                             </View>
                         }
@@ -136,7 +206,6 @@ class Informativos extends React.Component {
                 <ScrollView 
                     style={styles.viewPrinc}
                 >
-                    { this.renderInfos(this.props.listInfos) }
                     { this.renderInfos(this.props.listInfos) }
                     <View style={{ marginVertical: 40 }} />
                 </ScrollView>
@@ -170,7 +239,8 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-    listInfos: state.InfoReducer.listInfos
+    listInfos: state.InfoReducer.listInfos,
+    userLogged: state.LoginReducer.userLogged
 });
 
 export default connect(mapStateToProps, {

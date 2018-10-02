@@ -50,6 +50,7 @@ class JogoEdit extends React.Component {
         this.onPressSelectImg = this.onPressSelectImg.bind(this);
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
         this.setImgProperties = this.setImgProperties.bind(this);
+        this.clearContentImg = this.clearContentImg.bind(this);
         this.checkConInfo = this.checkConInfo.bind(this);
     }
 
@@ -91,7 +92,7 @@ class JogoEdit extends React.Component {
         this.setState({ loading: true });
 
         const { titulo, data, descricao, scrollView } = this.state;
-        const { keyItem, imgUrl } = this.props;
+        const { keyItem, imgJogoUri } = this.props;
         const b64File = this.b64Str;
         const contentTp = this.contentType;
         let dataStr = '';
@@ -149,7 +150,10 @@ class JogoEdit extends React.Component {
                     return imgRef.put(blob, metadata);
                 })
                 .then(() => {
-                    uploadBlob.close();
+                    if (uploadBlob) {
+                        uploadBlob.close();
+                        uploadBlob = null;
+                    }
                     return imgRef.getDownloadURL();
                 })
                 .then((url) => {
@@ -170,9 +174,9 @@ class JogoEdit extends React.Component {
                         });
                 })
                 .then(() => {
-                    this.setState({ loading: false });
-                    if (keyItem && imgUrl) {
-                        firebase.storage().refFromURL(imgUrl).delete()
+                    this.setState({ loading: false, isTitValid: false });
+                    if (keyItem && imgJogoUri) {
+                        firebase.storage().refFromURL(imgJogoUri).delete()
                         .then(() => true)
                         .catch(() => true);
                     }
@@ -192,7 +196,7 @@ class JogoEdit extends React.Component {
                         uploadBlob.close();
                     }
 
-                    this.setState({ loading: false });
+                    this.setState({ loading: false, isTitValid: false });
                     showAlert(
                         'danger', 
                         'Ops!', 
@@ -211,11 +215,11 @@ class JogoEdit extends React.Component {
                     descricao 
                 })
                 .then(() => {
-                    this.setState({ loading: false });
+                    this.setState({ loading: false, isTitValid: false });
                     showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
                 })
                 .catch(() => {
-                    this.setState({ loading: false });
+                    this.setState({ loading: false, isTitValid: false });
                     showAlert(
                         'danger', 
                         'Ops!', 
@@ -232,11 +236,11 @@ class JogoEdit extends React.Component {
                     placarVisit: '0'  
                 })
                 .then(() => {
-                    this.setState({ loading: false });
+                    this.setState({ loading: false, isTitValid: false });
                     showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
                 })
                 .catch(() => {
-                    this.setState({ loading: false });
+                    this.setState({ loading: false, isTitValid: false });
                     showAlert(
                         'danger', 
                         'Ops!', 
@@ -250,6 +254,11 @@ class JogoEdit extends React.Component {
     setImgProperties(b64Str, mime) {
         this.b64Str = b64Str;
         this.contentType = mime;
+    }
+
+    clearContentImg() {
+        this.b64Str = '';
+        this.contentType = '';
     }
 
     checkConInfo(funExec) {
@@ -397,8 +406,7 @@ class JogoEdit extends React.Component {
                     title={'Limpar'} 
                     buttonStyle={{ width: '100%', marginVertical: 10 }}
                     onPress={() => {
-                        this.b64Str = '';
-                        this.contentType = '';
+                        this.clearContentImg();
                         this.setState({
                             contentType: '',
                             imgJogoUri: null,

@@ -20,6 +20,7 @@ class AlertScl extends React.Component {
 
         this.onPressConfRemov = this.onPressConfRemov.bind(this);
         this.onPressDisableUser = this.onPressDisableUser.bind(this);
+        this.onPressRemoveInfo = this.onPressRemoveInfo.bind(this);
     }
 
     onPressDisableUser() {
@@ -106,6 +107,44 @@ class AlertScl extends React.Component {
         }, 1000);
     }
 
+    onPressRemoveInfo() {
+        const { itemInfoSelected } = this.props;
+
+        const dbItemRef = firebase.database().ref().child(`informativos/${itemInfoSelected.key}`);
+
+        dbItemRef.remove()
+        .then(() => {
+            if (itemInfoSelected.imgArticle) {
+                firebase.storage().refFromURL(itemInfoSelected.imgArticle).delete()
+                .then(() => true)
+                .catch(() => true);
+            }
+            Toast.show('Informativo removido com sucesso.', Toast.LONG);
+        })
+        .catch(() => Toast.show('Falha ao remover informativo.', Toast.LONG));
+        
+        store.dispatch({
+            type: 'modifica_showalertscl_alertscl',
+            payload: false
+        });
+
+        store.dispatch({
+            type: 'modifica_itemselected_info',
+            payload: {}
+        }); 
+
+        setTimeout(() => {
+            store.dispatch({
+                type: 'modifica_remove_alertscl',
+                payload: false
+            });
+            store.dispatch({
+                type: 'modifica_flagremoveinfo_info',
+                payload: false
+            });
+        }, 1000);
+    }
+
     render() {
         return (
             <SCLAlert
@@ -151,6 +190,8 @@ class AlertScl extends React.Component {
                             onPress={() => { 
                                 if (this.props.flagDisableUser) {
                                     return this.onPressDisableUser();
+                                } else if (this.props.flagRemoveInfo) {
+                                    return this.onPressRemoveInfo();
                                 }
                                 return this.onPressConfRemov(); 
                             }}
@@ -189,7 +230,9 @@ const mapStateToProps = (state) => ({
     remove: state.AlertSclReducer.remove,
     itemSelected: state.JogosReducer.itemSelected,
     itemUserSelected: state.UsuariosReducer.itemSelected,
-    flagDisableUser: state.UsuariosReducer.flagDisableUser
+    flagDisableUser: state.UsuariosReducer.flagDisableUser,
+    flagRemoveInfo: state.InfoReducer.flagRemoveInfo,
+    itemInfoSelected: state.InfoReducer.itemSelected,
 });
 
 export default connect(mapStateToProps)(AlertScl);

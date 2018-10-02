@@ -3,7 +3,6 @@ import {
     View,
     ScrollView, 
     StyleSheet,
-    Platform,
     TouchableOpacity,
     Text,
     Switch
@@ -205,6 +204,8 @@ class Usuarios extends React.Component {
                 <SearchBar
                     round
                     lightTheme
+                    autoCapitalize={'none'}
+                    autoCorrect={false}
                     clearIcon={!!this.props.filterStr}
                     showLoadingIcon={this.props.filterLoad}
                     containerStyle={{ 
@@ -401,50 +402,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colorAppF
     },
-    text: {
-        fontSize: 14,
-    },
-    inputContainer: {
-        borderBottomWidth: 1,
-        borderBottomColor: '#9E9E9E',
-        height: Platform.OS === 'android' ? 45 : 40,
-    },
-    input: {
-        paddingBottom: 0, 
-        width: null,
-        color: 'black',
-        height: 35
-    },
     card: {
         paddingHorizontal: 10,
-    },
-    viewImageSelect: {
-        flexDirection: 'row', 
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 2, 
-        borderColor: '#EEEEEE',
-        borderRadius: 0.9
-    },
-    dateInput: {
-        borderWidth: 0,
-        alignItems: 'flex-start',
-        height: 35,
-        ...Platform.select({
-            android: {
-                paddingLeft: 3,
-                justifyContent: 'flex-end'
-            },
-            ios: {
-                paddingLeft: 0,
-                justifyContent: 'center'
-            }
-        })
-    },
-    dateText: {
-        fontSize: 14,
-        color: 'black',
-        textAlign: 'left'
     },
     dropCard: { 
         backgroundColor: colorAppS,
@@ -468,12 +427,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         marginVertical: 8
-    },
-    textData: {
-        textAlign: 'center',
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: 'black'
     }
 });
 

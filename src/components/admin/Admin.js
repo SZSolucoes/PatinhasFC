@@ -109,7 +109,7 @@ class Admin extends React.Component {
                 <View style={styles.viewLinha}>
                     <TouchableOpacity 
                         style={{ flex: 1 }} 
-                        onPress={() => false}
+                        onPress={() => Actions.cadastroInfos()}
                     >
                         <Card 
                             containerStyle={{ flex: 1 }}

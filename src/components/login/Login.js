@@ -136,16 +136,16 @@ class Login extends React.Component {
                             >
                                 <View style={styles.sectionStyle}>
                                     <TextInput
-                                        placeholder='E-mail'
+                                        placeholder={'E-mail'}
                                         autoCorrect={false}
-                                        placeholderTextColor='#f16636'
-                                        returnKeyType='next'
-                                        autoCapitalize='none'
+                                        placeholderTextColor={'#f16636'}
+                                        returnKeyType={'next'}
+                                        autoCapitalize={'none'}
                                         style={styles.input}
                                         onChangeText={username => 
                                             this.props.modificaUsername(username)}
                                         value={this.props.username}
-                                        underlineColorAndroid='transparent'
+                                        underlineColorAndroid={'transparent'}
                                         onSubmitEditing={() => this.txtPassword.focus()}
                                         blurOnSubmit={false}
                                     />
@@ -153,14 +153,14 @@ class Login extends React.Component {
                                 <View style={styles.sectionStyle}>
                                     <TextInput 
                                         ref={(input) => { this.txtPassword = input; }}
-                                        placeholder='Senha'
-                                        placeholderTextColor='#f16636'
-                                        returnKeyType='next'
-                                        autoCapitalize='none'
+                                        placeholder={'Senha'}
+                                        placeholderTextColor={'#f16636'}
+                                        returnKeyType={'next'}
+                                        autoCapitalize={'none'}
                                         autoCorrect={false}
                                         style={[styles.input, { marginLeft: 33 }]}
                                         secureTextEntry={this.props.hidePw}
-                                        underlineColorAndroid='transparent'
+                                        underlineColorAndroid={'transparent'}
                                         onChangeText={password => 
                                             this.props.modificaPassword(password)}
                                         value={this.props.password}

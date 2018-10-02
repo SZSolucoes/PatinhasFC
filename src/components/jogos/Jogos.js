@@ -313,7 +313,9 @@ class Jogos extends React.Component {
                                 /> 
                             </View>
                             <View style={{ flex: 2.5 }}>
-                                <SearchBar 
+                                <SearchBar
+                                    autoCapitalize={'none'}
+                                    autoCorrect={false}
                                     clearIcon={!!this.props.filterStr}
                                     showLoadingIcon={this.props.filterLoad}
                                     containerStyle={{ 

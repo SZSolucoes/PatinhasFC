@@ -103,7 +103,13 @@ class Coment extends React.Component {
                                 <Text
                                     style={{ fontWeight: 'bold' }}
                                 >
-                                    {this.props.numLikes}
+                                    {
+                                        !!this.props.listInfos &&
+                                        this.props.listInfos.listLikes ?
+                                        this.props.listInfos.listLikes.length
+                                        :
+                                        0
+                                    }
                                 </Text>
                             </View>
                             <TouchableWithoutFeedback
@@ -146,7 +152,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     startUpOrDownAnim: state.InfoReducer.startUpOrDownAnim,
-    numLikes: state.InfoReducer.numLikes
+    listInfos: state.InfoReducer.listInfos
 });
 
 export default connect(mapStateToProps, {

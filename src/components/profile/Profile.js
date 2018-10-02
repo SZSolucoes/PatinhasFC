@@ -98,7 +98,10 @@ class Profile extends React.Component {
                     return uploadTask;
                 })
                 .then(() => {
-                    uploadBlob.close();
+                    if (uploadBlob) {
+                        uploadBlob.close();
+                        uploadBlob = null;
+                    }
                     return imgRef.getDownloadURL();
                 })
                 .then((url) => {

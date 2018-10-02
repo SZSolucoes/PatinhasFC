@@ -1,7 +1,10 @@
 const INITIAL_STATE = {
     listInfos: [],
+    itemSelected: {},
     startUpOrDownAnim: 'down',
-    numLikes: '0'
+    filterStr: '',
+    filterLoad: false,
+    flagRemoveInfo: false
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -16,17 +19,35 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 startUpOrDownAnim: action.payload 
             };
-        case 'modifica_numlikes_info':
+        case 'modifica_filterstr_info':
             return { 
                 ...state, 
-                numLikes: action.payload 
+                filterStr: action.payload
+            };
+        case 'modifica_filterload_info':
+            return { 
+                ...state, 
+                filterLoad: action.payload
+            };
+        case 'modifica_itemselected_info':
+            return { 
+                ...state, 
+                itemSelected: { ...action.payload }
+            };
+        case 'modifica_flagremoveinfo_info':
+            return { 
+                ...state, 
+                flagRemoveInfo: action.payload
             };
         case 'modifica_clean_info':
             return {
                 ...state,
                 listInfos: [],
+                itemSelected: {},
                 startUpOrDownAnim: 'down',
-                numLikes: '0'
+                filterStr: '',
+                filterLoad: false,
+                flagRemoveInfo: false
             };
         default:
             return state;

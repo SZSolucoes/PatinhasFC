@@ -99,11 +99,11 @@ class UsuarioEdit extends React.Component {
                 tipoPerfil
             })
             .then(() => {
-                this.setState({ loading: false });
+                this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                 showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
             })
             .catch(() => {
-                this.setState({ loading: false });
+                this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                 showAlert(
                     'danger', 
                     'Ops!', 
@@ -139,11 +139,11 @@ class UsuarioEdit extends React.Component {
                 };
                 dbUsuariosRef.set({ ...newUser })
                 .then(() => {
-                    this.setState({ loading: false });
+                    this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                     showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
                 })
                 .catch(() => {
-                    this.setState({ loading: false });
+                    this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                     showAlert(
                         'danger', 
                         'Ops!', 
@@ -154,15 +154,15 @@ class UsuarioEdit extends React.Component {
             .catch((error) => {
                 switch (error.code) {
                     case 'auth/email-already-in-use':
-                        this.setState({ loading: false });
+                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                         showAlert('danger', 'Erro!', 'Email já cadastrado.');
                         break;
                     case 'auth/invalid-email':
-                        this.setState({ loading: false });
+                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                         showAlert('danger', 'Erro!', 'Email informado não é válido..');
                         break;
                     case 'auth/operation-not-allowed':
-                        this.setState({ loading: false });
+                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                         showAlert(
                             'danger', 
                             'Erro!', 
@@ -170,7 +170,7 @@ class UsuarioEdit extends React.Component {
                         );
                         break;
                     case 'auth/weak-password':
-                        this.setState({ loading: false });
+                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                         showAlert('danger', 'Erro!', 'A senha informada é insegura.');
                         break;
                     default:
