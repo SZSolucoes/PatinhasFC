@@ -156,11 +156,12 @@ class Info extends React.Component {
     }
 
     renderListInfosEdit(infos) {
+        const reverseInfos = _.reverse([...infos]);
         let infosView = null;
 
         if (infos.length) {
             infosView = (
-                infos.map((item, index) => {
+                reverseInfos.map((item, index) => {
                     const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                     const nomeUser = item.nomeUser ? item.nomeUser : 'Patinhas';
                     const perfilUser = item.perfilUser ? item.perfilUser : 'Administrador';

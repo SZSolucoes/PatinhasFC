@@ -4,7 +4,8 @@ const INITIAL_STATE = {
     startUpOrDownAnim: 'down',
     filterStr: '',
     filterLoad: false,
-    flagRemoveInfo: false
+    flagRemoveInfo: false,
+    infoMsgSelected: {}
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -39,6 +40,11 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 flagRemoveInfo: action.payload
             };
+        case 'modifica_infomsgselected_info':
+            return { 
+                ...state, 
+                infoMsgSelected: { ...action.payload }
+            };
         case 'modifica_clean_info':
             return {
                 ...state,
@@ -47,7 +53,8 @@ export default (state = INITIAL_STATE, action) => {
                 startUpOrDownAnim: 'down',
                 filterStr: '',
                 filterLoad: false,
-                flagRemoveInfo: false
+                flagRemoveInfo: false,
+                infoMsgSelected: {}
             };
         default:
             return state;

@@ -24,3 +24,13 @@ export const modificaFlagRemoveInfo = (value) => ({
     payload: value
 });
 
+export const modificaInfoMsgSelected = (value) => ({
+    type: 'modifica_infomsgselected_info',
+    payload: value
+});
+
+export const modificaShowTabBar = (value) => ({
+    type: 'modifica_hidetabbar_login',
+    payload: value
+});
+

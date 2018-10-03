@@ -9,7 +9,8 @@ const INITIAL_STATE = {
     indicator: false,
     userLogged: {},
     userLevel: '1',
-    conInfo: ''
+    conInfo: '',
+    hideTabBar: false
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -69,6 +70,11 @@ export default (state = INITIAL_STATE, action) => {
                 ...state,
                 conInfo: action.payload
             };
+        case 'modifica_hidetabbar_login':
+            return {
+                ...state,
+                hideTabBar: action.payload
+            };
         case 'modifica_clean_login':
             return {
                 ...state,
@@ -80,7 +86,8 @@ export default (state = INITIAL_STATE, action) => {
                 indicator: false,
                 userLogged: {},
                 userLevel: '1',
-                conInfo: ''
+                conInfo: '',
+                hideTabBar: false
             };
         default:
             return state;

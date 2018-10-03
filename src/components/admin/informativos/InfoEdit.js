@@ -383,7 +383,6 @@ class UsuarioEdit extends React.Component {
                             }
                         }}
                         underlineColorAndroid={'transparent'}
-                        onSubmitEditing={() => this.inputDate.onPressDate()}
                     />
                     <Button 
                         small

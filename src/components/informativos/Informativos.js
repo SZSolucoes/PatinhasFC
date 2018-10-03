@@ -1,13 +1,13 @@
 import React from 'react';
 import {
     View,
-    ScrollView, 
     StyleSheet,
     TouchableOpacity,
     Image,
     Text,
     TouchableWithoutFeedback,
-    Linking
+    Linking,
+    Animated
 } from 'react-native';
 import firebase from 'firebase';
 import b64 from 'base-64';
@@ -16,7 +16,13 @@ import _ from 'lodash';
 import { Card, ListItem, Icon } from 'react-native-elements';
 import InfoActions from './InfoActions';
 import Coment from './Coment';
-import { modificaStartUpOrDownAnim } from '../../actions/InfoActions';
+import { 
+    modificaStartUpOrDownAnim,
+    modificaInfoMsgSelected
+} from '../../actions/InfoActions';
+import {  
+    modificaAnimatedHeigth,
+} from '../../actions/JogosActions';
 
 import imgAvatar from '../../imgs/patinhasfclogo.png';
 import { colorAppF } from '../../utils/constantes';
@@ -27,6 +33,16 @@ class Informativos extends React.Component {
         super(props);
 
         this.dbFbRef = firebase.database().ref();
+        this.KeyboardIsOpened = false;
+        this.scrollCurrentOffset = 0;
+        this.scrollViewContentSize = 0;
+        this.scrollViewHeight = 0;
+
+        this.state = {
+            maxOffSetScrollView: 0,
+            scrollY: new Animated.Value(0),
+            animTools: new Animated.Value(0)
+        };
 
         this.renderInfos = this.renderInfos.bind(this);
         this.renderDots = this.renderDots.bind(this);
@@ -34,6 +50,7 @@ class Informativos extends React.Component {
         this.renderActions = this.renderActions.bind(this);
         this.comentsUpOrDown = this.comentsUpOrDown.bind(this);
         this.onPressLikeBtn = this.onPressLikeBtn.bind(this);
+        this.onScrollView = this.onScrollView.bind(this);
     }
     
     onPressLikeBtn(likeOrDeslike, item) {
@@ -78,7 +95,25 @@ class Informativos extends React.Component {
         }
     }
 
-    comentsUpOrDown(upOrDown = 'down') {
+    onScrollView(currentOffset, direction) {
+        if (!this.KeyboardIsOpened) {
+            if (currentOffset <= 0 || direction === 'up') {
+                this.props.modificaAnimatedHeigth(false);
+            } else if (direction === 'down') {
+                this.props.modificaAnimatedHeigth(true);
+            } else {
+                this.props.modificaAnimatedHeigth(false);
+            }
+        }
+        //this.onScrollViewTools(currentOffset, direction);
+    }
+
+    comentsUpOrDown(upOrDown = 'down', info) {
+        if (upOrDown === 'up') {
+            this.props.modificaInfoMsgSelected(info);
+        } else {
+            this.props.modificaInfoMsgSelected({});
+        }
         this.props.modificaStartUpOrDownAnim(upOrDown);
     }
 
@@ -86,7 +121,7 @@ class Informativos extends React.Component {
         return (
             <InfoActions 
                 item={item} 
-                comentsUpOrDown={(upOrDown) => this.comentsUpOrDown(upOrDown)}
+                comentsUpOrDown={(upOrDown, info) => this.comentsUpOrDown(upOrDown, info)}
                 onPressLikeBtn={
                     (likeOrDeslike, itemInfo) => this.onPressLikeBtn(likeOrDeslike, itemInfo)
                 }
@@ -167,7 +202,8 @@ class Informativos extends React.Component {
     }
 
     renderInfos(infos) {
-        return infos.map((item, index) => {
+        const reverseInfos = _.reverse([...infos]);
+        return reverseInfos.map((item, index) => {
             const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
             const nomeUser = item.nomeUser ? item.nomeUser : 'Patinhas';
             const perfilUser = item.perfilUser ? item.perfilUser : 'Administrador';
@@ -203,12 +239,40 @@ class Informativos extends React.Component {
     render() {
         return (
             <View style={{ flex: 1 }}>
-                <ScrollView 
+                <Animated.ScrollView
+                    ref={(ref) => { this.scrollViewRef = ref; }}
                     style={styles.viewPrinc}
+                    onContentSizeChange={(w, h) => { 
+                        this.scrollViewContentSize = h;
+                        const newOffSet = h - this.scrollViewHeight;
+                        this.setState({ maxOffSetScrollView: newOffSet });
+                    }}
+                    onLayout={ev => { 
+                        this.scrollViewHeight = ev.nativeEvent.layout.height;
+                        const newOffSet = this.scrollViewContentSize - ev.nativeEvent.layout.height;
+                        this.setState({ maxOffSetScrollView: newOffSet });
+                    }}
+                    onScroll={
+                        Animated.event(
+                            [{
+                                nativeEvent: { contentOffset: { y: this.state.scrollY } }
+                            }],
+                            {
+                                useNativeDriver: true,
+                                listener: (event) => {
+                                    const currentOffset = event.nativeEvent.contentOffset.y;
+                                    const direction = currentOffset > 
+                                                    this.scrollCurrentOffset ? 'down' : 'up';
+                                    this.scrollCurrentOffset = currentOffset;
+                                    this.onScrollView(currentOffset, direction);
+                                }
+                            }
+                        )
+                    }
                 >
                     { this.renderInfos(this.props.listInfos) }
                     <View style={{ marginVertical: 40 }} />
-                </ScrollView>
+                </Animated.ScrollView>
                 <Coment />
             </View>
         );
@@ -244,5 +308,7 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-    modificaStartUpOrDownAnim
+    modificaStartUpOrDownAnim,
+    modificaInfoMsgSelected,
+    modificaAnimatedHeigth
 })(Informativos);

@@ -156,10 +156,11 @@ class Usuarios extends React.Component {
         let usuariosView = null;
 
         if (usuarios.length) {
+            const newSortedUsers = _.orderBy(usuarios, ['nome', 'emai'], ['asc', 'asc']);
             usuariosView = (
                 <List containerStyle={{ marginBottom: 20 }}>
                 {
-                    usuarios.map((item, index) => {
+                    newSortedUsers.map((item, index) => {
                         const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                         return (
                             <ListItem

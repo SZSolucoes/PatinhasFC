@@ -88,7 +88,8 @@ class CadastroJogos extends React.Component {
     }
 
     renderListJogosEdit(jogos) {
-        const jogosView = jogos.map((item, index) => {
+        const reverseJogos = _.reverse([...jogos]);
+        const jogosView = reverseJogos.map((item, index) => {
             const titulo = item.titulo ? item.titulo : ' ';
             const data = item.data ? item.data : ' ';
             const placarCasa = item.placarCasa ? item.placarCasa : '0'; 

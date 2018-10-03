@@ -25,23 +25,42 @@ export default class InfoActions extends React.Component {
     render() {
         const { item, userLogged } = this.props;
         const b64UserKey = b64.encode(userLogged.email);
-        const qtdLikes = item.listLikes ? item.listLikes.length : 0;
-        const qtdComents = item.listComents ? item.listComents.length : 0;
-        const likeFound = _.findIndex(
-            item.listLikes, 
-            (itemLike) => itemLike.key && (itemLike.key === b64UserKey)
-        );
+        let qtdLikes = item.listLikes ? item.listLikes.length : 0;
+        let qtdComents = item.listComents ? item.listComents.length : 0;
         let txtQtdLikes = '';
+        let likeFound = -1;
         let txtQtdComent = '';
         let likeIconType = 'thumb-up-outline';
         let likeOrDeslike = 'like';
+
+        if (qtdLikes > 0) {
+            const isPushed = _.findIndex(
+                item.listLikes, (itemLike) => itemLike.push && itemLike.push === 'push'
+            );
+            likeFound = _.findIndex(
+                item.listLikes, 
+                (itemLike) => itemLike.key && (itemLike.key === b64UserKey)
+            );
+            if (isPushed !== -1) {
+                qtdLikes--;
+            }
+        }
+
+        if (qtdComents > 0) {
+            const isPushed = _.findIndex(
+                item.listComents, (itemComent) => itemComent.push && itemComent.push === 'push'
+            );
+            if (isPushed !== -1) {
+                qtdComents--;
+            }
+        }
 
         if (likeFound !== -1) {
             likeIconType = 'thumb-up';
             likeOrDeslike = 'deslike';
         }
 
-        if (qtdLikes === 0 || (qtdLikes === 1 && item.listLikes[0].push)) {
+        if (qtdLikes === 0) {
             txtQtdLikes = '0 curtidas';
         } else if (qtdLikes === 1) {
             txtQtdLikes = `${qtdLikes.toString()} curtiu`;
@@ -49,7 +68,7 @@ export default class InfoActions extends React.Component {
             txtQtdLikes = `${qtdLikes.toString()} curtiram`;
         }
 
-        if (qtdComents === 0 || (qtdComents === 1 && item.listComents[0].push)) {
+        if (qtdComents === 0) {
             txtQtdComent = '0 comentários';
         } else if (qtdComents === 1) {
             txtQtdComent = `${qtdComents.toString()} comentou`;
@@ -141,7 +160,7 @@ export default class InfoActions extends React.Component {
                                 }
                             ).start();
                         }}
-                        onPress={() => this.props.comentsUpOrDown('up')}
+                        onPress={() => this.props.comentsUpOrDown('up', item)}
                     >
                         <Animated.View 
                             style={{ 

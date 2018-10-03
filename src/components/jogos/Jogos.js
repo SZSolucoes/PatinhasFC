@@ -75,12 +75,10 @@ class Jogos extends React.Component {
 
     onKeyboardShow() {
         this.KeyboardIsOpened = true;
-        this.props.modificaAnimatedHeigth(1);
     }
     
     onKeyboardHide() {
         this.KeyboardIsOpened = false;
-        this.props.modificaAnimatedHeigth(false);
     }
 
     onPressCardGame() {
@@ -179,7 +177,8 @@ class Jogos extends React.Component {
     }
 
     renderCardsJogos(jogos) {
-        const jogosView = jogos.map((item, index) => {
+        const reverseJogos = _.reverse([...jogos]);
+        const jogosView = reverseJogos.map((item, index) => {
             const titulo = item.titulo ? item.titulo : ' ';
             const data = item.data ? item.data : ' ';
             const imagem = item.imagem ? { uri: item.imagem } : imgEstadio;
@@ -316,6 +315,8 @@ class Jogos extends React.Component {
                                 <SearchBar
                                     autoCapitalize={'none'}
                                     autoCorrect={false}
+                                    onFocus={() => this.props.modificaAnimatedHeigth(1)}
+                                    onBlur={() => this.props.modificaAnimatedHeigth(false)}
                                     clearIcon={!!this.props.filterStr}
                                     showLoadingIcon={this.props.filterLoad}
                                     containerStyle={{ 

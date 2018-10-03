@@ -6,7 +6,9 @@ import {
     View,
     AsyncStorage,
     Animated,
-    Dimensions
+    Dimensions,
+    Keyboard,
+    BackHandler
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
@@ -80,6 +82,15 @@ class Routes extends React.Component {
             }
         }
         );
+
+        BackHandler.addEventListener('hardwareBackPress', () => {
+            Keyboard.dismiss();
+            store.dispatch({
+                type: 'modifica_startupordownanim_info',
+                payload: 'down'
+            });
+            return true;
+        });
     }
 
     shouldComponentUpdate(nextProps, nextStates) {
@@ -91,6 +102,7 @@ class Routes extends React.Component {
     }
 
     onBackAndroidHdl() {
+        Keyboard.dismiss();
         store.dispatch({
             type: 'modifica_startupordownanim_info',
             payload: 'down'
@@ -409,6 +421,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: 'rgba(0, 0, 0, 0.3)',
         position: 'absolute',
+        height: 50,
         left: 0,
         right: 0,
         bottom: 0
