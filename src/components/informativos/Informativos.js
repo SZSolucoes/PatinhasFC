@@ -7,7 +7,9 @@ import {
     Text,
     TouchableWithoutFeedback,
     Linking,
-    Animated
+    Animated,
+    FlatList,
+    ActivityIndicator
 } from 'react-native';
 import firebase from 'firebase';
 import b64 from 'base-64';
@@ -18,7 +20,9 @@ import InfoActions from './InfoActions';
 import Coment from './Coment';
 import { 
     modificaStartUpOrDownAnim,
-    modificaInfoMsgSelected
+    modificaInfoMsgSelected,
+    modificaAddNewRows,
+    modificaLoadingFooter
 } from '../../actions/InfoActions';
 import {  
     modificaAnimatedHeigth,
@@ -26,6 +30,8 @@ import {
 
 import imgAvatar from '../../imgs/patinhasfclogo.png';
 import { colorAppF } from '../../utils/constantes';
+
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
 class Informativos extends React.Component {
 
@@ -37,6 +43,7 @@ class Informativos extends React.Component {
         this.scrollCurrentOffset = 0;
         this.scrollViewContentSize = 0;
         this.scrollViewHeight = 0;
+        this.fixedNumberRows = 30;
 
         this.state = {
             maxOffSetScrollView: 0,
@@ -45,7 +52,10 @@ class Informativos extends React.Component {
         };
 
         this.renderInfos = this.renderInfos.bind(this);
+        this.dataSourceControl = this.dataSourceControl.bind(this);
+        this.flatListKeyExtractor = this.flatListKeyExtractor.bind(this);
         this.renderDots = this.renderDots.bind(this);
+        this.addNewRows = this.addNewRows.bind(this);
         this.renderArticle = this.renderArticle.bind(this);
         this.renderActions = this.renderActions.bind(this);
         this.comentsUpOrDown = this.comentsUpOrDown.bind(this);
@@ -108,6 +118,11 @@ class Informativos extends React.Component {
         //this.onScrollViewTools(currentOffset, direction);
     }
 
+    addNewRows(numberAdd) {
+        this.props.modificaAddNewRows(numberAdd);
+        this.props.modificaLoadingFooter(false);
+    }
+
     comentsUpOrDown(upOrDown = 'down', info) {
         if (upOrDown === 'up') {
             this.props.modificaInfoMsgSelected(info);
@@ -115,6 +130,22 @@ class Informativos extends React.Component {
             this.props.modificaInfoMsgSelected({});
         }
         this.props.modificaStartUpOrDownAnim(upOrDown);
+    }
+
+    dataSourceControl(infos) {
+        let newInfos = infos;
+        if (infos && infos.length > 0) {
+            newInfos = _.reverse([...infos]);
+            newInfos = newInfos.slice(0, this.props.maxRows);
+            this.lastIndexListInfos = newInfos.length - 1;
+            return newInfos;
+        }
+
+        return newInfos;
+    }
+
+    flatListKeyExtractor(item, index) {
+        return index.toString();
     }
 
     renderActions(item) {
@@ -201,47 +232,65 @@ class Informativos extends React.Component {
         );
     }
 
-    renderInfos(infos) {
-        const reverseInfos = _.reverse([...infos]);
-        return reverseInfos.map((item, index) => {
-            const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
-            const nomeUser = item.nomeUser ? item.nomeUser : 'Patinhas';
-            const perfilUser = item.perfilUser ? item.perfilUser : 'Administrador';
-            return (
-                <View key={index}>
-                    <Card containerStyle={styles.card}>
-                        <View style={{ marginVertical: 5 }}>
-                            <ListItem
-                                containerStyle={{ borderBottomWidth: 0 }}
-                                avatar={imgAvt}
-                                title={nomeUser}
-                                subtitle={perfilUser}
-                                rightIcon={(this.renderDots())}
-                            />
+    renderInfos({ item }) {
+        const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
+        const nomeUser = item.nomeUser ? item.nomeUser : 'Patinhas';
+        const perfilUser = item.perfilUser ? item.perfilUser : 'Administrador';
+
+        return (
+            <View>
+                <Card containerStyle={styles.card}>
+                    <View style={{ marginVertical: 5 }}>
+                        <ListItem
+                            containerStyle={{ borderBottomWidth: 0 }}
+                            avatar={imgAvt}
+                            title={nomeUser}
+                            subtitle={perfilUser}
+                            rightIcon={(this.renderDots())}
+                        />
+                    </View>
+                    { 
+                        !!item.descPost &&
+                        <View style={{ marginHorizontal: 10 }}>
+                            <Text>
+                                { item.descPost }
+                            </Text>
                         </View>
-                        { 
-                            !!item.descPost &&
-                            <View style={{ marginHorizontal: 10 }}>
-                                <Text>
-                                    { item.descPost }
-                                </Text>
-                            </View>
-                        }
-                        { this.renderArticle(item) }
-                        { this.renderActions(item) }
-                        <View style={{ marginVertical: 5 }} />
-                    </Card>
-                </View>
-            );
-        });
+                    }
+                    { this.renderArticle(item) }
+                    { this.renderActions(item) }
+                    <View style={{ marginVertical: 5 }} />
+                </Card>
+            </View>
+        );
     }
 
     render() {
         return (
             <View style={{ flex: 1 }}>
-                <Animated.ScrollView
+                <AnimatedFlatList
                     ref={(ref) => { this.scrollViewRef = ref; }}
+                    data={this.dataSourceControl(this.props.listInfos)}
+                    renderItem={this.renderInfos}
+                    keyExtractor={this.flatListKeyExtractor}
                     style={styles.viewPrinc}
+                    onEndReachedThreshold={0.01}
+                    onEndReached={() => {
+                        let rowsToShow = (this.lastIndexListInfos + 1) + this.fixedNumberRows;
+                        const infosLength = this.props.listInfos.length;
+                        if (rowsToShow > infosLength) {
+                            rowsToShow = infosLength;
+                        }
+
+                        if (rowsToShow !== this.props.maxRows) {
+                            if (rowsToShow !== (this.lastIndexListInfos + 1)) {
+                                this.props.modificaLoadingFooter(true);
+                            }
+                            _.debounce(this.addNewRows, 2000)(rowsToShow);
+                        } else {
+                            this.props.modificaLoadingFooter(false);
+                        }
+                    }}
                     onContentSizeChange={(w, h) => { 
                         this.scrollViewContentSize = h;
                         const newOffSet = h - this.scrollViewHeight;
@@ -269,10 +318,15 @@ class Informativos extends React.Component {
                             }
                         )
                     }
-                >
-                    { this.renderInfos(this.props.listInfos) }
-                    <View style={{ marginVertical: 40 }} />
-                </Animated.ScrollView>
+                    ListFooterComponent={(
+                        <View style={{ marginBottom: 50, marginTop: 10 }} >
+                        {
+                            this.props.loadingFooter &&
+                            <ActivityIndicator size={'large'} color={'white'} />
+                        }
+                        </View> 
+                )}
+                />
                 <Coment />
             </View>
         );
@@ -304,11 +358,15 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     listInfos: state.InfoReducer.listInfos,
+    loadingFooter: state.InfoReducer.loadingFooter,
+    maxRows: state.InfoReducer.maxRows,
     userLogged: state.LoginReducer.userLogged
 });
 
 export default connect(mapStateToProps, {
     modificaStartUpOrDownAnim,
     modificaInfoMsgSelected,
+    modificaAddNewRows,
+    modificaLoadingFooter,
     modificaAnimatedHeigth
 })(Informativos);

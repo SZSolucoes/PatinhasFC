@@ -10,11 +10,13 @@ import {
     TouchableWithoutFeedback,
     TextInput,
     Keyboard,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from 'react-native';
 import firebase from 'firebase';
 import _ from 'lodash';
 import b64 from 'base-64';
+import Moment from 'moment';
 import { Icon, Divider, Avatar } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { modificaStartUpOrDownAnim, modificaInfoMsgSelected } from '../../actions/InfoActions';
@@ -63,11 +65,6 @@ class Coment extends React.Component {
             this.infoKeyListener.off();
         }
 
-        if (nextProps.infoMsgSelected !== this.props.infoMsgSelected) {
-            if (this.scrollView) {
-                setTimeout(() => this.scrollView.scrollToEnd({ animated: true }), 1000);
-            }
-        }
         return nextProps !== this.props || nextStates !== this.state;
     }
 
@@ -84,6 +81,7 @@ class Coment extends React.Component {
         const { infoMsgSelected, userLogged } = this.props;
         const b64UserKey = b64.encode(userLogged.email);
         const { comentario } = this.state;
+        const dataAtual = Moment(new Date().toLocaleString()).format('YYYY-MM-DD HH:mm:ss');
         const newInfoMsgSelectedList = infoMsgSelected.listComents ? 
         [...infoMsgSelected.listComents] : [];
         let newInfoMsgSelected = {};
@@ -97,7 +95,8 @@ class Coment extends React.Component {
             key: b64UserKey,
             imgAvatar: userLogged.imgAvatar,
             nome: userLogged.nome,
-            comentario: comentario.trim()
+            comentario: comentario.trim(),
+            dataKey: dataAtual
         });
 
         newInfoMsgSelected = { ...infoMsgSelected, listComents: newInfoMsgSelectedList };
@@ -105,7 +104,14 @@ class Coment extends React.Component {
         this.dbFbRef.child(`informativos/${infoMsgSelected.key}`).update({
             listComents: newInfoMsgSelectedList
         })
-        .then(() => this.props.modificaInfoMsgSelected(newInfoMsgSelected))
+        .then(() => { 
+            this.props.modificaInfoMsgSelected(newInfoMsgSelected);
+            setTimeout(() => {
+                if (this.scrollView) {
+                    this.scrollView.scrollToEnd({ animated: true });
+                }
+            }, 500);
+        })
         .catch(() => true); 
 
         this.setState({ comentario: '' });
@@ -136,7 +142,23 @@ class Coment extends React.Component {
     }
 
     removeComent(item) {
-        console.log(item);
+        const { infoMsgSelected } = this.props;
+        const newListComents = [...infoMsgSelected.listComents];
+        const msgIndex = _.findIndex(
+            newListComents, (itemComent) => itemComent.dataKey === item.dataKey
+        );
+        let newInfoMsgSelected = {};
+        if (msgIndex !== -1) {
+            newListComents.splice(msgIndex, 1);
+            newInfoMsgSelected = { ...infoMsgSelected, listComents: newListComents };
+            this.dbFbRef.child(`informativos/${infoMsgSelected.key}`).update({
+                listComents: newListComents
+            })
+            .then(() => { 
+                this.props.modificaInfoMsgSelected(newInfoMsgSelected);
+            })
+            .catch(() => true); 
+        }
     }
 
     renderComents() {
@@ -147,6 +169,7 @@ class Coment extends React.Component {
             newListComents, (coment) => coment.push && coment.push === 'push'
         );
         let viewComents = null;
+        const dataAtual = Moment();
 
         if (isPushed !== -1) {
             newListComents.splice(isPushed, 1);
@@ -159,6 +182,31 @@ class Coment extends React.Component {
         viewComents = newListComents.map((item, index) => {
             const userImg = item.imgAvatar ? { uri: item.imgAvatar } : perfilUserImg;
             const isMsgUser = item.key && item.key === b64UserKey;
+            let timeDiff = '';
+            let timeAppend = '';
+
+            if (item.dataKey) {
+                const dataKeyTime = Moment(item.dataKey, 'YYYY-MM-DD HH:mm:ss');
+                timeDiff = dataAtual.diff(dataKeyTime, 'days');
+                timeAppend = 'd';
+                if (!timeDiff > 0) {
+                    timeDiff = dataAtual.diff(dataKeyTime, 'hours');
+                    timeAppend = 'h';
+                    if (!timeDiff > 0) {
+                        timeDiff = dataAtual.diff(dataKeyTime, 'minutes');
+                        timeAppend = 'min';
+                        if (!timeDiff > 0) {
+                            timeDiff = dataAtual.diff(dataKeyTime, 'seconds');
+                            timeAppend = 's';
+                            if (!timeDiff > 0) {
+                                timeDiff = '';
+                                timeAppend = 'agora mesmo';
+                            }
+                        }
+                    }
+                }
+                timeDiff = `${timeDiff} ${timeAppend}`;
+            }
             return (
                 <View key={index}>
                     <View style={styles.coments}>
@@ -191,16 +239,32 @@ class Coment extends React.Component {
                         }}
                     >
                         <View>
-                            <Text style={{ color: '#B4B4B4' }}>
-                                {'6 min'}
+                            <Text style={{ color: '#707070' }}>
+                                {timeDiff}
                             </Text>
                         </View>
                         {
                             isMsgUser &&
                             <View style={{ marginLeft: 10 }}>
                                 <Text 
-                                    style={{ fontWeight: 'bold', color: '#B4B4B4' }}
-                                    onPress={() => this.removeComent(item)}
+                                    style={{ fontWeight: 'bold', color: '#707070' }}
+                                    onPress={() => {
+                                        Alert.alert(
+                                            'Remover!', 
+                                            'Deseja remover o comentário selecionado ?',
+                                            [
+                                                { 
+                                                    text: 'Cancelar',
+                                                    onPress: () => false, 
+                                                    style: 'cancel' 
+                                                },
+                                                { 
+                                                    text: 'Ok', 
+                                                    onPress: () => this.removeComent(item) 
+                                                }
+                                            ]
+                                        );
+                                    }}
                                 >
                                     Remover
                                 </Text>
@@ -282,10 +346,8 @@ class Coment extends React.Component {
                         </View>
                         <Divider />
                         <ScrollView
+                            keyboardShouldPersistTaps={'handled'}
                             ref={(ref) => { this.scrollView = ref; }}
-                            onContentSizeChange={
-                                () => this.scrollView.scrollToEnd({ animated: true })
-                            }
                         >
                             {
                                 !!this.props.infoMsgSelected &&

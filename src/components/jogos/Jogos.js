@@ -8,7 +8,9 @@ import {
     Text,
     Animated,
     Keyboard,
-    TouchableWithoutFeedback
+    TouchableWithoutFeedback,
+    FlatList,
+    ActivityIndicator
 } from 'react-native';
 import firebase from 'firebase';
 import _ from 'lodash';
@@ -27,11 +29,15 @@ import {
     modificaAnimatedHeigth,
     modificaFilterStr,
     modificaFilterLoad,
-    modificaUserLogged
+    modificaUserLogged,
+    modificaLoadingFooter,
+    modificaAddNewRows
 } from '../../actions/JogosActions';
 import { modificaListUsuarios } from '../../actions/UsuariosActions';
 import { colorAppT } from '../../utils/constantes';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
+
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
 class Jogos extends React.Component {
 
@@ -40,6 +46,9 @@ class Jogos extends React.Component {
 
         this.startOrStopFBJogosListener = this.startOrStopFBJogosListener.bind(this);
         this.renderListItens = this.renderListItens.bind(this);
+        this.addNewRows = this.addNewRows.bind(this);
+        this.flatListKeyExtractor = this.flatListKeyExtractor.bind(this);
+        this.dataSourceControl = this.dataSourceControl.bind(this);
         this.onScrollView = this.onScrollView.bind(this);
         this.onScrollViewTools = this.onScrollViewTools.bind(this);
         this.onFilterJogos = this.onFilterJogos.bind(this);
@@ -55,6 +64,8 @@ class Jogos extends React.Component {
         this.scrollCurrentOffset = 0;
         this.scrollViewContentSize = 0;
         this.scrollViewHeight = 0;
+        this.lastIndexListJogos = -1;
+        this.fixedNumberRows = 30;
 
         this.state = {
             maxOffSetScrollView: 0,
@@ -139,6 +150,21 @@ class Jogos extends React.Component {
         ));
     }
 
+    addNewRows(numberAdd) {
+        this.props.modificaAddNewRows(numberAdd);
+        this.props.modificaLoadingFooter(false);
+    }
+
+    dataSourceControl(jogos, filterStr) {
+        let newJogos = _.reverse([...jogos]);
+        newJogos = newJogos.slice(0, this.props.maxRows);
+        return this.renderBasedFilterOrNot(newJogos, filterStr);
+    }
+
+    flatListKeyExtractor(item, index) {
+        return index.toString();
+    }
+
     startOrStopFBJogosListener(startOrStop) {
         const { username } = this.props;
         const user = firebase.auth().currentUser;
@@ -161,81 +187,96 @@ class Jogos extends React.Component {
         }
     }
 
-    renderBasedFilterOrNot() {
-        const { listJogos, filterStr } = this.props;
-        let jogosView = null;
-        if (listJogos) {
+    renderBasedFilterOrNot(jogos, filterStr) {
+        let newJogos = jogos;
+        if (jogos) {
             if (filterStr) {
-                jogosView = this.renderCardsJogos(
-                    this.onFilterJogos(listJogos, filterStr)
-                );
-            } else {
-                jogosView = this.renderCardsJogos(listJogos);
+                newJogos = this.onFilterJogos(jogos, filterStr);
             }
+            this.lastIndexListJogos = newJogos.length - 1;
         }
-        return jogosView;
+
+        return newJogos;
     }
 
-    renderCardsJogos(jogos) {
-        const reverseJogos = _.reverse([...jogos]);
-        const jogosView = reverseJogos.map((item, index) => {
-            const titulo = item.titulo ? item.titulo : ' ';
-            const data = item.data ? item.data : ' ';
-            const imagem = item.imagem ? { uri: item.imagem } : imgEstadio;
-            const descricao = item.descricao ? item.descricao : ' ';
-            const placarCasa = item.placarCasa ? item.placarCasa : '0'; 
-            const placarVisit = item.placarVisit ? item.placarVisit : '0';
+    renderCardsJogos({ item, index }) {
+        const titulo = item.titulo ? item.titulo : ' ';
+        const data = item.data ? item.data : ' ';
+        const imagem = item.imagem ? { uri: item.imagem } : imgEstadio;
+        const descricao = item.descricao ? item.descricao : ' ';
+        const placarCasa = item.placarCasa ? item.placarCasa : '0'; 
+        const placarVisit = item.placarVisit ? item.placarVisit : '0';
 
-            return (
-                <View key={index}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            if (this.props.conInfo.type === 'none' ||
-                                this.props.conInfo.type === 'unknown'
-                            ) {
-                                Toast.show('Sem conexão.', Toast.SHORT);
-                                return false;
-                            }
+        if (this.lastIndexListJogos === index) {
+            setTimeout(() => this.props.modificaFilterLoad(false), 1000);
+        }
 
-                            return this.onPressCardGame();
-                        }}
+        return (
+            <View>
+                <TouchableOpacity
+                    onPress={() => {
+                        if (this.props.conInfo.type === 'none' ||
+                            this.props.conInfo.type === 'unknown'
+                        ) {
+                            Toast.show('Sem conexão.', Toast.SHORT);
+                            return false;
+                        }
+
+                        return this.onPressCardGame();
+                    }}
+                >
+                    <Card 
+                        title={titulo} 
+                        containerStyle={[styles.card, styles.shadowCard]}
+                        image={imagem}
+                        featuredSubtitle={descricao}
                     >
-                        <Card 
-                            title={titulo} 
-                            containerStyle={[styles.card, styles.shadowCard]}
-                            image={imagem}
-                            featuredSubtitle={descricao}
-                        >
-                            <Text style={styles.textData}>
-                                {data}
-                            </Text>
-                            <Divider
-                                style={{
-                                    marginTop: 5,
-                                    marginBottom: 5,
-                                    height: 2
-                                }}
-                            />
-                            <Versus
-                                placarCasa={placarCasa} 
-                                placarVisit={placarVisit}  
-                            />
-                        </Card>   
-                    </TouchableOpacity>
-                    <View style={{ marginBottom: 10 }} />
-                </View>
-            );
-        });
-
-        setTimeout(() => this.props.modificaFilterLoad(false), 1000);
-        return jogosView;
+                        <Text style={styles.textData}>
+                            {data}
+                        </Text>
+                        <Divider
+                            style={{
+                                marginTop: 5,
+                                marginBottom: 5,
+                                height: 2
+                            }}
+                        />
+                        <Versus
+                            placarCasa={placarCasa} 
+                            placarVisit={placarVisit}  
+                        />
+                    </Card>   
+                </TouchableOpacity>
+                <View style={{ marginBottom: 10 }} />
+            </View>
+        );
     }
 
     renderListItens() {
         return (
             <View>
-                <Animated.ScrollView
+                <AnimatedFlatList
                     ref={(ref) => { this.scrollViewRef = ref; }}
+                    data={this.dataSourceControl(this.props.listJogos, this.props.filterStr)}
+                    renderItem={this.renderCardsJogos}
+                    keyExtractor={this.flatListKeyExtractor}
+                    onEndReachedThreshold={0.01}
+                    onEndReached={() => {
+                        let rowsToShow = (this.lastIndexListJogos + 1) + this.fixedNumberRows;
+                        const jogosLength = this.props.listJogos.length;
+                        if (rowsToShow > jogosLength) {
+                            rowsToShow = jogosLength;
+                        }
+
+                        if (rowsToShow !== this.props.maxRows) {
+                            if (rowsToShow !== (this.lastIndexListJogos + 1)) {
+                                this.props.modificaLoadingFooter(true);
+                            }
+                            _.debounce(this.addNewRows, 2000)(rowsToShow);
+                        } else {
+                            this.props.modificaLoadingFooter(false);
+                        }
+                    }}
                     onContentSizeChange={(w, h) => { 
                         this.scrollViewContentSize = h;
                         const newOffSet = h - this.scrollViewHeight;
@@ -263,12 +304,16 @@ class Jogos extends React.Component {
                             }
                         )
                     }
-                >
-                    <View style={{ marginTop: 60 }}>
-                        { this.renderBasedFilterOrNot() }
-                    </View>
-                    <View style={{ marginBottom: 100 }} />
-                </Animated.ScrollView>
+                    ListHeaderComponent={(<View style={{ marginTop: 60 }} />)}
+                    ListFooterComponent={(
+                            <View style={{ marginBottom: 50 }} >
+                            {
+                                this.props.loadingFooter &&
+                                <ActivityIndicator size={'large'} color={'white'} />
+                            }
+                            </View> 
+                    )}
+                />
             </View>
         );
     }
@@ -388,6 +433,8 @@ const mapStateToProps = (state) => ({
     listJogos: state.JogosReducer.listJogos,
     listUsuarios: state.UsuariosReducer.listUsuarios,
     filterStr: state.JogosReducer.filterStr,
+    loadingFooter: state.JogosReducer.loadingFooter,
+    maxRows: state.JogosReducer.maxRows,
     filterLoad: state.JogosReducer.filterLoad,
     userLogged: state.LoginReducer.userLogged,
     conInfo: state.LoginReducer.conInfo
@@ -399,5 +446,7 @@ export default connect(mapStateToProps, {
     modificaFilterStr,
     modificaFilterLoad,
     modificaListUsuarios,
-    modificaUserLogged
+    modificaUserLogged,
+    modificaLoadingFooter,
+    modificaAddNewRows
 })(Jogos);

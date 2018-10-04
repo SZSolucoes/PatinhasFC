@@ -5,7 +5,9 @@ const INITIAL_STATE = {
     filterStr: '',
     filterLoad: false,
     flagRemoveInfo: false,
-    infoMsgSelected: {}
+    infoMsgSelected: {},
+    loadingFooter: false,
+    maxRows: 30
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -40,6 +42,16 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 flagRemoveInfo: action.payload
             };
+        case 'modifica_loadingfooter_info':
+            return { 
+                ...state, 
+                loadingFooter: action.payload
+            };
+        case 'modifica_maxrows_info':
+            return { 
+                ...state, 
+                maxRows: action.payload
+            };
         case 'modifica_infomsgselected_info':
             return { 
                 ...state, 
@@ -54,7 +66,9 @@ export default (state = INITIAL_STATE, action) => {
                 filterStr: '',
                 filterLoad: false,
                 flagRemoveInfo: false,
-                infoMsgSelected: {}
+                infoMsgSelected: {},
+                loadingFooter: false,
+                maxRows: 30
             };
         default:
             return state;

@@ -3,7 +3,9 @@ const INITIAL_STATE = {
     itemSelected: {},
     animatedHeigth: false,
     filterStr: '',
-    filterLoad: false
+    filterLoad: false,
+    loadingFooter: false,
+    maxRows: 30
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -33,6 +35,16 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 filterLoad: action.payload
             };
+        case 'modifica_loadingfooter_jogos':
+            return { 
+                ...state, 
+                loadingFooter: action.payload
+            };
+        case 'modifica_addnewrows_jogos':
+            return { 
+                ...state, 
+                maxRows: action.payload
+            };
         case 'modifica_clean_jogos':
             return {
                 ...state,
@@ -40,7 +52,9 @@ export default (state = INITIAL_STATE, action) => {
                 itemSelected: {},
                 animatedHeigth: false,
                 filterStr: '',
-                filterLoad: false
+                filterLoad: false,
+                loadingFooter: false,
+                maxRows: 30
             };
         default:
             return state;

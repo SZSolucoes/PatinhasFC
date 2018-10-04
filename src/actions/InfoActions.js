@@ -34,3 +34,13 @@ export const modificaShowTabBar = (value) => ({
     payload: value
 });
 
+export const modificaLoadingFooter = (value) => ({
+    type: 'modifica_loadingfooter_info',
+    payload: value
+});
+
+export const modificaAddNewRows = (value) => ({
+    type: 'modifica_maxrows_info',
+    payload: value
+});
+

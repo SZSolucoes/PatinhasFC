@@ -115,7 +115,7 @@ class UsuarioEdit extends React.Component {
         }
 
         // Tratamento para o protocolo
-        if (protocol.toLowerCase() !== 'http') {
+        if (protocol.trim() && protocol.toLowerCase() !== 'http') {
             linkArticle = `http://${linkExt}`;        
         }
 
