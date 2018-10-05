@@ -7,7 +7,9 @@ const INITIAL_STATE = {
     flagRemoveInfo: false,
     infoMsgSelected: {},
     loadingFooter: false,
-    maxRows: 30
+    maxRows: 30,
+    showShareModal: false,
+    itemShareSelected: {}
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -52,10 +54,20 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 maxRows: action.payload
             };
+        case 'modifica_showsharemodal_info':
+            return { 
+                ...state, 
+                showShareModal: action.payload
+            };
         case 'modifica_infomsgselected_info':
             return { 
                 ...state, 
                 infoMsgSelected: { ...action.payload }
+            };
+        case 'modifica_itemshareselected_info':
+            return { 
+                ...state, 
+                itemShareSelected: { ...action.payload }
             };
         case 'modifica_clean_info':
             return {
@@ -68,7 +80,9 @@ export default (state = INITIAL_STATE, action) => {
                 flagRemoveInfo: false,
                 infoMsgSelected: {},
                 loadingFooter: false,
-                maxRows: 30
+                maxRows: 30,
+                showShareModal: false,
+                itemShareSelected: {}
             };
         default:
             return state;

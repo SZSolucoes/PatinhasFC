@@ -4,12 +4,14 @@ import {
     StyleSheet,
     Platform,
     TouchableOpacity,
-    Picker
+    Picker,
+    TouchableWithoutFeedback,
+    Text,
+    ActionSheetIOS
 } from 'react-native';
 
 import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
-import firebase from 'firebase';
 import { 
     FormLabel, 
     FormInput, 
@@ -22,6 +24,7 @@ import Moment from 'moment';
 import b64 from 'base-64';
 
 import DatePicker from 'react-native-datepicker';
+import firebase from '../../../Firebase';
 import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
 
@@ -36,11 +39,12 @@ class UsuarioEdit extends React.Component {
             email: props.email ? props.email : '',
             senha: props.senha ? props.senha : '',
             nome: props.nome ? props.nome : '',
-            data: props.data ? props.data : new Date(),
+            data: props.data ? props.data : Moment().format('DD/MM/YYYY'),
             tipoPerfil: props.tipoPerfil ? props.tipoPerfil : '',
             loading: props.loading ? props.loading : false,
             scrollView: props.scrollView ? props.scrollView : null,
             secureOn: true,
+            tipoPerfilIos: 'Sócio'
         };
 
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
@@ -75,11 +79,10 @@ class UsuarioEdit extends React.Component {
 
         const databaseRef = firebase.database().ref();
         const auth = firebase.auth();
-        dataAtual = Moment(new Date().toLocaleString()).format('DD/MM/YYYY HH:mm:ss');
+        dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
         const emailUser64 = b64.encode(email);
 
-        if (data instanceof Date) {
-            dataStr = data.toLocaleDateString();
+        if (data instanceof Moment) {
             dataStr = Moment(dataStr).format('DD/MM/YYYY');
         } else {
             dataStr = data;
@@ -325,23 +328,79 @@ class UsuarioEdit extends React.Component {
                             }
                         }) }]}
                     >
-                        <Picker
-                            ref={(ref) => { this.inputTipoPerfil = ref; }}
-                            selectedValue={this.state.tipoPerfil}
-                            style={{ height: 50, width: '105%', marginLeft: -4 }}
-                            onValueChange={(value) => {
-                                if (this.props.keyItem) {
-                                    this.setState({ tipoPerfil: value });
-                                } else {
-                                    this.setState({ tipoPerfil: value });
-                                    this.props.onChangeSuperState({ tipoPerfil: value });
-                                }
-                            }}
-                        >
-                            <Picker.Item label={'Sócio'} value={'socio'} />
-                            <Picker.Item label={'Sócio Patrimonial'} value={'sociopatrim'} />
-                            <Picker.Item label={'Sócio Contribuinte'} value={'sociocontrib'} />
-                        </Picker>
+                        {
+                            Platform.OS === 'android' ?
+                            (
+                            <Picker
+                                ref={(ref) => { this.inputTipoPerfil = ref; }}
+                                selectedValue={this.state.tipoPerfil}
+                                style={{ height: 50, width: '105%', marginLeft: -4 }}
+                                onValueChange={(value) => {
+                                    if (this.props.keyItem) {
+                                        this.setState({ tipoPerfil: value });
+                                    } else {
+                                        this.setState({ tipoPerfil: value });
+                                        this.props.onChangeSuperState({ tipoPerfil: value });
+                                    }
+                                }}
+                            >
+                                <Picker.Item label={'Sócio'} value={'socio'} />
+                                <Picker.Item label={'Sócio Patrimonial'} value={'sociopatrim'} />
+                                <Picker.Item label={'Sócio Contribuinte'} value={'sociocontrib'} />
+                            </Picker>
+                            )
+                            :
+                            (
+                                <TouchableWithoutFeedback
+                                    onPress={() =>
+                                        ActionSheetIOS.showActionSheetWithOptions({
+                                            options: [
+                                                'Sócio',
+                                                'Sócio Patrimonial', 
+                                                'Sócio Contribuinte'
+                                            ]
+                                          },
+                                          (buttonIndex) => {
+                                            let value = '';
+                                            let label = '';
+                                            switch (buttonIndex) {
+                                                case 2:
+                                                    value = 'sociocontrib';
+                                                    label = 'Sócio Contribuinte';
+                                                    break;
+                                                case 1:
+                                                    value = 'sociopatrim';
+                                                    label = 'Sócio Patrimonial';
+                                                    break;
+                                                case 0:
+                                                    value = 'socio';
+                                                    label = 'Sócio';
+                                                    break;
+                                                default:
+                                            }
+                                            if (this.props.keyItem) {
+                                                this.setState({ 
+                                                    tipoPerfil: value, 
+                                                    tipoPerfilIos: label 
+                                                });
+                                            } else {
+                                                this.setState({ 
+                                                    tipoPerfil: value, 
+                                                    tipoPerfilIos: label 
+                                                });
+                                                this.props.onChangeSuperState(
+                                                    { tipoPerfil: value }
+                                                );
+                                            }
+                                        })
+                                    }
+                                >
+                                    <View style={{ height: 50, width: '105%', marginTop: 9 }} >
+                                        <Text style={styles.text}>{this.state.tipoPerfilIos}</Text>
+                                    </View>
+                                </TouchableWithoutFeedback>
+                            )
+                        }
                     </View>
                     <Button 
                         small
@@ -362,7 +421,8 @@ class UsuarioEdit extends React.Component {
                             senha: '',
                             nome: '',
                             data: new Date(),
-                            tipoPerfil: ''
+                            tipoPerfil: '',
+                            tipoPerfilIos: 'Sócio'
                         })}
                     />
                 </Card>

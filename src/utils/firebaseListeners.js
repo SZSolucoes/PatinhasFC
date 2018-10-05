@@ -1,8 +1,8 @@
 
-import firebase from 'firebase';
 import _ from 'lodash';
 import b64 from 'base-64';
 import { store } from '../App';
+import firebase from '../Firebase';
 
 let jogosListener = null;
 let infosListener = null;

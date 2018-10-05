@@ -4,22 +4,39 @@ import {
     View,
     Text,
     TouchableWithoutFeedback,
-    Animated
+    Animated,
+    Platform
 } from 'react-native';
 import { Icon, Divider } from 'react-native-elements';
 import _ from 'lodash';
 import b64 from 'base-64';
+import { store } from '../../App';
 
 export default class InfoActions extends React.Component {
 
     constructor(props) {
         super(props);
 
+        this.onPressShareBtn = this.onPressShareBtn.bind(this);
+
         this.state = {
             curtirAnimValue: new Animated.Value(1),
             comentAnimValue: new Animated.Value(1),
             compartAnimValue: new Animated.Value(1)
         };
+    }
+
+    onPressShareBtn(item) {
+        store.dispatch({
+            type: 'modifica_itemshareselected_info',
+            payload: item
+        });
+        setTimeout(() => 
+            store.dispatch({
+                type: 'modifica_showsharemodal_info',
+                payload: true
+            })
+        , 100);
     }
 
     render() {
@@ -85,7 +102,10 @@ export default class InfoActions extends React.Component {
                     <View style={{ marginHorizontal: 5 }}>
                         <Text style={{ textAlign: 'center' }}>-</Text>
                     </View>
-                    <Text style={{ color: '#A2A2A2' }}>
+                    <Text 
+                        style={{ color: '#A2A2A2' }}
+                        onPress={() => this.props.comentsUpOrDown('up', item)}
+                    >
                         { txtQtdComent }
                     </Text>
                 </View>
@@ -133,7 +153,18 @@ export default class InfoActions extends React.Component {
                                 type='material-community' 
                                 size={24} color='green'
                             />
-                            <View style={{ marginHorizontal: 4 }} />
+                            <View 
+                                style={{ 
+                                    ...Platform.select({
+                                        android: {
+                                            marginHorizontal: 4
+                                        },
+                                        ios: {
+                                            marginHorizontal: 2
+                                        }
+                                    })
+                                }} 
+                            />
                             <Text style={{ color: '#A2A2A2' }}>
                                 Curtir
                             </Text>
@@ -175,7 +206,18 @@ export default class InfoActions extends React.Component {
                                 type='material-community' 
                                 size={24} color='green'
                             />
-                            <View style={{ marginHorizontal: 4 }} />
+                            <View 
+                                style={{ 
+                                    ...Platform.select({
+                                        android: {
+                                            marginHorizontal: 4
+                                        },
+                                        ios: {
+                                            marginHorizontal: 2
+                                        }
+                                    })
+                                }} 
+                            />
                             <Text style={{ color: '#A2A2A2' }}>
                                 Comentar
                             </Text>
@@ -202,7 +244,7 @@ export default class InfoActions extends React.Component {
                                 }
                             ).start();
                         }}
-                        onPress={() => false}
+                        onPress={() => this.onPressShareBtn(item)}
                     >
                         <Animated.View 
                             style={{ 
@@ -217,7 +259,18 @@ export default class InfoActions extends React.Component {
                                 type='material-community' 
                                 size={24} color='green'
                             />
-                            <View style={{ marginHorizontal: 4 }} />
+                            <View 
+                                style={{ 
+                                    ...Platform.select({
+                                        android: {
+                                            marginHorizontal: 4
+                                        },
+                                        ios: {
+                                            marginHorizontal: 2
+                                        }
+                                    })
+                                }} 
+                            />
                             <Text style={{ color: '#A2A2A2' }}>
                                 Compartilhar
                             </Text>

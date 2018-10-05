@@ -9,7 +9,6 @@ import {
 
 import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
-import firebase from 'firebase';
 import RNFetchBlob from 'rn-fetch-blob';
 import { 
     FormLabel, 
@@ -24,6 +23,7 @@ import b64 from 'base-64';
 
 import ImagePicker from 'react-native-image-crop-picker';
 import DatePicker from 'react-native-datepicker';
+import firebase from '../../../Firebase';
 import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
 
@@ -38,7 +38,7 @@ class JogoEdit extends React.Component {
             imgJogoUri: props.imgJogoUri ? props.imgJogoUri : null,
             imgPath: props.imgPath ? props.imgPath : '',
             titulo: props.titulo ? props.titulo : '',
-            data: props.data ? props.data : new Date(),
+            data: props.data ? props.data : Moment().format('DD/MM/YYYY'),
             descricao: props.descricao ? props.descricao : '',
             loading: props.loading ? props.loading : false,
             scrollView: props.scrollView ? props.scrollView : null
@@ -112,9 +112,8 @@ class JogoEdit extends React.Component {
             return;
         }
 
-        if (data instanceof Date) {
-            dataStr = data.toLocaleDateString();
-            dataStr = Moment(dataStr).format('DD/MM/YYYY');
+        if (data instanceof Moment) {
+            dataStr = Moment(data).format('DD/MM/YYYY');
         } else {
             dataStr = data;
         }

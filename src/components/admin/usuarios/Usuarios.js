@@ -5,7 +5,8 @@ import {
     StyleSheet,
     TouchableOpacity,
     Text,
-    Switch
+    Switch,
+    Platform
 } from 'react-native';
 
 import Toast from 'react-native-simple-toast';
@@ -142,11 +143,28 @@ class Usuarios extends React.Component {
                         alignItems: 'center',
                         justifyContent: 'center'
                     }}
-                >     
-                    <Switch 
-                        value={item.userDisabled === 'false'}
-                        onValueChange={() => this.checkConInfo(() => this.onPressEditRemove(item))}
-                    />
+                > 
+                    {
+                        Platform.OS === 'android' ?
+                        (
+                            <Switch 
+                                value={item.userDisabled === 'false'}
+                                onValueChange={
+                                    () => this.checkConInfo(() => this.onPressEditRemove(item))
+                                }
+                            />
+                        )
+                        :
+                        (
+                            <Switch 
+                                value={item.userDisabled === 'false'}
+                                onValueChange={
+                                    () => this.checkConInfo(() => this.onPressEditRemove(item))
+                                }
+                                style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
+                            />
+                        )
+                    }
                 </View>
             </View>
         );
@@ -426,8 +444,9 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
         fontWeight: 'bold',
+        marginVertical: 8,
         textAlign: 'center',
-        marginVertical: 8
+        marginRight: 5
     }
 });
 

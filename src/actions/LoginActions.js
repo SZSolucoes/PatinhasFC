@@ -1,9 +1,9 @@
 
 import { AsyncStorage } from 'react-native';
-import firebase from 'firebase';
 import Moment from 'moment';
 import b64 from 'base-64';
 import { Actions } from 'react-native-router-flux';
+import firebase from '../Firebase';
 import { showAlert } from '../utils/store';
 
 export const modificaUsername = (value) => ({

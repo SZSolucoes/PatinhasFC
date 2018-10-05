@@ -9,9 +9,9 @@ import {
     Linking,
     Animated,
     FlatList,
-    ActivityIndicator
+    ActivityIndicator,
+    Platform
 } from 'react-native';
-import firebase from 'firebase';
 import b64 from 'base-64';
 import { connect } from 'react-redux';
 import _ from 'lodash';
@@ -28,8 +28,10 @@ import {
     modificaAnimatedHeigth,
 } from '../../actions/JogosActions';
 
+import firebase from '../../Firebase';
 import imgAvatar from '../../imgs/patinhasfclogo.png';
 import { colorAppF } from '../../utils/constantes';
+import ShareModal from './ShareModal';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -318,6 +320,9 @@ class Informativos extends React.Component {
                             }
                         )
                     }
+                    ListHeaderComponent={
+                        (<View style={{ ...Platform.select({ ios: { marginTop: 10 } }) }} />)
+                    }
                     ListFooterComponent={(
                         <View style={{ marginBottom: 50, marginTop: 10 }} >
                         {
@@ -328,6 +333,7 @@ class Informativos extends React.Component {
                 )}
                 />
                 <Coment />
+                <ShareModal />
             </View>
         );
     }

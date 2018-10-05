@@ -6,7 +6,6 @@ import { createStore, applyMiddleware } from 'redux';
 import ReduxThunk from 'redux-thunk';
 import Axios from 'axios';
 import { decode, encode } from 'base-64';
-import firebase from 'firebase';
 
 import Routes from './Routes';
 import reducers from './reducers';
@@ -39,14 +38,6 @@ class App extends React.Component {
             'Require cycle:'
         ]);
 
-        firebase.initializeApp({
-            apiKey: 'AIzaSyBlCoHh_en9YwIGB2HRVQ4oWxjw3613jf4',
-            authDomain: 'patinhasfc-46efc.firebaseapp.com',
-            databaseURL: 'https://patinhasfc-46efc.firebaseio.com',
-            projectId: 'patinhasfc-46efc',
-            storageBucket: 'patinhasfc-46efc.appspot.com',
-            messagingSenderId: '982612165762'
-        });
         setTimeout(() => 
             AsyncStorage.getItem('username')
             .then((userName) => {

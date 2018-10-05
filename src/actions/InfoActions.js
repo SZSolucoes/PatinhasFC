@@ -44,3 +44,8 @@ export const modificaAddNewRows = (value) => ({
     payload: value
 });
 
+export const modificaShowShareModal = (value) => ({
+    type: 'modifica_showsharemodal_info',
+    payload: value
+});
+

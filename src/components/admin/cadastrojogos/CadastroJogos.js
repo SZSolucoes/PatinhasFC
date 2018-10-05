@@ -4,7 +4,8 @@ import {
     ScrollView, 
     StyleSheet,
     TouchableOpacity,
-    Text
+    Text,
+    Platform
 } from 'react-native';
 
 import Toast from 'react-native-simple-toast';
@@ -425,7 +426,8 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'center',
-        marginVertical: 8
+        marginVertical: 8,
+        marginRight: 5
     }
 });
 

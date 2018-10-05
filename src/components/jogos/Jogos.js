@@ -12,10 +12,10 @@ import {
     FlatList,
     ActivityIndicator
 } from 'react-native';
-import firebase from 'firebase';
 import _ from 'lodash';
 
 import Toast from 'react-native-simple-toast';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import { Card, Divider, SearchBar, Avatar } from 'react-native-elements';
@@ -33,6 +33,7 @@ import {
     modificaLoadingFooter,
     modificaAddNewRows
 } from '../../actions/JogosActions';
+import firebase from '../../Firebase';
 import { modificaListUsuarios } from '../../actions/UsuariosActions';
 import { colorAppT } from '../../utils/constantes';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -339,48 +340,60 @@ class Jogos extends React.Component {
                                 top: 0,
                                 right: 0,
                                 zIndex: 1,
-                                height: 50,
-                                flexDirection: 'row',
-                                alignItems: 'center',
                                 paddingHorizontal: 15,
                                 backgroundColor: colorAppT
                             }}
                         >
-                            <View style={{ flex: 0.5 }}>
-                                <Avatar
-                                    small
-                                    rounded
-                                    title={'GO'}
-                                    source={userImg}
-                                    onPress={() => Keyboard.dismiss()}
-                                    activeOpacity={0.7}
-                                /> 
-                            </View>
-                            <View style={{ flex: 2.5 }}>
-                                <SearchBar
-                                    autoCapitalize={'none'}
-                                    autoCorrect={false}
-                                    onFocus={() => this.props.modificaAnimatedHeigth(1)}
-                                    onBlur={() => this.props.modificaAnimatedHeigth(false)}
-                                    clearIcon={!!this.props.filterStr}
-                                    showLoadingIcon={this.props.filterLoad}
-                                    containerStyle={{ 
-                                        backgroundColor: 'transparent',
-                                        borderTopWidth: 0, 
-                                        borderBottomWidth: 0
-                                    }}
-                                    searchIcon={{ size: 24 }}
-                                    value={this.props.filterStr}
-                                    onChangeText={(value) => {
-                                        this.props.modificaFilterStr(value);
-                                        this.props.modificaFilterLoad(true);
-                                    }}
-                                    onClear={() => this.props.modificaFilterStr('')}
-                                    placeholder='Buscar jogo...'
+                            {
+                                Platform.OS === 'ios' &&
+                                <View 
+                                    style={{ 
+                                        height: getStatusBarHeight(true), 
+                                        backgroundColor: colorAppT 
+                                    }} 
                                 />
-
+                            }
+                            <View 
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <View style={{ flex: 0.5 }}>
+                                    <Avatar
+                                        small
+                                        rounded
+                                        title={'GO'}
+                                        source={userImg}
+                                        onPress={() => Keyboard.dismiss()}
+                                        activeOpacity={0.7}
+                                    /> 
+                                </View>
+                                <View style={{ flex: 2.5 }}>
+                                    <SearchBar
+                                        autoCapitalize={'none'}
+                                        autoCorrect={false}
+                                        onFocus={() => this.props.modificaAnimatedHeigth(1)}
+                                        onBlur={() => this.props.modificaAnimatedHeigth(false)}
+                                        clearIcon={!!this.props.filterStr}
+                                        showLoadingIcon={this.props.filterLoad}
+                                        containerStyle={{ 
+                                            backgroundColor: 'transparent',
+                                            borderTopWidth: 0, 
+                                            borderBottomWidth: 0
+                                        }}
+                                        searchIcon={{ size: 24 }}
+                                        value={this.props.filterStr}
+                                        onChangeText={(value) => {
+                                            this.props.modificaFilterStr(value);
+                                            this.props.modificaFilterLoad(true);
+                                        }}
+                                        onClear={() => this.props.modificaFilterStr('')}
+                                        placeholder='Buscar jogo...'
+                                    />
+                                </View>
+                                <View style={{ flex: 0.5 }} />
                             </View>
-                            <View style={{ flex: 0.5 }} />
                         </Animated.View>
                     </TouchableWithoutFeedback>
                     { 

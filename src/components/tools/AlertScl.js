@@ -1,16 +1,15 @@
 import React from 'react';
 import { View } from 'react-native';
 import { connect } from 'react-redux';
-import firebase from 'firebase';
 import b64 from 'base-64';
 
 import {
-  SCLAlert,
-  SCLAlertButton
+    SCLAlert,
+    SCLAlertButton
 } from 'react-native-scl-alert';
 import Toast from 'react-native-simple-toast';
 
-
+import firebase from '../../Firebase';
 import { store } from '../../App';
 
 class AlertScl extends React.Component {
@@ -37,17 +36,25 @@ class AlertScl extends React.Component {
         .then(() => {
             this.setState({ loading: false });
             if (userDisabled === 'true') {
-                Toast.show('Usuário desabilitado com sucesso.', Toast.LONG);
+                setTimeout(
+                    () => Toast.show('Usuário desabilitado com sucesso.', Toast.LONG)
+                , 1000);
             } else {
-                Toast.show('Usuário habilitado com sucesso.', Toast.LONG);
+                setTimeout(
+                    () => Toast.show('Usuário habilitado com sucesso.', Toast.LONG)
+                , 1000);
             }
         })
         .catch(() => {
             this.setState({ loading: false });
             if (userDisabled === 'true') {
-                Toast.show('Falha ao desabilitar usuário.', Toast.LONG);
+                setTimeout(
+                    () => Toast.show('Falha ao desabilitar usuário.', Toast.LONG)
+                , 1000);
             } else {
-                Toast.show('Falha ao habilitar usuário.', Toast.LONG);
+                setTimeout(
+                    () => Toast.show('Falha ao habilitar usuário.', Toast.LONG)
+                , 1000);
             }
         });  
 
@@ -85,9 +92,15 @@ class AlertScl extends React.Component {
                 .then(() => true)
                 .catch(() => true);
             }
-            Toast.show('Jogo removido com sucesso.', Toast.LONG);
+            setTimeout(
+                () => Toast.show('Jogo removido com sucesso.', Toast.LONG)
+            , 1000);
         })
-        .catch(() => Toast.show('Falha ao remover jogo.', Toast.LONG));
+        .catch(() => 
+            setTimeout(
+                () => Toast.show('Falha ao remover jogo.', Toast.LONG)
+            , 1000)
+        );
         
         store.dispatch({
             type: 'modifica_showalertscl_alertscl',
@@ -119,9 +132,15 @@ class AlertScl extends React.Component {
                 .then(() => true)
                 .catch(() => true);
             }
-            Toast.show('Informativo removido com sucesso.', Toast.LONG);
+            setTimeout(
+                () => Toast.show('Informativo removido com sucesso.', Toast.LONG)
+            , 1000);
         })
-        .catch(() => Toast.show('Falha ao remover informativo.', Toast.LONG));
+        .catch(() => 
+            setTimeout(
+                () => Toast.show('Falha ao remover informativo.', Toast.LONG)
+            , 1000)
+        );
         
         store.dispatch({
             type: 'modifica_showalertscl_alertscl',

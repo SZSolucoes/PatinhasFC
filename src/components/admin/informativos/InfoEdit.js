@@ -9,7 +9,6 @@ import {
 
 import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
-import firebase from 'firebase';
 import { 
     FormLabel, 
     FormInput, 
@@ -23,6 +22,7 @@ import b64 from 'base-64';
 import RNFetchBlob from 'rn-fetch-blob';
 import ImagePicker from 'react-native-image-crop-picker';
 
+import firebase from '../../../Firebase';
 import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
 import { checkPerfil } from '../../../utils/userUtils';
@@ -119,7 +119,7 @@ class UsuarioEdit extends React.Component {
             linkArticle = `http://${linkExt}`;        
         }
 
-        dataStr = Moment(new Date().toLocaleString()).format('DD/MM/YYYY HH:mm:ss');
+        dataStr = Moment().format('DD/MM/YYYY HH:mm:ss');
 
         // Upload de imagem e dados
         if (b64File) {

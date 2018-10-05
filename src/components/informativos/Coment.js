@@ -11,14 +11,17 @@ import {
     TextInput,
     Keyboard,
     TouchableOpacity,
-    Alert
+    Alert,
+    Platform,
+    KeyboardAvoidingView
 } from 'react-native';
-import firebase from 'firebase';
 import _ from 'lodash';
 import b64 from 'base-64';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Moment from 'moment';
 import { Icon, Divider, Avatar } from 'react-native-elements';
 import { connect } from 'react-redux';
+import firebase from '../../Firebase';
 import { modificaStartUpOrDownAnim, modificaInfoMsgSelected } from '../../actions/InfoActions';
 import { modificaAnimatedHeigth } from '../../actions/JogosActions';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -81,7 +84,7 @@ class Coment extends React.Component {
         const { infoMsgSelected, userLogged } = this.props;
         const b64UserKey = b64.encode(userLogged.email);
         const { comentario } = this.state;
-        const dataAtual = Moment(new Date().toLocaleString()).format('YYYY-MM-DD HH:mm:ss');
+        const dataAtual = Moment().format('YYYY-MM-DD HH:mm:ss');
         const newInfoMsgSelectedList = infoMsgSelected.listComents ? 
         [...infoMsgSelected.listComents] : [];
         let newInfoMsgSelected = {};
@@ -110,6 +113,7 @@ class Coment extends React.Component {
                 if (this.scrollView) {
                     this.scrollView.scrollToEnd({ animated: true });
                 }
+                Keyboard.dismiss();
             }, 500);
         })
         .catch(() => true); 
@@ -278,6 +282,84 @@ class Coment extends React.Component {
         return viewComents;
     }
 
+    renderBasedPlatform() {
+        if (Platform.OS === 'ios') {
+            return (
+                <KeyboardAvoidingView
+                    behavior={'position'}
+                >
+                    <View style={styles.inputMsg}>
+                        <Divider />
+                        <View style={styles.viewTextInput}>
+                            <View style={styles.inputSend}>
+                                <TextInput
+                                    placeholder='Escreva um comentário...'
+                                    multiline
+                                    value={this.state.comentario}
+                                    onChangeText={
+                                        (value) => this.setState({ comentario: value })
+                                    }
+                                />
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => this.onPressSendMessage()}
+                                style={{ 
+                                    flex: 0.5,
+                                    ...Platform.select({
+                                        ios: {
+                                            marginTop: 3
+                                        }
+                                    })
+                                }}
+                            >
+                                <Icon
+                                    name='send' 
+                                    type='material-community' 
+                                    size={30} color='green'
+                                />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </KeyboardAvoidingView>
+            );
+        }
+
+        return (
+            <View style={styles.inputMsg}>
+                <Divider />
+                <View style={styles.viewTextInput}>
+                    <View style={styles.inputSend}>
+                        <TextInput
+                            placeholder='Escreva um comentário...'
+                            multiline
+                            value={this.state.comentario}
+                            onChangeText={
+                                (value) => this.setState({ comentario: value })
+                            }
+                        />
+                    </View>
+                    <TouchableOpacity
+                        onPress={() => this.onPressSendMessage()}
+                        style={{ 
+                            flex: 0.5,
+                            ...Platform.select({
+                                ios: {
+                                    marginTop: 3
+                                }
+                            })
+                        }}
+                    >
+                        <Icon
+                            name='send' 
+                            type='material-community' 
+                            size={30} color='green'
+                        />
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    }
+
     render() {
         const { infoMsgSelected } = this.props;
         let qtdLikes = infoMsgSelected && infoMsgSelected.listLikes ? 
@@ -288,102 +370,73 @@ class Coment extends React.Component {
         }
 
         return (
-            <TouchableWithoutFeedback 
-                styles={styles.viewPrincip}
-                onPress={() => Keyboard.dismiss()}
+            <Animated.View 
+                style={{ 
+                    backgroundColor: 'black', 
+                    width: '100%',
+                    height: '100%',
+                    transform: [{ translateY: this.state.animScreenT }]
+                }} 
             >
-                <Animated.View 
-                    style={{ 
-                        backgroundColor: 'black', 
-                        width: '100%',
-                        height: '100%',
-                        transform: [{ translateY: this.state.animScreenT }]
-                    }} 
-                >
-                    <View style={styles.containerPrincip}>
+                <View style={styles.containerPrincip}>
+                    <View
+                        style={{ 
+                            flexDirection: 'row', 
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginHorizontal: 15
+                        }}
+                    >
                         <View
                             style={{ 
                                 flexDirection: 'row', 
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                margin: 15
+                                alignItems: 'center'
                             }}
                         >
-                            <View
-                                style={{ 
-                                    flexDirection: 'row', 
-                                    alignItems: 'center'
-                                }}
+                            <Icon
+                                name='thumb-up' 
+                                type='material-community' 
+                                size={18} color='green'
+                            />
+                            <View style={{ marginHorizontal: 3 }} />
+                            <Text
+                                style={{ fontWeight: 'bold' }}
                             >
+                                { qtdLikes }
+                            </Text>
+                        </View>
+                        <TouchableWithoutFeedback
+                            style={{ alignSelf: 'flex-end' }}
+                            onPress={() => {
+                                Keyboard.dismiss();
+                                this.props.modificaStartUpOrDownAnim('down');
+                            }}
+                        >   
+                            <View>
                                 <Icon
-                                    name='thumb-up' 
+                                    name='close-box-outline' 
                                     type='material-community' 
-                                    size={18} color='green'
+                                    size={28} color='black'
+                                    iconStyle={{ opacity: 0.8, margin: 5 }}
                                 />
-                                <View style={{ marginHorizontal: 3 }} />
-                                <Text
-                                    style={{ fontWeight: 'bold' }}
-                                >
-                                    { qtdLikes }
-                                </Text>
                             </View>
-                            <TouchableWithoutFeedback
-                                style={{ alignSelf: 'flex-end' }}
-                                onPress={() => {
-                                    Keyboard.dismiss();
-                                    this.props.modificaStartUpOrDownAnim('down');
-                                }}
-                            >   
-                                <View>
-                                    <Icon
-                                        name='close-box-outline' 
-                                        type='material-community' 
-                                        size={28} color='black'
-                                        iconStyle={{ opacity: 0.8, margin: 5 }}
-                                    />
-                                </View>
-                            </TouchableWithoutFeedback>
-                        </View>
-                        <Divider />
-                        <ScrollView
-                            keyboardShouldPersistTaps={'handled'}
-                            ref={(ref) => { this.scrollView = ref; }}
-                        >
-                            {
-                                !!this.props.infoMsgSelected &&
-                                !!this.props.infoMsgSelected.listComents &&
-                                this.renderComents()
-                            }
-                            <View style={{ marginVertical: 40 }} />
-                        </ScrollView>
-                        <View style={styles.inputMsg}>
-                            <Divider />
-                            <View style={styles.viewTextInput}>
-                                <View style={styles.inputSend}>
-                                    <TextInput
-                                        placeholder='Escreva um comentário...'
-                                        multiline
-                                        value={this.state.comentario}
-                                        onChangeText={
-                                            (value) => this.setState({ comentario: value })
-                                        }
-                                    />
-                                </View>
-                                <TouchableOpacity
-                                    onPress={() => this.onPressSendMessage()}
-                                    style={{ flex: 0.5 }}
-                                >
-                                    <Icon
-                                        name='send' 
-                                        type='material-community' 
-                                        size={30} color='green'
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                        </TouchableWithoutFeedback>
                     </View>
-                </Animated.View>
-            </TouchableWithoutFeedback>
+                    <Divider />
+                    <ScrollView
+                        keyboardShouldPersistTaps={'handled'}
+                        ref={(ref) => { this.scrollView = ref; }}
+                    >
+                        {
+                            !!this.props.infoMsgSelected &&
+                            !!this.props.infoMsgSelected.listComents &&
+                            this.renderComents()
+                        }
+                        <View style={{ marginVertical: 40 }} />
+                    </ScrollView>
+                    { this.renderBasedPlatform() }
+                </View>
+            </Animated.View>
         );
     }
 }
@@ -402,7 +455,12 @@ const styles = StyleSheet.create({
         width: '100%', 
         height: '100%',
         borderTopLeftRadius: 10,
-        borderTopRightRadius: 10
+        borderTopRightRadius: 10,
+        ...Platform.select({
+            ios: {
+                paddingTop: getStatusBarHeight(true)
+            }
+        })
     },
     inputMsg: {
         backgroundColor: 'white',
@@ -410,7 +468,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: 20
+        zIndex: 50
     },
     viewTextInput: {
         backgroundColor: '#EEEEEE',
@@ -422,12 +480,17 @@ const styles = StyleSheet.create({
     inputSend: { 
         flex: 3, 
         maxHeight: 100,
-        paddingHorizontal: 15
+        paddingHorizontal: 15,
+        ...Platform.select({
+            ios: {
+                marginVertical: 10
+            }
+        })
     },
     coments: {
         flexDirection: 'row',
-        marginVertical: 5,
-        marginHorizontal: 10
+        marginHorizontal: 10,
+        marginVertical: 5
     },
     viewComent: {
         backgroundColor: '#EEEEEE',

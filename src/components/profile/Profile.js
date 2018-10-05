@@ -10,7 +10,6 @@ import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import * as Progress from 'react-native-progress';
-import firebase from 'firebase';
 import RNFetchBlob from 'rn-fetch-blob';
 import b64 from 'base-64';
 import { Button, List, ListItem } from 'react-native-elements';
@@ -19,6 +18,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { showAlert, showAlertDesenv } from '../../utils/store';
 import { colorAppP } from '../../utils/constantes';
 
+import firebase from '../../Firebase';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 import perfilBgUserImg from '../../imgs/backgrounduserimg.jpg';
 
