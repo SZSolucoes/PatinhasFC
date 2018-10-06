@@ -13,6 +13,7 @@ import {
 import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 
+import { isPortrait, isLandscape } from './utils/orientation';
 import AlertScl from './components/tools/AlertScl';
 import Login from './components/login/Login';
 import Jogos from './components/jogos/Jogos';
@@ -39,6 +40,7 @@ class Routes extends React.Component {
         this.renderRouter = this.renderRouter.bind(this);
         this.doTabAnimation = this.doTabAnimation.bind(this);
         this.renderAdminTab = this.renderAdminTab.bind(this);
+        this.onChangeDimension = this.onChangeDimension.bind(this);
 
         this.state = {
             logged: false,
@@ -91,6 +93,7 @@ class Routes extends React.Component {
             });
             return true;
         });
+        Dimensions.addEventListener('change', this.onChangeDimension);
     }
 
     shouldComponentUpdate(nextProps, nextStates) {
@@ -99,6 +102,10 @@ class Routes extends React.Component {
             return false;
         }
         return nextProps !== this.props || nextStates !== this.state;
+    }
+
+    componentWillUnmount() {
+        Dimensions.removeEventListener('change', this.onChangeDimension);
     }
 
     onBackAndroidHdl() {
@@ -110,27 +117,48 @@ class Routes extends React.Component {
         return true;
     }
 
-    doTabAnimation(animatedHeigth) {
-        if (animatedHeigth === 1) {
+    onChangeDimension() {
+        if (isLandscape()) {
+            const toValue = Dimensions.get('screen').height;
             Animated.timing(
                 this.state.animHeigth, 
                 {
-                    toValue: 100,
+                    toValue,
                     useNativeDriver: true,
                     delay: 200
                 }
             ).start();
         } else {
-            const toValue = animatedHeigth ? Dimensions.get('screen').height : 0;
-            Animated.spring(
-                this.state.animHeigth, 
-                {
-                    toValue,
-                    useNativeDriver: true,
-                    bounciness: 2
-                }
-            ).start();
+            const isComentUp = store.getState().InfoReducer.startUpOrDownAnim === 'up';
+            if (!isComentUp) {
+                this.doTabAnimation(false);
+            }
         }
+    }
+
+    doTabAnimation(animatedHeigth) {
+        if (isPortrait()) {
+            if (animatedHeigth === 1) {
+                Animated.timing(
+                    this.state.animHeigth, 
+                    {
+                        toValue: 100,
+                        useNativeDriver: true,
+                        delay: 200
+                    }
+                ).start();
+            } else {
+                const toValue = animatedHeigth ? Dimensions.get('screen').height : 0;
+                Animated.spring(
+                    this.state.animHeigth, 
+                    {
+                        toValue,
+                        useNativeDriver: true,
+                        bounciness: 2
+                    }
+                ).start();
+            }
+        }  
     }
 
     renderAdminTab() {

@@ -28,12 +28,45 @@ class ShareModal extends React.Component {
         super(props);
 
         this.onShareImage = this.onShareImage.bind(this);
+        this.onShareMessage = this.onShareMessage.bind(this);
         this.closeModal = this.closeModal.bind(this);
 
         this.state = {
             fadeAnimValue: new Animated.Value(0),
             enablePress: true
         };
+    }
+
+    onShareMessage(item) {
+        let message = '';
+
+        if (item.nomeUser) {
+            message += `${item.nomeUser}`;
+        }
+        if (item.descPost) {
+            message += `\n\n${item.descPost}`;
+        }
+        if (item.textArticle) {
+            message += `\n\nTexto do artigo:\n${item.textArticle}`;
+        }
+        if (item.linkArticle) {
+            message += `\n\nLink do artigo:\n${item.linkArticle}`;
+        }
+
+        const shareImageBase64 = {
+            title: 'Compartilhar mensagem',
+            message
+        };
+
+        Share.open(shareImageBase64)
+        .then(() => {
+            this.setState({ enablePress: true });
+            this.closeModal();
+        })
+        .catch(() => {
+            this.setState({ enablePress: true });
+            this.closeModal();
+        });
     }
 
     onShareImage(item) {
@@ -48,24 +81,39 @@ class ShareModal extends React.Component {
         })
         .fetch('GET', item.imgArticle)
         .then(res => {
-            this.setState({ enablePress: true });
-            this.closeModal();
             imagePath = res.path();
             contentType = res.info().headers['content-type'];
             return res.readFile('base64');
         })
         .then(base64Data => {
+            let message = '';
+            if (item.textArticle) {
+                message += `Texto do artigo:\n${item.textArticle}`;
+            }
+            if (item.linkArticle) {
+                message += `\n\nLink do artigo:\n${item.linkArticle}`;
+            }
             const shareImageBase64 = {
-                title: 'Escolha um App para compartilhar',
-                message: item.textArticle,
+                title: 'Compartilhar imagem',
+                message,
                 url: `data:${contentType};base64,${base64Data}`,
             };
 
             Share.open(shareImageBase64)
-            .then((res) => console.log(res))
-            .catch((err) => console.log(err));
+            .then(() => {
+                this.setState({ enablePress: true });
+                this.closeModal();
+            })
+            .catch(() => {
+                this.setState({ enablePress: true });
+                this.closeModal();
+            });
 
             return fs.unlink(imagePath);
+        })
+        .catch(() => {
+            this.setState({ enablePress: true });
+            setTimeout(() => Toast.show('Falha ao carregar imagem.', Toast.SHORT), 500);
         });
     }
 
@@ -91,6 +139,7 @@ class ShareModal extends React.Component {
                 animationType="slide"
                 transparent
                 visible={this.props.showShareModal}
+                supportedOrientations={['portrait', 'landscape']}
                 onRequestClose={() => this.closeModal()}
                 onShow={() =>
                     Animated.timing(
@@ -119,42 +168,54 @@ class ShareModal extends React.Component {
                             <View style={styles.viewPricinp} >
                                 <View style={styles.viewTop}>
                                     <View style={styles.viewUser}>
-                                        <Avatar
-                                            small
-                                            rounded
-                                            title={'avatar'}
-                                            source={userImg}
-                                            onPress={() => false}
-                                        />
-                                        <View style={{ marginHorizontal: 5 }} />
-                                        <Text 
-                                            style={{ 
-                                                fontWeight: '400', fontSize: 14, color: 'black' 
+                                        <View 
+                                            style={{
+                                                flex: 1,
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                justifyContent: 'flex-start' 
                                             }}
                                         >
-                                            { userNome }
-                                        </Text>
-                                        {
-                                            !this.state.enablePress &&
-                                            <View 
+                                            <Avatar
+                                                small
+                                                rounded
+                                                title={'avatar'}
+                                                source={userImg}
+                                                onPress={() => false}
+                                            />
+                                            <View style={{ marginHorizontal: 5 }} />
+                                            <Text 
                                                 style={{ 
-                                                    alignItems: 'flex-end', 
-                                                    justifyContent: 'center' 
+                                                    fontWeight: '400', fontSize: 14, color: 'black' 
                                                 }}
                                             >
+                                                { userNome }
+                                            </Text>
+                                        </View>
+                                        <View 
+                                            style={{
+                                                flex: 1,
+                                                alignItems: 'flex-end', 
+                                            }}
+                                        >
+                                            {
+                                                !this.state.enablePress &&
                                                 <ActivityIndicator 
                                                     size={'large'} 
                                                     color={colorAppP} 
                                                 />
-                                            </View>
-                                        }
+                                            }
+                                        </View>
                                     </View>
                                 </View>
                                 <View style={styles.viewBottom}>
                                     <TouchableHighlight
                                         underlayColor={'#EEEEEE'}
                                         style={{ flex: 1 }}
-                                        onPress={() => console.log('Compartilhar imagem')}
+                                        onPress={() => 
+                                            this.state.enablePress && 
+                                            this.onShareMessage(itemShareSelected)
+                                        }
                                     >
                                         <View
                                             style={[
@@ -287,7 +348,6 @@ const styles = StyleSheet.create({
     viewUser: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'flex-start',
         paddingHorizontal: 10
     }
 });

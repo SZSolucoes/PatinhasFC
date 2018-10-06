@@ -22,6 +22,7 @@ import Moment from 'moment';
 import { Icon, Divider, Avatar } from 'react-native-elements';
 import { connect } from 'react-redux';
 import firebase from '../../Firebase';
+import { isPortrait } from '../../utils/orientation';
 import { modificaStartUpOrDownAnim, modificaInfoMsgSelected } from '../../actions/InfoActions';
 import { modificaAnimatedHeigth } from '../../actions/JogosActions';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -76,7 +77,9 @@ class Coment extends React.Component {
     }
 
     onChangeDimension(event) {
-        this.setState({ maxHeight: event.window.heigth });
+        if (isPortrait()) {
+            this.setState({ maxHeight: event.window.height });
+        }
         this.setState({ maxWidthText: event.window.width });
     }
 

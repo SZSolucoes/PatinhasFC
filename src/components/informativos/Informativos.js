@@ -2,7 +2,6 @@ import React from 'react';
 import {
     View,
     StyleSheet,
-    TouchableOpacity,
     Image,
     Text,
     TouchableWithoutFeedback,
@@ -15,7 +14,7 @@ import {
 import b64 from 'base-64';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-import { Card, ListItem, Icon } from 'react-native-elements';
+import { Card, ListItem } from 'react-native-elements';
 import InfoActions from './InfoActions';
 import Coment from './Coment';
 import { 
@@ -221,7 +220,8 @@ class Informativos extends React.Component {
     }
 
     renderDots() {
-        return (
+        return (<View />);
+        /* return (
             <TouchableOpacity
                 onPress={() => false}
             >
@@ -231,7 +231,7 @@ class Informativos extends React.Component {
                     size={24} color='green' 
                 />   
             </TouchableOpacity>
-        );
+        ); */
     }
 
     renderInfos({ item }) {
