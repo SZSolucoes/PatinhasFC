@@ -4,8 +4,7 @@ import {
     ScrollView, 
     StyleSheet,
     TouchableOpacity,
-    Text,
-    Platform
+    Text
 } from 'react-native';
 
 import Toast from 'react-native-simple-toast';

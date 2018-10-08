@@ -91,6 +91,11 @@ class Routes extends React.Component {
                 type: 'modifica_startupordownanim_info',
                 payload: 'down'
             });
+            store.dispatch({
+                type: 'modifica_showimageview_info',
+                payload: false
+            });
+            
             return true;
         });
         Dimensions.addEventListener('change', this.onChangeDimension);
@@ -114,6 +119,11 @@ class Routes extends React.Component {
             type: 'modifica_startupordownanim_info',
             payload: 'down'
         });
+        store.dispatch({
+            type: 'modifica_showimageview_info',
+            payload: false
+        });
+
         return true;
     }
 

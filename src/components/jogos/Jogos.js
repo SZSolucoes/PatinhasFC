@@ -36,6 +36,7 @@ import {
 import firebase from '../../Firebase';
 import { modificaListUsuarios } from '../../actions/UsuariosActions';
 import { colorAppT } from '../../utils/constantes';
+import { retrieveImgSource } from '../../utils/imageStorage';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
@@ -229,7 +230,7 @@ class Jogos extends React.Component {
                     <Card 
                         title={titulo} 
                         containerStyle={[styles.card, styles.shadowCard]}
-                        image={imagem}
+                        image={retrieveImgSource(imagem)}
                         featuredSubtitle={descricao}
                     >
                         <Text style={styles.textData}>
@@ -364,7 +365,7 @@ class Jogos extends React.Component {
                                         small
                                         rounded
                                         title={'GO'}
-                                        source={userImg}
+                                        source={retrieveImgSource(userImg)}
                                         onPress={() => Keyboard.dismiss()}
                                         activeOpacity={0.7}
                                     /> 

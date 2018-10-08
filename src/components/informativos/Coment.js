@@ -23,6 +23,7 @@ import { Icon, Divider, Avatar } from 'react-native-elements';
 import { connect } from 'react-redux';
 import firebase from '../../Firebase';
 import { isPortrait } from '../../utils/orientation';
+import { retrieveImgSource } from '../../utils/imageStorage';
 import { modificaStartUpOrDownAnim, modificaInfoMsgSelected } from '../../actions/InfoActions';
 import { modificaAnimatedHeigth } from '../../actions/JogosActions';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -78,9 +79,12 @@ class Coment extends React.Component {
 
     onChangeDimension(event) {
         if (isPortrait()) {
-            this.setState({ maxHeight: event.window.height });
+            this.setState({ 
+                maxHeight: event.window.height, maxWidthText: event.window.width / 1.3 
+            });
+        } else {
+            this.setState({ maxWidthText: event.window.width / 1.3 });
         }
-        this.setState({ maxWidthText: event.window.width });
     }
 
     onPressSendMessage() {
@@ -220,7 +224,7 @@ class Coment extends React.Component {
                         <Avatar
                             medium
                             rounded
-                            source={userImg}
+                            source={retrieveImgSource(userImg)}
                             onPress={() => Keyboard.dismiss()}
                             activeOpacity={0.7}
                         />

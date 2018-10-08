@@ -9,7 +9,9 @@ const INITIAL_STATE = {
     loadingFooter: false,
     maxRows: 30,
     showShareModal: false,
-    itemShareSelected: {}
+    itemShareSelected: {},
+    imagesForView: [],
+    showImageView: false
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -59,6 +61,16 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 showShareModal: action.payload
             };
+        case 'modifica_imagesforview_info':
+            return { 
+                ...state, 
+                imagesForView: [...action.payload]
+            };
+        case 'modifica_showimageview_info':
+            return { 
+                ...state, 
+                showImageView: action.payload
+            };
         case 'modifica_infomsgselected_info':
             return { 
                 ...state, 
@@ -82,7 +94,9 @@ export default (state = INITIAL_STATE, action) => {
                 loadingFooter: false,
                 maxRows: 30,
                 showShareModal: false,
-                itemShareSelected: {}
+                itemShareSelected: {},
+                imagesForView: [],
+                showImageView: false
             };
         default:
             return state;

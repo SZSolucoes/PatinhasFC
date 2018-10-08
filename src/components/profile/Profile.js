@@ -17,6 +17,7 @@ import ParallaxScrollView from 'react-native-parallax-scrollview';
 import ImagePicker from 'react-native-image-crop-picker';
 import { showAlert, showAlertDesenv } from '../../utils/store';
 import { colorAppP } from '../../utils/constantes';
+import { retrieveImgSource } from '../../utils/imageStorage';
 
 import firebase from '../../Firebase';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -166,8 +167,8 @@ class Profile extends React.Component {
                     onPressUserImg={() => this.checkConInfo(
                         () => this.onPressUserImg('userImg')
                     )}
-                    userImage={userImg}
-                    backgroundSource={imgBg}
+                    userImage={retrieveImgSource(userImg)}
+                    backgroundSource={retrieveImgSource(imgBg)}
                     userName={username}
                     userTitle={posicao}
                     navBarHeight={0.1}

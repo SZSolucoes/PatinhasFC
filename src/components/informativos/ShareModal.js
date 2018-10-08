@@ -19,6 +19,7 @@ import {
     modificaShowShareModal
 } from '../../actions/InfoActions';
 import { colorAppP } from '../../utils/constantes';
+import { retrieveImgSource } from '../../utils/imageStorage';
 
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 
@@ -71,22 +72,15 @@ class ShareModal extends React.Component {
 
     onShareImage(item) {
         const fs = RNFetchBlob.fs;
+        const locateCachedImgUri = retrieveImgSource({ uri: item.imgArticle }).uri;
         let imagePath = null;
         let contentType = '';
 
         this.setState({ enablePress: false });
 
-        RNFetchBlob.config({
-            fileCache: true
-        })
-        .fetch('GET', item.imgArticle)
-        .then(res => {
-            imagePath = res.path();
-            contentType = res.info().headers['content-type'];
-            return res.readFile('base64');
-        })
-        .then(base64Data => {
+        if (locateCachedImgUri !== item.imgArticle) {
             let message = '';
+            
             if (item.textArticle) {
                 message += `Texto do artigo:\n${item.textArticle}`;
             }
@@ -96,7 +90,7 @@ class ShareModal extends React.Component {
             const shareImageBase64 = {
                 title: 'Compartilhar imagem',
                 message,
-                url: `data:${contentType};base64,${base64Data}`,
+                url: locateCachedImgUri,
             };
 
             Share.open(shareImageBase64)
@@ -108,13 +102,50 @@ class ShareModal extends React.Component {
                 this.setState({ enablePress: true });
                 this.closeModal();
             });
-
-            return fs.unlink(imagePath);
-        })
-        .catch(() => {
-            this.setState({ enablePress: true });
-            setTimeout(() => Toast.show('Falha ao carregar imagem.', Toast.SHORT), 500);
-        });
+        } else {
+            RNFetchBlob.config({
+                fileCache: true
+            })
+            .fetch('GET', item.imgArticle)
+            .then(res => {
+                imagePath = res.path();
+                contentType = res.info().headers['content-type'];
+                return res.readFile('base64');
+            })
+            .then(base64Data => {
+                let message = '';
+    
+                if (item.textArticle) {
+                    message += `Texto do artigo:\n${item.textArticle}`;
+                }
+                if (item.linkArticle) {
+                    message += `\n\nLink do artigo:\n${item.linkArticle}`;
+                }
+                const shareImageBase64 = {
+                    title: 'Compartilhar imagem',
+                    message,
+                    url: `data:${contentType};base64,${base64Data}`,
+                };
+    
+                Share.open(shareImageBase64)
+                .then(() => {
+                    this.setState({ enablePress: true });
+                    this.closeModal();
+                })
+                .catch(() => {
+                    this.setState({ enablePress: true });
+                    this.closeModal();
+                });
+    
+                return fs.unlink(imagePath);
+            })
+            .catch(() => {
+                this.setState({ enablePress: true });
+                setTimeout(() => Toast.show(
+                    'Falha ao carregar imagem. Verifique a conexão.', Toast.SHORT
+                ), 500);
+            });
+        }
     }
 
     closeModal() {
@@ -180,7 +211,7 @@ class ShareModal extends React.Component {
                                                 small
                                                 rounded
                                                 title={'avatar'}
-                                                source={userImg}
+                                                source={retrieveImgSource(userImg)}
                                                 onPress={() => false}
                                             />
                                             <View style={{ marginHorizontal: 5 }} />

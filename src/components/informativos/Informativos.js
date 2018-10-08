@@ -15,13 +15,16 @@ import b64 from 'base-64';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import { Card, ListItem } from 'react-native-elements';
+import ImageView from 'react-native-image-view';
 import InfoActions from './InfoActions';
 import Coment from './Coment';
 import { 
     modificaStartUpOrDownAnim,
     modificaInfoMsgSelected,
     modificaAddNewRows,
-    modificaLoadingFooter
+    modificaLoadingFooter,
+    modificaImagesForView,
+    modificaShowImageView
 } from '../../actions/InfoActions';
 import {  
     modificaAnimatedHeigth,
@@ -31,6 +34,7 @@ import firebase from '../../Firebase';
 import imgAvatar from '../../imgs/patinhasfclogo.png';
 import { colorAppF } from '../../utils/constantes';
 import ShareModal from './ShareModal';
+import { retrieveImgSource } from '../../utils/imageStorage';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -62,6 +66,7 @@ class Informativos extends React.Component {
         this.comentsUpOrDown = this.comentsUpOrDown.bind(this);
         this.onPressLikeBtn = this.onPressLikeBtn.bind(this);
         this.onScrollView = this.onScrollView.bind(this);
+        this.onPressImage = this.onPressImage.bind(this);
     }
     
     onPressLikeBtn(likeOrDeslike, item) {
@@ -103,6 +108,13 @@ class Informativos extends React.Component {
                 .then(() => true)
                 .catch(() => true); 
             }
+        }
+    }
+
+    onPressImage(imageUri) {
+        if (imageUri) {
+            this.props.modificaImagesForView([{ source: imageUri }]);
+            this.props.modificaShowImageView(true);
         }
     }
 
@@ -163,6 +175,10 @@ class Informativos extends React.Component {
     }
 
     renderArticle(item) {
+        let imageUri = null;
+        if (item.imgArticle) {
+            imageUri = retrieveImgSource({ uri: item.imgArticle });
+        }
         return (
             <View 
                 style={{
@@ -170,17 +186,21 @@ class Informativos extends React.Component {
                 }}
             >
                 { 
-                    !!item.imgArticle && 
-                    <Image
-                        resizeMode="cover"
-                        style={{ 
-                            width: null, 
-                            height: 160,
-                            borderWidth: 1,
-                            borderRadius: 2
-                        }}
-                        source={{ uri: item.imgArticle }}
-                    />
+                    !!item.imgArticle &&
+                    <TouchableWithoutFeedback
+                        onPress={() => this.onPressImage(imageUri)}
+                    >
+                        <Image
+                            resizeMode="cover"
+                            style={{ 
+                                width: null, 
+                                height: 160,
+                                borderWidth: 1,
+                                borderRadius: 2
+                            }}
+                            source={imageUri}
+                        />
+                    </TouchableWithoutFeedback>
                 }
                 {
                     (!!item.textArticle || !!item.linkArticle) &&
@@ -245,7 +265,7 @@ class Informativos extends React.Component {
                     <View style={{ marginVertical: 5 }}>
                         <ListItem
                             containerStyle={{ borderBottomWidth: 0 }}
-                            avatar={imgAvt}
+                            avatar={retrieveImgSource(imgAvt)}
                             title={nomeUser}
                             subtitle={perfilUser}
                             rightIcon={(this.renderDots())}
@@ -334,6 +354,13 @@ class Informativos extends React.Component {
                 />
                 <Coment />
                 <ShareModal />
+                <ImageView
+                    images={this.props.imagesForView}
+                    imageIndex={0}
+                    isVisible={this.props.showImageView}
+                    renderFooter={() => (<View />)}
+                    onClose={() => this.props.modificaShowImageView(false)}
+                />
             </View>
         );
     }
@@ -366,6 +393,8 @@ const mapStateToProps = (state) => ({
     listInfos: state.InfoReducer.listInfos,
     loadingFooter: state.InfoReducer.loadingFooter,
     maxRows: state.InfoReducer.maxRows,
+    imagesForView: state.InfoReducer.imagesForView,
+    showImageView: state.InfoReducer.showImageView,
     userLogged: state.LoginReducer.userLogged
 });
 
@@ -374,5 +403,7 @@ export default connect(mapStateToProps, {
     modificaInfoMsgSelected,
     modificaAddNewRows,
     modificaLoadingFooter,
-    modificaAnimatedHeigth
+    modificaAnimatedHeigth,
+    modificaImagesForView,
+    modificaShowImageView
 })(Informativos);

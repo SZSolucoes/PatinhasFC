@@ -91,8 +91,7 @@ export default class LoadingBallAnim extends React.Component {
         Animated.timing(this.viewAnim, {
             toValue,
             duration,
-            easing: Easing.linear,
-            useNativeDriver: true
+            easing: Easing.linear
         }).start();
     }
 

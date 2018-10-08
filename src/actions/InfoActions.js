@@ -49,3 +49,13 @@ export const modificaShowShareModal = (value) => ({
     payload: value
 });
 
+export const modificaImagesForView = (value) => ({
+    type: 'modifica_imagesforview_info',
+    payload: value
+});
+
+export const modificaShowImageView = (value) => ({
+    type: 'modifica_showimageview_info',
+    payload: value
+});
+

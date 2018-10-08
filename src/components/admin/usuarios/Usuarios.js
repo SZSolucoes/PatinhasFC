@@ -24,6 +24,7 @@ import b64 from 'base-64';
 
 import ModalDropdown from 'react-native-modal-dropdown';
 import { colorAppS, colorAppF } from '../../../utils/constantes';
+import { retrieveImgSource } from '../../../utils/imageStorage';
 import { showAlert } from '../../../utils/store';
 import UsuarioEdit from './UsuarioEdit';
 import {
@@ -183,7 +184,7 @@ class Usuarios extends React.Component {
                         return (
                             <ListItem
                                 roundAvatar
-                                avatar={imgAvt}
+                                avatar={retrieveImgSource(imgAvt)}
                                 key={index}
                                 title={item.nome}
                                 subtitle={item.email}

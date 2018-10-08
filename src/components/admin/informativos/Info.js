@@ -21,6 +21,7 @@ import _ from 'lodash';
 import InfoEdit from './InfoEdit';
 
 import { colorAppS, colorAppF } from '../../../utils/constantes';
+import { retrieveImgSource } from '../../../utils/imageStorage';
 import { showAlert } from '../../../utils/store';
 import { limitDotText } from '../../../utils/strComplex';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
@@ -171,7 +172,7 @@ class Info extends React.Component {
                                 <View style={{ marginVertical: 5 }}>
                                     <ListItem
                                         containerStyle={{ borderBottomWidth: 0 }}
-                                        avatar={imgAvt}
+                                        avatar={retrieveImgSource(imgAvt)}
                                         title={nomeUser}
                                         subtitle={perfilUser}
                                         rightIcon={(this.renderIcons(item))}
