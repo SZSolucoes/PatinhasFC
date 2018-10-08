@@ -33,6 +33,7 @@ import {
     modificaLoadingFooter,
     modificaAddNewRows
 } from '../../actions/JogosActions';
+import { modificaJogoSelected } from '../../actions/JogoActions';
 import firebase from '../../Firebase';
 import { modificaListUsuarios } from '../../actions/UsuariosActions';
 import { colorAppT } from '../../utils/constantes';
@@ -94,9 +95,9 @@ class Jogos extends React.Component {
         this.KeyboardIsOpened = false;
     }
 
-    onPressCardGame() {
-        // ... Lógica para abrir tela de jogo...
-        return false;
+    onPressCardGame(item) {
+        this.props.modificaJogoSelected(item);
+        Actions.jogoTabBar({ onBack: () => Actions.replace('mainTabBar') });
     }
 
     onScrollView(currentOffset, direction) {
@@ -224,7 +225,7 @@ class Jogos extends React.Component {
                             return false;
                         }
 
-                        return this.onPressCardGame();
+                        return this.onPressCardGame(item);
                     }}
                 >
                     <Card 
@@ -418,7 +419,8 @@ const styles = StyleSheet.create({
         padding: 0,
         margin: 0,
         marginHorizontal: 10,
-        marginVertical: 15
+        marginVertical: 15,
+        borderRadius: 3
     },
     shadowCard: {
         ...Platform.select({
@@ -462,5 +464,6 @@ export default connect(mapStateToProps, {
     modificaListUsuarios,
     modificaUserLogged,
     modificaLoadingFooter,
-    modificaAddNewRows
+    modificaAddNewRows,
+    modificaJogoSelected
 })(Jogos);

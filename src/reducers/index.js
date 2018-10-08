@@ -6,6 +6,7 @@ import AlertSclReducer from './AlertSclReducer';
 import CadastroJogosReducer from './CadastroJogosReducer';
 import UsuariosReducer from './UsuariosReducer';
 import InfoReducer from './InfoReducer';
+import JogoReducer from './JogoReducer';
 
 export default combineReducers({
     LoginReducer,
@@ -13,5 +14,6 @@ export default combineReducers({
     AlertSclReducer,
     CadastroJogosReducer,
     UsuariosReducer,
-    InfoReducer
+    InfoReducer,
+    JogoReducer
 });

@@ -8,7 +8,9 @@ import {
     Animated,
     Dimensions,
     Keyboard,
-    BackHandler
+    BackHandler,
+    Platform,
+    Image
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
@@ -17,6 +19,8 @@ import { isPortrait, isLandscape } from './utils/orientation';
 import AlertScl from './components/tools/AlertScl';
 import Login from './components/login/Login';
 import Jogos from './components/jogos/Jogos';
+import Jogo from './components/core/jogo/Jogo';
+import Escalacao from './components/core/escalacao/Escalacao';
 import Informativos from './components/informativos/Informativos';
 import Profile from './components/profile/Profile';
 import Admin from './components/admin/Admin';
@@ -28,6 +32,8 @@ import { colorAppS } from './utils/constantes';
 import { store } from './App';
 import SplashScreenAnim from './components/animations/SplashScreenAnim';
 import AnimScene from './components/tools/AnimatedScene';
+
+import imgBootOne from './imgs/bootone.png';
 
 const AnimatedScene = Animated.createAnimatedComponent(AnimScene);
 
@@ -179,7 +185,6 @@ class Routes extends React.Component {
                     key='mainTabBar' 
                     tabs 
                     hideNavBar
-                    swipeEnabled
                     initial={this.state.logged}
                     showLabel={false}
                     tabBarStyle={
@@ -290,7 +295,6 @@ class Routes extends React.Component {
                 key='mainTabBar' 
                 tabs 
                 hideNavBar
-                swipeEnabled
                 initial={this.state.logged}
                 showLabel={false}
                 tabBarStyle={
@@ -420,6 +424,88 @@ class Routes extends React.Component {
                         backButtonTintColor={'white'}
                         //initial
                     />
+                    <Scene 
+                        key={'jogoTabBar'}
+                        tabs
+                        showLabel={false}
+                        tabBarPosition={'top'}
+                        showIcon
+                        swipeEnabled
+                        title={'Jogo'} 
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        tabBarStyle={{ backgroundColor: colorAppS }}
+                    >
+                        <Scene 
+                            key={'jogoTab'}
+                            hideNavBar 
+                            component={Jogo}
+                            initial
+                            icon={({ focused }) => (
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: 500
+                                    }}
+                                >
+                                    <Image 
+                                        source={imgBootOne}
+                                        style={{
+                                            width: focused ? 35 : 45,
+                                            height: focused ? 25 : 40,
+                                            tintColor: focused ? 'white' : 'black',
+                                            margin: 0,
+                                            padding: 0
+                                        }}
+                                    />
+                                    { focused && 
+                                    <Text
+                                        style={{
+                                            color: focused ? 'white' : 'black',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Jogo
+                                    </Text>}
+                                </View>
+                            )} 
+                        />
+                        <Scene 
+                            key={'escalacaoTab'}
+                            hideNavBar 
+                            component={Escalacao}
+                            icon={({ focused }) => (
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: 500
+                                    }}
+                                >
+                                    <Icon
+                                        color={focused ? 'white' : 'black'}
+                                        size={focused ? 24 : 36}
+                                        name='soccer-field'
+                                        type='material-community'
+                                        iconStyle={{ transform: [{ rotate: '90deg' }] }}
+                                    />
+                                    { focused && 
+                                    <Text
+                                        style={{
+                                            color: focused ? 'white' : 'black',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Escalação
+                                    </Text>}
+                                </View>
+                            )} 
+                        />
+                    </Scene>
                 </Scene>
             </Router>
         );
@@ -443,7 +529,16 @@ class Routes extends React.Component {
 
 const styles = StyleSheet.create({
     header: {
-        backgroundColor: colorAppS
+        backgroundColor: colorAppS,
+        borderBottomWidth: 0,
+        ...Platform.select({
+            android: {
+                elevation: 0
+            },
+            ios: {
+                shadowOpacity: 0
+            }
+        })
     },
     title: {
         color: 'white',
@@ -455,14 +550,18 @@ const styles = StyleSheet.create({
     },
     mainTabBar: {
         backgroundColor: colorAppS,
-        elevation: 4,
-        borderTopWidth: 1,
-        borderTopColor: 'rgba(0, 0, 0, 0.3)',
         position: 'absolute',
         height: 50,
         left: 0,
         right: 0,
-        bottom: 0
+        bottom: 0,
+        ...Platform.select({
+            android: {
+                elevation: 8,
+                borderTopWidth: 1,
+                borderTopColor: 'rgba(0, 0, 0, 0.4)',
+            }
+        })
     }
 });
 

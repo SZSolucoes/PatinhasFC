@@ -28,7 +28,7 @@ class Campo extends React.Component {
                     <View style={styles.viewGridRow}>
                         <View style={[styles.viewGridColumn, { flex: 0.7 }]}>
                             <Avatar
-                                size='medium'
+                                medium
                                 rounded
                                 title={'GO'}
                                 //source={{ uri: 'https://s3.amazonaws.com/uifaces/faces/twitter/ladylexy/128.jpg' }}
@@ -39,7 +39,7 @@ class Campo extends React.Component {
                         <View style={styles.viewGridColumn}>
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'LE'}
                                     //source={{ uri: '' }}
@@ -49,7 +49,7 @@ class Campo extends React.Component {
                             </View>
                             <View style={{ alignSelf: 'flex-start' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'ZA'}
                                     //source={{ uri: '' }}
@@ -59,7 +59,7 @@ class Campo extends React.Component {
                             </View>
                             <View style={{ alignSelf: 'flex-start' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'ZA'}
                                     //source={{ uri: '' }}
@@ -69,7 +69,7 @@ class Campo extends React.Component {
                             </View>
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'LD'}
                                     //source={{ uri: '' }}
@@ -81,7 +81,7 @@ class Campo extends React.Component {
                         <View style={styles.viewGridColumn}>
                             <View />
                             <Avatar
-                                size='medium'
+                                medium
                                 rounded
                                 title={'MD'}
                                 //source={{ uri: '' }}
@@ -89,7 +89,7 @@ class Campo extends React.Component {
                                 activeOpacity={0.7}
                             />
                             <Avatar
-                                size='medium'
+                                medium
                                 rounded
                                 title={'MD'}
                                 //source={{ uri: '' }}
@@ -100,7 +100,7 @@ class Campo extends React.Component {
                         </View>
                         <View style={styles.viewGridColumn}>
                             <Avatar
-                                size='medium'
+                                medium
                                 rounded
                                 title={'MO'}
                                 //source={{ uri: '' }}
@@ -108,7 +108,7 @@ class Campo extends React.Component {
                                 activeOpacity={0.7}
                             />
                             <Avatar
-                                size='medium'
+                                medium
                                 rounded
                                 title={'MO'}
                                 //source={{ uri: '' }}
@@ -118,7 +118,7 @@ class Campo extends React.Component {
                         </View>
                         <View style={styles.viewGridColumn}>
                             <Avatar
-                                size='medium'
+                                medium
                                 rounded
                                 title={'AT'}
                                 //source={{ uri: '' }}
@@ -126,7 +126,7 @@ class Campo extends React.Component {
                                 activeOpacity={0.7}
                             />
                             <Avatar
-                                size='medium'
+                                medium
                                 rounded
                                 title={'AT'}
                                 //source={{ uri: '' }}
@@ -151,7 +151,7 @@ class Campo extends React.Component {
                         <View style={styles.viewGridColumn}>
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'AT'}
                                     //source={{ uri: '' }}
@@ -161,7 +161,7 @@ class Campo extends React.Component {
                             </View>
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'AT'}
                                     //source={{ uri: '' }}
@@ -173,7 +173,7 @@ class Campo extends React.Component {
                         <View style={styles.viewGridColumn}>
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'MO'}
                                     //source={{ uri: '' }}
@@ -183,7 +183,7 @@ class Campo extends React.Component {
                             </View>
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'MO'}
                                     //source={{ uri: '' }}
@@ -196,7 +196,7 @@ class Campo extends React.Component {
                             <View />
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'MD'}
                                     //source={{ uri: '' }}
@@ -206,7 +206,7 @@ class Campo extends React.Component {
                             </View>
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'MD'}
                                     //source={{ uri: '' }}
@@ -219,7 +219,7 @@ class Campo extends React.Component {
                         <View style={styles.viewGridColumn}>
                             <View style={{ alignSelf: 'flex-start' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'LD'}
                                     //source={{ uri: '' }}
@@ -229,7 +229,7 @@ class Campo extends React.Component {
                             </View>
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'ZA'}
                                     //source={{ uri: '' }}
@@ -239,7 +239,7 @@ class Campo extends React.Component {
                             </View>
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'ZA'}
                                     //source={{ uri: '' }}
@@ -249,7 +249,7 @@ class Campo extends React.Component {
                             </View>
                             <View style={{ alignSelf: 'flex-start' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'LE'}
                                     //source={{ uri: '' }}
@@ -261,7 +261,7 @@ class Campo extends React.Component {
                         <View style={[styles.viewGridColumn, { flex: 0.7 }]}>
                             <View style={{ alignSelf: 'flex-end' }}>
                                 <Avatar
-                                    size='medium'
+                                    medium
                                     rounded
                                     title={'GO'}
                                     //source={{ uri: '' }}
@@ -289,7 +289,7 @@ class Campo extends React.Component {
 
 const styles = StyleSheet.create({
     viewMain: {
-        flex: 1
+        flex: 3
     },
     campo: {
         width: '100%',
