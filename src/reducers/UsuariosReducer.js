@@ -42,12 +42,8 @@ export default (state = INITIAL_STATE, action) => {
         case 'modifica_clean_usuarios':
             return {
                 ...state,
-                listUsuarios: [],
-                itemSelected: {},
                 filterStr: '',
-                filterLoad: false,
-                userDisabled: false,
-                flagDisableUser: false
+                filterLoad: false
             };
         default:
             return state;

@@ -29,7 +29,8 @@ import {
     modificaFilterLoad,
     modificaFilterStr,
     modificaItemSelected,
-    modificaFlagRemoveInfo
+    modificaFlagRemoveInfo,
+    modificaClean
 } from '../../../actions/InfoActions';
 import { modificaRemocao } from '../../../actions/AlertSclActions';
 
@@ -64,6 +65,10 @@ class Info extends React.Component {
         this.checkConInfo = this.checkConInfo.bind(this);
     }
 
+    componentWillUnmount() {
+        this.props.modificaClean();
+    }
+
     onPressEditRemove(item) {
         this.props.modificaItemSelected(item);
         this.props.modificaFlagRemoveInfo(true);
@@ -76,12 +81,13 @@ class Info extends React.Component {
     }
 
     onFilterInfosEdit(infos, filterStr) {
+        const lowerFilter = filterStr.toLowerCase();
         return _.filter(infos, (usuario) => (
-                usuario.descPost.includes(filterStr) ||
-                usuario.nomeUser.includes(filterStr) ||
-                usuario.perfilUser.includes(filterStr) ||
-                usuario.textArticle.includes(filterStr) ||
-                usuario.dataPost.includes(filterStr)
+                (usuario.descPost && usuario.descPost.toLowerCase().includes(lowerFilter)) ||
+                (usuario.nomeUser && usuario.nomeUser.toLowerCase().includes(lowerFilter)) ||
+                (usuario.perfilUser && usuario.perfilUser.toLowerCase().includes(lowerFilter)) ||
+                (usuario.textArticle && usuario.textArticle.toLowerCase().includes(lowerFilter)) ||
+                (usuario.dataPost && usuario.dataPost.toLowerCase().includes(lowerFilter))
         ));
     }
 
@@ -163,6 +169,9 @@ class Info extends React.Component {
         if (infos.length) {
             infosView = (
                 reverseInfos.map((item, index) => {
+                    if ((index + 1) > 30) {
+                        return false;
+                    }
                     const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                     const nomeUser = item.nomeUser ? item.nomeUser : 'Patinhas';
                     const perfilUser = item.perfilUser ? item.perfilUser : 'Administrador';
@@ -477,5 +486,6 @@ export default connect(mapStateToProps, {
     modificaFilterStr,
     modificaItemSelected,
     modificaFlagRemoveInfo,
+    modificaClean,
     modificaRemocao
 })(Info);

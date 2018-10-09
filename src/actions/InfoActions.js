@@ -59,3 +59,7 @@ export const modificaShowImageView = (value) => ({
     payload: value
 });
 
+export const modificaClean = () => ({
+    type: 'modifica_clean_info'
+});
+

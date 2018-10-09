@@ -10,3 +10,7 @@ export const modificaFilterLoad = (value) => ({
     payload: value
 });
 
+export const modificaClean = () => ({
+    type: 'modifica_clean_cadastrojogos'
+});
+

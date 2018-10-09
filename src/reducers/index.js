@@ -7,6 +7,7 @@ import CadastroJogosReducer from './CadastroJogosReducer';
 import UsuariosReducer from './UsuariosReducer';
 import InfoReducer from './InfoReducer';
 import JogoReducer from './JogoReducer';
+import GerenciarReducer from './GerenciarReducer';
 
 export default combineReducers({
     LoginReducer,
@@ -15,5 +16,6 @@ export default combineReducers({
     CadastroJogosReducer,
     UsuariosReducer,
     InfoReducer,
-    JogoReducer
+    JogoReducer,
+    GerenciarReducer
 });

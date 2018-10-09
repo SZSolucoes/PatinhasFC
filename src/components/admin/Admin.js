@@ -55,7 +55,7 @@ class Admin extends React.Component {
                     </TouchableOpacity>
                     <TouchableOpacity 
                         style={{ flex: 1 }} 
-                        onPress={() => false}
+                        onPress={() => Actions.gerenciar()}
                     >
                         <Card 
                             containerStyle={{ flex: 1 }}
@@ -65,7 +65,7 @@ class Admin extends React.Component {
                                 <View style={{ marginTop: 2 }} />
                                 <Icon name='users' type='font-awesome' size={26} />
                                 <View style={{ marginTop: 15 }} />
-                                <Text style={styles.text}>Escalação</Text>
+                                <Text style={styles.text}>Gerenciar</Text>
                             </View>
                         </Card>
                     </TouchableOpacity>

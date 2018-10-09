@@ -84,19 +84,8 @@ export default (state = INITIAL_STATE, action) => {
         case 'modifica_clean_info':
             return {
                 ...state,
-                listInfos: [],
-                itemSelected: {},
-                startUpOrDownAnim: 'down',
                 filterStr: '',
-                filterLoad: false,
-                flagRemoveInfo: false,
-                infoMsgSelected: {},
-                loadingFooter: false,
-                maxRows: 30,
-                showShareModal: false,
-                itemShareSelected: {},
-                imagesForView: [],
-                showImageView: false
+                filterLoad: false
             };
         default:
             return state;

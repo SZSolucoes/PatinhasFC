@@ -169,7 +169,12 @@ class JogoEdit extends React.Component {
                             descricao,
                             imagem: url,
                             placarCasa: '0',
-                            placarVisit: '0' 
+                            placarVisit: '0',
+                            confirmados: [{ push: 'push' }],
+                            gols: [{ push: 'push' }],
+                            cartoes: [{ push: 'push' }],
+                            escalacao: [{ push: 'push' }],
+                            status: '0'
                         });
                 })
                 .then(() => {
@@ -232,7 +237,12 @@ class JogoEdit extends React.Component {
                     descricao,
                     imagem: '',
                     placarCasa: '0',
-                    placarVisit: '0'  
+                    placarVisit: '0',
+                    confirmados: [{ push: 'push' }],
+                    gols: [{ push: 'push' }],
+                    cartoes: [{ push: 'push' }],
+                    escalacao: [{ push: 'push' }],
+                    status: '0'  
                 })
                 .then(() => {
                     this.setState({ loading: false, isTitValid: false });

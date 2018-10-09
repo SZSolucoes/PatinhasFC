@@ -27,6 +27,8 @@ import Admin from './components/admin/Admin';
 import CadastroJogos from './components/admin/cadastrojogos/CadastroJogos';
 import Usuarios from './components/admin/usuarios/Usuarios';
 import Info from './components/admin/informativos/Info';
+import Gerenciar from './components/admin/gerenciar/Gerenciar';
+import GerenciarJogo from './components/admin/gerenciar/GerenciarJogo';
 import { colorAppS } from './utils/constantes';
 
 import { store } from './App';
@@ -419,6 +421,24 @@ class Routes extends React.Component {
                         key={'cadastroInfos'}
                         title={'Informativos'} 
                         component={Info}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'gerenciar'}
+                        title={'Gerenciar Jogos'} 
+                        component={Gerenciar}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'gerenciarJogo'}
+                        title={'Gerenciar Jogo'} 
+                        component={GerenciarJogo}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}

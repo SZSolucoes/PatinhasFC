@@ -13,8 +13,10 @@ import {
     ActivityIndicator
 } from 'react-native';
 import _ from 'lodash';
+import b64 from 'base-64';
 
 import Toast from 'react-native-simple-toast';
+import Moment from 'moment';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
@@ -49,6 +51,9 @@ class Jogos extends React.Component {
 
         this.startOrStopFBJogosListener = this.startOrStopFBJogosListener.bind(this);
         this.renderListItens = this.renderListItens.bind(this);
+        this.renderCardFooter = this.renderCardFooter.bind(this);
+        this.onPressConfirmP = this.onPressConfirmP.bind(this);
+        this.onPressRemoveP = this.onPressRemoveP.bind(this);
         this.addNewRows = this.addNewRows.bind(this);
         this.flatListKeyExtractor = this.flatListKeyExtractor.bind(this);
         this.dataSourceControl = this.dataSourceControl.bind(this);
@@ -96,8 +101,45 @@ class Jogos extends React.Component {
     }
 
     onPressCardGame(item) {
-        this.props.modificaJogoSelected(item);
+        this.props.modificaJogoSelected(item.key);
         Actions.jogoTabBar({ onBack: () => Actions.replace('mainTabBar') });
+    }
+
+    onPressConfirmP(item, b64UserKey) {
+        const { userLogged } = this.props;
+        const newConfirmadosList = item.confirmados ? 
+        [...item.confirmados] : [];
+        const dataAtual = Moment().format('YYYY-MM-DD HH:mm:ss');
+
+        newConfirmadosList.push({
+            key: b64UserKey,
+            imgAvatar: userLogged.imgAvatar,
+            nome: userLogged.nome,
+            horaConfirm: dataAtual
+        });
+
+        firebase.database().ref().child(`jogos/${item.key}`).update({
+            confirmados: newConfirmadosList
+        })
+        .then(() => true)
+        .catch(() => true);
+    }
+
+    onPressRemoveP(item, b64UserKey) {
+        const indexFound = _.findIndex(
+            item.confirmados, (usuario) => usuario.key === b64UserKey
+        );
+        let newConfirmadosList = [];
+
+        if (newConfirmadosList !== -1) {
+            newConfirmadosList = [...item.confirmados];
+            newConfirmadosList.splice(indexFound, 1);
+            firebase.database().ref().child(`jogos/${item.key}`).update({
+                confirmados: newConfirmadosList
+            })
+            .then(() => true)
+            .catch(() => true);
+        }
     }
 
     onScrollView(currentOffset, direction) {
@@ -145,11 +187,12 @@ class Jogos extends React.Component {
     }
 
     onFilterJogos(jogos, filterStr) {
+        const lowerFilter = filterStr.toLowerCase();
         return _.filter(jogos, (jogo) => (
-                jogo.titulo.includes(filterStr) ||
-                jogo.descricao.includes(filterStr) ||
-                jogo.data.includes(filterStr) ||
-                `${jogo.placarCasa}x${jogo.placarVisit}`.includes(filterStr)
+                (jogo.titulo && jogo.titulo.toLowerCase().includes(lowerFilter)) ||
+                (jogo.descricao && jogo.descricao.toLowerCase().includes(lowerFilter)) ||
+                (jogo.data && jogo.data.toLowerCase().includes(lowerFilter)) ||
+                `${jogo.placarCasa}x${jogo.placarVisit}`.includes(lowerFilter)
         ));
     }
 
@@ -202,6 +245,85 @@ class Jogos extends React.Component {
         return newJogos;
     }
 
+    renderCardFooter(item) {
+        if (item.status && item.status === '0') {
+            const b64UserKey = b64.encode(this.props.userLogged.email);
+            return (
+                <View>
+                    <Divider
+                        style={{
+                            marginTop: 5,
+                            marginBottom: 5,
+                            height: 2
+                        }}
+                    />
+                    {
+                        _.findIndex(
+                            item.confirmados, 
+                            (usuario) => usuario.key && usuario.key === b64UserKey) !== -1 ?
+                            (
+                                <TouchableOpacity
+                                    onPress={() => this.onPressRemoveP(item, b64UserKey)}
+                                >
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            borderRadius: 5,
+                                            backgroundColor: 'red',
+                                            padding: 5,
+                                            marginTop: 5
+                                        }}
+                                    >
+                                        <Text
+                                            style={{ 
+                                                color: 'white',
+                                                fontSize: 18, 
+                                                fontWeight: '500' 
+                                            }}
+                                        >
+                                            Retirar presença !
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )
+                            :
+                            (
+                                <TouchableOpacity
+                                    onPress={() => this.onPressConfirmP(item, b64UserKey)}
+                                >
+                                    <View
+                                        style={{
+                                            flexDirection: 'row',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            borderRadius: 5,
+                                            backgroundColor: 'green',
+                                            padding: 5,
+                                            marginTop: 5
+                                        }}
+                                    >
+                                        <Text
+                                            style={{ 
+                                                color: 'white', 
+                                                fontSize: 18, 
+                                                fontWeight: '500' 
+                                            }}
+                                        >
+                                            Confirmar presença !
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )
+                    }
+                </View>
+            );
+        }
+
+        return false;
+    }
+
     renderCardsJogos({ item, index }) {
         const titulo = item.titulo ? item.titulo : ' ';
         const data = item.data ? item.data : ' ';
@@ -217,6 +339,7 @@ class Jogos extends React.Component {
         return (
             <View>
                 <TouchableOpacity
+                    activeOpacity={0.5}
                     onPress={() => {
                         if (this.props.conInfo.type === 'none' ||
                             this.props.conInfo.type === 'unknown'
@@ -248,6 +371,7 @@ class Jogos extends React.Component {
                             placarCasa={placarCasa} 
                             placarVisit={placarVisit}  
                         />
+                        { this.renderCardFooter(item) }  
                     </Card>   
                 </TouchableOpacity>
                 <View style={{ marginBottom: 10 }} />

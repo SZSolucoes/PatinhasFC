@@ -31,7 +31,8 @@ import {
     modificaFilterStr,
     modificaFilterLoad,
     modificaItemSelected,
-    modificaFlagDisableUser
+    modificaFlagDisableUser,
+    modificaClean
 } from '../../../actions/UsuariosActions';
 import { modificaRemocao } from '../../../actions/AlertSclActions';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
@@ -66,6 +67,10 @@ class Usuarios extends React.Component {
         this.checkConInfo = this.checkConInfo.bind(this);
     }
 
+    componentWillUnmount() {
+        this.props.modificaClean();
+    }
+
     onPressEditRemove(item) {
         this.props.modificaItemSelected(item);
         this.props.modificaFlagDisableUser(true);
@@ -82,11 +87,12 @@ class Usuarios extends React.Component {
     }
 
     onFilterUsuariosEdit(usuarios, filterStr) {
+        const lowerFilter = filterStr.toLowerCase();
         return _.filter(usuarios, (usuario) => (
-                usuario.email.includes(filterStr) ||
-                usuario.dtnasc.includes(filterStr) ||
-                usuario.tipoPerfil.includes(filterStr) ||
-                usuario.nome.includes(filterStr)
+                (usuario.email && usuario.email.toLowerCase().includes(lowerFilter)) ||
+                (usuario.dtnasc && usuario.dtnasc.toLowerCase().includes(lowerFilter)) ||
+                (usuario.tipoPerfil && usuario.tipoPerfil.toLowerCase().includes(lowerFilter)) ||
+                (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter))
         ));
     }
 
@@ -180,6 +186,9 @@ class Usuarios extends React.Component {
                 <List containerStyle={{ marginBottom: 20 }}>
                 {
                     newSortedUsers.map((item, index) => {
+                        if ((index + 1) > 30) {
+                            return false;
+                        }
                         const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                         return (
                             <ListItem
@@ -463,5 +472,6 @@ export default connect(mapStateToProps, {
     modificaFilterLoad,
     modificaItemSelected,
     modificaRemocao,
-    modificaFlagDisableUser
+    modificaFlagDisableUser,
+    modificaClean
 })(Usuarios);

@@ -24,7 +24,11 @@ import Versus from '../../jogos/Versus';
 import JogoEdit from './JogoEdit';
 import { modificaItemSelected } from '../../../actions/JogosActions';
 import { modificaRemocao } from '../../../actions/AlertSclActions';
-import { modificaFilterStr, modificaFilterLoad } from '../../../actions/CadastroJogosActions';
+import { 
+    modificaFilterStr, 
+    modificaFilterLoad, 
+    modificaClean
+ } from '../../../actions/CadastroJogosActions';
 
 class CadastroJogos extends React.Component {
 
@@ -56,6 +60,10 @@ class CadastroJogos extends React.Component {
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.checkConInfo = this.checkConInfo.bind(this);
     }
+    
+    componentWillUnmount() {
+        this.props.modificaClean();
+    }
 
     onPressEditRemove(item) {
         this.props.modificaRemocao(true);
@@ -68,11 +76,12 @@ class CadastroJogos extends React.Component {
     }
 
     onFilterJogosEdit(jogos, filterStr) {
+        const lowerFilter = filterStr.toLowerCase();
         return _.filter(jogos, (jogo) => (
-                jogo.titulo.includes(filterStr) ||
-                jogo.descricao.includes(filterStr) ||
-                jogo.data.includes(filterStr) ||
-                `${jogo.placarCasa}x${jogo.placarVisit}`.includes(filterStr)
+                (jogo.titulo && jogo.titulo.toLowerCase().includes(lowerFilter)) ||
+                (jogo.descricao && jogo.descricao.toLowerCase().includes(lowerFilter)) ||
+                (jogo.data && jogo.data.toLowerCase().includes(lowerFilter)) ||
+                `${jogo.placarCasa}x${jogo.placarVisit}`.includes(lowerFilter)
         ));
     }
 
@@ -90,6 +99,9 @@ class CadastroJogos extends React.Component {
     renderListJogosEdit(jogos) {
         const reverseJogos = _.reverse([...jogos]);
         const jogosView = reverseJogos.map((item, index) => {
+            if ((index + 1) > 30) {
+                return false;
+            }
             const titulo = item.titulo ? item.titulo : ' ';
             const data = item.data ? item.data : ' ';
             const placarCasa = item.placarCasa ? item.placarCasa : '0'; 
@@ -441,5 +453,6 @@ export default connect(mapStateToProps, {
     modificaItemSelected,
     modificaRemocao,
     modificaFilterStr, 
-    modificaFilterLoad
+    modificaFilterLoad,
+    modificaClean
 })(CadastroJogos);

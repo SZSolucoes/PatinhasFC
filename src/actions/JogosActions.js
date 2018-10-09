@@ -34,3 +34,7 @@ export const modificaAddNewRows = (value) => ({
     payload: value
 });
 
+export const modificaClean = () => ({
+    type: 'modifica_clean_jogos'
+});
+

@@ -1,5 +1,5 @@
 const INITIAL_STATE = {
-    jogoSelected: {},
+    jogoSelected: '',
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -7,12 +7,12 @@ export default (state = INITIAL_STATE, action) => {
         case 'modifica_jogoselected_jogo':
             return { 
                 ...state, 
-                jogoSelected: { ...action.payload }
+                jogoSelected: action.payload
             };
-        case 'modifica_clean_login':
+        case 'modifica_clean_jogo':
             return {
                 ...state,
-                jogoSelected: {}
+                jogoSelected: ''
             };
         default:
             return state;

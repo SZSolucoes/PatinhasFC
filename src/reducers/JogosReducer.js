@@ -48,13 +48,8 @@ export default (state = INITIAL_STATE, action) => {
         case 'modifica_clean_jogos':
             return {
                 ...state,
-                listJogos: [],
-                itemSelected: {},
-                animatedHeigth: false,
                 filterStr: '',
-                filterLoad: false,
-                loadingFooter: false,
-                maxRows: 30
+                filterLoad: false
             };
         default:
             return state;
