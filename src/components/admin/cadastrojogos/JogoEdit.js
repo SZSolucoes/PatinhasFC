@@ -173,7 +173,7 @@ class JogoEdit extends React.Component {
                             confirmados: [{ push: 'push' }],
                             gols: [{ push: 'push' }],
                             cartoes: [{ push: 'push' }],
-                            escalacao: [{ push: 'push' }],
+                            escalacao: { casa: [{ push: 'push' }], visit: [{ push: 'push' }] },
                             status: '0'
                         });
                 })
@@ -241,7 +241,7 @@ class JogoEdit extends React.Component {
                     confirmados: [{ push: 'push' }],
                     gols: [{ push: 'push' }],
                     cartoes: [{ push: 'push' }],
-                    escalacao: [{ push: 'push' }],
+                    escalacao: { casa: [{ push: 'push' }], visit: [{ push: 'push' }] },
                     status: '0'  
                 })
                 .then(() => {

@@ -58,8 +58,8 @@ class Gerenciar extends React.Component {
     }
 
     onPressCardGame(item) {
-        this.props.modificaItemSelected(item);
-        Actions.gerenciarJogo();
+        this.props.modificaItemSelected(item.key);
+        Actions.gerenciarJogoTab();
     }
 
     checkConInfo(funExec) {

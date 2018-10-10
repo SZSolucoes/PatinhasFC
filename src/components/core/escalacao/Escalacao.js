@@ -18,7 +18,7 @@ import { isPortrait } from '../../../utils/orientation';
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
 
-class Escalacao extends React.PureComponent {
+class Escalacao extends React.Component {
 
     constructor(props) {
         super(props);
@@ -149,17 +149,6 @@ class Escalacao extends React.PureComponent {
                             </TouchableWithoutFeedback>
                         </View>
                         <View onLayout={this.onLayoutCasa}>
-                            <View 
-                                style={{ 
-                                    marginTop: 15, 
-                                    justifyContent: 'flex-end', 
-                                    padding: 3
-                                }}
-                            >
-                                <Text style={{ fontWeight: 'bold', color: 'black' }}>
-                                    {'4-4-2'}
-                                </Text>
-                            </View>
                             <View style={{ height: this.state.heightDim }}>
                                 <Campo />
                             </View>
@@ -199,17 +188,6 @@ class Escalacao extends React.PureComponent {
                             </TouchableWithoutFeedback>
                         </View>
                         <View onLayout={this.onLayoutVisit}>
-                            <View 
-                                style={{ 
-                                    marginTop: 15, 
-                                    justifyContent: 'flex-end', 
-                                    padding: 3
-                                }}
-                            >
-                                <Text style={{ fontWeight: 'bold', color: 'black' }}>
-                                    {'4-4-2'}
-                                </Text>
-                            </View>
                             <View style={{ height: this.state.heightDim }}>
                                 <Campo />
                             </View>

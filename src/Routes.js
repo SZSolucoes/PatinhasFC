@@ -20,7 +20,9 @@ import AlertScl from './components/tools/AlertScl';
 import Login from './components/login/Login';
 import Jogos from './components/jogos/Jogos';
 import Jogo from './components/core/jogo/Jogo';
+import JogoG from './components/admin/gerenciar/JogoG';
 import Escalacao from './components/core/escalacao/Escalacao';
+import EscalacaoG from './components/admin/gerenciar/EscalacaoG';
 import Informativos from './components/informativos/Informativos';
 import Profile from './components/profile/Profile';
 import Admin from './components/admin/Admin';
@@ -28,7 +30,6 @@ import CadastroJogos from './components/admin/cadastrojogos/CadastroJogos';
 import Usuarios from './components/admin/usuarios/Usuarios';
 import Info from './components/admin/informativos/Info';
 import Gerenciar from './components/admin/gerenciar/Gerenciar';
-import GerenciarJogo from './components/admin/gerenciar/GerenciarJogo';
 import { colorAppS } from './utils/constantes';
 
 import { store } from './App';
@@ -436,15 +437,6 @@ class Routes extends React.Component {
                         //initial
                     />
                     <Scene 
-                        key={'gerenciarJogo'}
-                        title={'Gerenciar Jogo'} 
-                        component={GerenciarJogo}
-                        titleStyle={styles.title}
-                        leftButtonTextStyle={styles.btLeft}
-                        backButtonTintColor={'white'}
-                        //initial
-                    />
-                    <Scene 
                         key={'jogoTabBar'}
                         tabs
                         showLabel={false}
@@ -497,6 +489,88 @@ class Routes extends React.Component {
                             key={'escalacaoTab'}
                             hideNavBar 
                             component={Escalacao}
+                            icon={({ focused }) => (
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: 500
+                                    }}
+                                >
+                                    <Icon
+                                        color={focused ? 'white' : 'black'}
+                                        size={focused ? 24 : 36}
+                                        name='soccer-field'
+                                        type='material-community'
+                                        iconStyle={{ transform: [{ rotate: '90deg' }] }}
+                                    />
+                                    { focused && 
+                                    <Text
+                                        style={{
+                                            color: focused ? 'white' : 'black',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Escalação
+                                    </Text>}
+                                </View>
+                            )} 
+                        />
+                    </Scene>
+                    <Scene 
+                        key={'gerenciarJogoTab'}
+                        tabs
+                        showLabel={false}
+                        tabBarPosition={'top'}
+                        showIcon
+                        swipeEnabled
+                        title={'Gerenciar Jogo'} 
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        tabBarStyle={{ backgroundColor: colorAppS }}
+                    >
+                        <Scene 
+                            key={'jogoTabG'}
+                            hideNavBar 
+                            component={JogoG}
+                            initial
+                            icon={({ focused }) => (
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: 500
+                                    }}
+                                >
+                                    <Image 
+                                        source={imgBootOne}
+                                        style={{
+                                            width: focused ? 35 : 45,
+                                            height: focused ? 25 : 40,
+                                            tintColor: focused ? 'white' : 'black',
+                                            margin: 0,
+                                            padding: 0
+                                        }}
+                                    />
+                                    { focused && 
+                                    <Text
+                                        style={{
+                                            color: focused ? 'white' : 'black',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Jogo
+                                    </Text>}
+                                </View>
+                            )} 
+                        />
+                        <Scene 
+                            key={'escalacaoTabG'}
+                            hideNavBar 
+                            component={EscalacaoG}
                             icon={({ focused }) => (
                                 <View
                                     style={{

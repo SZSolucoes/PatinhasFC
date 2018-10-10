@@ -19,7 +19,7 @@ import imgBola from '../../../imgs/bolaanim.png';
 import imgYellowCard from '../../../imgs/yellowcard.png';
 import imgRedCard from '../../../imgs/redcard.png';
 
-class Jogo extends React.Component {
+class JogoG extends React.Component {
 
     constructor(props) {
         super(props);
@@ -591,8 +591,8 @@ class Jogo extends React.Component {
     }
 
     render() {
-        const { listJogos, jogoSelected } = this.props;
-        const jogo = _.filter(listJogos, (item) => item.key === jogoSelected)[0];
+        const { listJogos, itemSelected } = this.props;
+        const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
         return (
             <ScrollView style={styles.viewP}>
                 { this.renderCardPlacar(jogo) }
@@ -648,8 +648,8 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-    jogoSelected: state.JogoReducer.jogoSelected,
+    itemSelected: state.GerenciarReducer.itemSelected,
     listJogos: state.JogosReducer.listJogos
 });
 
-export default connect(mapStateToProps, { modificaClean })(Jogo);
+export default connect(mapStateToProps, { modificaClean })(JogoG);
