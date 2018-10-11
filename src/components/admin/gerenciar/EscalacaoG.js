@@ -8,7 +8,8 @@ import {
     Text,
     TouchableWithoutFeedback,
     Image,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from 'react-native';
 import { Card, Icon, List, ListItem } from 'react-native-elements';
 import { connect } from 'react-redux';
@@ -29,6 +30,9 @@ class EscalacaoG extends React.Component {
     constructor(props) {
         super(props);
 
+        this.isFirstCasa = true;
+        this.isFirstVisit = true;
+
         this.maxViewCasaHeight = 0;
         this.minViewCasaHeight = 0;
 
@@ -48,6 +52,7 @@ class EscalacaoG extends React.Component {
         this.renderCasaJogadores = this.renderCasaJogadores.bind(this);
         this.renderVisitJogadores = this.renderVisitJogadores.bind(this);
         this.renderIcons = this.renderIcons.bind(this);
+        this.renderConfirmados = this.renderConfirmados.bind(this);
 
         this.state = {
             heightDim: Dimensions.get('screen').height / 2.5,
@@ -74,6 +79,10 @@ class EscalacaoG extends React.Component {
 
     onLayoutTitleCasa(event) {
         this.minViewCasaHeight = event.nativeEvent.layout.height;
+        if (this.isFirstCasa) {
+            this.onToggleCasa();
+            this.isFirstCasa = false;
+        }
     }
 
     onLayoutCasa(event) {
@@ -90,13 +99,17 @@ class EscalacaoG extends React.Component {
 
     onLayoutTitleVisit(event) {
         this.minViewVisitHeight = event.nativeEvent.layout.height;
+        if (this.isFirstVisit) {
+            this.onToggleVisit();
+            this.isFirstVisit = false;
+        }
     }
 
     onLayoutVisit(event) {
         this.maxViewVisitHeight = event.nativeEvent.layout.height;
         if (this.state.isVisitExpanded) {
             Animated.spring(     
-                this.state.animCasaValue,
+                this.state.animVisitValue,
                 {
                     toValue: this.maxViewVisitHeight + 50
                 }
@@ -182,7 +195,7 @@ class EscalacaoG extends React.Component {
         }
     }
 
-    renderIcons(item) {
+    renderIcons(item, jogo) {
         return (
             <View 
                 style={{ 
@@ -200,12 +213,27 @@ class EscalacaoG extends React.Component {
                     }}
                 >
                     <TouchableOpacity
-                        onPress={() => false}
+                        onPress={() => {
+                            Alert.alert(
+                                'Aviso',
+                                `Confirma a remoção do jogador:\n${item.nome} ?`,
+                                [
+                                    { text: 'Cancelar', 
+                                        onPress: () => true, 
+                                        style: 'cancel' 
+                                    },
+                                    { 
+                                        text: 'Ok', 
+                                        onPress: () => this.doInOrOut(item, false, jogo) 
+                                    },
+                                ]
+                            );
+                        }}
                     >
                         <Icon
-                            name='square-edit-outline' 
+                            name='delete' 
                             type='material-community' 
-                            size={30} color='green' 
+                            size={30} color='red' 
                         />   
                     </TouchableOpacity>
                 </View>
@@ -222,19 +250,27 @@ class EscalacaoG extends React.Component {
         }
 
         return (
-            <List>
+            <List 
+                containerStyle={{  
+                    borderTopWidth: 0, 
+                    borderBottomWidth: 0 
+                }}
+            >
                 {
                     casaJogadores.map((item, index) => {
                         const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                         return (
                             <ListItem
+                                containerStyle={
+                                    (index + 1) === numJogadores ? { borderBottomWidth: 0 } : null 
+                                }
                                 roundAvatar
                                 avatar={retrieveImgSource(imgAvt)}
                                 key={index}
                                 title={item.nome}
-                                subtitle={item.email}
+                                subtitle={item.posicao}
                                 rightIcon={(
-                                    this.renderIcons(item)
+                                    this.renderIcons(item, jogo)
                                 )}
                             />
                         );
@@ -253,25 +289,91 @@ class EscalacaoG extends React.Component {
         }
 
         return (
-            <List>
+            <List 
+                containerStyle={{  
+                    borderTopWidth: 0, 
+                    borderBottomWidth: 0 
+                }}
+            >
                 {
                     visitJogadores.map((item, index) => {
                         const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                         return (
                             <ListItem
+                                containerStyle={
+                                    (index + 1) === numJogadores ? { borderBottomWidth: 0 } : null 
+                                }
                                 roundAvatar
                                 avatar={retrieveImgSource(imgAvt)}
                                 key={index}
                                 title={item.nome}
-                                subtitle={item.email}
+                                subtitle={item.posicao}
                                 rightIcon={(
-                                    this.renderIcons(item)
+                                    this.renderIcons(item, jogo)
                                 )}
                             />
                         );
                     })
                 }
             </List>
+        );
+    }
+
+    renderConfirmados(jogo) {
+        const jogadoresConfirmados = _.filter(jogo.confirmados, (jgCasa) => !jgCasa.push);
+        const numjogadoresConfirmados = jogadoresConfirmados.length;
+
+        if (numjogadoresConfirmados === 0) {
+            return false;
+        }
+
+        return (
+            <Card
+                containerStyle={styles.card}
+            >
+                <View 
+                    style={styles.titleContainer} 
+                    onLayout={this.onLayoutTitleCasa}
+                >
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image 
+                            style={{ height: 40, width: 35, marginRight: 5 }}
+                            resizeMode={'stretch'}
+                            source={imgHomeShirt} 
+                        /> 
+                        <Text 
+                            onPress={() => this.onToggleCasa()}
+                            style={{ fontSize: 16, color: 'black' }}
+                        >
+                            Confirmados
+                        </Text>
+                    </View>
+                </View>
+                <List 
+                    containerStyle={{ 
+                        marginTop: 0, 
+                        borderTopWidth: 1, 
+                        borderBottomWidth: 1 
+                    }}
+                >
+                    {
+                        jogadoresConfirmados.map((item, index) => {
+                            const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
+                            return (
+                                <ListItem
+                                    titleContainerStyle={{ marginLeft: 10 }}
+                                    subtitleContainerStyle={{ marginLeft: 10 }}
+                                    roundAvatar
+                                    avatar={retrieveImgSource(imgAvt)}
+                                    key={index}
+                                    title={item.nome}
+                                    rightIcon={(<View />)}
+                                />
+                            );
+                        })
+                    }
+                </List>
+            </Card>     
         );
     }
 
@@ -391,6 +493,7 @@ class EscalacaoG extends React.Component {
                             </View>
                         </Animated.View>
                     </Card>
+                    { this.renderConfirmados(jogo) }
                     <View style={{ marginVertical: 60 }} />
                 </ScrollView>
                 <PlayersModal 

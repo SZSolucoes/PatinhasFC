@@ -174,7 +174,8 @@ class JogoEdit extends React.Component {
                             gols: [{ push: 'push' }],
                             cartoes: [{ push: 'push' }],
                             escalacao: { casa: [{ push: 'push' }], visit: [{ push: 'push' }] },
-                            status: '0'
+                            status: '3',
+                            currentTime: '0'
                         });
                 })
                 .then(() => {
@@ -242,7 +243,8 @@ class JogoEdit extends React.Component {
                     gols: [{ push: 'push' }],
                     cartoes: [{ push: 'push' }],
                     escalacao: { casa: [{ push: 'push' }], visit: [{ push: 'push' }] },
-                    status: '0'  
+                    status: '3',
+                    currentTime: '0' 
                 })
                 .then(() => {
                     this.setState({ loading: false, isTitValid: false });

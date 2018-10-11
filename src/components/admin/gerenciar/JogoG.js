@@ -4,25 +4,36 @@ import {
     StyleSheet,
     Text,
     Image,
-    View
+    View,
+    Platform,
+    TouchableOpacity
 } from 'react-native';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { Card, List } from 'react-native-elements';
-import { colorAppF, colorAppP } from '../../../utils/constantes';
+import { Card, List, ListItem } from 'react-native-elements';
+import { Actions } from 'react-native-router-flux';
+import Toast from 'react-native-simple-toast';
+import firebase from '../../../Firebase';
+import { colorAppF, colorAppP, colorAppS, colorAppW } from '../../../utils/constantes';
+import { retrieveImgSource } from '../../../utils/imageStorage';
 import { limitDotText } from '../../../utils/strComplex';
-import { modificaClean } from '../../../actions/JogoActions';
+import { modificaClean, modificaCurrentTime } from '../../../actions/JogoActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
 import imgBola from '../../../imgs/bolaanim.png';
 import imgYellowCard from '../../../imgs/yellowcard.png';
 import imgRedCard from '../../../imgs/redcard.png';
+import imgCartoes from '../../../imgs/cards.png';
+import imgAvatar from '../../../imgs/perfiluserimg.png';
+import Jogos from '../../jogos/Jogos';
 
 class JogoG extends React.Component {
 
     constructor(props) {
         super(props);
+
+        this.intervalIncrementer = null;
 
         this.renderCardPlacar = this.renderCardPlacar.bind(this);
         this.renderGoals = this.renderGoals.bind(this);
@@ -31,10 +42,160 @@ class JogoG extends React.Component {
         this.textPlacar = this.textPlacar.bind(this);
         this.renderGolJogador = this.renderGolJogador.bind(this);
         this.renderCartaoJogador = this.renderCartaoJogador.bind(this);
+        this.renderEscalados = this.renderEscalados.bind(this);
+        this.onStartTimer = this.onStartTimer.bind(this);
+        this.onPauseTimer = this.onPauseTimer.bind(this);
+        this.onResetTimer = this.onResetTimer.bind(this);
+        this.formattedSeconds = this.formattedSeconds.bind(this);
+
+        this.state = {
+            seconds: 0,
+            btnStartEnabled: true,
+            btnPauseEnabled: false,
+            btnResetEnabled: false
+        };
+    }
+
+    componentDidMount() {
+        const { listJogos, itemSelected } = this.props;
+        const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
+        const currentTime = parseInt(jogo.currentTime, 10);
+        this.setState({ seconds: currentTime });
+        if (jogo.status === '0') {
+            this.setState({
+                btnStartEnabled: true,
+                btnPauseEnabled: false,
+                btnResetEnabled: currentTime > 0
+            });
+        } else if (jogo.status === '1') {
+            this.setState({
+                btnStartEnabled: false,
+                btnPauseEnabled: true,
+                btnResetEnabled: false
+            });
+            this.intervalIncrementer = setInterval(() =>
+                this.setState({
+                    seconds: this.state.seconds + 1
+                })
+            , 1000);
+        } else if (Jogos.status === '2') {
+            this.setState({
+                btnStartEnabled: true,
+                btnPauseEnabled: false,
+                btnResetEnabled: false
+            });
+        }
+    }
+
+    shouldComponentUpdate(nextProps, nextStates) {
+        const { listJogos, itemSelected } = this.props;
+        if (nextProps !== this.props) {
+            setTimeout(() => {
+                const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
+                const nj = _.filter(nextProps.listJogos, (item) => item.key === itemSelected)[0];
+                if (jogo.currentTime !== nj.currentTime) {
+                    this.setState({ currentTime: parseInt(nj.currentTime, 10) });
+                }
+                if (jogo.status !== nj.status) {
+                    if (nj.status === '0') {
+                        clearInterval(this.intervalIncrementer);
+                    } else if (nj.status === '1') {
+                        this.intervalIncrementer = setInterval(() =>
+                            this.setState({
+                                seconds: this.state.seconds + 1
+                            })
+                        , 1000);
+                    } else if (nj.status === '2') {
+                        clearInterval(this.intervalIncrementer);
+                        this.setState({
+                            seconds: 0
+                        }); 
+                    }
+                }
+            }, 500);
+        }
+
+        if (nextStates.seconds !== this.state.seconds) {
+            this.props.modificaCurrentTime(nextStates.seconds);
+        }
+
+        return nextProps !== this.props || nextStates !== this.state;
     }
 
     componentWillUnmount() {
+        const { listJogos, itemSelected } = this.props;
+        const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
+        firebase.database().ref().child(`jogos/${jogo.key}`).update({
+            status: '0',
+            currentTime: this.state.seconds.toString()
+        })
+        .then(() => true)
+        .catch(() => true);
+        if (this.intervalIncrementer) {
+            clearInterval(this.intervalIncrementer);
+        }
         this.props.modificaClean();
+    }
+
+    onStartTimer(enabled, jogo) {
+        if (enabled) {
+            firebase.database().ref().child(`jogos/${jogo.key}`).update({
+                status: '1',
+                currentTime: this.state.seconds.toString()
+            })
+            .then(() => {
+                this.setState({
+                    btnStartEnabled: false,
+                    btnPauseEnabled: true,
+                    btnResetEnabled: false
+                });  
+            })
+            .catch(() => 
+                Toast.show('Falha ao iniciar a partida, verifique a conexão.', Toast.SHORT)
+            );
+        } 
+    }
+
+    onPauseTimer(enabled, jogo) { 
+        if (enabled) {
+            firebase.database().ref().child(`jogos/${jogo.key}`).update({
+                status: '0',
+                currentTime: this.state.seconds.toString()
+            })
+            .then(() => {
+                this.setState({
+                    btnStartEnabled: true,
+                    btnPauseEnabled: false,
+                    btnResetEnabled: true
+                });
+            })
+            .catch(() => 
+                Toast.show('Falha ao pausar a partida, verifique a conexão.', Toast.SHORT)
+            );
+        }  
+    }
+
+    onResetTimer(enabled, jogo) { 
+        if (enabled) {
+            firebase.database().ref().child(`jogos/${jogo.key}`).update({
+                status: '2',
+                currentTime: '0'
+            })
+            .then(() => {
+                this.setState({
+                    btnStartEnabled: true,
+                    btnPauseEnabled: false,
+                    btnResetEnabled: false
+                }); 
+            })
+            .catch(() => 
+                Toast.show('Falha ao reiniciar a partida, verifique a conexão.', Toast.SHORT)
+            ); 
+        } 
+    }
+
+    formattedSeconds(sec) {
+        return `${Math.floor(sec / 60)}:${(`0${sec % 60}`).slice(-2)}`;
     }
 
     textJogoProgress(jogo) {
@@ -44,6 +205,8 @@ class JogoG extends React.Component {
             case '1':
                 return 'Ao vivo';
             case '2':
+                return 'Em espera';
+            case '3':
                 return 'Encerrado';
             default:
                 return 'Encerrado';
@@ -55,6 +218,11 @@ class JogoG extends React.Component {
     }
 
     renderCardPlacar(jogo) {
+        const { 
+            btnStartEnabled,
+            btnPauseEnabled,
+            btnResetEnabled
+        } = this.state;
         return (
             <Card
                 containerStyle={styles.card}
@@ -125,7 +293,7 @@ class JogoG extends React.Component {
                                     <Text
                                         style={{ fontSize: 16, fontWeight: '500' }}
                                     >
-                                    {'09:13'}
+                                    { this.formattedSeconds(this.state.seconds) }
                                     </Text>
                                 </View>
                             </View>
@@ -145,7 +313,89 @@ class JogoG extends React.Component {
                         </Text>
                     </View>
                 </View>
-                <View style={{ marginBottom: 30 }} />
+                <View 
+                    style={{ 
+                        flex: 1,
+                        flexDirection: 'row', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        marginTop: 15 
+                    }}
+                >
+                    <View style={[styles.centerFlex, { opacity: btnStartEnabled ? 1 : 0.5 }]}>
+                        <TouchableOpacity
+                            onPress={() => this.onStartTimer(btnStartEnabled, jogo)}
+                        >
+                            <View 
+                                style={[
+                                    styles.circleBtn, 
+                                    styles.centerAlign, 
+                                    { backgroundColor: colorAppS }
+                                ]}
+                            >
+                                <View
+                                    style={[
+                                        styles.circleBtnTwo, 
+                                        styles.centerAlign
+                                    ]}
+                                >
+                                    <Text style={styles.textCircle}>
+                                        Iniciar
+                                    </Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={[styles.centerFlex, { opacity: btnPauseEnabled ? 1 : 0.5 }]}>
+                        <TouchableOpacity
+                            onPress={() => this.onPauseTimer(btnPauseEnabled, jogo)}
+                        >
+                            <View 
+                                style={[
+                                    styles.circleBtn, 
+                                    styles.centerAlign, 
+                                    { backgroundColor: colorAppW }
+                                ]}
+                            >
+                                <View
+                                    style={[
+                                        styles.circleBtnTwo, 
+                                        styles.centerAlign
+                                    ]}
+                                >
+                                    <Text style={styles.textCircle}>
+                                        Pausar
+                                    </Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={[styles.centerFlex, { opacity: btnResetEnabled ? 1 : 0.5 }]}>
+                        <TouchableOpacity
+                            onPress={() => this.onResetTimer(btnResetEnabled, jogo)}
+                        >
+                            <View 
+                                style={[
+                                    styles.circleBtn, 
+                                    styles.centerAlign, 
+                                    { backgroundColor: colorAppP }
+                                ]}
+                            >
+                                <View
+                                    style={[
+                                        styles.circleBtnTwo, 
+                                        styles.centerAlign
+                                    ]}
+                                >
+                                    <Text style={styles.textCircle}>
+                                        Reiniciar
+                                    </Text>
+                                </View>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={{ marginBottom: 20 }} />
             </Card>
         );
     }
@@ -165,12 +415,14 @@ class JogoG extends React.Component {
                             Gols
                         </Text>
                     </View>
-                    <View>
+                    <View style={styles.cardEffect}>
                         <List 
                             containerStyle={{
                                 marginTop: 0,
                                 paddingHorizontal: 5,
-                                paddingVertical: 10
+                                paddingVertical: 10,
+                                borderTopWidth: 0,
+                                borderBottomWidth: 0
                             }}
                         >
                             { this.renderGolJogador(jogo.gols) }
@@ -189,7 +441,13 @@ class JogoG extends React.Component {
         const viewsGols = [];
 
         if (numGolsCasa === 0 && numGolsVisit === 0) {
-            return (<View style={{ marginVertical: 20 }} />);
+            return (
+                <View 
+                    style={{ alignContent: 'center', marginLeft: 3 }} 
+                >
+                    <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                </View>
+            );
         }
 
         if (numGolsCasa > numGolsVisit) {
@@ -370,12 +628,14 @@ class JogoG extends React.Component {
                             Cartões
                         </Text>
                     </View>
-                    <View>
+                    <View style={styles.cardEffect}>
                         <List 
                             containerStyle={{ 
                                 marginTop: 0,
                                 paddingHorizontal: 5,
-                                paddingVertical: 10
+                                paddingVertical: 10,
+                                borderTopWidth: 0,
+                                borderBottomWidth: 0
                             }}
                         >
                             { this.renderCartaoJogador(jogo.cartoes) }
@@ -394,7 +654,13 @@ class JogoG extends React.Component {
         const viewCartoes = [];
 
         if (numCartoesCasa === 0 && numCartoesVisit === 0) {
-            return (<View style={{ marginVertical: 20 }} />);
+            return (
+                <View 
+                    style={{ alignContent: 'center' }} 
+                >
+                    <Image source={imgCartoes} style={{ width: 30, height: 30 }} />
+                </View>
+            );
         }
 
         if (numCartoesCasa > numCartoesVisit) {
@@ -590,15 +856,111 @@ class JogoG extends React.Component {
         return viewCartoes;
     }
 
+    renderEscalados(jogo) {
+        const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push);
+        const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push);
+        const numJogadoresCasa = jogadoresCasaFt.length;
+        const numjogadoresVisit = jogadoresVisitFt.length;
+
+        if (numJogadoresCasa === 0 && numjogadoresVisit === 0) {
+            return false;
+        }
+
+        return (
+            <View style={{ padding: 5 }}>
+                <View style={{ margin: 5 }}>
+                    <Text
+                        style={{ 
+                            color: 'black', 
+                            fontWeight: 'bold',
+                            fontSize: 16 
+                        }}
+                    >
+                        Jogadores
+                    </Text>
+                </View>
+                <View style={[styles.cardEffect, { paddingVertical: 5, paddingHorizontal: 1 }]}>
+                    <List 
+                        containerStyle={{ 
+                            marginTop: 0, 
+                            borderTopWidth: 0, 
+                            borderBottomWidth: 0 
+                        }}
+                    >
+                        {
+                            jogadoresCasaFt.map((item, index) => {
+                                const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
+                                return (
+                                    <ListItem
+                                        containerStyle={
+                                            (index + 1) === numJogadoresCasa && 
+                                            numjogadoresVisit === 0 ? 
+                                            { borderBottomWidth: 0 } : null 
+                                        }
+                                        titleContainerStyle={{ marginLeft: 10 }}
+                                        subtitleContainerStyle={{ marginLeft: 10 }}
+                                        roundAvatar
+                                        avatar={retrieveImgSource(imgAvt)}
+                                        key={index}
+                                        title={item.nome}
+                                        subtitle={item.posicao}
+                                        rightIcon={(<View />)}
+                                        leftIcon={(
+                                            <Image 
+                                                style={{ height: 40, width: 35, marginRight: 5 }}
+                                                resizeMode={'stretch'}
+                                                source={imgHomeShirt} 
+                                            />)
+                                        }
+                                    />
+                                );
+                            })
+                        }
+                        {
+                            jogadoresVisitFt.map((item, index) => {
+                                const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
+                                return (
+                                    <ListItem
+                                        containerStyle={
+                                            (index + 1) === numjogadoresVisit ?
+                                            { borderBottomWidth: 0 } : null 
+                                        }
+                                        titleContainerStyle={{ marginLeft: 10 }}
+                                        subtitleContainerStyle={{ marginLeft: 10 }}
+                                        roundAvatar
+                                        avatar={retrieveImgSource(imgAvt)}
+                                        key={index}
+                                        title={item.nome}
+                                        subtitle={item.posicao}
+                                        rightIcon={(<View />)}
+                                        leftIcon={(
+                                            <Image 
+                                                style={{ height: 40, width: 35, marginRight: 5 }}
+                                                resizeMode={'stretch'}
+                                                source={imgVisitShirt} 
+                                            />)
+                                        }
+                                    />
+                                );
+                            })
+                        }
+                    </List>
+                </View>
+            </View>
+        );
+    }
+
     render() {
         const { listJogos, itemSelected } = this.props;
         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
+
         return (
             <ScrollView style={styles.viewP}>
                 { this.renderCardPlacar(jogo) }
                 <View style={{ marginVertical: 2 }} />
                 { this.renderGoals(jogo) }
                 { this.renderCartoes(jogo) }
+                { this.renderEscalados(jogo) }
                 <View style={{ marginVertical: 20 }} />
             </ScrollView>
         );
@@ -628,6 +990,22 @@ const styles = StyleSheet.create({
         marginVertical: 15,
         borderRadius: 5
     },
+    cardEffect: {
+        backgroundColor: 'white',
+        borderColor: '#e1e8ee',
+        borderRadius: 5,
+        ...Platform.select({
+            ios: {
+                shadowColor: 'rgba(0,0,0, .2)',
+                shadowOffset: { height: 0, width: 0 },
+                shadowOpacity: 1,
+                shadowRadius: 1,
+            },
+            android: {
+                elevation: 1,
+            },
+        }),
+    },
     topViewPlacar: {
         width: '80%',
         height: 0,
@@ -644,6 +1022,44 @@ const styles = StyleSheet.create({
         borderTopWidth: 0.5, 
         borderTopColor: 'black',
         marginVertical: 5
+    },
+    circleBtn: { 
+        width: 70, 
+        height: 70, 
+        borderRadius: 70 / 2,
+        borderColor: '#e1e8ee',
+        ...Platform.select({
+            ios: {
+                shadowColor: 'rgba(0,0,0, .2)',
+                shadowOffset: { height: 0, width: 0 },
+                shadowOpacity: 1,
+                shadowRadius: 1,
+            },
+            android: {
+                elevation: 1,
+            },
+        }),
+    },
+    circleBtnTwo: { 
+        width: 60, 
+        height: 60, 
+        borderRadius: 60 / 2,
+        borderWidth: 2,
+        borderColor: 'white'
+    },
+    centerFlex: { 
+        flex: 1, 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+    },
+    centerAlign: {
+        alignItems: 'center', 
+        justifyContent: 'center'
+    },
+    textCircle: {
+        fontSize: 12, 
+        color: 'white', 
+        fontWeight: 'bold' 
     }
 });
 
@@ -652,4 +1068,7 @@ const mapStateToProps = (state) => ({
     listJogos: state.JogosReducer.listJogos
 });
 
-export default connect(mapStateToProps, { modificaClean })(JogoG);
+export default connect(mapStateToProps, { 
+    modificaClean,
+    modificaCurrentTime 
+})(JogoG);

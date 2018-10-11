@@ -246,7 +246,7 @@ class Jogos extends React.Component {
     }
 
     renderCardFooter(item) {
-        if (item.status && item.status === '0') {
+        if (item.status && item.status === '3') {
             const b64UserKey = b64.encode(this.props.userLogged.email);
             return (
                 <View>

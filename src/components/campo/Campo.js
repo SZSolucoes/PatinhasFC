@@ -14,6 +14,7 @@ import {
     modificaShowPlayersModal,
     modificaJogador
 } from '../../actions/GerenciarActions';
+import { getPosName } from '../../utils/jogosUtils';
 
 import imgCampo from '../../imgs/campo.jpg';
 import imgAvatar from '../../imgs/perfiluserimg.png';
@@ -30,10 +31,12 @@ class Campo extends React.Component {
 
     onTouchPlayer(jogador, side, pos) {
         const incluir = jogador.length === 0;
+
         if (incluir) {
             const newJogador = {
                 key: '',
                 nome: '',
+                posicao: getPosName(pos),
                 posvalue: pos,
                 imgAvatar: '',
                 side
@@ -46,7 +49,7 @@ class Campo extends React.Component {
         
         Alert.alert(
             'Aviso',
-            `Confirma a remoção do jogador ${jogador[0].nome} ?`,
+            `Confirma a remoção do jogador:\n${jogador[0].nome} ?`,
             [
                 { text: 'Cancelar', onPress: () => true, style: 'cancel' },
                 { text: 'Ok', onPress: () => this.props.doInOrOut(jogador[0], false) },
@@ -102,6 +105,10 @@ class Campo extends React.Component {
                                     <View style={[styles.viewGridColumn, { flex: 0.7 }]}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'GO'}
                                             source={this.retrieveSource(go)}
@@ -116,6 +123,10 @@ class Campo extends React.Component {
                                         <View style={{ alignSelf: 'flex-end' }}>
                                             <Avatar
                                                 medium
+                                                avatarStyle={
+                                                    side === 'casa' ? 
+                                                    styles.avatarHomeStyle : styles.avatarVisitStyle
+                                                }
                                                 rounded
                                                 title={'LE'}
                                                 source={this.retrieveSource(le)}
@@ -129,6 +140,10 @@ class Campo extends React.Component {
                                         <View style={{ alignSelf: 'flex-start' }}>
                                             <Avatar
                                                 medium
+                                                avatarStyle={
+                                                    side === 'casa' ? 
+                                                    styles.avatarHomeStyle : styles.avatarVisitStyle
+                                                }
                                                 rounded
                                                 title={'ZA'}
                                                 source={this.retrieveSource(za1)}
@@ -142,6 +157,10 @@ class Campo extends React.Component {
                                         <View style={{ alignSelf: 'flex-start' }}>
                                             <Avatar
                                                 medium
+                                                avatarStyle={
+                                                    side === 'casa' ? 
+                                                    styles.avatarHomeStyle : styles.avatarVisitStyle
+                                                }
                                                 rounded
                                                 title={'ZA'}
                                                 source={this.retrieveSource(za2)}
@@ -155,6 +174,10 @@ class Campo extends React.Component {
                                         <View style={{ alignSelf: 'flex-end' }}>
                                             <Avatar
                                                 medium
+                                                avatarStyle={
+                                                    side === 'casa' ? 
+                                                    styles.avatarHomeStyle : styles.avatarVisitStyle
+                                                }
                                                 rounded
                                                 title={'LD'}
                                                 source={this.retrieveSource(ld)}
@@ -170,6 +193,10 @@ class Campo extends React.Component {
                                         <View />
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MD'}
                                             source={this.retrieveSource(md1)}
@@ -181,6 +208,10 @@ class Campo extends React.Component {
                                         />
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MD'}
                                             source={this.retrieveSource(md2)}
@@ -195,6 +226,10 @@ class Campo extends React.Component {
                                     <View style={styles.viewGridColumn}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MO'}
                                             source={this.retrieveSource(mo1)}
@@ -206,6 +241,10 @@ class Campo extends React.Component {
                                         />
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MO'}
                                             source={this.retrieveSource(mo2)}
@@ -219,6 +258,10 @@ class Campo extends React.Component {
                                     <View style={styles.viewGridColumn}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'AT'}
                                             source={this.retrieveSource(at1)}
@@ -230,6 +273,10 @@ class Campo extends React.Component {
                                         />
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'AT'}
                                             source={this.retrieveSource(at2)}
@@ -267,6 +314,10 @@ class Campo extends React.Component {
                                     <View style={[styles.viewGridColumn, { flex: 0.7 }]}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'GO'}
                                             source={this.retrieveSource(go)}
@@ -281,6 +332,10 @@ class Campo extends React.Component {
                                         <View style={{ alignSelf: 'flex-end' }}>
                                             <Avatar
                                                 medium
+                                                avatarStyle={
+                                                    side === 'casa' ? 
+                                                    styles.avatarHomeStyle : styles.avatarVisitStyle
+                                                }
                                                 rounded
                                                 title={'LE'}
                                                 source={this.retrieveSource(le)}
@@ -294,6 +349,10 @@ class Campo extends React.Component {
                                         <View style={{ alignSelf: 'flex-start' }}>
                                             <Avatar
                                                 medium
+                                                avatarStyle={
+                                                    side === 'casa' ? 
+                                                    styles.avatarHomeStyle : styles.avatarVisitStyle
+                                                }
                                                 rounded
                                                 title={'ZA'}
                                                 source={this.retrieveSource(za1)}
@@ -307,6 +366,10 @@ class Campo extends React.Component {
                                         <View style={{ alignSelf: 'flex-start' }}>
                                             <Avatar
                                                 medium
+                                                avatarStyle={
+                                                    side === 'casa' ? 
+                                                    styles.avatarHomeStyle : styles.avatarVisitStyle
+                                                }
                                                 rounded
                                                 title={'ZA'}
                                                 source={this.retrieveSource(za2)}
@@ -320,6 +383,10 @@ class Campo extends React.Component {
                                         <View style={{ alignSelf: 'flex-end' }}>
                                             <Avatar
                                                 medium
+                                                avatarStyle={
+                                                    side === 'casa' ? 
+                                                    styles.avatarHomeStyle : styles.avatarVisitStyle
+                                                }
                                                 rounded
                                                 title={'LD'}
                                                 source={this.retrieveSource(ld)}
@@ -335,6 +402,10 @@ class Campo extends React.Component {
                                         <View />
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MD'}
                                             source={this.retrieveSource(md1)}
@@ -346,6 +417,10 @@ class Campo extends React.Component {
                                         />
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MD'}
                                             source={this.retrieveSource(md2)}
@@ -360,6 +435,10 @@ class Campo extends React.Component {
                                     <View style={styles.viewGridColumn}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MO'}
                                             source={this.retrieveSource(mo1)}
@@ -371,6 +450,10 @@ class Campo extends React.Component {
                                         />
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MO'}
                                             source={this.retrieveSource(mo2)}
@@ -384,6 +467,10 @@ class Campo extends React.Component {
                                     <View style={styles.viewGridColumn}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'AT'}
                                             source={this.retrieveSource(at1)}
@@ -395,6 +482,10 @@ class Campo extends React.Component {
                                         />
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'AT'}
                                             source={this.retrieveSource(at2)}
@@ -436,6 +527,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-end' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'AT'}
                                             //source={{ uri: '' }}
@@ -446,6 +541,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-end' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'AT'}
                                             //source={{ uri: '' }}
@@ -458,6 +557,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-end' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MO'}
                                             //source={{ uri: '' }}
@@ -468,6 +571,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-end' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MO'}
                                             //source={{ uri: '' }}
@@ -481,6 +588,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-end' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MD'}
                                             //source={{ uri: '' }}
@@ -491,6 +602,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-end' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'MD'}
                                             //source={{ uri: '' }}
@@ -504,6 +619,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-start' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'LD'}
                                             //source={{ uri: '' }}
@@ -514,6 +633,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-end' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'ZA'}
                                             //source={{ uri: '' }}
@@ -524,6 +647,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-end' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'ZA'}
                                             //source={{ uri: '' }}
@@ -534,6 +661,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-start' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'LE'}
                                             //source={{ uri: '' }}
@@ -546,6 +677,10 @@ class Campo extends React.Component {
                                     <View style={{ alignSelf: 'flex-end' }}>
                                         <Avatar
                                             medium
+                                            avatarStyle={
+                                                side === 'casa' ? 
+                                                styles.avatarHomeStyle : styles.avatarVisitStyle
+                                            }
                                             rounded
                                             title={'GO'}
                                             //source={{ uri: '' }}
@@ -597,6 +732,14 @@ const styles = StyleSheet.create({
         height: 50,
         backgroundColor: '#fff',
         borderRadius: 100
+    },
+    avatarHomeStyle: {
+        borderWidth: 2,
+        borderColor: 'white'
+    },
+    avatarVisitStyle: {
+        borderWidth: 2,
+        borderColor: '#0083FF'
     }
 });
 

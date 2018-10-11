@@ -59,7 +59,7 @@ class Gerenciar extends React.Component {
 
     onPressCardGame(item) {
         this.props.modificaItemSelected(item.key);
-        Actions.gerenciarJogoTab();
+        Actions.gerenciarJogoTab({ onBack: () => Actions.popTo('gerenciar') });
     }
 
     checkConInfo(funExec) {

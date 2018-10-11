@@ -10,10 +10,14 @@ import {
     Keyboard,
     BackHandler,
     Platform,
-    Image
+    Image,
+    TouchableOpacity,
+    Alert
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
+import _ from 'lodash';
+import Toast from 'react-native-simple-toast';
 
 import { isPortrait, isLandscape } from './utils/orientation';
 import AlertScl from './components/tools/AlertScl';
@@ -33,10 +37,12 @@ import Gerenciar from './components/admin/gerenciar/Gerenciar';
 import { colorAppS } from './utils/constantes';
 
 import { store } from './App';
+import firebase from './Firebase';
 import SplashScreenAnim from './components/animations/SplashScreenAnim';
 import AnimScene from './components/tools/AnimatedScene';
 
 import imgBootOne from './imgs/bootone.png';
+import imgFinishFlag from './imgs/finishflag.png';
 
 const AnimatedScene = Animated.createAnimatedComponent(AnimScene);
 
@@ -50,6 +56,7 @@ class Routes extends React.Component {
         this.doTabAnimation = this.doTabAnimation.bind(this);
         this.renderAdminTab = this.renderAdminTab.bind(this);
         this.onChangeDimension = this.onChangeDimension.bind(this);
+        this.rightButtonGerenciarTab = this.rightButtonGerenciarTab.bind(this);
 
         this.state = {
             logged: false,
@@ -178,6 +185,79 @@ class Routes extends React.Component {
                 ).start();
             }
         }  
+    }
+
+    rightButtonGerenciarTab() {
+        return (
+            <View 
+                style={{
+                    flexDirection: 'row',
+                    marginHorizontal: 5,
+                    paddingHorizontal: 10,
+                }}
+            >
+                <TouchableOpacity
+                    onPress={() => {
+                        const currentTimeNow = store.getState().JogoReducer.currentTime;
+                        const { listJogos } = store.getState().JogosReducer;
+                        const { itemSelected } = store.getState().GerenciarReducer;
+                        const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
+                        if (jogo.status === '1') {
+                            Alert.alert(
+                                'Aviso',
+                                'Para sincronizar o tempo de jogo' +
+                                ' é necessário que o jogo esteja pausado.'
+                            );
+                            return;
+                        }
+                        Alert.alert(
+                            'Aviso',
+                            'Deseja sincronizar o tempo de jogo com todos os usuários ?',
+                            [
+                                { text: 'Cancelar', 
+                                    onPress: () => true, 
+                                    style: 'cancel' 
+                                },
+                                { 
+                                    text: 'Ok', 
+                                    onPress: () => {
+                                        firebase.database()
+                                        .ref()
+                                        .child(`jogos/${jogo.key}`).update({
+                                            currentTime: currentTimeNow.toString()
+                                        })
+                                        .then(
+                                            () => Toast.show('Sincronização efetuada.', Toast.SHORT)
+                                        )
+                                        .catch(
+                                            () => Toast.show(
+                                                'Falha ao sincronizar. Verifique a conexão.',
+                                                 Toast.SHORT
+                                            )
+                                        );
+                                    }
+                                }
+                            ]
+                        );
+                    }}
+                >
+                    <Icon
+                        color={'white'}
+                        name='cloud-sync'
+                        type='material-community'
+                        size={26}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={{ marginLeft: 20 }}
+                >        
+                        <Image
+                            source={imgFinishFlag}
+                            style={{ width: 20, height: 25, tintColor: 'white' }}
+                        />
+                </TouchableOpacity>
+            </View>
+        );
     }
 
     renderAdminTab() {
@@ -441,6 +521,7 @@ class Routes extends React.Component {
                         tabs
                         showLabel={false}
                         tabBarPosition={'top'}
+                        lazy={false}
                         showIcon
                         swipeEnabled
                         title={'Jogo'} 
@@ -523,6 +604,7 @@ class Routes extends React.Component {
                         tabs
                         showLabel={false}
                         tabBarPosition={'top'}
+                        lazy={false}
                         showIcon
                         swipeEnabled
                         title={'Gerenciar Jogo'} 
@@ -530,6 +612,7 @@ class Routes extends React.Component {
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
+                        renderRightButton={() => this.rightButtonGerenciarTab()}
                     >
                         <Scene 
                             key={'jogoTabG'}

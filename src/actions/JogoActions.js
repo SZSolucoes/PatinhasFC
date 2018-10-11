@@ -8,3 +8,8 @@ export const modificaClean = () => ({
     type: 'modifica_clean_jogo'
 });
 
+export const modificaCurrentTime = (value) => ({
+    type: 'modifica_currenttime_jogo',
+    payload: value
+});
+

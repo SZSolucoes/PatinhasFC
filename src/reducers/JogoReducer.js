@@ -1,5 +1,6 @@
 const INITIAL_STATE = {
     jogoSelected: '',
+    currentTime: 0
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -9,10 +10,16 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 jogoSelected: action.payload
             };
+        case 'modifica_currenttime_jogo':
+            return { 
+                ...state, 
+                currentTime: action.payload
+            };
         case 'modifica_clean_jogo':
             return {
                 ...state,
-                jogoSelected: ''
+                jogoSelected: '',
+                currentTime: 0
             };
         default:
             return state;
