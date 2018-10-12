@@ -21,7 +21,7 @@ export const startFbListener = (name, params) => {
         case 'jogos':
             // LISTENER FIREBASE JOGOS
             if (!jogosListener || (jogosListener && !jogosListenerOn)) {
-                jogosListener = databaseRef.child('jogos');
+                jogosListener = databaseRef.child('jogos').orderByChild('endStatus').equalTo('0');
                 jogosListener.on('value', (snapshot) => {
                     store.dispatch({
                         type: 'modifica_listjogos_jogos',
@@ -32,7 +32,7 @@ export const startFbListener = (name, params) => {
             }
             break;
         case 'infos':
-            // LISTENER FIREBASE JOGOS
+            // LISTENER FIREBASE INFORMATIVOS
             if (!infosListener || (infosListener && !infosListenerOn)) {
                 infosListener = databaseRef.child('informativos');
                 infosListener.on('value', (snapshot) => {

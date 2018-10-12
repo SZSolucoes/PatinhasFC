@@ -60,7 +60,7 @@ export const doLogin = (params) => dispatch => {
 
 const onLoginSuccess = (dispatch, params) => {
     const dbUsuarioRef = firebase.database().ref().child(`usuarios/${b64.encode(params.email)}`);
-    const dataAtual = Moment(new Date().toLocaleString()).format('DD/MM/YYYY HH:mm:ss');
+    const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
     let usuarioLogged = {};
     dbUsuarioRef.once('value', (snapshot) => {
         const snapVal = snapshot.val();
@@ -78,15 +78,15 @@ const onLoginSuccess = (dispatch, params) => {
                 telefone: '',
                 endereco: '',
                 dataCadastro: dataAtual,
-                dataHoraUltimoLogin: '',
-                jogosParticipados: '',
-                jogosEscalados: '',
-                vitorias: '',
-                derrotas: '',
-                gols: '',
-                faltas: '',
-                cartoesAmarelos: '',
-                cartoesVermelhos: '',
+                dataHoraUltimoLogin: dataAtual,
+                jogosParticipados: '0',
+                jogosEscalados: '0',
+                vitorias: '0',
+                derrotas: '0',
+                gols: '0',
+                faltas: '0',
+                cartoesAmarelos: '0',
+                cartoesVermelhos: '0',
                 posicao: ''
             };
 

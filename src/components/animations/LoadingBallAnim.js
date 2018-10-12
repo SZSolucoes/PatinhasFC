@@ -7,6 +7,8 @@ import {
     Dimensions,
 } from 'react-native';
 
+import { store } from '../../App';
+
 import imgBall from '../../imgs/bolaanim.png';
 
 export default class LoadingBallAnim extends React.Component {
@@ -44,6 +46,7 @@ export default class LoadingBallAnim extends React.Component {
         this.animBallThree = this.animBallThree.bind(this);
         this.animBallFour = this.animBallFour.bind(this);
         this.animBallFive = this.animBallFive.bind(this);
+        this.checkConInfo = this.checkConInfo.bind(this);
 
         this.state = {
             animsOn: true
@@ -62,7 +65,7 @@ export default class LoadingBallAnim extends React.Component {
             this.ballFourTime.stop();
             this.ballFiveTime.stop();
             this.setState({ animsOn: false });
-            this.animNetView(-100, Dimensions.get('window').height / 2, 3000);
+            this.checkConInfo();
         }, 15000);
     }
 
@@ -73,6 +76,18 @@ export default class LoadingBallAnim extends React.Component {
         this.ballFourTime.stop();
         this.ballFiveTime.stop();
         clearTimeout(this.animViewTimeout);
+    }
+
+    checkConInfo() {
+        const info = store.getState().LoginReducer.conInfo;
+        if (info.type === 'none' ||
+            info.type === 'unknown'
+        ) {
+            this.animNetView(-100, Dimensions.get('window').height / 2, 3000);
+            return false;
+        }
+
+        return true;
     }
 
     doAnim(initValue, toValue) {

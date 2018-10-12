@@ -1,5 +1,5 @@
 import React from 'react';
-import { Router, Scene } from 'react-native-router-flux';
+import { Router, Scene, Actions } from 'react-native-router-flux';
 import { 
     StyleSheet,
     Text,
@@ -250,6 +250,55 @@ class Routes extends React.Component {
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={{ marginLeft: 20 }}
+                    onPress={() => {
+                        const { listJogos } = store.getState().JogosReducer;
+                        const { itemSelected } = store.getState().GerenciarReducer;
+                        const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
+                        if (jogo.status === '1') {
+                            Alert.alert(
+                                'Aviso',
+                                'Para finalizar o jogo' +
+                                ' é necessário que o jogo não esteja em andamento.'
+                            );
+                            return;
+                        }
+                        Alert.alert(
+                            'Atenção',
+                            'Ao finalizar o jogo, o mesmo estará disponível' +
+                            ' apenas em histórico. Deseja continuar ?',
+                            [
+                                { text: 'Cancelar', 
+                                    onPress: () => true, 
+                                    style: 'cancel' 
+                                },
+                                { 
+                                    text: 'Ok', 
+                                    onPress: () => {
+                                        firebase.database()
+                                        .ref()
+                                        .child(`jogos/${jogo.key}`).update({
+                                            endStatus: '1'
+                                        })
+                                        .then(
+                                            () => {
+                                                Actions.popTo('gerenciar');
+                                                Toast.show(
+                                                    'Jogo finalizado.',
+                                                    Toast.SHORT
+                                                );
+                                            }
+                                        )
+                                        .catch(
+                                            () => Toast.show(
+                                                'Falha ao finalizar jogo. Verifique a conexão.',
+                                                 Toast.SHORT
+                                            )
+                                        );
+                                    }
+                                }
+                            ]
+                        );
+                    }}
                 >        
                         <Image
                             source={imgFinishFlag}

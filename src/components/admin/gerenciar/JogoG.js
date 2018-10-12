@@ -6,17 +6,17 @@ import {
     Image,
     View,
     Platform,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from 'react-native';
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Card, List, ListItem } from 'react-native-elements';
-import { Actions } from 'react-native-router-flux';
 import Toast from 'react-native-simple-toast';
 import firebase from '../../../Firebase';
 import { colorAppF, colorAppP, colorAppS, colorAppW } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
-import { limitDotText } from '../../../utils/strComplex';
+import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
 import { modificaClean, modificaCurrentTime } from '../../../actions/JogoActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
@@ -35,18 +35,22 @@ class JogoG extends React.Component {
 
         this.intervalIncrementer = null;
 
+        this.fbDatabaseRef = firebase.database().ref();
+
         this.renderCardPlacar = this.renderCardPlacar.bind(this);
         this.renderGoals = this.renderGoals.bind(this);
         this.renderCartoes = this.renderCartoes.bind(this);
         this.textJogoProgress = this.textJogoProgress.bind(this);
         this.textPlacar = this.textPlacar.bind(this);
+        this.onPressPlayerGol = this.onPressPlayerGol.bind(this);
+        this.onPressCard = this.onPressCard.bind(this);
         this.renderGolJogador = this.renderGolJogador.bind(this);
         this.renderCartaoJogador = this.renderCartaoJogador.bind(this);
         this.renderEscalados = this.renderEscalados.bind(this);
+        this.renderIcons = this.renderIcons.bind(this);
         this.onStartTimer = this.onStartTimer.bind(this);
         this.onPauseTimer = this.onPauseTimer.bind(this);
         this.onResetTimer = this.onResetTimer.bind(this);
-        this.formattedSeconds = this.formattedSeconds.bind(this);
 
         this.state = {
             seconds: 0,
@@ -89,6 +93,11 @@ class JogoG extends React.Component {
 
     shouldComponentUpdate(nextProps, nextStates) {
         const { listJogos, itemSelected } = this.props;
+
+        if (nextProps.listJogos && nextProps.listJogos.length === 0) {
+            return false;
+        }
+
         if (nextProps !== this.props) {
             setTimeout(() => {
                 const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
@@ -125,7 +134,7 @@ class JogoG extends React.Component {
     componentWillUnmount() {
         const { listJogos, itemSelected } = this.props;
         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
-        firebase.database().ref().child(`jogos/${jogo.key}`).update({
+        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
             status: '0',
             currentTime: this.state.seconds.toString()
         })
@@ -139,7 +148,7 @@ class JogoG extends React.Component {
 
     onStartTimer(enabled, jogo) {
         if (enabled) {
-            firebase.database().ref().child(`jogos/${jogo.key}`).update({
+            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
                 status: '1',
                 currentTime: this.state.seconds.toString()
             })
@@ -158,7 +167,7 @@ class JogoG extends React.Component {
 
     onPauseTimer(enabled, jogo) { 
         if (enabled) {
-            firebase.database().ref().child(`jogos/${jogo.key}`).update({
+            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
                 status: '0',
                 currentTime: this.state.seconds.toString()
             })
@@ -177,7 +186,7 @@ class JogoG extends React.Component {
 
     onResetTimer(enabled, jogo) { 
         if (enabled) {
-            firebase.database().ref().child(`jogos/${jogo.key}`).update({
+            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
                 status: '2',
                 currentTime: '0'
             })
@@ -194,8 +203,104 @@ class JogoG extends React.Component {
         } 
     }
 
-    formattedSeconds(sec) {
-        return `${Math.floor(sec / 60)}:${(`0${sec % 60}`).slice(-2)}`;
+    onPressPlayerGol(jogador, jogo) {
+        const gols = [
+            ...jogo.gols, 
+            { 
+                side: jogador.side,
+                nome: jogador.nome,
+                time: this.state.seconds.toString()
+            }
+        ];
+
+        Alert.alert(
+            'Aviso',
+            `Confirma o gol para o jogador:\n${jogador.nome} ?`,
+            [
+                { text: 'Cancelar', 
+                    onPress: () => true, 
+                    style: 'cancel' 
+                },
+                { 
+                    text: 'Ok', 
+                    onPress: () => {
+                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
+                            gols
+                        })
+                        .then(() => {
+                            Toast.show('Gol marcado.', Toast.SHORT);
+                            this.fbDatabaseRef
+                            .child(`usuarios/${jogador.key}/gols`).once('value', (snapshot) => {
+                                const golsPlus = parseInt(snapshot.val(), 10) + 1;
+                                this.fbDatabaseRef
+                                .child(`usuarios/${jogador.key}`).update({
+                                    gols: golsPlus.toString()
+                                })
+                                .then(() => true)
+                                .catch(() => true);
+                            });
+                        })
+                        .catch(() => 
+                            Toast.show('Falha ao marcar o gol. Verifique a conexão.', Toast.SHORT)
+                        );
+                    }
+                }
+            ]
+        );
+    }
+
+    onPressCard(jogador, jogo, color) {
+        const cartoes = [
+            ...jogo.cartoes, 
+            { 
+                side: jogador.side,
+                nome: jogador.nome,
+                time: this.state.seconds.toString(),
+                color
+            }
+        ];
+
+        Alert.alert(
+            'Aviso',
+            `Confirma o cartão ${color} para o jogador:\n${jogador.nome} ?`,
+            [
+                { text: 'Cancelar', 
+                    onPress: () => true, 
+                    style: 'cancel' 
+                },
+                { 
+                    text: 'Ok', 
+                    onPress: () => {
+                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
+                            cartoes
+                        })
+                        .then(() => {
+                            const keyCard = color === 'amarelo' ? 
+                            'cartoesAmarelos' : 'cartoesVermelhos';
+                            Toast.show(`Cartão ${color} aplicado.`, Toast.SHORT);
+                            this.fbDatabaseRef
+                            .child(`usuarios/${jogador.key}/${keyCard}`)
+                            .once('value', (snapshot) => {
+                                const cartaoPlus = parseInt(snapshot.val(), 10) + 1;
+                                const keyCardJson = color === 'amarelo' ? 
+                                { cartoesAmarelos: cartaoPlus.toString() } 
+                                :
+                                { cartoesVermelhos: cartaoPlus.toString() };
+                                this.fbDatabaseRef
+                                .child(`usuarios/${jogador.key}`).update({
+                                    ...keyCardJson
+                                })
+                                .then(() => true)
+                                .catch(() => true);
+                            });
+                        })
+                        .catch(() => 
+                            Toast.show('Falha ao aplicar cartão. Verifique a conexão.', Toast.SHORT)
+                        );
+                    }
+                }
+            ]
+        );
     }
 
     textJogoProgress(jogo) {
@@ -293,7 +398,7 @@ class JogoG extends React.Component {
                                     <Text
                                         style={{ fontSize: 16, fontWeight: '500' }}
                                     >
-                                    { this.formattedSeconds(this.state.seconds) }
+                                    { formattedSeconds(this.state.seconds) }
                                     </Text>
                                 </View>
                             </View>
@@ -454,6 +559,31 @@ class JogoG extends React.Component {
             let i = 0;
             for (i = 0; i < numGolsCasa; i++) {
                 if ((i + 1) > numGolsVisit || numGolsVisit === 0) {
+                    let timeText = formatJogoSeconds(golsCasa[i].time);
+                    if (timeText.length > 1) {
+                        timeText = (
+                            <Text>
+                                { timeText[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeText[1] }
+                                </Text>
+                                <Text>
+                                    { golsCasa[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeText = (
+                            <Text>
+                                <Text>
+                                    { timeText[0] }
+                                </Text>
+                                <Text>
+                                    { golsCasa[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
                     viewsGols.push(
                         <View key={i}>
                             {
@@ -476,14 +606,62 @@ class JogoG extends React.Component {
                                 >
                                     <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeText }
                                 </View>
                             </View>
                         </View>
                     );
                 } else {
+                    let timeTextCasa = formatJogoSeconds(golsCasa[i].time);
+                    let timeTextVisit = formatJogoSeconds(golsVisit[i].time);
+                    if (timeTextCasa.length > 1) {
+                        timeTextCasa = (
+                            <Text>
+                                { timeTextCasa[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextCasa[1] }
+                                </Text>
+                                <Text>
+                                    { golsCasa[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextCasa = (
+                            <Text>
+                                <Text>
+                                    { timeTextCasa[0] }
+                                </Text>
+                                <Text>
+                                    { golsCasa[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
+                    if (timeTextVisit.length > 1) {
+                        timeTextVisit = (
+                            <Text>
+                                { timeTextVisit[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextVisit[1] }
+                                </Text>
+                                <Text>
+                                    { golsVisit[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextVisit = (
+                            <Text>
+                                <Text>
+                                    { timeTextVisit[0] }
+                                </Text>
+                                <Text>
+                                    { golsVisit[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
                     viewsGols.push(
                         <View key={i}>
                             {
@@ -506,9 +684,7 @@ class JogoG extends React.Component {
                                 >
                                     <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeTextCasa }
                                 </View>
                                 <View
                                     style={{
@@ -518,9 +694,7 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeTextVisit }
                                     <View style={{ marginHorizontal: 3 }} />
                                     <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                 </View>
@@ -533,6 +707,31 @@ class JogoG extends React.Component {
             let i = 0;
             for (i = 0; i < numGolsVisit; i++) {
                 if ((i + 1) > numGolsCasa || numGolsCasa === 0) {
+                    let timeText = formatJogoSeconds(golsVisit[i].time);
+                    if (timeText.length > 1) {
+                        timeText = (
+                            <Text>
+                                { timeText[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeText[1] }
+                                </Text>
+                                <Text>
+                                    { golsVisit[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeText = (
+                            <Text>
+                                <Text>
+                                    { timeText[0] }
+                                </Text>
+                                <Text>
+                                    { golsVisit[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
                     viewsGols.push(
                         <View key={i}>
                             {
@@ -553,9 +752,7 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeText }
                                     <View style={{ marginHorizontal: 3 }} />
                                     <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                 </View>
@@ -563,6 +760,56 @@ class JogoG extends React.Component {
                         </View>
                     );
                 } else {
+                    let timeTextVisit = formatJogoSeconds(golsVisit[i].time);
+                    let timeTextCasa = formatJogoSeconds(golsCasa[i].time);
+                    if (timeTextVisit.length > 1) {
+                        timeTextVisit = (
+                            <Text>
+                                { timeTextVisit[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextVisit[1] }
+                                </Text>
+                                <Text>
+                                    { golsVisit[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextVisit = (
+                            <Text>
+                                <Text>
+                                    { timeTextVisit[0] }
+                                </Text>
+                                <Text>
+                                    { golsVisit[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
+                    if (timeTextCasa.length > 1) {
+                        timeTextCasa = (
+                            <Text>
+                                { timeTextCasa[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextCasa[1] }
+                                </Text>
+                                <Text>
+                                    { golsCasa[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextCasa = (
+                            <Text>
+                                <Text>
+                                    { timeTextCasa[0] }
+                                </Text>
+                                <Text>
+                                    { golsCasa[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
                     viewsGols.push(
                         <View key={i}>
                             {
@@ -585,9 +832,7 @@ class JogoG extends React.Component {
                                 >
                                     <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeTextVisit }
                                 </View>
                                 <View
                                     style={{
@@ -597,9 +842,7 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeTextCasa }
                                     <View style={{ marginHorizontal: 3 }} />
                                     <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                 </View>
@@ -667,6 +910,31 @@ class JogoG extends React.Component {
             let i = 0;
             for (i = 0; i < numCartoesCasa; i++) {
                 if ((i + 1) > numCartoesVisit || numCartoesVisit === 0) {
+                    let timeText = formatJogoSeconds(cartoesCasa[i].time);
+                    if (timeText.length > 1) {
+                        timeText = (
+                            <Text>
+                                { timeText[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeText[1] }
+                                </Text>
+                                <Text>
+                                    { cartoesCasa[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeText = (
+                            <Text>
+                                <Text>
+                                    { timeText[0] }
+                                </Text>
+                                <Text>
+                                    { cartoesCasa[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
                     viewCartoes.push(
                         <View key={i}>
                             {
@@ -688,20 +956,71 @@ class JogoG extends React.Component {
                                     }}
                                 >
                                     <Image 
-                                        source={imgRedCard}
+                                        source={
+                                            cartoesCasa[i].color === 'amarelo' ?
+                                            imgYellowCard : imgRedCard
+                                        }
                                         style={{ 
                                             width: 20, height: 25 
                                         }} 
                                     />
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeText }
                                 </View>
                             </View>
                         </View>
                     );
                 } else {
+                    let timeTextCasa = formatJogoSeconds(cartoesCasa[i].time);
+                    let timeTextVisit = formatJogoSeconds(cartoesVisit[i].time);
+                    if (timeTextCasa.length > 1) {
+                        timeTextCasa = (
+                            <Text>
+                                { timeTextCasa[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextCasa[1] }
+                                </Text>
+                                <Text>
+                                    { cartoesCasa[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextCasa = (
+                            <Text>
+                                <Text>
+                                    { timeTextCasa[0] }
+                                </Text>
+                                <Text>
+                                    { cartoesCasa[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
+                    if (timeTextVisit.length > 1) {
+                        timeTextVisit = (
+                            <Text>
+                                { timeTextVisit[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextVisit[1] }
+                                </Text>
+                                <Text>
+                                    { cartoesVisit[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextVisit = (
+                            <Text>
+                                <Text>
+                                    { timeTextVisit[0] }
+                                </Text>
+                                <Text>
+                                    { cartoesVisit[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
                     viewCartoes.push(
                         <View key={i}>
                             {
@@ -723,15 +1042,16 @@ class JogoG extends React.Component {
                                     }}
                                 >
                                     <Image 
-                                        source={imgRedCard}
+                                        source={
+                                            cartoesCasa[i].color === 'amarelo' ?
+                                            imgYellowCard : imgRedCard
+                                        }
                                         style={{ 
                                             width: 20, height: 25 
                                         }} 
                                     />
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeTextCasa }
                                 </View>
                                 <View
                                     style={{
@@ -741,12 +1061,13 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeTextVisit }
                                     <View style={{ marginHorizontal: 3 }} />
                                     <Image 
-                                        source={imgRedCard}
+                                        source={
+                                            cartoesVisit[i].color === 'amarelo' ?
+                                            imgYellowCard : imgRedCard
+                                        }
                                         style={{ 
                                             width: 20, height: 25 
                                         }} 
@@ -761,6 +1082,31 @@ class JogoG extends React.Component {
             let i = 0;
             for (i = 0; i < numCartoesVisit; i++) {
                 if ((i + 1) > numCartoesCasa || numCartoesCasa === 0) {
+                    let timeText = formatJogoSeconds(cartoesVisit[i].time);
+                    if (timeText.length > 1) {
+                        timeText = (
+                            <Text>
+                                { timeText[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeText[1] }
+                                </Text>
+                                <Text>
+                                    { cartoesVisit[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeText = (
+                            <Text>
+                                <Text>
+                                    { timeText[0] }
+                                </Text>
+                                <Text>
+                                    { cartoesVisit[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
                     viewCartoes.push(
                         <View key={i}>
                             {
@@ -781,12 +1127,13 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeText }
                                     <View style={{ marginHorizontal: 3 }} />
                                     <Image 
-                                        source={imgRedCard}
+                                        source={
+                                            cartoesVisit[i].color === 'amarelo' ?
+                                            imgYellowCard : imgRedCard
+                                        }
                                         style={{ 
                                             width: 20, height: 25 
                                         }} 
@@ -796,6 +1143,56 @@ class JogoG extends React.Component {
                         </View>
                     );
                 } else {
+                    let timeTextVisit = formatJogoSeconds(cartoesVisit[i].time);
+                    let timeTextCasa = formatJogoSeconds(cartoesCasa[i].time);
+                    if (timeTextVisit.length > 1) {
+                        timeTextVisit = (
+                            <Text>
+                                { timeTextVisit[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextVisit[1] }
+                                </Text>
+                                <Text>
+                                    { cartoesVisit[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextVisit = (
+                            <Text>
+                                <Text>
+                                    { timeTextVisit[0] }
+                                </Text>
+                                <Text>
+                                    { cartoesVisit[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
+                    if (timeTextCasa.length > 1) {
+                        timeTextCasa = (
+                            <Text>
+                                { timeTextCasa[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextCasa[1] }
+                                </Text>
+                                <Text>
+                                    { cartoesCasa[i].nome }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextCasa = (
+                            <Text>
+                                <Text>
+                                    { timeTextCasa[0] }
+                                </Text>
+                                <Text>
+                                    { cartoesCasa[i].nome }
+                                </Text>
+                            </Text>
+                        );
+                    }
                     viewCartoes.push(
                         <View key={i}>
                             {
@@ -817,15 +1214,16 @@ class JogoG extends React.Component {
                                     }}
                                 >
                                     <Image 
-                                        source={imgRedCard}
+                                        source={
+                                            cartoesCasa[i].color === 'amarelo' ?
+                                            imgYellowCard : imgRedCard
+                                        }
                                         style={{ 
                                             width: 20, height: 25 
                                         }} 
                                     />
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeTextCasa }
                                 </View>
                                 <View
                                     style={{
@@ -835,12 +1233,13 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    <Text>
-                                        45' Roney Maia
-                                    </Text>
+                                    { timeTextVisit }
                                     <View style={{ marginHorizontal: 3 }} />
                                     <Image 
-                                        source={imgRedCard}
+                                        source={
+                                            cartoesVisit[i].color === 'amarelo' ?
+                                            imgYellowCard : imgRedCard
+                                        }
                                         style={{ 
                                             width: 20, height: 25 
                                         }} 
@@ -904,7 +1303,7 @@ class JogoG extends React.Component {
                                         key={index}
                                         title={item.nome}
                                         subtitle={item.posicao}
-                                        rightIcon={(<View />)}
+                                        rightIcon={this.renderIcons(item, jogo)}
                                         leftIcon={(
                                             <Image 
                                                 style={{ height: 40, width: 35, marginRight: 5 }}
@@ -932,7 +1331,7 @@ class JogoG extends React.Component {
                                         key={index}
                                         title={item.nome}
                                         subtitle={item.posicao}
-                                        rightIcon={(<View />)}
+                                        rightIcon={this.renderIcons(item, jogo)}
                                         leftIcon={(
                                             <Image 
                                                 style={{ height: 40, width: 35, marginRight: 5 }}
@@ -945,6 +1344,74 @@ class JogoG extends React.Component {
                             })
                         }
                     </List>
+                </View>
+            </View>
+        );
+    }
+
+    renderIcons(jogador, jogo) {
+        return (
+            <View 
+                style={{ 
+                    flex: 0.8, 
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                }}
+            >
+                <View 
+                    style={{ 
+                        flex: 1, 
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() => this.onPressPlayerGol(jogador, jogo)}
+                    >
+                        <Image 
+                            source={imgBola}
+                            style={{ 
+                                width: 25, height: 25 
+                            }} 
+                        />   
+                    </TouchableOpacity>
+                </View>
+                <View 
+                    style={{ 
+                        flex: 1, 
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() => this.onPressCard(jogador, jogo, 'amarelo')}
+                    >
+                        <Image 
+                            source={imgYellowCard}
+                            style={{ 
+                                width: 20, height: 25 
+                            }} 
+                        />   
+                    </TouchableOpacity>
+                </View>
+                <View 
+                    style={{ 
+                        flex: 1, 
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() => this.onPressCard(jogador, jogo, 'vermelho')}
+                    >
+                        <Image 
+                            source={imgRedCard}
+                            style={{ 
+                                width: 20, height: 25 
+                            }} 
+                        />   
+                    </TouchableOpacity>
                 </View>
             </View>
         );
@@ -1060,6 +1527,11 @@ const styles = StyleSheet.create({
         fontSize: 12, 
         color: 'white', 
         fontWeight: 'bold' 
+    },
+    extraTime: { 
+        fontSize: 12, 
+        fontWeight: 'bold', 
+        color: 'red' 
     }
 });
 

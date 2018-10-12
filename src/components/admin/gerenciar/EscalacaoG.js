@@ -67,6 +67,14 @@ class EscalacaoG extends React.Component {
         Dimensions.addEventListener('change', this.onChangeDimensions);
     }
 
+    shouldComponentUpdate(nextProps, nextStates) {
+        if (nextProps.listJogos && nextProps.listJogos.length === 0) {
+            return false;
+        }
+
+        return nextProps !== this.props || nextStates !== this.state;
+    }
+
     componentWillUnmount() {
         Dimensions.removeEventListener('change', this.onChangeDimensions);
     }

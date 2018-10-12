@@ -84,6 +84,15 @@ class Jogos extends React.Component {
 
     componentDidMount() {
         this.startOrStopFBJogosListener(true);
+        const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
+        firebase
+        .database()
+        .ref()
+        .child(`usuarios/${b64.encode(this.props.username)}`).update({
+            dataHoraUltimoLogin: dataAtual
+        })
+        .then(() => true)
+        .catch(() => true);
     }
 
     componentWillUnmount() {

@@ -130,14 +130,14 @@ class UsuarioEdit extends React.Component {
                     endereco: '',
                     dataCadastro: dataAtual,
                     dataHoraUltimoLogin: '',
-                    jogosParticipados: '',
-                    jogosEscalados: '',
-                    vitorias: '',
-                    derrotas: '',
-                    gols: '',
-                    faltas: '',
-                    cartoesAmarelos: '',
-                    cartoesVermelhos: '',
+                    jogosParticipados: '0',
+                    jogosEscalados: '0',
+                    vitorias: '0',
+                    derrotas: '0',
+                    gols: '0',
+                    faltas: '0',
+                    cartoesAmarelos: '0',
+                    cartoesVermelhos: '0',
                     posicao: ''
                 };
                 dbUsuariosRef.set({ ...newUser })
