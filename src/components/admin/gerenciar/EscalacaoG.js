@@ -20,10 +20,16 @@ import { retrieveImgSource } from '../../../utils/imageStorage';
 import Campo from '../../campo/Campo';
 import PlayersModal from './PlayersModal';
 import { isPortrait } from '../../../utils/orientation';
+import { 
+    modificaShowPlayersModal,
+    modificaIsSubstitute,
+    modificaJogador
+} from '../../../actions/GerenciarActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
+import imgInOut from '../../../imgs/inout.png';
 
 class EscalacaoG extends React.Component {
 
@@ -48,6 +54,7 @@ class EscalacaoG extends React.Component {
         this.onToggleVisit = this.onToggleVisit.bind(this);
 
         this.onChangeDimensions = this.onChangeDimensions.bind(this);
+        this.onPressSubs = this.onPressSubs.bind(this);
         this.doInOrOut = this.doInOrOut.bind(this);
         this.renderCasaJogadores = this.renderCasaJogadores.bind(this);
         this.renderVisitJogadores = this.renderVisitJogadores.bind(this);
@@ -83,6 +90,22 @@ class EscalacaoG extends React.Component {
         if (isPortrait()) {
             this.setState({ heightDim: event.screen.height / 2.5 });
         }
+    }
+
+    onPressSubs(jogador) {
+        const newJogador = {
+            key: jogador.key,
+            nome: jogador.nome,
+            posicao: jogador.posicao,
+            posvalue: jogador.posvalue,
+            imgAvatar: jogador.imgAvatar,
+            side: jogador.side
+        };
+
+        this.props.modificaJogador(newJogador);
+        this.props.modificaIsSubstitute(true);
+        this.props.modificaShowPlayersModal(true);
+        return;
     }
 
     onLayoutTitleCasa(event) {
@@ -161,8 +184,31 @@ class EscalacaoG extends React.Component {
         ).start(); 
     }
 
-    doInOrOut(jogador, inOrOut, jogo) {
-        if (inOrOut) {
+    doInOrOut(jogador, inOrOut, jogo, newJogador = false) {
+        if (newJogador) {
+            const { side } = jogador;
+            if (side === 'casa') {
+                const newCasaList = _.filter(
+                    jogo.escalacao.casa, (item) => (item.key !== jogador.key) || !!item.push
+                );
+                newCasaList.push(newJogador);
+                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
+                    casa: newCasaList
+                })
+                .then(() => true)
+                .catch(() => true);
+            } else if (side === 'visit') {
+                const newVisitList = _.filter(
+                    jogo.escalacao.visit, (item) => (item.key !== jogador.key) || !!item.push
+                );
+                newVisitList.push(newJogador);
+                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
+                    visit: newVisitList
+                })
+                .then(() => true)
+                .catch(() => true);
+            }
+        } else if (inOrOut) {
             const { side } = jogador;
             if (side === 'casa') {
                 const newCasaList = [...jogo.escalacao.casa, jogador];
@@ -213,6 +259,24 @@ class EscalacaoG extends React.Component {
                     justifyContent: 'center'
                 }}
             >
+                <View 
+                    style={{ 
+                        flex: 1, 
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() => this.onPressSubs(item, jogo)}
+                    >
+                        <Image 
+                            source={imgInOut}
+                            style={{ 
+                                width: 25, height: 25 
+                            }} 
+                        />   
+                    </TouchableOpacity>
+                </View>
                 <View 
                     style={{ 
                         flex: 1, 
@@ -506,8 +570,8 @@ class EscalacaoG extends React.Component {
                 </ScrollView>
                 <PlayersModal 
                     doInOrOut={
-                        (jogador, inOrOut) => 
-                        this.doInOrOut(jogador, inOrOut, jogo)
+                        (jogador, inOrOut, newJogador = false) => 
+                        this.doInOrOut(jogador, inOrOut, jogo, newJogador)
                     }
                     jogadoresCasaFt={jogadoresCasaFt}
                     jogadoresVisitFt={jogadoresVisitFt}
@@ -550,4 +614,8 @@ const mapStateToProps = (state) => ({
     listJogos: state.JogosReducer.listJogos
 });
 
-export default connect(mapStateToProps, {})(EscalacaoG);
+export default connect(mapStateToProps, {
+    modificaShowPlayersModal,
+    modificaIsSubstitute,
+    modificaJogador
+})(EscalacaoG);

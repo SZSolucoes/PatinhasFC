@@ -13,3 +13,8 @@ export const modificaCurrentTime = (value) => ({
     payload: value
 });
 
+export const modificaShowTimerModal = (value) => ({
+    type: 'modifica_showtimermodal_jogo',
+    payload: value
+});
+

@@ -198,6 +198,33 @@ class Routes extends React.Component {
             >
                 <TouchableOpacity
                     onPress={() => {
+                        const { listJogos } = store.getState().JogosReducer;
+                        const { itemSelected } = store.getState().GerenciarReducer;
+                        const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
+                        if (jogo.status === '1') {
+                            Alert.alert(
+                                'Aviso',
+                                'Para alterar o tempo de jogo manualmente' +
+                                ' é necessário que o jogo esteja pausado.'
+                            );
+                            return;
+                        }
+                        store.dispatch({
+                            type: 'modifica_showtimermodal_jogo',
+                            payload: true
+                        });
+                    }}
+                >
+                    <Icon
+                        color={'white'}
+                        name='timer'
+                        type='material-community'
+                        size={26}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={{ marginLeft: 15 }}
+                    onPress={() => {
                         const currentTimeNow = store.getState().JogoReducer.currentTime;
                         const { listJogos } = store.getState().JogosReducer;
                         const { itemSelected } = store.getState().GerenciarReducer;
@@ -249,7 +276,7 @@ class Routes extends React.Component {
                     />
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={{ marginLeft: 20 }}
+                    style={{ marginLeft: 15 }}
                     onPress={() => {
                         const { listJogos } = store.getState().JogosReducer;
                         const { itemSelected } = store.getState().GerenciarReducer;

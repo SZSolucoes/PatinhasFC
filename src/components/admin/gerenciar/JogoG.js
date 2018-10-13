@@ -13,11 +13,16 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Card, List, ListItem } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
+import ModalInput from '../../tools/ModalInput';
 import firebase from '../../../Firebase';
 import { colorAppF, colorAppP, colorAppS, colorAppW } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
-import { modificaClean, modificaCurrentTime } from '../../../actions/JogoActions';
+import { 
+    modificaClean, 
+    modificaCurrentTime, 
+    modificaShowTimerModal 
+} from '../../../actions/JogoActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
@@ -26,6 +31,7 @@ import imgYellowCard from '../../../imgs/yellowcard.png';
 import imgRedCard from '../../../imgs/redcard.png';
 import imgCartoes from '../../../imgs/cards.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
+import imgInOut from '../../../imgs/inout.png';
 import Jogos from '../../jogos/Jogos';
 
 class JogoG extends React.Component {
@@ -44,6 +50,11 @@ class JogoG extends React.Component {
         this.textPlacar = this.textPlacar.bind(this);
         this.onPressPlayerGol = this.onPressPlayerGol.bind(this);
         this.onPressCard = this.onPressCard.bind(this);
+        this.onPressRemoveGol = this.onPressRemoveGol.bind(this);
+        this.onAddPressRemoveGol = this.onAddPressRemoveGol.bind(this);
+        this.onPressRemoveCard = this.onPressRemoveCard.bind(this);
+        this.onAddPressRemoveCard = this.onAddPressRemoveCard.bind(this);
+        this.onConfirmManualTimer = this.onConfirmManualTimer.bind(this);
         this.renderGolJogador = this.renderGolJogador.bind(this);
         this.renderCartaoJogador = this.renderCartaoJogador.bind(this);
         this.renderEscalados = this.renderEscalados.bind(this);
@@ -146,6 +157,13 @@ class JogoG extends React.Component {
         this.props.modificaClean();
     }
 
+    onConfirmManualTimer(value) {
+        if (value) {
+            const newValue = parseInt(value, 10) * 60;
+            this.setState({ seconds: newValue });
+        }
+    }
+
     onStartTimer(enabled, jogo) {
         if (enabled) {
             this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
@@ -186,19 +204,37 @@ class JogoG extends React.Component {
 
     onResetTimer(enabled, jogo) { 
         if (enabled) {
-            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                status: '2',
-                currentTime: '0'
-            })
-            .then(() => {
-                this.setState({
-                    btnStartEnabled: true,
-                    btnPauseEnabled: false,
-                    btnResetEnabled: false
-                }); 
-            })
-            .catch(() => 
-                Toast.show('Falha ao reiniciar a partida, verifique a conexão.', Toast.SHORT)
+            Alert.alert(
+                'Aviso',
+                'Confirma o reinício do jogo ?',
+                [
+                    { text: 'Cancelar', 
+                        onPress: () => true, 
+                        style: 'cancel' 
+                    },
+                    { 
+                        text: 'Ok', 
+                        onPress: () => {
+                            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
+                                status: '2',
+                                currentTime: '0'
+                            })
+                            .then(() => {
+                                this.setState({
+                                    btnStartEnabled: true,
+                                    btnPauseEnabled: false,
+                                    btnResetEnabled: false
+                                }); 
+                            })
+                            .catch(() => 
+                                Toast.show(
+                                    'Falha ao reiniciar a partida, verifique a conexão.', 
+                                    Toast.SHORT
+                                )
+                            );
+                        }
+                    }
+                ]
             ); 
         } 
     }
@@ -206,12 +242,16 @@ class JogoG extends React.Component {
     onPressPlayerGol(jogador, jogo) {
         const gols = [
             ...jogo.gols, 
-            { 
+            {
+                key: jogador.key, 
                 side: jogador.side,
                 nome: jogador.nome,
-                time: this.state.seconds.toString()
+                time: this.state.seconds.toString(),
+                indexKey: jogo.gols.length.toString()
             }
         ];
+        const placarCasa = parseInt(jogo.placarCasa, 10) + 1;
+        const placarVisit = parseInt(jogo.placarVisit, 10) + 1;
 
         Alert.alert(
             'Aviso',
@@ -224,8 +264,14 @@ class JogoG extends React.Component {
                 { 
                     text: 'Ok', 
                     onPress: () => {
+                        let payload = {};
+                        if (jogador.side === 'casa') {
+                            payload = { gols, placarCasa };
+                        } else {
+                            payload = { gols, placarVisit };
+                        }
                         this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                            gols
+                            ...payload
                         })
                         .then(() => {
                             Toast.show('Gol marcado.', Toast.SHORT);
@@ -234,7 +280,7 @@ class JogoG extends React.Component {
                                 const golsPlus = parseInt(snapshot.val(), 10) + 1;
                                 this.fbDatabaseRef
                                 .child(`usuarios/${jogador.key}`).update({
-                                    gols: golsPlus.toString()
+                                    gols: golsPlus.toString(),
                                 })
                                 .then(() => true)
                                 .catch(() => true);
@@ -249,14 +295,79 @@ class JogoG extends React.Component {
         );
     }
 
+    onAddPressRemoveGol(jogador, jogo) {
+        return () => this.onPressRemoveGol(jogador, jogo);
+    }
+
+    onPressRemoveGol(jogador, jogo) {
+        const gols = [
+            ...jogo.gols
+        ];
+        let i = 0;
+        
+        gols.splice(parseInt(jogador.indexKey, 10), 1);
+
+        for (i = 0; i < gols.length; i++) {
+            if (!gols[i].push) {
+                gols[i].indexKey = i.toString();
+            }
+        }
+
+        const placarCasa = parseInt(jogo.placarCasa, 10) - 1;
+        const placarVisit = parseInt(jogo.placarVisit, 10) - 1;
+
+        Alert.alert(
+            'Aviso',
+            `Confirma a remoção do gol para o jogador:\n${jogador.nome} ?`,
+            [
+                { text: 'Cancelar', 
+                    onPress: () => true, 
+                    style: 'cancel' 
+                },
+                { 
+                    text: 'Ok', 
+                    onPress: () => {
+                        let payload = {};
+                        if (jogador.side === 'casa') {
+                            payload = { gols, placarCasa };
+                        } else {
+                            payload = { gols, placarVisit };
+                        }
+                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
+                            ...payload
+                        })
+                        .then(() => {
+                            Toast.show('Gol removido.', Toast.SHORT);
+                            this.fbDatabaseRef
+                            .child(`usuarios/${jogador.key}/gols`).once('value', (snapshot) => {
+                                const golsLess = parseInt(snapshot.val(), 10) - 1;
+                                this.fbDatabaseRef
+                                .child(`usuarios/${jogador.key}`).update({
+                                    gols: golsLess.toString()
+                                })
+                                .then(() => true)
+                                .catch(() => true);
+                            });
+                        })
+                        .catch(() => 
+                            Toast.show('Falha ao remover o gol. Verifique a conexão.', Toast.SHORT)
+                        );
+                    }
+                }
+            ]
+        );
+    }
+
     onPressCard(jogador, jogo, color) {
         const cartoes = [
             ...jogo.cartoes, 
             { 
+                key: jogador.key, 
                 side: jogador.side,
                 nome: jogador.nome,
                 time: this.state.seconds.toString(),
-                color
+                color,
+                indexKey: jogo.cartoes.length.toString()
             }
         ];
 
@@ -296,6 +407,67 @@ class JogoG extends React.Component {
                         })
                         .catch(() => 
                             Toast.show('Falha ao aplicar cartão. Verifique a conexão.', Toast.SHORT)
+                        );
+                    }
+                }
+            ]
+        );
+    }
+
+    onAddPressRemoveCard(jogador, jogo) {
+        return () => this.onPressRemoveCard(jogador, jogo);
+    }
+
+    onPressRemoveCard(jogador, jogo) {
+        const cartoes = [
+            ...jogo.cartoes
+        ];
+        let i = 0;
+        
+        cartoes.splice(parseInt(jogador.indexKey, 10), 1);
+
+        for (i = 0; i < cartoes.length; i++) {
+            if (!cartoes[i].push) {
+                cartoes[i].indexKey = i.toString();
+            }
+        }
+
+        Alert.alert(
+            'Aviso',
+            `Confirma a remoção do cartão ${jogador.color} para o jogador:\n${jogador.nome} ?`,
+            [
+                { text: 'Cancelar', 
+                    onPress: () => true, 
+                    style: 'cancel' 
+                },
+                { 
+                    text: 'Ok', 
+                    onPress: () => {
+                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
+                            cartoes
+                        })
+                        .then(() => {
+                            const keyCard = jogador.color === 'amarelo' ? 
+                            'cartoesAmarelos' : 'cartoesVermelhos';
+                            Toast.show(`Cartão ${jogador.color} removido.`, Toast.SHORT);
+                            this.fbDatabaseRef
+                            .child(`usuarios/${jogador.key}/${keyCard}`)
+                            .once('value', (snapshot) => {
+                                const cartaoLess = parseInt(snapshot.val(), 10) - 1;
+                                const keyCardJson = jogador.color === 'amarelo' ? 
+                                { cartoesAmarelos: cartaoLess.toString() } 
+                                :
+                                { cartoesVermelhos: cartaoLess.toString() };
+                                this.fbDatabaseRef
+                                .child(`usuarios/${jogador.key}`).update({
+                                    ...keyCardJson
+                                })
+                                .then(() => true)
+                                .catch(() => true);
+                            });
+                        })
+                        .catch(() => 
+                            Toast.show('Falha ao remover cartão. Verifique a conexão.', Toast.SHORT)
                         );
                     }
                 }
@@ -445,7 +617,7 @@ class JogoG extends React.Component {
                                     ]}
                                 >
                                     <Text style={styles.textCircle}>
-                                        Iniciar
+                                        { this.state.seconds > 0 ? 'Retomar' : 'Iniciar'}
                                     </Text>
                                 </View>
                             </View>
@@ -530,7 +702,7 @@ class JogoG extends React.Component {
                                 borderBottomWidth: 0
                             }}
                         >
-                            { this.renderGolJogador(jogo.gols) }
+                            { this.renderGolJogador(jogo.gols, jogo) }
                         </List>
                     </View>
                 </View>
@@ -538,7 +710,7 @@ class JogoG extends React.Component {
         );
     }
 
-    renderGolJogador(gols) {
+    renderGolJogador(gols, jogo) {
         const golsCasa = _.filter(gols, (item) => item.side && item.side === 'casa');
         const golsVisit = _.filter(gols, (item) => item.side && item.side === 'visit');
         const numGolsCasa = golsCasa.length;
@@ -604,7 +776,11 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-start'
                                     }}
                                 >
-                                    <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    <TouchableOpacity
+                                        onPress={this.onAddPressRemoveGol(golsCasa[i], jogo)}
+                                    >
+                                        <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
                                     { timeText }
                                 </View>
@@ -682,7 +858,11 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-start' 
                                     }}
                                 >
-                                    <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    <TouchableOpacity
+                                        onPress={this.onAddPressRemoveGol(golsCasa[i], jogo)}
+                                    >
+                                        <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
                                     { timeTextCasa }
                                 </View>
@@ -696,7 +876,13 @@ class JogoG extends React.Component {
                                 >
                                     { timeTextVisit }
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveGol(golsVisit[i], jogo)
+                                        }
+                                    >
+                                        <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -754,7 +940,13 @@ class JogoG extends React.Component {
                                 >
                                     { timeText }
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveGol(golsVisit[i], jogo)
+                                        }
+                                    >
+                                        <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -830,9 +1022,15 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-start' 
                                     }}
                                 >
-                                    <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveGol(golsCasa[i], jogo)
+                                        }
+                                    >
+                                        <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
-                                    { timeTextVisit }
+                                    { timeTextCasa }
                                 </View>
                                 <View
                                     style={{
@@ -842,9 +1040,15 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    { timeTextCasa }
+                                    { timeTextVisit }
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveGol(golsVisit[i], jogo)
+                                        }
+                                    >
+                                        <Image source={imgBola} style={{ width: 25, height: 25 }} />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -881,7 +1085,7 @@ class JogoG extends React.Component {
                                 borderBottomWidth: 0
                             }}
                         >
-                            { this.renderCartaoJogador(jogo.cartoes) }
+                            { this.renderCartaoJogador(jogo.cartoes, jogo) }
                         </List>
                     </View>
                 </View>
@@ -889,7 +1093,7 @@ class JogoG extends React.Component {
         );
     }
 
-    renderCartaoJogador(cartoes) {
+    renderCartaoJogador(cartoes, jogo) {
         const cartoesCasa = _.filter(cartoes, (item) => item.side && item.side === 'casa');
         const cartoesVisit = _.filter(cartoes, (item) => item.side && item.side === 'visit');
         const numCartoesCasa = cartoesCasa.length;
@@ -955,15 +1159,21 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-start'
                                     }}
                                 >
-                                    <Image 
-                                        source={
-                                            cartoesCasa[i].color === 'amarelo' ?
-                                            imgYellowCard : imgRedCard
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveCard(cartoesCasa[i], jogo)
                                         }
-                                        style={{ 
-                                            width: 20, height: 25 
-                                        }} 
-                                    />
+                                    >
+                                        <Image 
+                                            source={
+                                                cartoesCasa[i].color === 'amarelo' ?
+                                                imgYellowCard : imgRedCard
+                                            }
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
                                     { timeText }
                                 </View>
@@ -1041,15 +1251,21 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-start' 
                                     }}
                                 >
-                                    <Image 
-                                        source={
-                                            cartoesCasa[i].color === 'amarelo' ?
-                                            imgYellowCard : imgRedCard
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveCard(cartoesCasa[i], jogo)
                                         }
-                                        style={{ 
-                                            width: 20, height: 25 
-                                        }} 
-                                    />
+                                    >
+                                        <Image 
+                                            source={
+                                                cartoesCasa[i].color === 'amarelo' ?
+                                                imgYellowCard : imgRedCard
+                                            }
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
                                     { timeTextCasa }
                                 </View>
@@ -1063,15 +1279,21 @@ class JogoG extends React.Component {
                                 >
                                     { timeTextVisit }
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Image 
-                                        source={
-                                            cartoesVisit[i].color === 'amarelo' ?
-                                            imgYellowCard : imgRedCard
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveCard(cartoesVisit[i], jogo)
                                         }
-                                        style={{ 
-                                            width: 20, height: 25 
-                                        }} 
-                                    />
+                                    >
+                                        <Image 
+                                            source={
+                                                cartoesVisit[i].color === 'amarelo' ?
+                                                imgYellowCard : imgRedCard
+                                            }
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -1129,15 +1351,21 @@ class JogoG extends React.Component {
                                 >
                                     { timeText }
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Image 
-                                        source={
-                                            cartoesVisit[i].color === 'amarelo' ?
-                                            imgYellowCard : imgRedCard
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveCard(cartoesVisit[i], jogo)
                                         }
-                                        style={{ 
-                                            width: 20, height: 25 
-                                        }} 
-                                    />
+                                    >
+                                        <Image 
+                                            source={
+                                                cartoesVisit[i].color === 'amarelo' ?
+                                                imgYellowCard : imgRedCard
+                                            }
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -1213,15 +1441,21 @@ class JogoG extends React.Component {
                                         justifyContent: 'flex-start' 
                                     }}
                                 >
-                                    <Image 
-                                        source={
-                                            cartoesCasa[i].color === 'amarelo' ?
-                                            imgYellowCard : imgRedCard
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveCard(cartoesCasa[i], jogo)
                                         }
-                                        style={{ 
-                                            width: 20, height: 25 
-                                        }} 
-                                    />
+                                    >
+                                        <Image 
+                                            source={
+                                                cartoesCasa[i].color === 'amarelo' ?
+                                                imgYellowCard : imgRedCard
+                                            }
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
                                     { timeTextCasa }
                                 </View>
@@ -1235,15 +1469,21 @@ class JogoG extends React.Component {
                                 >
                                     { timeTextVisit }
                                     <View style={{ marginHorizontal: 3 }} />
-                                    <Image 
-                                        source={
-                                            cartoesVisit[i].color === 'amarelo' ?
-                                            imgYellowCard : imgRedCard
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveCard(cartoesVisit[i], jogo)
                                         }
-                                        style={{ 
-                                            width: 20, height: 25 
-                                        }} 
-                                    />
+                                    >
+                                        <Image 
+                                            source={
+                                                cartoesVisit[i].color === 'amarelo' ?
+                                                imgYellowCard : imgRedCard
+                                            }
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
                         </View>
@@ -1422,14 +1662,26 @@ class JogoG extends React.Component {
         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
 
         return (
-            <ScrollView style={styles.viewP}>
-                { this.renderCardPlacar(jogo) }
-                <View style={{ marginVertical: 2 }} />
-                { this.renderGoals(jogo) }
-                { this.renderCartoes(jogo) }
-                { this.renderEscalados(jogo) }
-                <View style={{ marginVertical: 20 }} />
-            </ScrollView>
+            <View style={{ flex: 1 }}>
+                <ScrollView style={styles.viewP}>
+                    { this.renderCardPlacar(jogo) }
+                    <View style={{ marginVertical: 2 }} />
+                    { this.renderGoals(jogo) }
+                    { this.renderCartoes(jogo) }
+                    { this.renderEscalados(jogo) }
+                    <View style={{ marginVertical: 20 }} />
+                </ScrollView>
+                <ModalInput
+                        isDialogVisible={this.props.showTimerModal}
+                        title={'Tempo de Jogo'}
+                        message={'Altere em minutos o tempo de jogo desejado.'}
+                        submitInput={(value) => this.onConfirmManualTimer(value)}
+                        closeDialog={() => this.props.modificaShowTimerModal(false)}
+                        hint={this.state.seconds}
+                        cancelText={'Cancelar'}
+                        submitText={'Ok'} 
+                />
+            </View>
         );
     }
 }
@@ -1537,10 +1789,12 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     itemSelected: state.GerenciarReducer.itemSelected,
-    listJogos: state.JogosReducer.listJogos
+    listJogos: state.JogosReducer.listJogos,
+    showTimerModal: state.JogoReducer.showTimerModal
 });
 
 export default connect(mapStateToProps, { 
     modificaClean,
-    modificaCurrentTime 
+    modificaCurrentTime,
+    modificaShowTimerModal
 })(JogoG);

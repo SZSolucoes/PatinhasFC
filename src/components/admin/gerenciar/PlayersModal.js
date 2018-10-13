@@ -15,6 +15,7 @@ import Toast from 'react-native-simple-toast';
 import _ from 'lodash';
 import {
     modificaShowPlayersModal,
+    modificaIsSubstitute,
     modificaFilterModalLoad,
     modificaFilterModalStr
 } from '../../../actions/GerenciarActions';
@@ -41,12 +42,18 @@ class PlayersModal extends React.Component {
     }
 
     onChoosePlayer(item) {
-        const { jogador } = this.props;
+        const { jogador, isSubstitute } = this.props;
         const newJogador = { ...jogador };
         newJogador.key = item.key;
         newJogador.nome = item.nome;
         newJogador.imgAvatar = item.imgAvatar;
-        this.props.doInOrOut(newJogador, true);
+
+        if (isSubstitute) {
+            this.props.doInOrOut(jogador, false, newJogador);
+        } else {
+            this.props.doInOrOut(newJogador, true);
+        }
+
         this.closeModal();
     }
 
@@ -80,6 +87,7 @@ class PlayersModal extends React.Component {
             }
         ).start(() => {
             setTimeout(() => this.props.modificaShowPlayersModal(false), 100);
+            setTimeout(() => this.props.modificaIsSubstitute(false), 100);
         });
     }
 
@@ -271,6 +279,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     showPlayersModal: state.GerenciarReducer.showPlayersModal,
+    isSubstitute: state.GerenciarReducer.isSubstitute,
     listUsuarios: state.UsuariosReducer.listUsuarios,
     filterModalStr: state.GerenciarReducer.filterModalStr,
     filterModalLoad: state.GerenciarReducer.filterModalLoad,
@@ -280,6 +289,7 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, { 
     modificaShowPlayersModal,
+    modificaIsSubstitute,
     modificaFilterModalLoad,
     modificaFilterModalStr 
 })(PlayersModal);
