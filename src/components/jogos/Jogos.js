@@ -255,7 +255,7 @@ class Jogos extends React.Component {
     }
 
     renderCardFooter(item) {
-        if (item.status && item.status === '3') {
+        if (item.endStatus && item.endStatus === '0') {
             const b64UserKey = b64.encode(this.props.userLogged.email);
             return (
                 <View>
@@ -476,7 +476,9 @@ class Jogos extends React.Component {
                                 right: 0,
                                 zIndex: 1,
                                 paddingHorizontal: 15,
-                                backgroundColor: colorAppT
+                                backgroundColor: colorAppT,
+                                borderBottomWidth: 0.5,
+                                borderBottomColor: 'white'
                             }}
                         >
                             {
@@ -491,7 +493,7 @@ class Jogos extends React.Component {
                             <View 
                                 style={{
                                     flexDirection: 'row',
-                                    alignItems: 'center',
+                                    alignItems: 'center'
                                 }}
                             >
                                 <View style={{ flex: 0.5 }}>

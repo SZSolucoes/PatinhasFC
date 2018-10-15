@@ -3,6 +3,7 @@ const INITIAL_STATE = {
     filterLoad: false,
     itemSelected: '',
     showPlayersModal: false,
+    showPlayersModalJ: false,
     isSubstitute: false,
     filterModalStr: '',
     filterModalLoad: false,
@@ -31,6 +32,11 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 showPlayersModal: action.payload
             };
+        case 'modifica_showplayersmodalj_gerenciar':
+            return { 
+                ...state, 
+                showPlayersModalJ: action.payload
+            };
         case 'modifica_issubstitute_gerenciar':
             return { 
                 ...state, 
@@ -58,6 +64,7 @@ export default (state = INITIAL_STATE, action) => {
                 filterLoad: false,
                 itemSelected: '',
                 showPlayersModal: false,
+                showPlayersModalJ: false,
                 isSubstitute: false,
                 filterModalStr: '',
                 filterModalLoad: false,

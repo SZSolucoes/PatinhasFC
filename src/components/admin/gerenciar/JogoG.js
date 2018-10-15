@@ -14,15 +14,22 @@ import { connect } from 'react-redux';
 import { Card, List, ListItem } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
 import ModalInput from '../../tools/ModalInput';
+import PlayersModal from './PlayersModal';
 import firebase from '../../../Firebase';
 import { colorAppF, colorAppP, colorAppS, colorAppW } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
+import { getPosIndex } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
 import { 
     modificaClean, 
     modificaCurrentTime, 
     modificaShowTimerModal 
 } from '../../../actions/JogoActions';
+import { 
+    modificaShowPlayersModalJ,
+    modificaIsSubstitute,
+    modificaJogador
+} from '../../../actions/GerenciarActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
@@ -46,6 +53,8 @@ class JogoG extends React.Component {
         this.renderCardPlacar = this.renderCardPlacar.bind(this);
         this.renderGoals = this.renderGoals.bind(this);
         this.renderCartoes = this.renderCartoes.bind(this);
+        this.renderSubs = this.renderSubs.bind(this);
+        this.doInOrOut = this.doInOrOut.bind(this);
         this.textJogoProgress = this.textJogoProgress.bind(this);
         this.textPlacar = this.textPlacar.bind(this);
         this.onPressPlayerGol = this.onPressPlayerGol.bind(this);
@@ -55,6 +64,7 @@ class JogoG extends React.Component {
         this.onPressRemoveCard = this.onPressRemoveCard.bind(this);
         this.onAddPressRemoveCard = this.onAddPressRemoveCard.bind(this);
         this.onConfirmManualTimer = this.onConfirmManualTimer.bind(this);
+        this.onPressSubs = this.onPressSubs.bind(this);
         this.renderGolJogador = this.renderGolJogador.bind(this);
         this.renderCartaoJogador = this.renderCartaoJogador.bind(this);
         this.renderEscalados = this.renderEscalados.bind(this);
@@ -113,6 +123,11 @@ class JogoG extends React.Component {
             setTimeout(() => {
                 const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
                 const nj = _.filter(nextProps.listJogos, (item) => item.key === itemSelected)[0];
+                
+                if (!nj) {
+                    return false;
+                }
+
                 if (jogo.currentTime !== nj.currentTime) {
                     this.setState({ currentTime: parseInt(nj.currentTime, 10) });
                 }
@@ -162,6 +177,22 @@ class JogoG extends React.Component {
             const newValue = parseInt(value, 10) * 60;
             this.setState({ seconds: newValue });
         }
+    }
+
+    onPressSubs(jogador) {
+        const newJogador = {
+            key: jogador.key,
+            nome: jogador.nome,
+            posicao: jogador.posicao,
+            posvalue: jogador.posvalue,
+            imgAvatar: jogador.imgAvatar,
+            side: jogador.side
+        };
+
+        this.props.modificaJogador(newJogador);
+        this.props.modificaIsSubstitute(true);
+        this.props.modificaShowPlayersModalJ(true);
+        return;
     }
 
     onStartTimer(enabled, jogo) {
@@ -475,6 +506,192 @@ class JogoG extends React.Component {
         );
     }
 
+    onAddPressRemoveSubs(sub, jogo) {
+        return () => this.onPressRemoveSubs(sub, jogo);
+    }
+
+    onPressRemoveSubs(sub, jogo) {
+        const subs = [
+            ...jogo.subs
+        ];
+        let i = 0;
+        
+        subs.splice(parseInt(sub.indexKey, 10), 1);
+
+        for (i = 0; i < subs.length; i++) {
+            if (!subs[i].push) {
+                subs[i].indexKey = i.toString();
+            }
+        }
+
+        Alert.alert(
+            'Aviso',
+            'Confirma a remoção da substituição ?',
+            [
+                { text: 'Cancelar', 
+                    onPress: () => true, 
+                    style: 'cancel' 
+                },
+                { 
+                    text: 'Ok', 
+                    onPress: () => {
+                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
+                            subs
+                        })
+                        .then(() =>
+                            this.doInOrOut(sub.jogadorIn, false, jogo, sub.jogadorOut, true)
+                        )
+                        .catch(() => 
+                            Toast.show(
+                                'Falha ao remover substituição. Verifique a conexão.', Toast.SHORT
+                            )
+                        );
+                    }
+                }
+            ]
+        );
+    }
+
+    doInOrOut(jogador, inOrOut, jogo, newJogador = false, isRemove = false) {
+        if (newJogador) {
+            const { side } = jogador;
+            let fSubs = [];
+            let inc = 0;
+
+            if (isRemove) {
+                fSubs = jogo.subs;
+            } else {
+                fSubs = _.filter(
+                    jogo.subs, 
+                    (sub) => 
+                        sub.push || (!sub.push &&
+                        !((sub.jogadorIn.key === jogador.key && 
+                        sub.jogadorOut.key === newJogador.key) ||
+                        (sub.jogadorIn.key === newJogador.key && 
+                        sub.jogadorOut.key === jogador.key)))
+                );
+
+                fSubs = _.filter(fSubs, (sub) => {
+                    if (sub.push) {
+                        return true;
+                    }
+                    const players = [];
+
+                    if (sub.jogadorIn.key === newJogador.key || 
+                        sub.jogadorOut.key === newJogador.key) {
+                        players.push(1);
+                    }
+
+                    for (inc = 0; inc < jogo.escalacao.casa.length; inc++) {
+                        const player = jogo.escalacao.casa[inc];
+                        if (sub.jogadorIn.key === player.key || sub.jogadorOut.key === player.key) {
+                            players.push(1);
+                        }
+                    }
+                    for (inc = 0; inc < jogo.escalacao.visit.length; inc++) {
+                        const player = jogo.escalacao.visit[inc];
+                        if (sub.jogadorIn.key === player.key || sub.jogadorOut.key === player.key) {
+                            players.push(1);
+                        }
+                    }
+
+                    return !(players.length >= 2);
+                });
+            }
+
+            for (inc = 0; inc < fSubs.length; inc++) {
+                if (!fSubs[inc].push) {
+                    fSubs[inc].indexKey = inc.toString();
+                }
+            }
+
+            const subs = [
+                ...fSubs, 
+                { 
+                    jogadorIn: newJogador,
+                    jogadorOut: jogador, 
+                    side: jogador.side,
+                    time: this.state.seconds.toString(),
+                    indexKey: fSubs.length.toString()
+                }
+            ];
+
+            if (side === 'casa') {
+                const newCasaList = _.filter(
+                    jogo.escalacao.casa, (item) => (item.key !== jogador.key) || !!item.push
+                );
+                newCasaList.push(newJogador);
+                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
+                    casa: newCasaList,
+                })
+                .then(() => {
+                    if (isRemove) {
+                        Toast.show('Substituição removida.', Toast.SHORT);
+                        return true;
+                    }
+                    firebase.database().ref().child(`jogos/${jogo.key}`).update({
+                        subs
+                    })
+                    .then(() =>
+                        Toast.show('Substituição efetuada.', Toast.SHORT)
+                    )
+                    .catch(() =>
+                        Toast.show(
+                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
+                        )
+                    );
+                })
+                .catch(() => {
+                    if (isRemove) {
+                        Toast.show(
+                            'Falha ao remover substituição. Verifique a conexão.', Toast.SHORT
+                        );
+                    } else {
+                        Toast.show(
+                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
+                        );
+                    }
+                });
+            } else if (side === 'visit') {
+                const newVisitList = _.filter(
+                    jogo.escalacao.visit, (item) => (item.key !== jogador.key) || !!item.push
+                );
+                newVisitList.push(newJogador);
+                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
+                    visit: newVisitList
+                })
+                .then(() => {
+                    if (isRemove) {
+                        Toast.show('Substituição removida.', Toast.SHORT);
+                        return true;
+                    }
+                    firebase.database().ref().child(`jogos/${jogo.key}`).update({
+                        subs
+                    })
+                    .then(() =>
+                        Toast.show('Substituição efetuada.', Toast.SHORT)
+                    )
+                    .catch(() =>
+                        Toast.show(
+                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
+                        )
+                    );
+                })
+                .catch(() => {
+                    if (isRemove) {
+                        Toast.show(
+                            'Falha ao remover substituição. Verifique a conexão.', Toast.SHORT
+                        );
+                    } else {
+                        Toast.show(
+                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
+                        );
+                    }
+                });
+            }
+        } 
+    }
+
     textJogoProgress(jogo) {
         switch (jogo.status) {
             case '0':
@@ -711,8 +928,34 @@ class JogoG extends React.Component {
     }
 
     renderGolJogador(gols, jogo) {
-        const golsCasa = _.filter(gols, (item) => item.side && item.side === 'casa');
-        const golsVisit = _.filter(gols, (item) => item.side && item.side === 'visit');
+        const golsCasa = _.filter(gols, (item) => item.side && item.side === 'casa').sort(
+            (a, b) => {
+                const aTime = parseInt(a.time, 10);
+                const bTime = parseInt(b.time, 10);
+                if (aTime > bTime) {
+                    return 1;
+                } 
+                if (aTime < bTime) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
+        const golsVisit = _.filter(gols, (item) => item.side && item.side === 'visit').sort(
+            (a, b) => {
+                const aTime = parseInt(a.time, 10);
+                const bTime = parseInt(b.time, 10);
+                if (aTime > bTime) {
+                    return 1;
+                } 
+                if (aTime < bTime) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
         const numGolsCasa = golsCasa.length;
         const numGolsVisit = golsVisit.length;
         const viewsGols = [];
@@ -1094,8 +1337,34 @@ class JogoG extends React.Component {
     }
 
     renderCartaoJogador(cartoes, jogo) {
-        const cartoesCasa = _.filter(cartoes, (item) => item.side && item.side === 'casa');
-        const cartoesVisit = _.filter(cartoes, (item) => item.side && item.side === 'visit');
+        const cartoesCasa = _.filter(cartoes, (item) => item.side && item.side === 'casa').sort(
+            (a, b) => {
+                const aTime = parseInt(a.time, 10);
+                const bTime = parseInt(b.time, 10);
+                if (aTime > bTime) {
+                    return 1;
+                } 
+                if (aTime < bTime) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
+        const cartoesVisit = _.filter(cartoes, (item) => item.side && item.side === 'visit').sort(
+            (a, b) => {
+                const aTime = parseInt(a.time, 10);
+                const bTime = parseInt(b.time, 10);
+                if (aTime > bTime) {
+                    return 1;
+                } 
+                if (aTime < bTime) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
         const numCartoesCasa = cartoesCasa.length;
         const numCartoesVisit = cartoesVisit.length;
         const viewCartoes = [];
@@ -1495,9 +1764,486 @@ class JogoG extends React.Component {
         return viewCartoes;
     }
 
+    renderSubs(jogo) {
+        return (
+            <View>
+                <View style={{ padding: 5 }}>
+                    <View style={{ margin: 5 }}>
+                        <Text
+                            style={{ 
+                                color: 'black', 
+                                fontWeight: 'bold',
+                                fontSize: 16 
+                            }}
+                        >
+                            Substituições
+                        </Text>
+                    </View>
+                    <View style={styles.cardEffect}>
+                        <List 
+                            containerStyle={{ 
+                                marginTop: 0,
+                                paddingHorizontal: 5,
+                                paddingVertical: 10,
+                                borderTopWidth: 0,
+                                borderBottomWidth: 0
+                            }}
+                        >
+                            { this.renderSubsJogador(jogo.subs, jogo) }
+                        </List>
+                    </View>
+                </View>
+            </View>
+        );
+    }
+
+    renderSubsJogador(subs, jogo) {
+        const subsCasa = _.filter(subs, (item) => item.side && item.side === 'casa').sort(
+            (a, b) => {
+                const aTime = parseInt(a.time, 10);
+                const bTime = parseInt(b.time, 10);
+                if (aTime > bTime) {
+                    return 1;
+                } 
+                if (aTime < bTime) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
+        const subsVisit = _.filter(subs, (item) => item.side && item.side === 'visit').sort(
+            (a, b) => {
+                const aTime = parseInt(a.time, 10);
+                const bTime = parseInt(b.time, 10);
+                if (aTime > bTime) {
+                    return 1;
+                } 
+                if (aTime < bTime) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
+        const numSubsCasa = subsCasa.length;
+        const numSubsVisit = subsVisit.length;
+        const viewSubs = [];
+
+        if (numSubsCasa === 0 && numSubsVisit === 0) {
+            return (
+                <View 
+                    style={{ alignContent: 'center' }} 
+                >
+                    <Image source={imgInOut} style={{ width: 30, height: 30 }} />
+                </View>
+            );
+        }
+
+        if (numSubsCasa > numSubsVisit) {
+            let i = 0;
+            for (i = 0; i < numSubsCasa; i++) {
+                if ((i + 1) > numSubsVisit || numSubsVisit === 0) {
+                    let timeText = formatJogoSeconds(subsCasa[i].time);
+                    if (timeText.length > 1) {
+                        timeText = (
+                            <Text>
+                                { timeText[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeText[1] }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeText = (
+                            <Text>
+                                <Text>
+                                    { timeText[0] }
+                                </Text>
+                            </Text>
+                        );
+                    }
+                    viewSubs.push(
+                        <View key={i}>
+                            {
+                                i !== 0 &&
+                                <View style={styles.separator} />
+                            }
+                            <View 
+                                style={{ 
+                                    flexDirection: 'row', 
+                                    alignItems: 'center' 
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        flex: 1,
+                                        flexDirection: 'row', 
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start'
+                                    }}
+                                >
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveSubs(subsCasa[i], jogo)
+                                        }
+                                    >
+                                        <Image 
+                                            source={imgInOut}
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
+                                    <View style={{ marginHorizontal: 3 }} />
+                                    { timeText }
+                                    <View>
+                                        <Text style={styles.textOut}>
+                                            { subsCasa[i].jogadorOut.nome }
+                                        </Text>
+                                        <Text style={styles.textIn}>
+                                            { subsCasa[i].jogadorIn.nome }
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+                        </View>
+                    );
+                } else {
+                    let timeTextCasa = formatJogoSeconds(subsCasa[i].time);
+                    let timeTextVisit = formatJogoSeconds(subsVisit[i].time);
+                    if (timeTextCasa.length > 1) {
+                        timeTextCasa = (
+                            <Text>
+                                { timeTextCasa[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextCasa[1] }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextCasa = (
+                            <Text>
+                                <Text>
+                                    { timeTextCasa[0] }
+                                </Text>
+                            </Text>
+                        );
+                    }
+                    if (timeTextVisit.length > 1) {
+                        timeTextVisit = (
+                            <Text>
+                                { timeTextVisit[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextVisit[1] }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextVisit = (
+                            <Text>
+                                <Text>
+                                    { timeTextVisit[0] }
+                                </Text>
+                            </Text>
+                        );
+                    }
+                    viewSubs.push(
+                        <View key={i}>
+                            {
+                                i !== 0 &&
+                                <View style={styles.separator} />
+                            }
+                            <View 
+                                style={{ 
+                                    flexDirection: 'row', 
+                                    alignItems: 'center'
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        flex: 1, 
+                                        flexDirection: 'row', 
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start' 
+                                    }}
+                                >
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveSubs(subsCasa[i], jogo)
+                                        }
+                                    >
+                                        <Image 
+                                            source={imgInOut}
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
+                                    <View style={{ marginHorizontal: 3 }} />
+                                    { timeTextCasa }
+                                    <View>
+                                        <Text style={styles.textOut}>
+                                            { subsCasa[i].jogadorOut.nome }
+                                        </Text>
+                                        <Text style={styles.textIn}>
+                                            { subsCasa[i].jogadorIn.nome }
+                                        </Text>
+                                    </View>
+                                </View>
+                                <View
+                                    style={{
+                                        flex: 1, 
+                                        flexDirection: 'row', 
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-end' 
+                                    }}
+                                >
+                                    { timeTextVisit }
+                                    <View>
+                                        <Text style={styles.textOut}>
+                                            { subsVisit[i].jogadorOut.nome }
+                                        </Text>
+                                        <Text style={styles.textIn}>
+                                            { subsVisit[i].jogadorIn.nome }
+                                        </Text>
+                                    </View>
+                                    <View style={{ marginHorizontal: 3 }} />
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveSubs(subsVisit[i], jogo)
+                                        }
+                                    >
+                                        <Image 
+                                            source={imgInOut}
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    );
+                }
+            }
+        } else {
+            let i = 0;
+            for (i = 0; i < numSubsVisit; i++) {
+                if ((i + 1) > numSubsCasa || numSubsCasa === 0) {
+                    let timeText = formatJogoSeconds(subsVisit[i].time);
+                    if (timeText.length > 1) {
+                        timeText = (
+                            <Text>
+                                { timeText[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeText[1] }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeText = (
+                            <Text>
+                                <Text>
+                                    { timeText[0] }
+                                </Text>
+                            </Text>
+                        );
+                    }
+                    viewSubs.push(
+                        <View key={i}>
+                            {
+                                i !== 0 &&
+                                <View style={styles.separator} />
+                            }
+                            <View 
+                                style={{ 
+                                    flexDirection: 'row', 
+                                    alignItems: 'center' 
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        flex: 1,
+                                        flexDirection: 'row', 
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-end' 
+                                    }}
+                                >
+                                    { timeText }
+                                    <View>
+                                        <Text style={styles.textOut}>
+                                            { subsVisit[i].jogadorOut.nome }
+                                        </Text>
+                                        <Text style={styles.textIn}>
+                                            { subsVisit[i].jogadorIn.nome }
+                                        </Text>
+                                    </View>
+                                    <View style={{ marginHorizontal: 3 }} />
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveSubs(subsVisit[i], jogo)
+                                        }
+                                    >
+                                        <Image 
+                                            source={imgInOut}
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    );
+                } else {
+                    let timeTextVisit = formatJogoSeconds(subsVisit[i].time);
+                    let timeTextCasa = formatJogoSeconds(subsCasa[i].time);
+                    if (timeTextVisit.length > 1) {
+                        timeTextVisit = (
+                            <Text>
+                                { timeTextVisit[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextVisit[1] }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextVisit = (
+                            <Text>
+                                <Text>
+                                    { timeTextVisit[0] }
+                                </Text>
+                            </Text>
+                        );
+                    }
+                    if (timeTextCasa.length > 1) {
+                        timeTextCasa = (
+                            <Text>
+                                { timeTextCasa[0] }
+                                <Text style={styles.extraTime}>
+                                    { timeTextCasa[1] }
+                                </Text>
+                            </Text> 
+                        );
+                    } else {
+                        timeTextCasa = (
+                            <Text>
+                                <Text>
+                                    { timeTextCasa[0] }
+                                </Text>
+                            </Text>
+                        );
+                    }
+                    viewSubs.push(
+                        <View key={i}>
+                            {
+                                i !== 0 &&
+                                <View style={styles.separator} />
+                            }
+                            <View 
+                                style={{ 
+                                    flexDirection: 'row', 
+                                    alignItems: 'center'
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        flex: 1,
+                                        flexDirection: 'row', 
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start' 
+                                    }}
+                                >
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveSubs(subsCasa[i], jogo)
+                                        }
+                                    >
+                                        <Image 
+                                            source={imgInOut}
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
+                                    <View style={{ marginHorizontal: 3 }} />
+                                    { timeTextCasa }
+                                    <View>
+                                        <Text style={styles.textOut}>
+                                            { subsCasa[i].jogadorOut.nome }
+                                        </Text>
+                                        <Text style={styles.textIn}>
+                                            { subsCasa[i].jogadorIn.nome }
+                                        </Text>
+                                    </View>
+                                </View>
+                                <View
+                                    style={{
+                                        flex: 1,
+                                        flexDirection: 'row', 
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-end' 
+                                    }}
+                                >
+                                    { timeTextVisit }
+                                    <View>
+                                        <Text style={styles.textOut}>
+                                            { subsVisit[i].jogadorOut.nome }
+                                        </Text>
+                                        <Text style={styles.textIn}>
+                                            { subsVisit[i].jogadorIn.nome }
+                                        </Text>
+                                    </View>
+                                    <View style={{ marginHorizontal: 3 }} />
+                                    <TouchableOpacity
+                                        onPress={
+                                            this.onAddPressRemoveSubs(subsVisit[i], jogo)
+                                        }
+                                    >
+                                        <Image 
+                                            source={imgInOut}
+                                            style={{ 
+                                                width: 20, height: 25 
+                                            }} 
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    );
+                }
+            }
+        }
+
+        return viewSubs;
+    }
+
     renderEscalados(jogo) {
-        const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push);
-        const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push);
+        const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push).sort(
+            (a, b) => {
+                if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
+                    return 1;
+                } 
+                if (getPosIndex(a.posvalue) < getPosIndex(b.posvalue)) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
+        const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push).sort(
+            (a, b) => {
+                if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
+                    return 1;
+                } 
+                if (getPosIndex(a.posvalue) < getPosIndex(b.posvalue)) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
         const numJogadoresCasa = jogadoresCasaFt.length;
         const numjogadoresVisit = jogadoresVisitFt.length;
 
@@ -1590,76 +2336,147 @@ class JogoG extends React.Component {
     }
 
     renderIcons(jogador, jogo) {
+        let i = 0;
+        let yellow = 0;
+        let red = 0;
+        let disabled = false;
+
+        for (i = 0; i < jogo.cartoes.length; i++) {
+            if (!jogo.cartoes[i].push && jogo.cartoes[i].key === jogador.key) {
+                if (jogo.cartoes[i].color === 'amarelo') {
+                    yellow++;
+                }
+                if (jogo.cartoes[i].color === 'vermelho') {
+                    red++;
+                }
+            }
+        }
+
+        if (yellow >= 2 || red >= 1) {
+            disabled = true;
+        }
+
         return (
             <View 
                 style={{ 
-                    flex: 0.8, 
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    flex: 1
                 }}
             >
-                <View 
-                    style={{ 
-                        flex: 1, 
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
-                >
-                    <TouchableOpacity
-                        onPress={() => this.onPressPlayerGol(jogador, jogo)}
-                    >
-                        <Image 
-                            source={imgBola}
+                {
+                    disabled ?
+                    (
+                        <View 
                             style={{ 
-                                width: 25, height: 25 
-                            }} 
-                        />   
-                    </TouchableOpacity>
-                </View>
-                <View 
-                    style={{ 
-                        flex: 1, 
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
-                >
-                    <TouchableOpacity
-                        onPress={() => this.onPressCard(jogador, jogo, 'amarelo')}
-                    >
-                        <Image 
-                            source={imgYellowCard}
+                                flex: 1, 
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <Text style={{ color: 'red', fontWeight: '500' }}>
+                                Jogador Expulso
+                            </Text>
+                        </View>
+                    )
+                    :
+                    (
+                        <View 
                             style={{ 
-                                width: 20, height: 25 
-                            }} 
-                        />   
-                    </TouchableOpacity>
-                </View>
-                <View 
-                    style={{ 
-                        flex: 1, 
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
-                >
-                    <TouchableOpacity
-                        onPress={() => this.onPressCard(jogador, jogo, 'vermelho')}
-                    >
-                        <Image 
-                            source={imgRedCard}
-                            style={{ 
-                                width: 20, height: 25 
-                            }} 
-                        />   
-                    </TouchableOpacity>
-                </View>
+                                flex: 0.8, 
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                            }}
+                        >
+                            <View 
+                                style={{ 
+                                    flex: 1, 
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => this.onPressPlayerGol(jogador, jogo)}
+                                >
+                                    <Image 
+                                        source={imgBola}
+                                        style={{ 
+                                            width: 25, height: 25 
+                                        }} 
+                                    />   
+                                </TouchableOpacity>
+                            </View>
+                            <View 
+                                style={{ 
+                                    flex: 1, 
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => this.onPressCard(jogador, jogo, 'amarelo')}
+                                >
+                                    <Image 
+                                        source={imgYellowCard}
+                                        style={{ 
+                                            width: 20, height: 25 
+                                        }} 
+                                    />   
+                                </TouchableOpacity>
+                            </View>
+                            <View 
+                                style={{ 
+                                    flex: 1, 
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => this.onPressCard(jogador, jogo, 'vermelho')}
+                                >
+                                    <Image 
+                                        source={imgRedCard}
+                                        style={{ 
+                                            width: 20, height: 25 
+                                        }} 
+                                    />   
+                                </TouchableOpacity>
+                            </View>
+                            <View 
+                                style={{ 
+                                    flex: 1, 
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => this.onPressSubs(jogador)}
+                                >
+                                    <Image 
+                                        source={imgInOut}
+                                        style={{ 
+                                            width: 25, height: 25 
+                                        }} 
+                                    />   
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )
+                }
             </View>
+
         );
     }
 
     render() {
         const { listJogos, itemSelected } = this.props;
         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
+
+        if (!jogo) {
+            return false;
+        }
+
+        const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push);
+        const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push);
 
         return (
             <View style={{ flex: 1 }}>
@@ -1668,6 +2485,7 @@ class JogoG extends React.Component {
                     <View style={{ marginVertical: 2 }} />
                     { this.renderGoals(jogo) }
                     { this.renderCartoes(jogo) }
+                    { this.renderSubs(jogo) }
                     { this.renderEscalados(jogo) }
                     <View style={{ marginVertical: 20 }} />
                 </ScrollView>
@@ -1680,6 +2498,15 @@ class JogoG extends React.Component {
                         hint={this.state.seconds}
                         cancelText={'Cancelar'}
                         submitText={'Ok'} 
+                />
+                <PlayersModal
+                    showPlayersModal={this.props.showPlayersModalJ}  
+                    doInOrOut={
+                        (jogador, inOrOut, newJogador = false) => 
+                        this.doInOrOut(jogador, inOrOut, jogo, newJogador)
+                    }
+                    jogadoresCasaFt={jogadoresCasaFt}
+                    jogadoresVisitFt={jogadoresVisitFt}
                 />
             </View>
         );
@@ -1784,10 +2611,19 @@ const styles = StyleSheet.create({
         fontSize: 12, 
         fontWeight: 'bold', 
         color: 'red' 
+    },
+    textIn: {
+        fontWeight: '600',
+        color: '#4AD940'
+    },
+    textOut: {
+        fontWeight: '600',
+        color: '#E44545'
     }
 });
 
 const mapStateToProps = (state) => ({
+    showPlayersModalJ: state.GerenciarReducer.showPlayersModalJ,
     itemSelected: state.GerenciarReducer.itemSelected,
     listJogos: state.JogosReducer.listJogos,
     showTimerModal: state.JogoReducer.showTimerModal
@@ -1796,5 +2632,8 @@ const mapStateToProps = (state) => ({
 export default connect(mapStateToProps, { 
     modificaClean,
     modificaCurrentTime,
-    modificaShowTimerModal
+    modificaShowTimerModal,
+    modificaShowPlayersModalJ,
+    modificaIsSubstitute,
+    modificaJogador
 })(JogoG);

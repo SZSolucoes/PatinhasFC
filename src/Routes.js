@@ -40,6 +40,7 @@ import { store } from './App';
 import firebase from './Firebase';
 import SplashScreenAnim from './components/animations/SplashScreenAnim';
 import AnimScene from './components/tools/AnimatedScene';
+import { doEndGame } from './utils/jogosUtils';
 
 import imgBootOne from './imgs/bootone.png';
 import imgFinishFlag from './imgs/finishflag.png';
@@ -300,28 +301,7 @@ class Routes extends React.Component {
                                 },
                                 { 
                                     text: 'Ok', 
-                                    onPress: () => {
-                                        firebase.database()
-                                        .ref()
-                                        .child(`jogos/${jogo.key}`).update({
-                                            endStatus: '1'
-                                        })
-                                        .then(
-                                            () => {
-                                                Actions.popTo('gerenciar');
-                                                Toast.show(
-                                                    'Jogo finalizado.',
-                                                    Toast.SHORT
-                                                );
-                                            }
-                                        )
-                                        .catch(
-                                            () => Toast.show(
-                                                'Falha ao finalizar jogo. Verifique a conexão.',
-                                                 Toast.SHORT
-                                            )
-                                        );
-                                    }
+                                    onPress: () => doEndGame(jogo, store, firebase, Actions, Toast)
                                 }
                             ]
                         );

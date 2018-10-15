@@ -20,6 +20,7 @@ import { retrieveImgSource } from '../../../utils/imageStorage';
 import Campo from '../../campo/Campo';
 import PlayersModal from './PlayersModal';
 import { isPortrait } from '../../../utils/orientation';
+import { getPosIndex } from '../../../utils/jogosUtils';
 import { 
     modificaShowPlayersModal,
     modificaIsSubstitute,
@@ -28,8 +29,8 @@ import {
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
+import imgTeam from '../../../imgs/team.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
-import imgInOut from '../../../imgs/inout.png';
 
 class EscalacaoG extends React.Component {
 
@@ -54,7 +55,6 @@ class EscalacaoG extends React.Component {
         this.onToggleVisit = this.onToggleVisit.bind(this);
 
         this.onChangeDimensions = this.onChangeDimensions.bind(this);
-        this.onPressSubs = this.onPressSubs.bind(this);
         this.doInOrOut = this.doInOrOut.bind(this);
         this.renderCasaJogadores = this.renderCasaJogadores.bind(this);
         this.renderVisitJogadores = this.renderVisitJogadores.bind(this);
@@ -90,22 +90,6 @@ class EscalacaoG extends React.Component {
         if (isPortrait()) {
             this.setState({ heightDim: event.screen.height / 2.5 });
         }
-    }
-
-    onPressSubs(jogador) {
-        const newJogador = {
-            key: jogador.key,
-            nome: jogador.nome,
-            posicao: jogador.posicao,
-            posvalue: jogador.posvalue,
-            imgAvatar: jogador.imgAvatar,
-            side: jogador.side
-        };
-
-        this.props.modificaJogador(newJogador);
-        this.props.modificaIsSubstitute(true);
-        this.props.modificaShowPlayersModal(true);
-        return;
     }
 
     onLayoutTitleCasa(event) {
@@ -184,31 +168,8 @@ class EscalacaoG extends React.Component {
         ).start(); 
     }
 
-    doInOrOut(jogador, inOrOut, jogo, newJogador = false) {
-        if (newJogador) {
-            const { side } = jogador;
-            if (side === 'casa') {
-                const newCasaList = _.filter(
-                    jogo.escalacao.casa, (item) => (item.key !== jogador.key) || !!item.push
-                );
-                newCasaList.push(newJogador);
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
-                    casa: newCasaList
-                })
-                .then(() => true)
-                .catch(() => true);
-            } else if (side === 'visit') {
-                const newVisitList = _.filter(
-                    jogo.escalacao.visit, (item) => (item.key !== jogador.key) || !!item.push
-                );
-                newVisitList.push(newJogador);
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
-                    visit: newVisitList
-                })
-                .then(() => true)
-                .catch(() => true);
-            }
-        } else if (inOrOut) {
+    doInOrOut(jogador, inOrOut, jogo) {
+        if (inOrOut) {
             const { side } = jogador;
             if (side === 'casa') {
                 const newCasaList = [...jogo.escalacao.casa, jogador];
@@ -267,24 +228,6 @@ class EscalacaoG extends React.Component {
                     }}
                 >
                     <TouchableOpacity
-                        onPress={() => this.onPressSubs(item, jogo)}
-                    >
-                        <Image 
-                            source={imgInOut}
-                            style={{ 
-                                width: 25, height: 25 
-                            }} 
-                        />   
-                    </TouchableOpacity>
-                </View>
-                <View 
-                    style={{ 
-                        flex: 1, 
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
-                >
-                    <TouchableOpacity
                         onPress={() => {
                             Alert.alert(
                                 'Aviso',
@@ -314,7 +257,18 @@ class EscalacaoG extends React.Component {
     }
 
     renderCasaJogadores(jogo) {
-        const casaJogadores = _.filter(jogo.escalacao.casa, (item) => !item.push);
+        const casaJogadores = _.filter(jogo.escalacao.casa, (item) => !item.push).sort(
+            (a, b) => {
+                if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
+                    return 1;
+                } 
+                if (getPosIndex(a.posvalue) < getPosIndex(b.posvalue)) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
         const numJogadores = casaJogadores.length;
 
         if (numJogadores === 0) {
@@ -353,7 +307,18 @@ class EscalacaoG extends React.Component {
     }
 
     renderVisitJogadores(jogo) {
-        const visitJogadores = _.filter(jogo.escalacao.visit, (item) => !item.push);
+        const visitJogadores = _.filter(jogo.escalacao.visit, (item) => !item.push).sort(
+            (a, b) => {
+                if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
+                    return 1;
+                } 
+                if (getPosIndex(a.posvalue) < getPosIndex(b.posvalue)) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
         const numJogadores = visitJogadores.length;
 
         if (numJogadores === 0) {
@@ -409,9 +374,9 @@ class EscalacaoG extends React.Component {
                 >
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Image 
-                            style={{ height: 40, width: 35, marginRight: 5 }}
+                            style={{ height: 45, width: 45, marginRight: 10 }}
                             resizeMode={'stretch'}
-                            source={imgHomeShirt} 
+                            source={imgTeam} 
                         /> 
                         <Text 
                             onPress={() => this.onToggleCasa()}
@@ -422,10 +387,10 @@ class EscalacaoG extends React.Component {
                     </View>
                 </View>
                 <List 
-                    containerStyle={{ 
+                    containerStyle={{
                         marginTop: 0, 
-                        borderTopWidth: 1, 
-                        borderBottomWidth: 1 
+                        borderTopWidth: 0, 
+                        borderBottomWidth: 0
                     }}
                 >
                     {
@@ -433,6 +398,10 @@ class EscalacaoG extends React.Component {
                             const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                             return (
                                 <ListItem
+                                    containerStyle={
+                                        (index + 1) === numjogadoresConfirmados ? 
+                                        { borderBottomWidth: 0 } : null 
+                                    }
                                     titleContainerStyle={{ marginLeft: 10 }}
                                     subtitleContainerStyle={{ marginLeft: 10 }}
                                     roundAvatar
@@ -452,6 +421,11 @@ class EscalacaoG extends React.Component {
     render() {
         const { listJogos, itemSelected } = this.props;
         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
+
+        if (!jogo) {
+            return false;
+        }
+        
         const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push);
         const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push);
 
@@ -568,10 +542,11 @@ class EscalacaoG extends React.Component {
                     { this.renderConfirmados(jogo) }
                     <View style={{ marginVertical: 60 }} />
                 </ScrollView>
-                <PlayersModal 
+                <PlayersModal
+                    showPlayersModal={this.props.showPlayersModal} 
                     doInOrOut={
-                        (jogador, inOrOut, newJogador = false) => 
-                        this.doInOrOut(jogador, inOrOut, jogo, newJogador)
+                        (jogador, inOrOut) => 
+                        this.doInOrOut(jogador, inOrOut, jogo)
                     }
                     jogadoresCasaFt={jogadoresCasaFt}
                     jogadoresVisitFt={jogadoresVisitFt}
@@ -610,6 +585,7 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
+    showPlayersModal: state.GerenciarReducer.showPlayersModal,
     itemSelected: state.GerenciarReducer.itemSelected,
     listJogos: state.JogosReducer.listJogos
 });

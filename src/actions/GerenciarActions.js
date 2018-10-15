@@ -19,6 +19,11 @@ export const modificaShowPlayersModal = (value) => ({
     payload: value
 });
 
+export const modificaShowPlayersModalJ = (value) => ({
+    type: 'modifica_showplayersmodalj_gerenciar',
+    payload: value
+});
+
 export const modificaIsSubstitute = (value) => ({
     type: 'modifica_issubstitute_gerenciar',
     payload: value

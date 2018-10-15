@@ -15,6 +15,7 @@ import Toast from 'react-native-simple-toast';
 import _ from 'lodash';
 import {
     modificaShowPlayersModal,
+    modificaShowPlayersModalJ,
     modificaIsSubstitute,
     modificaFilterModalLoad,
     modificaFilterModalStr
@@ -87,6 +88,7 @@ class PlayersModal extends React.Component {
             }
         ).start(() => {
             setTimeout(() => this.props.modificaShowPlayersModal(false), 100);
+            setTimeout(() => this.props.modificaShowPlayersModalJ(false), 100);
             setTimeout(() => this.props.modificaIsSubstitute(false), 100);
         });
     }
@@ -278,7 +280,6 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-    showPlayersModal: state.GerenciarReducer.showPlayersModal,
     isSubstitute: state.GerenciarReducer.isSubstitute,
     listUsuarios: state.UsuariosReducer.listUsuarios,
     filterModalStr: state.GerenciarReducer.filterModalStr,
@@ -289,6 +290,7 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, { 
     modificaShowPlayersModal,
+    modificaShowPlayersModalJ,
     modificaIsSubstitute,
     modificaFilterModalLoad,
     modificaFilterModalStr 
