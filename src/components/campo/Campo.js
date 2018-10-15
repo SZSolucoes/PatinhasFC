@@ -39,7 +39,11 @@ class Campo extends React.Component {
                 posicao: getPosName(pos),
                 posvalue: pos,
                 imgAvatar: '',
-                side
+                side,
+                vitorias: '0',
+                derrotas: '0',
+                empates: '0',
+                jogosEscalados: '0'
             };
 
             this.props.modificaJogador(newJogador);

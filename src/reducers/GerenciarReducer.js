@@ -7,7 +7,9 @@ const INITIAL_STATE = {
     isSubstitute: false,
     filterModalStr: '',
     filterModalLoad: false,
-    jogador: {}
+    jogador: {},
+    endGameModal: false,
+    endGameModalPerc: 0
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -52,6 +54,16 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 filterModalLoad: action.payload
             };
+        case 'modifica_endgamemodal_gerenciar':
+            return { 
+                ...state, 
+                endGameModal: action.payload
+            };
+        case 'modifica_endgamemodalperc_gerenciar':
+            return { 
+                ...state, 
+                endGameModalPerc: action.payload
+            };
         case 'modifica_jogador_gerenciar':
             return { 
                 ...state, 
@@ -68,7 +80,9 @@ export default (state = INITIAL_STATE, action) => {
                 isSubstitute: false,
                 filterModalStr: '',
                 filterModalLoad: false,
-                jogador: {}
+                jogador: {},
+                endGameModal: false,
+                endGameModalPerc: 0
             };
         default:
             return state;

@@ -301,7 +301,15 @@ class Routes extends React.Component {
                                 },
                                 { 
                                     text: 'Ok', 
-                                    onPress: () => doEndGame(jogo, store, firebase, Actions, Toast)
+                                    onPress: () => {
+                                        store.dispatch({
+                                            type: 'modifica_endgamemodal_gerenciar',
+                                            payload: true
+                                        });
+                                        setTimeout(() =>
+                                            doEndGame(jogo, store, firebase, Actions, Toast)
+                                        , 500);
+                                    }
                                 }
                             ]
                         );

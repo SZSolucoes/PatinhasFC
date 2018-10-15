@@ -13,6 +13,8 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Card, List, ListItem } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
+import * as Progress from 'react-native-progress';
+import { Dialog } from 'react-native-simple-dialogs';
 import ModalInput from '../../tools/ModalInput';
 import PlayersModal from './PlayersModal';
 import firebase from '../../../Firebase';
@@ -186,7 +188,11 @@ class JogoG extends React.Component {
             posicao: jogador.posicao,
             posvalue: jogador.posvalue,
             imgAvatar: jogador.imgAvatar,
-            side: jogador.side
+            side: jogador.side,
+            vitorias: jogador.vitorias,
+            derrotas: jogador.derrotas,
+            empates: jogador.empates,
+            jogosEscalados: jogador.jogosEscalados
         };
 
         this.props.modificaJogador(newJogador);
@@ -620,9 +626,14 @@ class JogoG extends React.Component {
                 const newCasaList = _.filter(
                     jogo.escalacao.casa, (item) => (item.key !== jogador.key) || !!item.push
                 );
+                const newBancoList = _.filter(
+                    jogo.escalacao.banco, (item) => (item.key !== newJogador.key) || !!item.push
+                );
                 newCasaList.push(newJogador);
+                newBancoList.push(jogador);
                 firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
                     casa: newCasaList,
+                    banco: newBancoList
                 })
                 .then(() => {
                     if (isRemove) {
@@ -656,9 +667,14 @@ class JogoG extends React.Component {
                 const newVisitList = _.filter(
                     jogo.escalacao.visit, (item) => (item.key !== jogador.key) || !!item.push
                 );
+                const newBancoList = _.filter(
+                    jogo.escalacao.banco, (item) => (item.key !== newJogador.key) || !!item.push
+                );
                 newVisitList.push(newJogador);
+                newBancoList.push(jogador);
                 firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
-                    visit: newVisitList
+                    visit: newVisitList,
+                    banco: newBancoList
                 })
                 .then(() => {
                     if (isRemove) {
@@ -2508,6 +2524,25 @@ class JogoG extends React.Component {
                     jogadoresCasaFt={jogadoresCasaFt}
                     jogadoresVisitFt={jogadoresVisitFt}
                 />
+                <Dialog 
+                    visible={this.props.endGameModal}
+                    title='Contabilizando dados...'
+                    onTouchOutside={() => true}
+                >
+                    <View 
+                        style={{ 
+                            alignItems: 'center',
+                            justifyContent: 'center' 
+                        }}
+                    >
+                        <Progress.Circle 
+                            progress={this.props.endGameModalPerc}
+                            size={100}
+                            showsText
+                            color={colorAppP}
+                        />
+                    </View>
+                </Dialog>
             </View>
         );
     }
@@ -2624,6 +2659,8 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     showPlayersModalJ: state.GerenciarReducer.showPlayersModalJ,
+    endGameModal: state.GerenciarReducer.endGameModal,
+    endGameModalPerc: state.GerenciarReducer.endGameModalPerc,
     itemSelected: state.GerenciarReducer.itemSelected,
     listJogos: state.JogosReducer.listJogos,
     showTimerModal: state.JogoReducer.showTimerModal

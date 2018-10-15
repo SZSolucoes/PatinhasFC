@@ -25,6 +25,7 @@
     "react-native-router-flux": "^4.0.1",
     "react-native-scl-alert": "^1.2.1",
     "react-native-share": "^1.1.2",
+    "react-native-simple-dialogs": "^1.0.0",
     "react-native-simple-toast": "0.0.8",
     "react-native-status-bar-height": "^2.1.0",
     "react-native-svg": "^6.5.2",

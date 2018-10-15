@@ -134,6 +134,7 @@ class UsuarioEdit extends React.Component {
                     jogosEscalados: '0',
                     vitorias: '0',
                     derrotas: '0',
+                    empates: '0',
                     gols: '0',
                     faltas: '0',
                     cartoesAmarelos: '0',

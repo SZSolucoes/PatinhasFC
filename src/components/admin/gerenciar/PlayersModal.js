@@ -48,6 +48,10 @@ class PlayersModal extends React.Component {
         newJogador.key = item.key;
         newJogador.nome = item.nome;
         newJogador.imgAvatar = item.imgAvatar;
+        newJogador.vitorias = item.vitorias;
+        newJogador.derrotas = item.derrotas;
+        newJogador.empates = item.empates;
+        newJogador.jogosEscalados = item.jogosEscalados;
 
         if (isSubstitute) {
             this.props.doInOrOut(jogador, false, newJogador);
