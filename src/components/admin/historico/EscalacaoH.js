@@ -7,35 +7,23 @@ import {
     Animated,
     Text,
     TouchableWithoutFeedback,
-    Image,
-    TouchableOpacity,
-    Alert
+    Image
 } from 'react-native';
 import { Card, Icon, List, ListItem } from 'react-native-elements';
 import { connect } from 'react-redux';
-import { Actions } from 'react-native-router-flux';
 import _ from 'lodash';
-import * as Progress from 'react-native-progress';
-import { Dialog } from 'react-native-simple-dialogs';
-import firebase from '../../../Firebase';
-import { colorAppF, colorAppP } from '../../../utils/constantes';
+import { colorAppF } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
 import Campo from '../../campo/Campo';
-import PlayersModal from './PlayersModal';
 import { isPortrait } from '../../../utils/orientation';
 import { getPosIndex } from '../../../utils/jogosUtils';
-import { 
-    modificaShowPlayersModal,
-    modificaIsSubstitute,
-    modificaJogador
-} from '../../../actions/GerenciarActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
 import imgTeam from '../../../imgs/team.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
 
-class EscalacaoG extends React.Component {
+class EscalacaoH extends React.Component {
 
     constructor(props) {
         super(props);
@@ -58,7 +46,6 @@ class EscalacaoG extends React.Component {
         this.onToggleVisit = this.onToggleVisit.bind(this);
 
         this.onChangeDimensions = this.onChangeDimensions.bind(this);
-        this.doInOrOut = this.doInOrOut.bind(this);
         this.renderCasaJogadores = this.renderCasaJogadores.bind(this);
         this.renderVisitJogadores = this.renderVisitJogadores.bind(this);
         this.renderIcons = this.renderIcons.bind(this);
@@ -79,7 +66,7 @@ class EscalacaoG extends React.Component {
 
     shouldComponentUpdate(nextProps, nextStates) {
         const { itemSelected } = this.props;
-        
+
         if (nextProps.listJogos) {
             const nj = _.filter(nextProps.listJogos, (item) => item.key === itemSelected)[0];
                 
@@ -177,49 +164,7 @@ class EscalacaoG extends React.Component {
         ).start(); 
     }
 
-    doInOrOut(jogador, inOrOut, jogo) {
-        if (inOrOut) {
-            const { side } = jogador;
-            if (side === 'casa') {
-                const newCasaList = [...jogo.escalacao.casa, jogador];
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
-                    casa: newCasaList
-                })
-                .then(() => true)
-                .catch(() => true);
-            } else if (side === 'visit') {
-                const newVisitList = [...jogo.escalacao.visit, jogador];
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
-                    visit: newVisitList
-                })
-                .then(() => true)
-                .catch(() => true);
-            }
-        } else {
-            const { side } = jogador;
-            if (side === 'casa') {
-                const newCasaList = _.filter(
-                    jogo.escalacao.casa, (item) => (item.key !== jogador.key) || !!item.push
-                );
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
-                    casa: newCasaList
-                })
-                .then(() => true)
-                .catch(() => true);
-            } else if (side === 'visit') {
-                const newVisitList = _.filter(
-                    jogo.escalacao.visit, (item) => (item.key !== jogador.key) || !!item.push
-                );
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
-                    visit: newVisitList
-                })
-                .then(() => true)
-                .catch(() => true);
-            }
-        }
-    }
-
-    renderIcons(item, jogo) {
+    renderIcons() {
         return (
             <View 
                 style={{ 
@@ -235,32 +180,7 @@ class EscalacaoG extends React.Component {
                         alignItems: 'center',
                         justifyContent: 'center'
                     }}
-                >
-                    <TouchableOpacity
-                        onPress={() => {
-                            Alert.alert(
-                                'Aviso',
-                                `Confirma a remoção do jogador:\n${item.nome} ?`,
-                                [
-                                    { text: 'Cancelar', 
-                                        onPress: () => true, 
-                                        style: 'cancel' 
-                                    },
-                                    { 
-                                        text: 'Ok', 
-                                        onPress: () => this.doInOrOut(item, false, jogo) 
-                                    },
-                                ]
-                            );
-                        }}
-                    >
-                        <Icon
-                            name='delete' 
-                            type='material-community' 
-                            size={30} color='red' 
-                        />   
-                    </TouchableOpacity>
-                </View>
+                />
             </View>
         );
     }
@@ -305,7 +225,7 @@ class EscalacaoG extends React.Component {
                                 title={item.nome}
                                 subtitle={item.posicao}
                                 rightIcon={(
-                                    this.renderIcons(item, jogo)
+                                    this.renderIcons()
                                 )}
                             />
                         );
@@ -355,7 +275,7 @@ class EscalacaoG extends React.Component {
                                 title={item.nome}
                                 subtitle={item.posicao}
                                 rightIcon={(
-                                    this.renderIcons(item, jogo)
+                                    this.renderIcons()
                                 )}
                             />
                         );
@@ -481,14 +401,10 @@ class EscalacaoG extends React.Component {
                             >
                                 <View style={{ height: this.state.heightDim }}>
                                     <Campo 
-                                        enableTouch
                                         jogadores={jogadoresCasaFt} 
                                         side={'casa'}
                                         tatics={'4-4-2'}
-                                        doInOrOut={
-                                            (jogador, inOrOut) => 
-                                            this.doInOrOut(jogador, inOrOut, jogo)
-                                        }
+                                        enableTouch={false}
                                     />
                                 </View>
                                 <View style={{ marginVertical: 20 }} />
@@ -534,11 +450,7 @@ class EscalacaoG extends React.Component {
                                         jogadores={jogadoresVisitFt}
                                         side={'visit'}
                                         tatics={'4-4-2'}
-                                        doInOrOut={
-                                            (jogador, inOrOut) => 
-                                            this.doInOrOut(jogador, inOrOut, jogo)
-                                        }
-                                        enableTouch
+                                        enableTouch={false}
                                     />
                                 </View>
                                 <View style={{ marginVertical: 20 }} />
@@ -550,34 +462,6 @@ class EscalacaoG extends React.Component {
                     { this.renderConfirmados(jogo) }
                     <View style={{ marginVertical: 60 }} />
                 </ScrollView>
-                <PlayersModal
-                    showPlayersModal={this.props.showPlayersModal} 
-                    doInOrOut={
-                        (jogador, inOrOut) => 
-                        this.doInOrOut(jogador, inOrOut, jogo)
-                    }
-                    jogadoresCasaFt={jogadoresCasaFt}
-                    jogadoresVisitFt={jogadoresVisitFt}
-                />
-                <Dialog 
-                    visible={this.props.endGameModal && Actions.currentScene === '_escalacaoTabG'}
-                    title='Gravando dados...'
-                    onTouchOutside={() => true}
-                >
-                    <View 
-                        style={{ 
-                            alignItems: 'center',
-                            justifyContent: 'center' 
-                        }}
-                    >
-                        <Progress.Circle 
-                            progress={this.props.endGameModalPerc}
-                            size={100}
-                            showsText
-                            color={colorAppP}
-                        />
-                    </View>
-                </Dialog>
             </View>
         );
     }
@@ -612,15 +496,8 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-    showPlayersModal: state.GerenciarReducer.showPlayersModal,
-    endGameModal: state.GerenciarReducer.endGameModal,
-    endGameModalPerc: state.GerenciarReducer.endGameModalPerc,
-    itemSelected: state.GerenciarReducer.itemSelected,
-    listJogos: state.JogosReducer.listJogos
+    itemSelected: state.HistoricoReducer.itemSelected,
+    listJogos: state.HistoricoReducer.listJogos
 });
 
-export default connect(mapStateToProps, {
-    modificaShowPlayersModal,
-    modificaIsSubstitute,
-    modificaJogador
-})(EscalacaoG);
+export default connect(mapStateToProps, {})(EscalacaoH);

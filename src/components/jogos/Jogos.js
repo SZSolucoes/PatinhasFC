@@ -206,12 +206,14 @@ class Jogos extends React.Component {
     }
 
     addNewRows(numberAdd) {
-        this.props.modificaAddNewRows(numberAdd);
+        const forcedMore = numberAdd < 2 ? 2 : numberAdd;
+        this.props.modificaAddNewRows(forcedMore);
         this.props.modificaLoadingFooter(false);
     }
 
     dataSourceControl(jogos, filterStr) {
         let newJogos = _.reverse([...jogos]);
+
         newJogos = newJogos.slice(0, this.props.maxRows);
         return this.renderBasedFilterOrNot(newJogos, filterStr);
     }
@@ -244,6 +246,7 @@ class Jogos extends React.Component {
 
     renderBasedFilterOrNot(jogos, filterStr) {
         let newJogos = jogos;
+        
         if (jogos) {
             if (filterStr) {
                 newJogos = this.onFilterJogos(jogos, filterStr);

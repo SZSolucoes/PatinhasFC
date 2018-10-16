@@ -7,32 +7,14 @@ import {
     View,
     Platform,
     TouchableOpacity,
-    Alert
 } from 'react-native';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { Actions } from 'react-native-router-flux';
 import { Card, List, ListItem } from 'react-native-elements';
-import Toast from 'react-native-simple-toast';
-import * as Progress from 'react-native-progress';
-import { Dialog } from 'react-native-simple-dialogs';
-import ModalInput from '../../tools/ModalInput';
-import PlayersModal from './PlayersModal';
-import firebase from '../../../Firebase';
-import { colorAppF, colorAppP, colorAppS, colorAppW } from '../../../utils/constantes';
+import { colorAppF, colorAppP } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
 import { getPosIndex } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
-import { 
-    modificaClean, 
-    modificaCurrentTime, 
-    modificaShowTimerModal 
-} from '../../../actions/JogoActions';
-import { 
-    modificaShowPlayersModalJ,
-    modificaIsSubstitute,
-    modificaJogador
-} from '../../../actions/GerenciarActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
@@ -42,46 +24,27 @@ import imgRedCard from '../../../imgs/redcard.png';
 import imgCartoes from '../../../imgs/cards.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
 import imgInOut from '../../../imgs/inout.png';
-import Jogos from '../../jogos/Jogos';
 
-class JogoG extends React.Component {
+class JogoH extends React.Component {
 
     constructor(props) {
         super(props);
 
         this.intervalIncrementer = null;
-        this.intervalUpdTimeFb = null;
-
-        this.fbDatabaseRef = firebase.database().ref();
 
         this.renderCardPlacar = this.renderCardPlacar.bind(this);
         this.renderGoals = this.renderGoals.bind(this);
         this.renderCartoes = this.renderCartoes.bind(this);
         this.renderSubs = this.renderSubs.bind(this);
-        this.doInOrOut = this.doInOrOut.bind(this);
         this.textJogoProgress = this.textJogoProgress.bind(this);
         this.textPlacar = this.textPlacar.bind(this);
-        this.onPressPlayerGol = this.onPressPlayerGol.bind(this);
-        this.onPressCard = this.onPressCard.bind(this);
-        this.onPressRemoveGol = this.onPressRemoveGol.bind(this);
-        this.onAddPressRemoveGol = this.onAddPressRemoveGol.bind(this);
-        this.onPressRemoveCard = this.onPressRemoveCard.bind(this);
-        this.onAddPressRemoveCard = this.onAddPressRemoveCard.bind(this);
-        this.onConfirmManualTimer = this.onConfirmManualTimer.bind(this);
-        this.onPressSubs = this.onPressSubs.bind(this);
         this.renderGolJogador = this.renderGolJogador.bind(this);
         this.renderCartaoJogador = this.renderCartaoJogador.bind(this);
         this.renderEscalados = this.renderEscalados.bind(this);
         this.renderIcons = this.renderIcons.bind(this);
-        this.onStartTimer = this.onStartTimer.bind(this);
-        this.onPauseTimer = this.onPauseTimer.bind(this);
-        this.onResetTimer = this.onResetTimer.bind(this);
 
         this.state = {
-            seconds: 0,
-            btnStartEnabled: true,
-            btnPauseEnabled: false,
-            btnResetEnabled: false
+            seconds: 0
         };
     }
 
@@ -90,29 +53,12 @@ class JogoG extends React.Component {
         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
         const currentTime = parseInt(jogo.currentTime, 10);
         this.setState({ seconds: currentTime });
-        if (jogo.status === '0') {
-            this.setState({
-                btnStartEnabled: true,
-                btnPauseEnabled: false,
-                btnResetEnabled: currentTime > 0
-            });
-        } else if (jogo.status === '1') {
-            this.setState({
-                btnStartEnabled: false,
-                btnPauseEnabled: true,
-                btnResetEnabled: false
-            });
+        if (jogo.status === '1') {
             this.intervalIncrementer = setInterval(() =>
                 this.setState({
                     seconds: this.state.seconds + 1
                 })
             , 1000);
-        } else if (Jogos.status === '2') {
-            this.setState({
-                btnStartEnabled: true,
-                btnPauseEnabled: false,
-                btnResetEnabled: false
-            });
         }
     }
 
@@ -142,605 +88,29 @@ class JogoG extends React.Component {
                 if (jogo.status !== nj.status) {
                     if (nj.status === '0') {
                         clearInterval(this.intervalIncrementer);
-                        clearInterval(this.intervalUpdTimeFb);
-                        this.setState({
-                            btnStartEnabled: true,
-                            btnPauseEnabled: false,
-                            btnResetEnabled: nj.currentTime > 0
-                        });
                     } else if (nj.status === '1') {
-                        this.setState({
-                            btnStartEnabled: false,
-                            btnPauseEnabled: true,
-                            btnResetEnabled: false
-                        });
                         this.intervalIncrementer = setInterval(() =>
                             this.setState({
                                 seconds: this.state.seconds + 1
                             })
                         , 1000);
-                        this.intervalUpdTimeFb = setInterval(() => {
-                            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                                currentTime: this.state.seconds.toString()
-                            })
-                            .then(() => true)
-                            .catch(() => true);
-                        }, 1000 * 60);
                     } else if (nj.status === '2') {
                         clearInterval(this.intervalIncrementer);
-                        clearInterval(this.intervalUpdTimeFb);
                         this.setState({
-                            seconds: 0,
-                            btnStartEnabled: true,
-                            btnPauseEnabled: false,
-                            btnResetEnabled: false
+                            seconds: 0
                         }); 
                     }
                 }
             }, 500);
         }
 
-        if (nextStates.seconds !== this.state.seconds) {
-            this.props.modificaCurrentTime(nextStates.seconds);
-        }
-
         return nextProps !== this.props || nextStates !== this.state;
     }
 
-    componentWillUnmount() {
-        const { listJogos, itemSelected } = this.props;
-        const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
-
-        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-            status: '0',
-            currentTime: this.state.seconds.toString()
-        })
-        .then(() => true)
-        .catch(() => true);
-
+    componentWillUnmount() {  
         if (this.intervalIncrementer) {
             clearInterval(this.intervalIncrementer);
         }
-
-        if (this.intervalUpdTimeFb) {
-            clearInterval(this.intervalUpdTimeFb);
-        }
-        
-        this.props.modificaClean();
-    }
-
-    onConfirmManualTimer(value) {
-        if (value) {
-            const newValue = parseInt(value, 10) * 60;
-            this.setState({ seconds: newValue });
-        }
-    }
-
-    onPressSubs(jogador) {
-        const newJogador = {
-            key: jogador.key,
-            nome: jogador.nome,
-            posicao: jogador.posicao,
-            posvalue: jogador.posvalue,
-            imgAvatar: jogador.imgAvatar,
-            side: jogador.side,
-            vitorias: jogador.vitorias,
-            derrotas: jogador.derrotas,
-            empates: jogador.empates,
-            jogosEscalados: jogador.jogosEscalados
-        };
-
-        this.props.modificaJogador(newJogador);
-        this.props.modificaIsSubstitute(true);
-        this.props.modificaShowPlayersModalJ(true);
-        return;
-    }
-
-    onStartTimer(enabled, jogo) {
-        if (enabled) {
-            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                status: '1',
-                currentTime: this.state.seconds.toString()
-            })
-            .then(() => {
-                this.setState({
-                    btnStartEnabled: false,
-                    btnPauseEnabled: true,
-                    btnResetEnabled: false
-                });  
-            })
-            .catch(() => 
-                Toast.show('Falha ao iniciar a partida, verifique a conexão.', Toast.SHORT)
-            );
-        } 
-    }
-
-    onPauseTimer(enabled, jogo) { 
-        if (enabled) {
-            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                status: '0',
-                currentTime: this.state.seconds.toString()
-            })
-            .then(() => {
-                this.setState({
-                    btnStartEnabled: true,
-                    btnPauseEnabled: false,
-                    btnResetEnabled: true
-                });
-            })
-            .catch(() => 
-                Toast.show('Falha ao pausar a partida, verifique a conexão.', Toast.SHORT)
-            );
-        }  
-    }
-
-    onResetTimer(enabled, jogo) { 
-        if (enabled) {
-            Alert.alert(
-                'Aviso',
-                'Confirma o reinício do jogo ?',
-                [
-                    { text: 'Cancelar', 
-                        onPress: () => true, 
-                        style: 'cancel' 
-                    },
-                    { 
-                        text: 'Ok', 
-                        onPress: () => {
-                            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                                status: '2',
-                                currentTime: '0'
-                            })
-                            .then(() => {
-                                this.setState({
-                                    btnStartEnabled: true,
-                                    btnPauseEnabled: false,
-                                    btnResetEnabled: false
-                                }); 
-                            })
-                            .catch(() => 
-                                Toast.show(
-                                    'Falha ao reiniciar a partida, verifique a conexão.', 
-                                    Toast.SHORT
-                                )
-                            );
-                        }
-                    }
-                ]
-            ); 
-        } 
-    }
-
-    onPressPlayerGol(jogador, jogo) {
-        const gols = [
-            ...jogo.gols, 
-            {
-                key: jogador.key, 
-                side: jogador.side,
-                nome: jogador.nome,
-                time: this.state.seconds.toString(),
-                indexKey: jogo.gols.length.toString()
-            }
-        ];
-        const placarCasa = parseInt(jogo.placarCasa, 10) + 1;
-        const placarVisit = parseInt(jogo.placarVisit, 10) + 1;
-
-        Alert.alert(
-            'Aviso',
-            `Confirma o gol para o jogador:\n${jogador.nome} ?`,
-            [
-                { text: 'Cancelar', 
-                    onPress: () => true, 
-                    style: 'cancel' 
-                },
-                { 
-                    text: 'Ok', 
-                    onPress: () => {
-                        let payload = {};
-                        if (jogador.side === 'casa') {
-                            payload = { gols, placarCasa };
-                        } else {
-                            payload = { gols, placarVisit };
-                        }
-                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                            ...payload
-                        })
-                        .then(() => {
-                            Toast.show('Gol marcado.', Toast.SHORT);
-                            this.fbDatabaseRef
-                            .child(`usuarios/${jogador.key}/gols`).once('value', (snapshot) => {
-                                const golsPlus = parseInt(snapshot.val(), 10) + 1;
-                                this.fbDatabaseRef
-                                .child(`usuarios/${jogador.key}`).update({
-                                    gols: golsPlus.toString(),
-                                })
-                                .then(() => true)
-                                .catch(() => true);
-                            });
-                        })
-                        .catch(() => 
-                            Toast.show('Falha ao marcar o gol. Verifique a conexão.', Toast.SHORT)
-                        );
-                    }
-                }
-            ]
-        );
-    }
-
-    onAddPressRemoveGol(jogador, jogo) {
-        return () => this.onPressRemoveGol(jogador, jogo);
-    }
-
-    onPressRemoveGol(jogador, jogo) {
-        const gols = [
-            ...jogo.gols
-        ];
-        let i = 0;
-        
-        gols.splice(parseInt(jogador.indexKey, 10), 1);
-
-        for (i = 0; i < gols.length; i++) {
-            if (!gols[i].push) {
-                gols[i].indexKey = i.toString();
-            }
-        }
-
-        const placarCasa = parseInt(jogo.placarCasa, 10) - 1;
-        const placarVisit = parseInt(jogo.placarVisit, 10) - 1;
-
-        Alert.alert(
-            'Aviso',
-            `Confirma a remoção do gol para o jogador:\n${jogador.nome} ?`,
-            [
-                { text: 'Cancelar', 
-                    onPress: () => true, 
-                    style: 'cancel' 
-                },
-                { 
-                    text: 'Ok', 
-                    onPress: () => {
-                        let payload = {};
-                        if (jogador.side === 'casa') {
-                            payload = { gols, placarCasa };
-                        } else {
-                            payload = { gols, placarVisit };
-                        }
-                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                            ...payload
-                        })
-                        .then(() => {
-                            Toast.show('Gol removido.', Toast.SHORT);
-                            this.fbDatabaseRef
-                            .child(`usuarios/${jogador.key}/gols`).once('value', (snapshot) => {
-                                const golsLess = parseInt(snapshot.val(), 10) - 1;
-                                this.fbDatabaseRef
-                                .child(`usuarios/${jogador.key}`).update({
-                                    gols: golsLess.toString()
-                                })
-                                .then(() => true)
-                                .catch(() => true);
-                            });
-                        })
-                        .catch(() => 
-                            Toast.show('Falha ao remover o gol. Verifique a conexão.', Toast.SHORT)
-                        );
-                    }
-                }
-            ]
-        );
-    }
-
-    onPressCard(jogador, jogo, color) {
-        const cartoes = [
-            ...jogo.cartoes, 
-            { 
-                key: jogador.key, 
-                side: jogador.side,
-                nome: jogador.nome,
-                time: this.state.seconds.toString(),
-                color,
-                indexKey: jogo.cartoes.length.toString()
-            }
-        ];
-
-        Alert.alert(
-            'Aviso',
-            `Confirma o cartão ${color} para o jogador:\n${jogador.nome} ?`,
-            [
-                { text: 'Cancelar', 
-                    onPress: () => true, 
-                    style: 'cancel' 
-                },
-                { 
-                    text: 'Ok', 
-                    onPress: () => {
-                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                            cartoes
-                        })
-                        .then(() => {
-                            const keyCard = color === 'amarelo' ? 
-                            'cartoesAmarelos' : 'cartoesVermelhos';
-                            Toast.show(`Cartão ${color} aplicado.`, Toast.SHORT);
-                            this.fbDatabaseRef
-                            .child(`usuarios/${jogador.key}/${keyCard}`)
-                            .once('value', (snapshot) => {
-                                const cartaoPlus = parseInt(snapshot.val(), 10) + 1;
-                                const keyCardJson = color === 'amarelo' ? 
-                                { cartoesAmarelos: cartaoPlus.toString() } 
-                                :
-                                { cartoesVermelhos: cartaoPlus.toString() };
-                                this.fbDatabaseRef
-                                .child(`usuarios/${jogador.key}`).update({
-                                    ...keyCardJson
-                                })
-                                .then(() => true)
-                                .catch(() => true);
-                            });
-                        })
-                        .catch(() => 
-                            Toast.show('Falha ao aplicar cartão. Verifique a conexão.', Toast.SHORT)
-                        );
-                    }
-                }
-            ]
-        );
-    }
-
-    onAddPressRemoveCard(jogador, jogo) {
-        return () => this.onPressRemoveCard(jogador, jogo);
-    }
-
-    onPressRemoveCard(jogador, jogo) {
-        const cartoes = [
-            ...jogo.cartoes
-        ];
-        let i = 0;
-        
-        cartoes.splice(parseInt(jogador.indexKey, 10), 1);
-
-        for (i = 0; i < cartoes.length; i++) {
-            if (!cartoes[i].push) {
-                cartoes[i].indexKey = i.toString();
-            }
-        }
-
-        Alert.alert(
-            'Aviso',
-            `Confirma a remoção do cartão ${jogador.color} para o jogador:\n${jogador.nome} ?`,
-            [
-                { text: 'Cancelar', 
-                    onPress: () => true, 
-                    style: 'cancel' 
-                },
-                { 
-                    text: 'Ok', 
-                    onPress: () => {
-                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                            cartoes
-                        })
-                        .then(() => {
-                            const keyCard = jogador.color === 'amarelo' ? 
-                            'cartoesAmarelos' : 'cartoesVermelhos';
-                            Toast.show(`Cartão ${jogador.color} removido.`, Toast.SHORT);
-                            this.fbDatabaseRef
-                            .child(`usuarios/${jogador.key}/${keyCard}`)
-                            .once('value', (snapshot) => {
-                                const cartaoLess = parseInt(snapshot.val(), 10) - 1;
-                                const keyCardJson = jogador.color === 'amarelo' ? 
-                                { cartoesAmarelos: cartaoLess.toString() } 
-                                :
-                                { cartoesVermelhos: cartaoLess.toString() };
-                                this.fbDatabaseRef
-                                .child(`usuarios/${jogador.key}`).update({
-                                    ...keyCardJson
-                                })
-                                .then(() => true)
-                                .catch(() => true);
-                            });
-                        })
-                        .catch(() => 
-                            Toast.show('Falha ao remover cartão. Verifique a conexão.', Toast.SHORT)
-                        );
-                    }
-                }
-            ]
-        );
-    }
-
-    onAddPressRemoveSubs(sub, jogo) {
-        return () => this.onPressRemoveSubs(sub, jogo);
-    }
-
-    onPressRemoveSubs(sub, jogo) {
-        const subs = [
-            ...jogo.subs
-        ];
-        let i = 0;
-        
-        subs.splice(parseInt(sub.indexKey, 10), 1);
-
-        for (i = 0; i < subs.length; i++) {
-            if (!subs[i].push) {
-                subs[i].indexKey = i.toString();
-            }
-        }
-
-        Alert.alert(
-            'Aviso',
-            'Confirma a remoção da substituição ?',
-            [
-                { text: 'Cancelar', 
-                    onPress: () => true, 
-                    style: 'cancel' 
-                },
-                { 
-                    text: 'Ok', 
-                    onPress: () => {
-                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                            subs
-                        })
-                        .then(() =>
-                            this.doInOrOut(sub.jogadorIn, false, jogo, sub.jogadorOut, true)
-                        )
-                        .catch(() => 
-                            Toast.show(
-                                'Falha ao remover substituição. Verifique a conexão.', Toast.SHORT
-                            )
-                        );
-                    }
-                }
-            ]
-        );
-    }
-
-    doInOrOut(jogador, inOrOut, jogo, newJogador = false, isRemove = false) {
-        if (newJogador) {
-            const { side } = jogador;
-            let fSubs = [];
-            let inc = 0;
-
-            if (isRemove) {
-                fSubs = jogo.subs;
-            } else {
-                fSubs = _.filter(
-                    jogo.subs, 
-                    (sub) => 
-                        sub.push || (!sub.push &&
-                        !((sub.jogadorIn.key === jogador.key && 
-                        sub.jogadorOut.key === newJogador.key) ||
-                        (sub.jogadorIn.key === newJogador.key && 
-                        sub.jogadorOut.key === jogador.key)))
-                );
-
-                fSubs = _.filter(fSubs, (sub) => {
-                    if (sub.push) {
-                        return true;
-                    }
-                    const players = [];
-
-                    if (sub.jogadorIn.key === newJogador.key || 
-                        sub.jogadorOut.key === newJogador.key) {
-                        players.push(1);
-                    }
-
-                    for (inc = 0; inc < jogo.escalacao.casa.length; inc++) {
-                        const player = jogo.escalacao.casa[inc];
-                        if (sub.jogadorIn.key === player.key || sub.jogadorOut.key === player.key) {
-                            players.push(1);
-                        }
-                    }
-                    for (inc = 0; inc < jogo.escalacao.visit.length; inc++) {
-                        const player = jogo.escalacao.visit[inc];
-                        if (sub.jogadorIn.key === player.key || sub.jogadorOut.key === player.key) {
-                            players.push(1);
-                        }
-                    }
-
-                    return !(players.length >= 2);
-                });
-            }
-
-            for (inc = 0; inc < fSubs.length; inc++) {
-                if (!fSubs[inc].push) {
-                    fSubs[inc].indexKey = inc.toString();
-                }
-            }
-
-            const subs = [
-                ...fSubs, 
-                { 
-                    jogadorIn: newJogador,
-                    jogadorOut: jogador, 
-                    side: jogador.side,
-                    time: this.state.seconds.toString(),
-                    indexKey: fSubs.length.toString()
-                }
-            ];
-
-            if (side === 'casa') {
-                const newCasaList = _.filter(
-                    jogo.escalacao.casa, (item) => (item.key !== jogador.key) || !!item.push
-                );
-                const newBancoList = _.filter(
-                    jogo.escalacao.banco, (item) => (item.key !== newJogador.key) || !!item.push
-                );
-                newCasaList.push(newJogador);
-                newBancoList.push(jogador);
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
-                    casa: newCasaList,
-                    banco: newBancoList
-                })
-                .then(() => {
-                    if (isRemove) {
-                        Toast.show('Substituição removida.', Toast.SHORT);
-                        return true;
-                    }
-                    firebase.database().ref().child(`jogos/${jogo.key}`).update({
-                        subs
-                    })
-                    .then(() =>
-                        Toast.show('Substituição efetuada.', Toast.SHORT)
-                    )
-                    .catch(() =>
-                        Toast.show(
-                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
-                        )
-                    );
-                })
-                .catch(() => {
-                    if (isRemove) {
-                        Toast.show(
-                            'Falha ao remover substituição. Verifique a conexão.', Toast.SHORT
-                        );
-                    } else {
-                        Toast.show(
-                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
-                        );
-                    }
-                });
-            } else if (side === 'visit') {
-                const newVisitList = _.filter(
-                    jogo.escalacao.visit, (item) => (item.key !== jogador.key) || !!item.push
-                );
-                const newBancoList = _.filter(
-                    jogo.escalacao.banco, (item) => (item.key !== newJogador.key) || !!item.push
-                );
-                newVisitList.push(newJogador);
-                newBancoList.push(jogador);
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
-                    visit: newVisitList,
-                    banco: newBancoList
-                })
-                .then(() => {
-                    if (isRemove) {
-                        Toast.show('Substituição removida.', Toast.SHORT);
-                        return true;
-                    }
-                    firebase.database().ref().child(`jogos/${jogo.key}`).update({
-                        subs
-                    })
-                    .then(() =>
-                        Toast.show('Substituição efetuada.', Toast.SHORT)
-                    )
-                    .catch(() =>
-                        Toast.show(
-                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
-                        )
-                    );
-                })
-                .catch(() => {
-                    if (isRemove) {
-                        Toast.show(
-                            'Falha ao remover substituição. Verifique a conexão.', Toast.SHORT
-                        );
-                    } else {
-                        Toast.show(
-                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
-                        );
-                    }
-                });
-            }
-        } 
     }
 
     textJogoProgress(jogo) {
@@ -763,11 +133,6 @@ class JogoG extends React.Component {
     }
 
     renderCardPlacar(jogo) {
-        const { 
-            btnStartEnabled,
-            btnPauseEnabled,
-            btnResetEnabled
-        } = this.state;
         return (
             <Card
                 containerStyle={styles.card}
@@ -858,88 +223,6 @@ class JogoG extends React.Component {
                         </Text>
                     </View>
                 </View>
-                <View 
-                    style={{ 
-                        flex: 1,
-                        flexDirection: 'row', 
-                        alignItems: 'center', 
-                        justifyContent: 'space-between',
-                        marginTop: 15 
-                    }}
-                >
-                    <View style={[styles.centerFlex, { opacity: btnStartEnabled ? 1 : 0.5 }]}>
-                        <TouchableOpacity
-                            onPress={() => this.onStartTimer(btnStartEnabled, jogo)}
-                        >
-                            <View 
-                                style={[
-                                    styles.circleBtn, 
-                                    styles.centerAlign, 
-                                    { backgroundColor: colorAppS }
-                                ]}
-                            >
-                                <View
-                                    style={[
-                                        styles.circleBtnTwo, 
-                                        styles.centerAlign
-                                    ]}
-                                >
-                                    <Text style={styles.textCircle}>
-                                        { this.state.seconds > 0 ? 'Retomar' : 'Iniciar'}
-                                    </Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={[styles.centerFlex, { opacity: btnPauseEnabled ? 1 : 0.5 }]}>
-                        <TouchableOpacity
-                            onPress={() => this.onPauseTimer(btnPauseEnabled, jogo)}
-                        >
-                            <View 
-                                style={[
-                                    styles.circleBtn, 
-                                    styles.centerAlign, 
-                                    { backgroundColor: colorAppW }
-                                ]}
-                            >
-                                <View
-                                    style={[
-                                        styles.circleBtnTwo, 
-                                        styles.centerAlign
-                                    ]}
-                                >
-                                    <Text style={styles.textCircle}>
-                                        Pausar
-                                    </Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={[styles.centerFlex, { opacity: btnResetEnabled ? 1 : 0.5 }]}>
-                        <TouchableOpacity
-                            onPress={() => this.onResetTimer(btnResetEnabled, jogo)}
-                        >
-                            <View 
-                                style={[
-                                    styles.circleBtn, 
-                                    styles.centerAlign, 
-                                    { backgroundColor: colorAppP }
-                                ]}
-                            >
-                                <View
-                                    style={[
-                                        styles.circleBtnTwo, 
-                                        styles.centerAlign
-                                    ]}
-                                >
-                                    <Text style={styles.textCircle}>
-                                        Reiniciar
-                                    </Text>
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                </View>
                 <View style={{ marginBottom: 20 }} />
             </Card>
         );
@@ -970,7 +253,7 @@ class JogoG extends React.Component {
                                 borderBottomWidth: 0
                             }}
                         >
-                            { this.renderGolJogador(jogo.gols, jogo) }
+                            { this.renderGolJogador(jogo.gols) }
                         </List>
                     </View>
                 </View>
@@ -978,7 +261,7 @@ class JogoG extends React.Component {
         );
     }
 
-    renderGolJogador(gols, jogo) {
+    renderGolJogador(gols) {
         const golsCasa = _.filter(gols, (item) => item.side && item.side === 'casa').sort(
             (a, b) => {
                 const aTime = parseInt(a.time, 10);
@@ -1071,7 +354,9 @@ class JogoG extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={this.onAddPressRemoveGol(golsCasa[i], jogo)}
+                                        onPress={
+                                            () => false
+                                        }
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     </TouchableOpacity>
@@ -1153,7 +438,9 @@ class JogoG extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={this.onAddPressRemoveGol(golsCasa[i], jogo)}
+                                        onPress={
+                                            () => false
+                                        }
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     </TouchableOpacity>
@@ -1172,7 +459,7 @@ class JogoG extends React.Component {
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveGol(golsVisit[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
@@ -1236,7 +523,7 @@ class JogoG extends React.Component {
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveGol(golsVisit[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
@@ -1318,7 +605,7 @@ class JogoG extends React.Component {
                                 >
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveGol(golsCasa[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
@@ -1338,7 +625,7 @@ class JogoG extends React.Component {
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveGol(golsVisit[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
@@ -1379,7 +666,7 @@ class JogoG extends React.Component {
                                 borderBottomWidth: 0
                             }}
                         >
-                            { this.renderCartaoJogador(jogo.cartoes, jogo) }
+                            { this.renderCartaoJogador(jogo.cartoes) }
                         </List>
                     </View>
                 </View>
@@ -1387,7 +674,7 @@ class JogoG extends React.Component {
         );
     }
 
-    renderCartaoJogador(cartoes, jogo) {
+    renderCartaoJogador(cartoes) {
         const cartoesCasa = _.filter(cartoes, (item) => item.side && item.side === 'casa').sort(
             (a, b) => {
                 const aTime = parseInt(a.time, 10);
@@ -1481,7 +768,7 @@ class JogoG extends React.Component {
                                 >
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveCard(cartoesCasa[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -1573,7 +860,7 @@ class JogoG extends React.Component {
                                 >
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveCard(cartoesCasa[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -1601,7 +888,7 @@ class JogoG extends React.Component {
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveCard(cartoesVisit[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -1673,7 +960,7 @@ class JogoG extends React.Component {
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveCard(cartoesVisit[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -1763,7 +1050,7 @@ class JogoG extends React.Component {
                                 >
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveCard(cartoesCasa[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -1791,7 +1078,7 @@ class JogoG extends React.Component {
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveCard(cartoesVisit[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -1840,7 +1127,7 @@ class JogoG extends React.Component {
                                 borderBottomWidth: 0
                             }}
                         >
-                            { this.renderSubsJogador(jogo.subs, jogo) }
+                            { this.renderSubsJogador(jogo.subs) }
                         </List>
                     </View>
                 </View>
@@ -1848,7 +1135,7 @@ class JogoG extends React.Component {
         );
     }
 
-    renderSubsJogador(subs, jogo) {
+    renderSubsJogador(subs) {
         const subsCasa = _.filter(subs, (item) => item.side && item.side === 'casa').sort(
             (a, b) => {
                 const aTime = parseInt(a.time, 10);
@@ -1936,7 +1223,7 @@ class JogoG extends React.Component {
                                 >
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveSubs(subsCasa[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -2021,7 +1308,7 @@ class JogoG extends React.Component {
                                 >
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveSubs(subsCasa[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -2062,7 +1349,7 @@ class JogoG extends React.Component {
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveSubs(subsVisit[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -2133,7 +1420,7 @@ class JogoG extends React.Component {
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveSubs(subsVisit[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -2208,7 +1495,7 @@ class JogoG extends React.Component {
                                 >
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveSubs(subsCasa[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -2249,7 +1536,7 @@ class JogoG extends React.Component {
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
                                         onPress={
-                                            this.onAddPressRemoveSubs(subsVisit[i], jogo)
+                                            () => false
                                         }
                                     >
                                         <Image 
@@ -2444,72 +1731,7 @@ class JogoG extends React.Component {
                                     alignItems: 'center',
                                     justifyContent: 'center'
                                 }}
-                            >
-                                <TouchableOpacity
-                                    onPress={() => this.onPressPlayerGol(jogador, jogo)}
-                                >
-                                    <Image 
-                                        source={imgBola}
-                                        style={{ 
-                                            width: 25, height: 25 
-                                        }} 
-                                    />   
-                                </TouchableOpacity>
-                            </View>
-                            <View 
-                                style={{ 
-                                    flex: 1, 
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <TouchableOpacity
-                                    onPress={() => this.onPressCard(jogador, jogo, 'amarelo')}
-                                >
-                                    <Image 
-                                        source={imgYellowCard}
-                                        style={{ 
-                                            width: 20, height: 25 
-                                        }} 
-                                    />   
-                                </TouchableOpacity>
-                            </View>
-                            <View 
-                                style={{ 
-                                    flex: 1, 
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <TouchableOpacity
-                                    onPress={() => this.onPressCard(jogador, jogo, 'vermelho')}
-                                >
-                                    <Image 
-                                        source={imgRedCard}
-                                        style={{ 
-                                            width: 20, height: 25 
-                                        }} 
-                                    />   
-                                </TouchableOpacity>
-                            </View>
-                            <View 
-                                style={{ 
-                                    flex: 1, 
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <TouchableOpacity
-                                    onPress={() => this.onPressSubs(jogador)}
-                                >
-                                    <Image 
-                                        source={imgInOut}
-                                        style={{ 
-                                            width: 25, height: 25 
-                                        }} 
-                                    />   
-                                </TouchableOpacity>
-                            </View>
+                            />
                         </View>
                     )
                 }
@@ -2526,9 +1748,6 @@ class JogoG extends React.Component {
             return false;
         }
 
-        const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push);
-        const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push);
-
         return (
             <View style={{ flex: 1 }}>
                 <ScrollView style={styles.viewP}>
@@ -2540,44 +1759,6 @@ class JogoG extends React.Component {
                     { this.renderEscalados(jogo) }
                     <View style={{ marginVertical: 20 }} />
                 </ScrollView>
-                <ModalInput
-                        isDialogVisible={this.props.showTimerModal}
-                        title={'Tempo de Jogo'}
-                        message={'Altere em minutos o tempo de jogo desejado.'}
-                        submitInput={(value) => this.onConfirmManualTimer(value)}
-                        closeDialog={() => this.props.modificaShowTimerModal(false)}
-                        hint={this.state.seconds}
-                        cancelText={'Cancelar'}
-                        submitText={'Ok'} 
-                />
-                <PlayersModal
-                    showPlayersModal={this.props.showPlayersModalJ}  
-                    doInOrOut={
-                        (jogador, inOrOut, newJogador = false) => 
-                        this.doInOrOut(jogador, inOrOut, jogo, newJogador)
-                    }
-                    jogadoresCasaFt={jogadoresCasaFt}
-                    jogadoresVisitFt={jogadoresVisitFt}
-                />
-                <Dialog 
-                    visible={this.props.endGameModal && Actions.currentScene === '_jogoTabG'}
-                    title='Gravando dados...'
-                    onTouchOutside={() => true}
-                >
-                    <View 
-                        style={{ 
-                            alignItems: 'center',
-                            justifyContent: 'center' 
-                        }}
-                    >
-                        <Progress.Circle 
-                            progress={this.props.endGameModalPerc}
-                            size={100}
-                            showsText
-                            color={colorAppP}
-                        />
-                    </View>
-                </Dialog>
             </View>
         );
     }
@@ -2668,15 +1849,6 @@ const styles = StyleSheet.create({
         alignItems: 'center', 
         justifyContent: 'center' 
     },
-    centerAlign: {
-        alignItems: 'center', 
-        justifyContent: 'center'
-    },
-    textCircle: {
-        fontSize: 12, 
-        color: 'white', 
-        fontWeight: 'bold' 
-    },
     extraTime: { 
         fontSize: 12, 
         fontWeight: 'bold', 
@@ -2693,19 +1865,8 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-    showPlayersModalJ: state.GerenciarReducer.showPlayersModalJ,
-    endGameModal: state.GerenciarReducer.endGameModal,
-    endGameModalPerc: state.GerenciarReducer.endGameModalPerc,
-    itemSelected: state.GerenciarReducer.itemSelected,
-    listJogos: state.JogosReducer.listJogos,
-    showTimerModal: state.JogoReducer.showTimerModal
+    itemSelected: state.HistoricoReducer.itemSelected,
+    listJogos: state.HistoricoReducer.listJogos
 });
 
-export default connect(mapStateToProps, { 
-    modificaClean,
-    modificaCurrentTime,
-    modificaShowTimerModal,
-    modificaShowPlayersModalJ,
-    modificaIsSubstitute,
-    modificaJogador
-})(JogoG);
+export default connect(mapStateToProps, {})(JogoH);

@@ -34,6 +34,9 @@ import CadastroJogos from './components/admin/cadastrojogos/CadastroJogos';
 import Usuarios from './components/admin/usuarios/Usuarios';
 import Info from './components/admin/informativos/Info';
 import Gerenciar from './components/admin/gerenciar/Gerenciar';
+import Historico from './components/admin/historico/Historico';
+import JogoH from './components/admin/historico/JogoH';
+import EscalacaoH from './components/admin/historico/EscalacaoH';
 import { colorAppS } from './utils/constantes';
 
 import { store } from './App';
@@ -344,6 +347,7 @@ class Routes extends React.Component {
                         key='jogos' 
                         component={Jogos} 
                         hideNavBar
+                        onEnter={() => this.doTabAnimation(false)}
                         icon={({ focused }) => (
                             <View>
                                 <Icon
@@ -367,6 +371,7 @@ class Routes extends React.Component {
                         key='informativos' 
                         component={Informativos} 
                         hideNavBar
+                        onEnter={() => this.doTabAnimation(false)}
                         icon={({ focused }) => (
                             <View>
                                 <Icon
@@ -391,6 +396,7 @@ class Routes extends React.Component {
                         key='perfil' 
                         component={Profile} 
                         hideNavBar
+                        onEnter={() => this.doTabAnimation(false)}
                         icon={({ focused }) => (
                             <View>
                                 <Icon
@@ -414,6 +420,7 @@ class Routes extends React.Component {
                         key='admin'
                         component={Admin} 
                         hideNavBar
+                        onEnter={() => this.doTabAnimation(false)}
                         icon={({ focused }) => (
                             <View>
                                 <Icon
@@ -454,6 +461,7 @@ class Routes extends React.Component {
                     key='jogos' 
                     component={Jogos} 
                     hideNavBar
+                    onEnter={() => this.doTabAnimation(false)}
                     icon={({ focused }) => (
                         <View>
                             <Icon
@@ -477,6 +485,7 @@ class Routes extends React.Component {
                     key='informativos' 
                     component={Informativos} 
                     hideNavBar
+                    onEnter={() => this.doTabAnimation(false)}
                     icon={({ focused }) => (
                         <View>
                             <Icon
@@ -501,6 +510,7 @@ class Routes extends React.Component {
                     key='perfil' 
                     component={Profile} 
                     hideNavBar
+                    onEnter={() => this.doTabAnimation(false)}
                     icon={({ focused }) => (
                         <View>
                             <Icon
@@ -575,6 +585,15 @@ class Routes extends React.Component {
                         key={'gerenciar'}
                         title={'Gerenciar Jogos'} 
                         component={Gerenciar}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'historico'}
+                        title={'Histórico de Jogos'} 
+                        component={Historico}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
@@ -718,6 +737,90 @@ class Routes extends React.Component {
                             key={'escalacaoTabG'}
                             hideNavBar 
                             component={EscalacaoG}
+                            icon={({ focused }) => (
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: 500
+                                    }}
+                                >
+                                    <Icon
+                                        color={focused ? 'white' : 'black'}
+                                        size={focused ? 24 : 36}
+                                        name='soccer-field'
+                                        type='material-community'
+                                        iconStyle={{ transform: [{ rotate: '90deg' }] }}
+                                    />
+                                    { focused && 
+                                    <Text
+                                        style={{
+                                            color: focused ? 'white' : 'black',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Escalação
+                                    </Text>}
+                                </View>
+                            )} 
+                        />
+                    </Scene>
+                    { /* HISTORICO E TABS */}
+                    <Scene 
+                        key={'historicoJogoTab'}
+                        tabs
+                        showLabel={false}
+                        tabBarPosition={'top'}
+                        lazy={false}
+                        showIcon
+                        swipeEnabled
+                        title={'Histórico de Jogo'} 
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        tabBarStyle={{ backgroundColor: colorAppS }}
+                    >
+                        <Scene 
+                            key={'jogoTabH'}
+                            hideNavBar 
+                            component={JogoH}
+                            initial
+                            icon={({ focused }) => (
+                                <View
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        width: 500
+                                    }}
+                                >
+                                    <Image 
+                                        source={imgBootOne}
+                                        style={{
+                                            width: focused ? 35 : 45,
+                                            height: focused ? 25 : 40,
+                                            tintColor: focused ? 'white' : 'black',
+                                            margin: 0,
+                                            padding: 0
+                                        }}
+                                    />
+                                    { focused && 
+                                    <Text
+                                        style={{
+                                            color: focused ? 'white' : 'black',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Jogo
+                                    </Text>}
+                                </View>
+                            )} 
+                        />
+                        <Scene 
+                            key={'escalacaoTabH'}
+                            hideNavBar 
+                            component={EscalacaoH}
                             icon={({ focused }) => (
                                 <View
                                     style={{

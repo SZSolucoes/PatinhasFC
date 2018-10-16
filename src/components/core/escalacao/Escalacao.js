@@ -9,19 +9,27 @@ import {
     TouchableWithoutFeedback,
     Image
 } from 'react-native';
-import { Card, Icon } from 'react-native-elements';
+import { Card, Icon, List, ListItem } from 'react-native-elements';
 import { connect } from 'react-redux';
+import _ from 'lodash';
 import { colorAppF } from '../../../utils/constantes';
+import { retrieveImgSource } from '../../../utils/imageStorage';
 import Campo from '../../campo/Campo';
 import { isPortrait } from '../../../utils/orientation';
+import { getPosIndex } from '../../../utils/jogosUtils';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
+import imgTeam from '../../../imgs/team.png';
+import imgAvatar from '../../../imgs/perfiluserimg.png';
 
 class Escalacao extends React.Component {
 
     constructor(props) {
         super(props);
+
+        this.isFirstCasa = true;
+        this.isFirstVisit = true;
 
         this.maxViewCasaHeight = 0;
         this.minViewCasaHeight = 0;
@@ -38,6 +46,10 @@ class Escalacao extends React.Component {
         this.onToggleVisit = this.onToggleVisit.bind(this);
 
         this.onChangeDimensions = this.onChangeDimensions.bind(this);
+        this.renderCasaJogadores = this.renderCasaJogadores.bind(this);
+        this.renderVisitJogadores = this.renderVisitJogadores.bind(this);
+        this.renderIcons = this.renderIcons.bind(this);
+        this.renderConfirmados = this.renderConfirmados.bind(this);
 
         this.state = {
             heightDim: Dimensions.get('screen').height / 2.5,
@@ -52,6 +64,20 @@ class Escalacao extends React.Component {
         Dimensions.addEventListener('change', this.onChangeDimensions);
     }
 
+    shouldComponentUpdate(nextProps, nextStates) {
+        const { itemSelected } = this.props;
+
+        if (nextProps.listJogos) {
+            const nj = _.filter(nextProps.listJogos, (item) => item.key === itemSelected)[0];
+                
+            if (!nj) {
+                return false;
+            }
+        }
+
+        return nextProps !== this.props || nextStates !== this.state;
+    }
+
     componentWillUnmount() {
         Dimensions.removeEventListener('change', this.onChangeDimensions);
     }
@@ -64,18 +90,42 @@ class Escalacao extends React.Component {
 
     onLayoutTitleCasa(event) {
         this.minViewCasaHeight = event.nativeEvent.layout.height;
+        if (this.isFirstCasa) {
+            this.onToggleCasa();
+            this.isFirstCasa = false;
+        }
     }
 
     onLayoutCasa(event) {
         this.maxViewCasaHeight = event.nativeEvent.layout.height;
+        if (this.state.isCasaExpanded) {
+            Animated.spring(     
+                this.state.animCasaValue,
+                {
+                    toValue: this.maxViewCasaHeight + 50
+                }
+            ).start(); 
+        }
     }
 
     onLayoutTitleVisit(event) {
         this.minViewVisitHeight = event.nativeEvent.layout.height;
+        if (this.isFirstVisit) {
+            this.onToggleVisit();
+            this.isFirstVisit = false;
+        }
     }
 
     onLayoutVisit(event) {
         this.maxViewVisitHeight = event.nativeEvent.layout.height;
+        if (this.state.isVisitExpanded) {
+            Animated.spring(     
+                this.state.animVisitValue,
+                {
+                    toValue: this.maxViewVisitHeight + 50
+                }
+            ).start(); 
+        }
     }
 
     onToggleCasa() {
@@ -114,89 +164,305 @@ class Escalacao extends React.Component {
         ).start(); 
     }
 
-    render() {
+    renderIcons() {
         return (
-            <ScrollView style={styles.viewP}>
-                <Card
-                    containerStyle={styles.card}
+            <View 
+                style={{ 
+                    flex: 0.5, 
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}
+            >
+                <View 
+                    style={{ 
+                        flex: 1, 
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                />
+            </View>
+        );
+    }
+
+    renderCasaJogadores(jogo) {
+        const casaJogadores = _.filter(jogo.escalacao.casa, (item) => !item.push).sort(
+            (a, b) => {
+                if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
+                    return 1;
+                } 
+                if (getPosIndex(a.posvalue) < getPosIndex(b.posvalue)) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
+        const numJogadores = casaJogadores.length;
+
+        if (numJogadores === 0) {
+            return false;
+        }
+
+        return (
+            <List 
+                containerStyle={{  
+                    borderTopWidth: 0, 
+                    borderBottomWidth: 0 
+                }}
+            >
+                {
+                    casaJogadores.map((item, index) => {
+                        const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
+                        return (
+                            <ListItem
+                                containerStyle={
+                                    (index + 1) === numJogadores ? { borderBottomWidth: 0 } : null 
+                                }
+                                roundAvatar
+                                avatar={retrieveImgSource(imgAvt)}
+                                key={index}
+                                title={item.nome}
+                                subtitle={item.posicao}
+                                rightIcon={(
+                                    this.renderIcons()
+                                )}
+                            />
+                        );
+                    })
+                }
+            </List>
+        );
+    }
+
+    renderVisitJogadores(jogo) {
+        const visitJogadores = _.filter(jogo.escalacao.visit, (item) => !item.push).sort(
+            (a, b) => {
+                if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
+                    return 1;
+                } 
+                if (getPosIndex(a.posvalue) < getPosIndex(b.posvalue)) {
+                    return -1;
+                } 
+               
+                return 0;  
+            }
+        );
+        const numJogadores = visitJogadores.length;
+
+        if (numJogadores === 0) {
+            return false;
+        }
+
+        return (
+            <List 
+                containerStyle={{  
+                    borderTopWidth: 0, 
+                    borderBottomWidth: 0 
+                }}
+            >
+                {
+                    visitJogadores.map((item, index) => {
+                        const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
+                        return (
+                            <ListItem
+                                containerStyle={
+                                    (index + 1) === numJogadores ? { borderBottomWidth: 0 } : null 
+                                }
+                                roundAvatar
+                                avatar={retrieveImgSource(imgAvt)}
+                                key={index}
+                                title={item.nome}
+                                subtitle={item.posicao}
+                                rightIcon={(
+                                    this.renderIcons()
+                                )}
+                            />
+                        );
+                    })
+                }
+            </List>
+        );
+    }
+
+    renderConfirmados(jogo) {
+        const jogadoresConfirmados = _.filter(jogo.confirmados, (jgCasa) => !jgCasa.push);
+        const numjogadoresConfirmados = jogadoresConfirmados.length;
+
+        if (numjogadoresConfirmados === 0) {
+            return false;
+        }
+
+        return (
+            <Card
+                containerStyle={styles.card}
+            >
+                <View 
+                    style={styles.titleContainer} 
+                    onLayout={this.onLayoutTitleCasa}
                 >
-                    <Animated.View
-                        style={{ height: this.state.animCasaValue }}
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image 
+                            style={{ height: 45, width: 45, marginRight: 10 }}
+                            resizeMode={'stretch'}
+                            source={imgTeam} 
+                        /> 
+                        <Text 
+                            style={{ fontSize: 16, color: 'black' }}
+                        >
+                            Confirmados
+                        </Text>
+                    </View>
+                </View>
+                <List 
+                    containerStyle={{
+                        marginTop: 0, 
+                        borderTopWidth: 0, 
+                        borderBottomWidth: 0
+                    }}
+                >
+                    {
+                        jogadoresConfirmados.map((item, index) => {
+                            const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
+                            return (
+                                <ListItem
+                                    containerStyle={
+                                        (index + 1) === numjogadoresConfirmados ? 
+                                        { borderBottomWidth: 0 } : null 
+                                    }
+                                    titleContainerStyle={{ marginLeft: 10 }}
+                                    subtitleContainerStyle={{ marginLeft: 10 }}
+                                    roundAvatar
+                                    avatar={retrieveImgSource(imgAvt)}
+                                    key={index}
+                                    title={item.nome}
+                                    rightIcon={(<View />)}
+                                />
+                            );
+                        })
+                    }
+                </List>
+            </Card>     
+        );
+    }
+
+    render() {
+        const { listJogos, itemSelected } = this.props;
+        const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
+
+        if (!jogo) {
+            return false;
+        }
+        
+        const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push);
+        const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push);
+
+        return (
+            <View style={{ flex: 1 }}>
+                <ScrollView style={styles.viewP}>
+                    <Card
+                        containerStyle={styles.card}
                     >
-                        <View style={styles.titleContainer} onLayout={this.onLayoutTitleCasa}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Image 
-                                    style={{ height: 40, width: 35, marginRight: 5 }}
-                                    resizeMode={'stretch'}
-                                    source={imgHomeShirt} 
-                                /> 
-                                <Text 
+                        <Animated.View
+                            style={{ height: this.state.animCasaValue }}
+                        >
+                            <View 
+                                style={styles.titleContainer} 
+                                onLayout={this.onLayoutTitleCasa}
+                            >
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Image 
+                                        style={{ height: 40, width: 35, marginRight: 5 }}
+                                        resizeMode={'stretch'}
+                                        source={imgHomeShirt} 
+                                    /> 
+                                    <Text 
+                                        onPress={() => this.onToggleCasa()}
+                                        style={{ fontSize: 16, color: 'black' }}
+                                    >
+                                        Casa
+                                    </Text>
+                                </View>
+                                <TouchableWithoutFeedback
                                     onPress={() => this.onToggleCasa()}
-                                    style={{ fontSize: 16, color: 'black' }}
                                 >
-                                    Casa
-                                </Text>
+                                    <Icon
+                                        color={'black'}
+                                        name={
+                                            this.state.isCasaExpanded ? 'menu-up' : 'menu-down'
+                                        }
+                                        type='material-community'
+                                        size={30}
+                                    />
+                                </TouchableWithoutFeedback>
                             </View>
-                            <TouchableWithoutFeedback
-                                onPress={() => this.onToggleCasa()}
+                            <View 
+                                onLayout={this.onLayoutCasa}
                             >
-                                <Icon
-                                    color={'black'}
-                                    name={this.state.isCasaExpanded ? 'menu-up' : 'menu-down'}
-                                    type='material-community'
-                                    size={30}
-                                />
-                            </TouchableWithoutFeedback>
-                        </View>
-                        <View onLayout={this.onLayoutCasa}>
-                            <View style={{ height: this.state.heightDim }}>
-                                <Campo />
+                                <View style={{ height: this.state.heightDim }}>
+                                    <Campo 
+                                        jogadores={jogadoresCasaFt} 
+                                        side={'casa'}
+                                        tatics={'4-4-2'}
+                                        enableTouch={false}
+                                    />
+                                </View>
+                                <View style={{ marginVertical: 20 }} />
+                                { this.renderCasaJogadores(jogo) }
+                                <View style={{ marginVertical: 20 }} />
                             </View>
-                            <View style={{ marginVertical: 5 }} />
-                        </View>
-                    </Animated.View>
-                </Card>
-                <Card
-                    containerStyle={styles.card}
-                >
-                    <Animated.View
-                        style={{ height: this.state.animVisitValue }}
+                        </Animated.View>
+                    </Card>
+                    <Card
+                        containerStyle={styles.card}
                     >
-                        <View style={styles.titleContainer} onLayout={this.onLayoutTitleVisit}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Image 
-                                    style={{ height: 40, width: 35, marginRight: 5 }}
-                                    resizeMode={'stretch'}
-                                    source={imgVisitShirt} 
-                                />
-                                <Text 
+                        <Animated.View
+                            style={{ height: this.state.animVisitValue }}
+                        >
+                            <View style={styles.titleContainer} onLayout={this.onLayoutTitleVisit}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Image 
+                                        style={{ height: 40, width: 35, marginRight: 5 }}
+                                        resizeMode={'stretch'}
+                                        source={imgVisitShirt} 
+                                    />
+                                    <Text 
+                                        onPress={() => this.onToggleVisit()}
+                                        style={{ fontSize: 16, color: 'black' }}
+                                    >
+                                        Visitantes
+                                    </Text>
+                                </View>
+                                <TouchableWithoutFeedback
                                     onPress={() => this.onToggleVisit()}
-                                    style={{ fontSize: 16, color: 'black' }}
                                 >
-                                    Visitantes
-                                </Text>
+                                    <Icon
+                                        color={'black'}
+                                        name={this.state.isVisitExpanded ? 'menu-up' : 'menu-down'}
+                                        type='material-community'
+                                        size={30}
+                                    />
+                                </TouchableWithoutFeedback>
                             </View>
-                            <TouchableWithoutFeedback
-                                onPress={() => this.onToggleVisit()}
-                            >
-                                <Icon
-                                    color={'black'}
-                                    name={this.state.isVisitExpanded ? 'menu-up' : 'menu-down'}
-                                    type='material-community'
-                                    size={30}
-                                />
-                            </TouchableWithoutFeedback>
-                        </View>
-                        <View onLayout={this.onLayoutVisit}>
-                            <View style={{ height: this.state.heightDim }}>
-                                <Campo />
+                            <View onLayout={this.onLayoutVisit}>
+                                <View style={{ height: this.state.heightDim }}>
+                                    <Campo 
+                                        jogadores={jogadoresVisitFt}
+                                        side={'visit'}
+                                        tatics={'4-4-2'}
+                                        enableTouch={false}
+                                    />
+                                </View>
+                                <View style={{ marginVertical: 20 }} />
+                                { this.renderVisitJogadores(jogo) }
+                                <View style={{ marginVertical: 20 }} />
                             </View>
-                            <View style={{ marginVertical: 5 }} />
-                        </View>
-                    </Animated.View>
-                </Card>
-                <View style={{ marginVertical: 30 }} />
-            </ScrollView>
+                        </Animated.View>
+                    </Card>
+                    { this.renderConfirmados(jogo) }
+                    <View style={{ marginVertical: 60 }} />
+                </ScrollView>
+            </View>
         );
     }
 }
@@ -205,13 +471,6 @@ const styles = StyleSheet.create({
     viewP: {
         flex: 1,
         backgroundColor: colorAppF
-    },
-    viewPrinc: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        backgroundColor: 'white'
     },
     text: { 
         fontSize: 28, 
@@ -236,8 +495,9 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = () => ({
-    
+const mapStateToProps = (state) => ({
+    itemSelected: state.JogoReducer.jogoSelected,
+    listJogos: state.JogosReducer.listJogos
 });
 
 export default connect(mapStateToProps, {})(Escalacao);

@@ -218,8 +218,8 @@ class Profile extends React.Component {
                             )}
                         />
                         <ListItem
-                            key={'Configurações'}
-                            title={'Configurações'}
+                            key={'Preferências'}
+                            title={'Preferências'}
                             leftIcon={{ name: 'settings', type: 'material-community' }}
                             onPress={() => this.checkConInfo(
                                 () => showAlertDesenv()

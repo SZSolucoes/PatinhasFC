@@ -125,7 +125,7 @@ class Admin extends React.Component {
                     </TouchableOpacity>
                     <TouchableOpacity 
                         style={{ flex: 1 }} 
-                        onPress={() => false}
+                        onPress={() => Actions.historico()}
                     >
                         <Card 
                             containerStyle={{ flex: 1 }}

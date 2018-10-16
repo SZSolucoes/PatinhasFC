@@ -3,7 +3,8 @@ import {
     View,
     ScrollView, 
     StyleSheet,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
 } from 'react-native';
 
 import Toast from 'react-native-simple-toast';
@@ -15,19 +16,27 @@ import {
 } from 'react-native-elements';
 import _ from 'lodash';
 
-import { colorAppS, colorAppF } from '../../../utils/constantes';
+import firebase from '../../../Firebase';
+import { colorAppS, colorAppF, colorAppP } from '../../../utils/constantes';
 import Versus from '../../jogos/Versus';
 import { 
     modificaFilterStr, 
     modificaFilterLoad, 
     modificaItemSelected,
+    modificaListJogos,
     modificaClean
-} from '../../../actions/GerenciarActions';
+} from '../../../actions/HistoricoActions';
 
-class Gerenciar extends React.Component {
+class Historico extends React.Component {
 
     constructor(props) {
         super(props);
+
+        this.state = {
+            indicatorOn: true
+        };
+
+        this.fbDatabaseRef = firebase.database().ref();
 
         this.scrollView = null;
 
@@ -37,6 +46,18 @@ class Gerenciar extends React.Component {
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.checkConInfo = this.checkConInfo.bind(this);
         this.onPressCardGame = this.onPressCardGame.bind(this);
+    }
+
+    componentDidMount() {
+        this.fbDatabaseRef.child('jogos')
+        .orderByChild('endStatus')
+        .equalTo('1')
+        .once('value', (snapshot) => {
+            this.props.modificaListJogos(
+                _.map(snapshot.val(), (value, key) => ({ key, ...value }))
+            );
+            this.setState({ indicatorOn: false });     
+        });
     }
 
     componentWillUnmount() {
@@ -55,7 +76,7 @@ class Gerenciar extends React.Component {
 
     onPressCardGame(item) {
         this.props.modificaItemSelected(item.key);
-        Actions.gerenciarJogoTab({ onBack: () => Actions.popTo('gerenciar') });
+        Actions.historicoJogoTab({ onBack: () => Actions.popTo('historico') });
     }
 
     checkConInfo(funExec) {
@@ -158,14 +179,31 @@ class Gerenciar extends React.Component {
     render() {
         return (
             <View style={styles.viewPrinc}>
-                <ScrollView 
-                    style={{ flex: 1 }} 
-                    ref={(ref) => { this.scrollView = ref; }}
-                    keyboardShouldPersistTaps={'handled'}
-                >
-                    { this.renderEditar() }
-                    <View style={{ marginVertical: 20 }} />
-                </ScrollView>
+                {
+                    this.state.indicatorOn ?
+                    (
+                        <View
+                            style={{
+                                flex: 1,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <ActivityIndicator size={'large'} color={colorAppP} />
+                        </View>
+                    )
+                    :
+                    (
+                        <ScrollView 
+                            style={{ flex: 1 }} 
+                            ref={(ref) => { this.scrollView = ref; }}
+                            keyboardShouldPersistTaps={'handled'}
+                        >
+                            { this.renderEditar() }
+                            <View style={{ marginVertical: 20 }} />
+                        </ScrollView>
+                    )
+                }
             </View>
         );
     }
@@ -206,9 +244,9 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-    listJogos: state.JogosReducer.listJogos,
-    filterStr: state.GerenciarReducer.filterStr,
-    filterLoad: state.GerenciarReducer.filterLoad,
+    listJogos: state.HistoricoReducer.listJogos,
+    filterStr: state.HistoricoReducer.filterStr,
+    filterLoad: state.HistoricoReducer.filterLoad,
     conInfo: state.LoginReducer.conInfo
 });
 
@@ -216,5 +254,6 @@ export default connect(mapStateToProps, {
     modificaFilterStr, 
     modificaFilterLoad, 
     modificaItemSelected,
-    modificaClean 
-})(Gerenciar);
+    modificaListJogos,
+    modificaClean
+})(Historico);
