@@ -43,6 +43,8 @@ class CadastroJogos extends React.Component {
             titulo: '',
             data: '',
             descricao: '',
+            timeCasa: '',
+            timeVisit: '',
             imagem: '',
             b64Str: '',
             contentType: '',
@@ -246,6 +248,8 @@ class CadastroJogos extends React.Component {
                         titulo={this.state.titulo}
                         data={this.state.data}
                         descricao={this.state.descricao}
+                        timeCasa={this.state.timeCasa}
+                        timeVisit={this.state.timeVisit}
                         b64Str={this.state.b64Str}
                         contentType={this.state.contentType}
                         imgJogoUri={this.state.imgJogoUri}
@@ -261,6 +265,8 @@ class CadastroJogos extends React.Component {
                         titulo={this.state.itemEdit.titulo}
                         data={this.state.itemEdit.data}
                         descricao={this.state.itemEdit.descricao}
+                        timeCasa={this.state.itemEdit.timeCasa}
+                        timeVisit={this.state.itemEdit.timeVisit}
                         imgJogoUri={this.state.itemEdit.imagem}
                         keyItem={this.state.itemEdit.key}
                     />);
@@ -271,6 +277,8 @@ class CadastroJogos extends React.Component {
                         titulo={this.state.titulo}
                         data={this.state.data}
                         descricao={this.state.descricao}
+                        timeCasa={this.state.timeCasa}
+                        timeVisit={this.state.timeVisit}
                         b64Str={this.state.b64Str}
                         contentType={this.state.contentType}
                         imgJogoUri={this.state.imgJogoUri}

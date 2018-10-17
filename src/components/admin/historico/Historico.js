@@ -17,6 +17,7 @@ import {
 import _ from 'lodash';
 
 import firebase from '../../../Firebase';
+import MonthPicker from '../../tools/MonthPicker';
 import { colorAppS, colorAppF, colorAppP } from '../../../utils/constantes';
 import Versus from '../../jogos/Versus';
 import { 
@@ -33,13 +34,16 @@ class Historico extends React.Component {
         super(props);
 
         this.state = {
-            indicatorOn: true
+            indicatorOn: true,
+            yearFilter: new Date().getFullYear(),
+            monthFilter: '',
         };
 
         this.fbDatabaseRef = firebase.database().ref();
 
         this.scrollView = null;
 
+        this.doDateFilter = this.doDateFilter.bind(this);
         this.renderEditar = this.renderEditar.bind(this);
         this.renderListJogos = this.renderListJogos.bind(this);
         this.onFilterJogos = this.onFilterJogos.bind(this);
@@ -77,6 +81,14 @@ class Historico extends React.Component {
     onPressCardGame(item) {
         this.props.modificaItemSelected(item.key);
         Actions.historicoJogoTab({ onBack: () => Actions.popTo('historico') });
+    }
+
+    doDateFilter(value, type) {
+        if (type === 'month') {
+            this.setState({ monthFilter: value });
+        } else if (type === 'year') {
+            this.setState({ yearFilter: value });
+        }
     }
 
     checkConInfo(funExec) {
@@ -134,14 +146,28 @@ class Historico extends React.Component {
 
     renderBasedFilterOrNot() {
         const { listJogos, filterStr } = this.props;
+        const { monthFilter, yearFilter } = this.state;
+        let filtredJogos = listJogos;
         let jogosView = null;
+
         if (listJogos) {
+            if (yearFilter) {
+                filtredJogos = _.filter(filtredJogos, (jogo) => 
+                    jogo.data && jogo.data.includes(`/${yearFilter}`)
+                );
+            }
+            if (monthFilter) {
+                filtredJogos = _.filter(filtredJogos, (jogo) => 
+                    jogo.data && jogo.data.includes(`/${monthFilter}/`)
+                );
+            }
+
             if (filterStr) {
                 jogosView = this.renderListJogos(
-                    this.onFilterJogos(listJogos, filterStr)
+                    this.onFilterJogos(filtredJogos, filterStr)
                 );
             } else {
-                jogosView = this.renderListJogos(listJogos);
+                jogosView = this.renderListJogos(filtredJogos);
             }
         }
         return jogosView;
@@ -179,31 +205,40 @@ class Historico extends React.Component {
     render() {
         return (
             <View style={styles.viewPrinc}>
-                {
-                    this.state.indicatorOn ?
-                    (
-                        <View
-                            style={{
-                                flex: 1,
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}
-                        >
-                            <ActivityIndicator size={'large'} color={colorAppP} />
-                        </View>
-                    )
-                    :
-                    (
-                        <ScrollView 
-                            style={{ flex: 1 }} 
-                            ref={(ref) => { this.scrollView = ref; }}
-                            keyboardShouldPersistTaps={'handled'}
-                        >
-                            { this.renderEditar() }
-                            <View style={{ marginVertical: 20 }} />
-                        </ScrollView>
-                    )
-                }
+                <View style={{ flex: 0.8 }}>
+                    {
+                        this.state.indicatorOn ?
+                        (
+                            <View
+                                style={{
+                                    flex: 1,
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <ActivityIndicator size={'large'} color={colorAppP} />
+                            </View>
+                        )
+                        :
+                        (
+                            <ScrollView 
+                                style={{ flex: 1 }} 
+                                ref={(ref) => { this.scrollView = ref; }}
+                                keyboardShouldPersistTaps={'handled'}
+                            >
+                                { this.renderEditar() }
+                                <View style={{ marginVertical: 20 }} />
+                            </ScrollView>
+                        )
+                    }
+                </View>
+                <View style={{ flex: 0.2 }}>
+                    <MonthPicker 
+                        orientation={'vertical'}
+                        onSelectYear={(value) => this.doDateFilter(value, 'year')}
+                        onPressMonth={(value, number) => this.doDateFilter(number, 'month')}
+                    />
+                </View>
             </View>
         );
     }
@@ -212,6 +247,7 @@ class Historico extends React.Component {
 const styles = StyleSheet.create({
     viewPrinc: {
         flex: 1,
+        flexDirection: 'row',
         backgroundColor: colorAppF
     },
     card: {

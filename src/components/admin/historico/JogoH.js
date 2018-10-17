@@ -147,7 +147,7 @@ class JogoH extends React.Component {
                 </View>
                 <View style={{ marginTop: 20 }} />
                 <View style={styles.viewPlacar}>
-                    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1.1 }}>
                         <Image 
                             style={{ height: 80, width: 70 }}
                             resizeMode={'stretch'}
@@ -155,24 +155,25 @@ class JogoH extends React.Component {
                         />
                         <Text
                             style={{
-                                fontWeight: '500'
+                                fontWeight: '500',
+                                fontSize: 14
                             }}
                         >
-                            Casa
+                            { jogo.timeCasa ? jogo.timeCasa.trim() : 'Casa' }
                         </Text>
                     </View>
                     <View 
-                        style={{ 
+                        style={{
+                            paddingHorizontal: 5,
                             alignItems: 'center', 
                             justifyContent: 'center',
                             borderWidth: 1,
-                            borderRadius: 3
+                            borderRadius: 3,
+                            flex: 0.8
                         }}
                     >
                             <View
                                 style={{ 
-                                    marginHorizontal: 30,
-                                    marginVertical: 5,
                                     alignItems: 'center',
                                     justifyContent: 'center' 
                                 }}
@@ -180,7 +181,7 @@ class JogoH extends React.Component {
                                 <View style={{ marginBottom: 10 }}>
                                     <Text
                                         style={{ 
-                                            fontSize: 18, 
+                                            fontSize: 16, 
                                             fontWeight: 'bold', 
                                             color: 'red' 
                                         }}
@@ -208,7 +209,7 @@ class JogoH extends React.Component {
                                 </View>
                             </View>
                     </View>
-                    <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1.1 }}>
                         <Image 
                             style={{ height: 80, width: 70 }}
                             resizeMode={'stretch'}
@@ -216,10 +217,12 @@ class JogoH extends React.Component {
                         />
                         <Text
                             style={{
-                                fontWeight: '500'
+                                fontWeight: '500',
+                                fontSize: 14
                             }}
+                            
                         >
-                            Visitantes
+                            { jogo.timeVisit ? jogo.timeVisit.trim() : 'Visitantes' }
                         </Text>
                     </View>
                 </View>

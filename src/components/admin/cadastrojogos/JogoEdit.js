@@ -40,6 +40,8 @@ class JogoEdit extends React.Component {
             titulo: props.titulo ? props.titulo : '',
             data: props.data ? props.data : Moment().format('DD/MM/YYYY'),
             descricao: props.descricao ? props.descricao : '',
+            timeCasa: props.timeCasa ? props.timeCasa : '',
+            timeVisit: props.timeVisit ? props.timeVisit : '',
             loading: props.loading ? props.loading : false,
             scrollView: props.scrollView ? props.scrollView : null
         };
@@ -51,6 +53,7 @@ class JogoEdit extends React.Component {
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
         this.setImgProperties = this.setImgProperties.bind(this);
         this.clearContentImg = this.clearContentImg.bind(this);
+        this.limitNomeTime = this.limitNomeTime.bind(this);
         this.checkConInfo = this.checkConInfo.bind(this);
     }
 
@@ -91,7 +94,7 @@ class JogoEdit extends React.Component {
     onPressConfirmar() {
         this.setState({ loading: true });
 
-        const { titulo, data, descricao, scrollView } = this.state;
+        const { titulo, data, descricao, scrollView, timeCasa, timeVisit } = this.state;
         const { keyItem, imgJogoUri } = this.props;
         const b64File = this.b64Str;
         const contentTp = this.contentType;
@@ -161,12 +164,16 @@ class JogoEdit extends React.Component {
                             titulo, 
                             data: dataStr, 
                             descricao,
+                            timeCasa,
+                            timeVisit,
                             imagem: url });
                     }
                     return dbJogosRef.push({
                             titulo, 
                             data: dataStr, 
                             descricao,
+                            timeCasa,
+                            timeVisit,
                             imagem: url,
                             placarCasa: '0',
                             placarVisit: '0',
@@ -179,7 +186,7 @@ class JogoEdit extends React.Component {
                                 visit: [{ push: 'push' }], 
                                 banco: [{ push: 'push' }] 
                             },
-                            status: '3',
+                            status: '0',
                             currentTime: '0',
                             endStatus: '0'
                         });
@@ -223,7 +230,9 @@ class JogoEdit extends React.Component {
                 dbJogosRef.update({
                     titulo, 
                     data: dataStr, 
-                    descricao 
+                    descricao,
+                    timeCasa,
+                    timeVisit 
                 })
                 .then(() => {
                     this.setState({ loading: false, isTitValid: false });
@@ -242,6 +251,8 @@ class JogoEdit extends React.Component {
                     titulo, 
                     data: dataStr, 
                     descricao,
+                    timeCasa,
+                    timeVisit,
                     imagem: '',
                     placarCasa: '0',
                     placarVisit: '0',
@@ -254,7 +265,7 @@ class JogoEdit extends React.Component {
                         visit: [{ push: 'push' }], 
                         banco: [{ push: 'push' }] 
                     },
-                    status: '3',
+                    status: '0',
                     currentTime: '0',
                     endStatus: '0'
                 })
@@ -293,6 +304,27 @@ class JogoEdit extends React.Component {
         }
 
         return funExec();
+    }
+
+    limitNomeTime(value, type) {
+        if (value.length > 16) {
+            return;
+        }
+        if (type === 'casa') {
+            if (this.props.keyItem) {
+                this.setState({ timeCasa: value });
+            } else {
+                this.setState({ timeCasa: value });
+                this.props.onChangeSuperState({ timeCasa: value });
+            }
+        } else if (type === 'visit') {
+            if (this.props.keyItem) {
+                this.setState({ timeVisit: value });
+            } else {
+                this.setState({ timeVisit: value });
+                this.props.onChangeSuperState({ timeVisit: value });
+            }
+        }
     }
     
     render() {
@@ -351,12 +383,11 @@ class JogoEdit extends React.Component {
                         onDateChange={(date) => {
                             if (this.props.keyItem) {
                                 this.setState({ data: date }); 
-                                this.descricao.focus();
                             } else {
                                 this.setState({ data: date }); 
                                 this.props.onChangeSuperState({ data: date });
-                                this.descricao.focus();
                             }
+                            this.descricao.focus();
                         }}
                     />
                 </View>
@@ -378,7 +409,39 @@ class JogoEdit extends React.Component {
                         }
                     }}
                     underlineColorAndroid={'transparent'}
-                    multiline 
+                    multiline
+                    onSubmitEditing={() => this.timeCasa.focus()}
+                />
+                <FormLabel labelStyle={styles.text}>TIME CASA (NOME)</FormLabel>
+                <FormInput
+                    ref={(ref) => {
+                        this.timeCasa = ref;
+                    }}
+                    selectTextOnFocus
+                    containerStyle={styles.inputContainer}
+                    returnKeyType={'next'}
+                    inputStyle={[styles.text, styles.input]}
+                    value={this.state.timeCasa}
+                    onChangeText={(value) => {
+                        this.limitNomeTime(value, 'casa');
+                    }}
+                    underlineColorAndroid={'transparent'}
+                    onSubmitEditing={() => this.timeVisit.focus()}
+                />
+                <FormLabel labelStyle={styles.text}>TIME VISITANTES (NOME)</FormLabel>
+                <FormInput
+                    ref={(ref) => {
+                        this.timeVisit = ref;
+                    }}
+                    selectTextOnFocus
+                    containerStyle={styles.inputContainer}
+                    returnKeyType={'next'}
+                    inputStyle={[styles.text, styles.input]}
+                    value={this.state.timeVisit}
+                    onChangeText={(value) => {
+                        this.limitNomeTime(value, 'visit');
+                    }}
+                    underlineColorAndroid={'transparent'}
                 />
                 <FormLabel labelStyle={styles.text}>IMAGEM DE EXIBIÇÃO</FormLabel>
                 <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
@@ -437,6 +500,8 @@ class JogoEdit extends React.Component {
                             titulo: '',
                             data: new Date(),
                             descricao: '',
+                            timeCasa: '',
+                            timeVisit: ''
                         });
                     }}
                 />

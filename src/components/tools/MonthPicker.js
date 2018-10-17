@@ -1,0 +1,188 @@
+import React from 'react';
+import { 
+    View, 
+    ScrollView, 
+    StyleSheet, 
+    Text,
+    TouchableOpacity
+} from 'react-native';
+import ModalDropdown from 'react-native-modal-dropdown';
+import { connect } from 'react-redux';
+import { colorAppW, colorAppS } from '../../utils/constantes';
+
+class MonthPicker extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.onPressMonth = this.onPressMonth.bind(this);
+        this.onSelectYear = this.onSelectYear.bind(this);
+        this.renderMonths = this.renderMonths.bind(this);
+        this.yearNow = new Date().getFullYear();
+        this.years = [this.yearNow, this.yearNow - 1, this.yearNow - 2];
+
+        this.state = {
+            indexSelected: 0
+        };
+    }
+
+    onPressMonth(item, index) {
+        this.setState({ indexSelected: index });
+        if (this.props.onPressMonth) {
+            if (index === 0) {
+                this.props.onPressMonth(item, '');
+                return;
+            }
+            const str = `${index}`;
+            const pad = '00';
+            const ans = pad.substring(0, pad.length - str.length) + str;
+            this.props.onPressMonth(item, ans);
+        }
+    }
+
+    onSelectYear(item, index) {
+        if (this.props.onSelectYear) {
+            this.props.onSelectYear(item, index);
+        }
+    }
+
+    renderMonths() {
+        const months = [
+            'Todos', 
+            'Jan', 
+            'Fev', 
+            'Mar', 
+            'Abr', 
+            'Mai', 
+            'Jun', 
+            'Jul', 
+            'Ago', 
+            'Set', 
+            'Out', 
+            'Nov', 
+            'Dez'
+        ];
+        let viewsMonth = null;
+
+        viewsMonth = months.map((item, index) => {
+            const styleSelect = index === this.state.indexSelected ? 
+            styles.monthSelected : styles.month;
+            const indexPlus = index - 1 === this.state.indexSelected ?
+            { ...styleSelect, borderTopColor: colorAppS } : styleSelect;
+
+            return (
+                <TouchableOpacity
+                    key={index}
+                    activeOpacity={0.8}
+                    onPress={() => this.onPressMonth(item, index)}
+                >
+                    <View
+                        style={indexPlus}
+                    >
+                        <Text style={styles.textMonth}>
+                            { item }
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            );
+        });
+
+        return viewsMonth;
+    }
+
+   
+    render() {
+        const { orientation } = this.props;
+        const orientHV = orientation && orientation === 'vertical'; 
+        const orient = orientHV ? styles.viewPVertical : styles.viewPHorizontal;
+
+        return (
+            <View
+                style={{ ...orient, borderLeftWidth: 0, borderTopWidth: 0 }}
+            >
+                <View style={{ flex: 0.1, paddingVertical: 5 }}>
+                    <ModalDropdown
+                        ref={(ref) => { this.modalDropRef = ref; }}
+                        style={[
+                            styles.month, 
+                            { 
+                                borderTopWidth: 3, 
+                                borderBottomWidth: 3, 
+                                borderLeftWidth: 3, 
+                                borderTopColor: colorAppW, 
+                                borderBottomColor: colorAppW, 
+                                borderLeftColor: colorAppW 
+                            }
+                        ]}
+                        textStyle={styles.textMonth}
+                        dropdownTextStyle={{ fontSize: 16 }}
+                        options={this.years}
+                        onSelect={(index, value) => this.onSelectYear(value, index)}
+                        defaultIndex={0}
+                        defaultValue={this.years[0].toString()}
+                    />
+                </View>
+                <View style={{ flex: 0.9 }}>
+                    <ScrollView
+                        showsHorizontalScrollIndicator={false}
+                        showsVerticalScrollIndicator={false}
+                        horizontal={!orientHV} 
+                        style={orient}
+                    >
+                        { this.renderMonths() }
+                    </ScrollView>
+                </View>
+            </View>
+        );
+    }
+
+}
+
+const styles = StyleSheet.create({
+    viewPHorizontal: {
+        flex: 1,
+        flexDirection: 'row'
+    },
+    viewPVertical: {
+        flex: 1,
+        flexDirection: 'column',
+        borderTopWidth: 3,
+        borderLeftWidth: 3,
+        borderTopColor: colorAppW,
+        borderLeftColor: colorAppW
+    },
+    month: { 
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderTopWidth: 2,
+        borderLeftWidth: 2,
+        borderTopColor: '#DCE0E4',
+        borderLeftColor: '#DCE0E4',
+        overflow: 'hidden',
+        padding: 15,
+        backgroundColor: colorAppW
+    },
+    monthSelected: { 
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderTopWidth: 2,
+        borderLeftWidth: 2,
+        borderTopColor: colorAppS,
+        borderLeftColor: colorAppS,
+        padding: 15,
+        backgroundColor: colorAppW
+    },
+    textMonth: {
+        fontSize: 12,
+        fontWeight: '500',
+        color: 'white'
+    }
+});
+
+const mapStateToProps = () => ({
+});
+
+export default connect(mapStateToProps)(MonthPicker);
+

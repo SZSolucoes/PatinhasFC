@@ -460,7 +460,7 @@ class EscalacaoG extends React.Component {
                                         onPress={() => this.onToggleCasa()}
                                         style={{ fontSize: 16, color: 'black' }}
                                     >
-                                        Casa
+                                        { jogo.timeCasa ? jogo.timeCasa.trim() : 'Casa' }
                                     </Text>
                                 </View>
                                 <TouchableWithoutFeedback
@@ -514,7 +514,7 @@ class EscalacaoG extends React.Component {
                                         onPress={() => this.onToggleVisit()}
                                         style={{ fontSize: 16, color: 'black' }}
                                     >
-                                        Visitantes
+                                        { jogo.timeVisit ? jogo.timeVisit.trim() : 'Visitantes' }
                                     </Text>
                                 </View>
                                 <TouchableWithoutFeedback
