@@ -386,49 +386,55 @@ class Coment extends React.Component {
                 }} 
             >
                 <View style={styles.containerPrincip}>
-                    <View
-                        style={{ 
-                            flexDirection: 'row', 
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginHorizontal: 15
+                    <TouchableWithoutFeedback
+                        onPress={() => {
+                            Keyboard.dismiss();
                         }}
                     >
                         <View
                             style={{ 
                                 flexDirection: 'row', 
-                                alignItems: 'center'
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginHorizontal: 15
                             }}
                         >
-                            <Icon
-                                name='thumb-up' 
-                                type='material-community' 
-                                size={18} color='green'
-                            />
-                            <View style={{ marginHorizontal: 3 }} />
-                            <Text
-                                style={{ fontWeight: 'bold' }}
+                            <View
+                                style={{ 
+                                    flexDirection: 'row', 
+                                    alignItems: 'center'
+                                }}
                             >
-                                { qtdLikes }
-                            </Text>
-                        </View>
-                        <TouchableWithoutFeedback
-                            style={{ alignSelf: 'flex-end' }}
-                            onPress={() => {
-                                Keyboard.dismiss();
-                                this.props.modificaStartUpOrDownAnim('down');
-                            }}
-                        >   
-                            <View>
                                 <Icon
-                                    name='close-box-outline' 
+                                    name='thumb-up' 
                                     type='material-community' 
-                                    size={28} color='black'
-                                    iconStyle={{ opacity: 0.8, margin: 5 }}
+                                    size={18} color='green'
                                 />
+                                <View style={{ marginHorizontal: 3 }} />
+                                <Text
+                                    style={{ fontWeight: 'bold' }}
+                                >
+                                    { qtdLikes }
+                                </Text>
                             </View>
-                        </TouchableWithoutFeedback>
-                    </View>
+                            <TouchableWithoutFeedback
+                                style={{ alignSelf: 'flex-end' }}
+                                onPress={() => {
+                                    Keyboard.dismiss();
+                                    this.props.modificaStartUpOrDownAnim('down');
+                                }}
+                            >   
+                                <View>
+                                    <Icon
+                                        name='close-box-outline' 
+                                        type='material-community' 
+                                        size={28} color='black'
+                                        iconStyle={{ opacity: 0.8, margin: 5 }}
+                                    />
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </View>
+                    </TouchableWithoutFeedback>
                     <Divider />
                     <ScrollView
                         keyboardShouldPersistTaps={'handled'}

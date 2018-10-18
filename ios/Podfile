@@ -15,7 +15,8 @@ target 'PatinhasFC' do
     'RCTSettings',
     'RCTText',
     'RCTVibration',
-    'RCTWebSocket'
+    'RCTWebSocket',
+    'ART'
   ]
 
   pod 'RNImageCropPicker', :path =>  '../node_modules/react-native-image-crop-picker'
@@ -23,7 +24,11 @@ target 'PatinhasFC' do
   pod 'rn-fetch-blob', :path => '../node_modules/rn-fetch-blob'
 
   pod 'RNShare', :path => '../node_modules/react-native-share'
-
+  
+  pod 'React', path: '../node_modules/react-native', subspecs: [
+    'ART',
+  ] 
+  
 end
 
 # very important to have, unless you removed React dependencies for Libraries 

@@ -169,7 +169,7 @@ class PlayersModal extends React.Component {
                 animationType="slide"
                 transparent
                 visible={this.props.showPlayersModal}
-                supportedOrientations={['portrait', 'landscape']}
+                supportedOrientations={['portrait']}
                 onRequestClose={() => this.closeModal()}
                 onShow={() =>
                     Animated.timing(

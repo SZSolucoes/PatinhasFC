@@ -10,7 +10,8 @@ import {
     Keyboard,
     TouchableWithoutFeedback,
     FlatList,
-    ActivityIndicator
+    ActivityIndicator,
+    Dimensions
 } from 'react-native';
 import _ from 'lodash';
 import b64 from 'base-64';
@@ -21,6 +22,7 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import { Card, Divider, SearchBar, Avatar } from 'react-native-elements';
+import { isPortrait } from '../../utils/orientation';
 import { startFbListener, stopFbListener } from '../../utils/firebaseListeners';
 import LoadingBallAnim from '../animations/LoadingBallAnim';
 import Versus from './Versus';
@@ -63,6 +65,7 @@ class Jogos extends React.Component {
         this.onPressCardGame = this.onPressCardGame.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.renderCardsJogos = this.renderCardsJogos.bind(this);
+        this.onChangeDimensions = this.onChangeDimensions.bind(this);
         this.onKeyboardShow = this.onKeyboardShow.bind(this);
         this.onKeyboardHide = this.onKeyboardHide.bind(this);
         this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.onKeyboardShow);
@@ -78,7 +81,8 @@ class Jogos extends React.Component {
         this.state = {
             maxOffSetScrollView: 0,
             scrollY: new Animated.Value(0),
-            animTools: new Animated.Value(0)
+            animTools: new Animated.Value(0),
+            isPortraitMode: true
         };
     }
 
@@ -93,12 +97,22 @@ class Jogos extends React.Component {
         })
         .then(() => true)
         .catch(() => true);
+        Dimensions.addEventListener('change', this.onChangeDimensions);
     }
 
     componentWillUnmount() {
         this.startOrStopFBJogosListener(false);
         this.keyboardDidShowListener.remove();
         this.keyboardDidHideListener.remove();
+        Dimensions.removeEventListener('change', this.onChangeDimensions);
+    }
+
+    onChangeDimensions() {
+        if (isPortrait()) {
+            this.setState({ isPortraitMode: true });
+        } else {
+            this.setState({ isPortraitMode: false });
+        }
     }
 
     onKeyboardShow() {
@@ -485,7 +499,7 @@ class Jogos extends React.Component {
                             }}
                         >
                             {
-                                Platform.OS === 'ios' &&
+                                Platform.OS === 'ios' && this.state.isPortraitMode &&
                                 <View 
                                     style={{ 
                                         height: getStatusBarHeight(true), 

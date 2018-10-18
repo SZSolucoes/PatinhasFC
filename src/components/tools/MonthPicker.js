@@ -22,7 +22,8 @@ class MonthPicker extends React.Component {
         this.years = [this.yearNow, this.yearNow - 1, this.yearNow - 2];
 
         this.state = {
-            indexSelected: 0
+            indexSelected: 0,
+            dropWidth: 0
         };
     }
 
@@ -48,7 +49,7 @@ class MonthPicker extends React.Component {
 
     renderMonths() {
         const months = [
-            'Todos', 
+            'Tudo', 
             'Jan', 
             'Fev', 
             'Mar', 
@@ -65,10 +66,19 @@ class MonthPicker extends React.Component {
         let viewsMonth = null;
 
         viewsMonth = months.map((item, index) => {
-            const styleSelect = index === this.state.indexSelected ? 
+            let styleSelect = index === this.state.indexSelected ? 
             styles.monthSelected : styles.month;
-            const indexPlus = index - 1 === this.state.indexSelected ?
+
+            styleSelect = index - 1 === this.state.indexSelected ?
             { ...styleSelect, borderTopColor: colorAppS } : styleSelect;
+
+            styleSelect = months.length - 1 === index ?
+            { ...styleSelect, borderBottomWidth: 2, borderBottomColor: '#DCE0E4' } 
+            : styleSelect;
+
+            styleSelect = months.length - 1 === index && index === this.state.indexSelected ?
+            { ...styleSelect, borderBottomWidth: 2, borderBottomColor: colorAppS } 
+            : styleSelect;
 
             return (
                 <TouchableOpacity
@@ -77,7 +87,7 @@ class MonthPicker extends React.Component {
                     onPress={() => this.onPressMonth(item, index)}
                 >
                     <View
-                        style={indexPlus}
+                        style={styleSelect}
                     >
                         <Text style={styles.textMonth}>
                             { item }
@@ -98,23 +108,31 @@ class MonthPicker extends React.Component {
 
         return (
             <View
-                style={{ ...orient, borderLeftWidth: 0, borderTopWidth: 0 }}
+                style={{ ...orient, borderLeftWidth: 0, borderTopWidth: 0, borderBottomWidth: 0 }}
             >
-                <View style={{ flex: 0.1, paddingVertical: 5 }}>
+                <View style={{ flex: 0.1 }} />
+                <View
+                    style={{ 
+                            borderTopWidth: 3, 
+                            borderBottomWidth: 3, 
+                            borderLeftWidth: 3, 
+                            borderTopColor: colorAppW, 
+                            borderBottomColor: colorAppW, 
+                            borderLeftColor: colorAppW,
+                            backgroundColor: colorAppW 
+                        }}
+                    onLayout={
+                        (event) =>
+                            this.setState({
+                                dropWidth: event.nativeEvent.layout.width
+                    })}
+                >
                     <ModalDropdown
                         ref={(ref) => { this.modalDropRef = ref; }}
-                        style={[
-                            styles.month, 
-                            { 
-                                borderTopWidth: 3, 
-                                borderBottomWidth: 3, 
-                                borderLeftWidth: 3, 
-                                borderTopColor: colorAppW, 
-                                borderBottomColor: colorAppW, 
-                                borderLeftColor: colorAppW 
-                            }
-                        ]}
-                        textStyle={styles.textMonth}
+                        style={{
+                            width: this.state.dropWidth - 1
+                        }}
+                        textStyle={styles.dropModalBtnText}
                         dropdownTextStyle={{ fontSize: 16 }}
                         options={this.years}
                         onSelect={(index, value) => this.onSelectYear(value, index)}
@@ -122,7 +140,8 @@ class MonthPicker extends React.Component {
                         defaultValue={this.years[0].toString()}
                     />
                 </View>
-                <View style={{ flex: 0.9 }}>
+                <View style={{ flex: 0.5, borderBottomWidth: 3, borderBottomColor: colorAppW }} />
+                <View style={{ flex: 10.5 }}>
                     <ScrollView
                         showsHorizontalScrollIndicator={false}
                         showsVerticalScrollIndicator={false}
@@ -132,6 +151,7 @@ class MonthPicker extends React.Component {
                         { this.renderMonths() }
                     </ScrollView>
                 </View>
+                <View style={{ flex: 0.5, borderTopWidth: 3, borderTopColor: colorAppW }} />
             </View>
         );
     }
@@ -146,9 +166,7 @@ const styles = StyleSheet.create({
     viewPVertical: {
         flex: 1,
         flexDirection: 'column',
-        borderTopWidth: 3,
         borderLeftWidth: 3,
-        borderTopColor: colorAppW,
         borderLeftColor: colorAppW
     },
     month: { 
@@ -178,6 +196,13 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '500',
         color: 'white'
+    },
+    dropModalBtnText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginVertical: 10
     }
 });
 

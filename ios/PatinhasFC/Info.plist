@@ -4,8 +4,8 @@
 <dict>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
-  		<string>whatsapp</string>
-  		<string>mailto</string>
+		<string>whatsapp</string>
+		<string>mailto</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>

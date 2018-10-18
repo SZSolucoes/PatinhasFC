@@ -157,7 +157,8 @@ class Jogo extends React.Component {
                         <Text
                             style={{
                                 fontWeight: '500',
-                                fontSize: 14
+                                fontSize: 14,
+                                textAlign: 'center'
                             }}
                         >
                             { jogo.timeCasa ? jogo.timeCasa.trim() : 'Casa' }
@@ -182,7 +183,8 @@ class Jogo extends React.Component {
                                 <View style={{ marginBottom: 10 }}>
                                     <Text
                                         style={{ 
-                                            fontSize: 16, 
+                                            fontSize: 14,
+                                            textAlign: 'center',
                                             fontWeight: 'bold', 
                                             color: 'red' 
                                         }}
@@ -219,7 +221,8 @@ class Jogo extends React.Component {
                         <Text
                             style={{
                                 fontWeight: '500',
-                                fontSize: 14
+                                fontSize: 14,
+                                textAlign: 'center'
                             }}
                             
                         >

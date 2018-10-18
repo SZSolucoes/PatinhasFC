@@ -12,7 +12,8 @@ import {
     Platform,
     Image,
     TouchableOpacity,
-    Alert
+    Alert,
+    StatusBar
 } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
@@ -45,7 +46,6 @@ import SplashScreenAnim from './components/animations/SplashScreenAnim';
 import AnimScene from './components/tools/AnimatedScene';
 import { doEndGame } from './utils/jogosUtils';
 
-import imgBootOne from './imgs/bootone.png';
 import imgFinishFlag from './imgs/finishflag.png';
 
 const AnimatedScene = Animated.createAnimatedComponent(AnimScene);
@@ -150,6 +150,8 @@ class Routes extends React.Component {
     onChangeDimension() {
         if (isLandscape()) {
             const toValue = Dimensions.get('screen').height;
+            StatusBar.setHidden(true);
+            
             Animated.timing(
                 this.state.animHeigth, 
                 {
@@ -160,6 +162,7 @@ class Routes extends React.Component {
             ).start();
         } else {
             const isComentUp = store.getState().InfoReducer.startUpOrDownAnim === 'up';
+            StatusBar.setHidden(false);
             if (!isComentUp) {
                 this.doTabAnimation(false);
             }
@@ -198,6 +201,7 @@ class Routes extends React.Component {
                     flexDirection: 'row',
                     marginHorizontal: 5,
                     paddingHorizontal: 10,
+                    justifyContent: 'space-between'
                 }}
             >
                 <TouchableOpacity
@@ -220,6 +224,7 @@ class Routes extends React.Component {
                     }}
                 >
                     <Icon
+                        iconStyle={{ marginHorizontal: 5 }}
                         color={'white'}
                         name='timer'
                         type='material-community'
@@ -227,60 +232,6 @@ class Routes extends React.Component {
                     />
                 </TouchableOpacity>
                 <TouchableOpacity
-                    style={{ marginLeft: 15 }}
-                    onPress={() => {
-                        const currentTimeNow = store.getState().JogoReducer.currentTime;
-                        const { listJogos } = store.getState().JogosReducer;
-                        const { itemSelected } = store.getState().GerenciarReducer;
-                        const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
-                        if (jogo.status === '1') {
-                            Alert.alert(
-                                'Aviso',
-                                'Para sincronizar o tempo de jogo' +
-                                ' é necessário que o jogo esteja pausado.'
-                            );
-                            return;
-                        }
-                        Alert.alert(
-                            'Aviso',
-                            'Deseja sincronizar o tempo de jogo com todos os usuários ?',
-                            [
-                                { text: 'Cancelar', 
-                                    onPress: () => true, 
-                                    style: 'cancel' 
-                                },
-                                { 
-                                    text: 'Ok', 
-                                    onPress: () => {
-                                        firebase.database()
-                                        .ref()
-                                        .child(`jogos/${jogo.key}`).update({
-                                            currentTime: currentTimeNow.toString()
-                                        })
-                                        .then(
-                                            () => Toast.show('Sincronização efetuada.', Toast.SHORT)
-                                        )
-                                        .catch(
-                                            () => Toast.show(
-                                                'Falha ao sincronizar. Verifique a conexão.',
-                                                 Toast.SHORT
-                                            )
-                                        );
-                                    }
-                                }
-                            ]
-                        );
-                    }}
-                >
-                    <Icon
-                        color={'white'}
-                        name='cloud-sync'
-                        type='material-community'
-                        size={26}
-                    />
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={{ marginLeft: 15 }}
                     onPress={() => {
                         const { listJogos } = store.getState().JogosReducer;
                         const { itemSelected } = store.getState().GerenciarReducer;
@@ -317,11 +268,16 @@ class Routes extends React.Component {
                             ]
                         );
                     }}
-                >        
-                        <Image
-                            source={imgFinishFlag}
-                            style={{ width: 20, height: 25, tintColor: 'white' }}
-                        />
+                >
+                    <Image
+                        source={imgFinishFlag}
+                        style={{ 
+                            width: 20, 
+                            height: 25, 
+                            tintColor: 'white',
+                            marginHorizontal: 5
+                        }}
+                    />
                 </TouchableOpacity>
             </View>
         );
@@ -602,99 +558,46 @@ class Routes extends React.Component {
                     <Scene 
                         key={'jogoTabBar'}
                         tabs
-                        showLabel={false}
+                        showLabel
                         tabBarPosition={'top'}
                         lazy={false}
-                        showIcon
                         swipeEnabled
                         title={'Jogo'} 
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
+                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
                     >
                         <Scene 
                             key={'jogoTab'}
                             hideNavBar 
                             component={Jogo}
                             initial
-                            icon={({ focused }) => (
-                                <View
-                                    style={{
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: 500
-                                    }}
-                                >
-                                    <Image 
-                                        source={imgBootOne}
-                                        style={{
-                                            width: focused ? 35 : 45,
-                                            height: focused ? 25 : 40,
-                                            tintColor: focused ? 'white' : 'black',
-                                            margin: 0,
-                                            padding: 0
-                                        }}
-                                    />
-                                    { focused && 
-                                    <Text
-                                        style={{
-                                            color: focused ? 'white' : 'black',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Jogo
-                                    </Text>}
-                                </View>
-                            )} 
+                            tabBarLabel={'Jogo'}
+                            activeTintColor={'white'} 
                         />
                         <Scene 
                             key={'escalacaoTab'}
                             hideNavBar 
                             component={Escalacao}
-                            icon={({ focused }) => (
-                                <View
-                                    style={{
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: 500
-                                    }}
-                                >
-                                    <Icon
-                                        color={focused ? 'white' : 'black'}
-                                        size={focused ? 24 : 36}
-                                        name='soccer-field'
-                                        type='material-community'
-                                        iconStyle={{ transform: [{ rotate: '90deg' }] }}
-                                    />
-                                    { focused && 
-                                    <Text
-                                        style={{
-                                            color: focused ? 'white' : 'black',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Escalação
-                                    </Text>}
-                                </View>
-                            )} 
+                            tabBarLabel={'Escalação'}
+                            activeTintColor={'white'} 
                         />
                     </Scene>
                     <Scene 
                         key={'gerenciarJogoTab'}
                         tabs
-                        showLabel={false}
+                        showLabel
                         tabBarPosition={'top'}
                         lazy={false}
-                        showIcon
                         swipeEnabled
                         title={'Gerenciar Jogo'} 
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
+                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
                         renderRightButton={() => this.rightButtonGerenciarTab()}
                     >
                         <Scene 
@@ -702,152 +605,46 @@ class Routes extends React.Component {
                             hideNavBar 
                             component={JogoG}
                             initial
-                            icon={({ focused }) => (
-                                <View
-                                    style={{
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: 500
-                                    }}
-                                >
-                                    <Image 
-                                        source={imgBootOne}
-                                        style={{
-                                            width: focused ? 35 : 45,
-                                            height: focused ? 25 : 40,
-                                            tintColor: focused ? 'white' : 'black',
-                                            margin: 0,
-                                            padding: 0
-                                        }}
-                                    />
-                                    { focused && 
-                                    <Text
-                                        style={{
-                                            color: focused ? 'white' : 'black',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Jogo
-                                    </Text>}
-                                </View>
-                            )} 
+                            tabBarLabel={'Jogo'}
+                            activeTintColor={'white'}
                         />
                         <Scene 
                             key={'escalacaoTabG'}
                             hideNavBar 
                             component={EscalacaoG}
-                            icon={({ focused }) => (
-                                <View
-                                    style={{
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: 500
-                                    }}
-                                >
-                                    <Icon
-                                        color={focused ? 'white' : 'black'}
-                                        size={focused ? 24 : 36}
-                                        name='soccer-field'
-                                        type='material-community'
-                                        iconStyle={{ transform: [{ rotate: '90deg' }] }}
-                                    />
-                                    { focused && 
-                                    <Text
-                                        style={{
-                                            color: focused ? 'white' : 'black',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Escalação
-                                    </Text>}
-                                </View>
-                            )} 
+                            tabBarLabel={'Escalação'}
+                            activeTintColor={'white'}
                         />
                     </Scene>
                     { /* HISTORICO E TABS */}
                     <Scene 
                         key={'historicoJogoTab'}
                         tabs
-                        showLabel={false}
+                        showLabel
                         tabBarPosition={'top'}
                         lazy={false}
-                        showIcon
                         swipeEnabled
                         title={'Histórico de Jogo'} 
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
+                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
                     >
                         <Scene 
                             key={'jogoTabH'}
                             hideNavBar 
                             component={JogoH}
                             initial
-                            icon={({ focused }) => (
-                                <View
-                                    style={{
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: 500
-                                    }}
-                                >
-                                    <Image 
-                                        source={imgBootOne}
-                                        style={{
-                                            width: focused ? 35 : 45,
-                                            height: focused ? 25 : 40,
-                                            tintColor: focused ? 'white' : 'black',
-                                            margin: 0,
-                                            padding: 0
-                                        }}
-                                    />
-                                    { focused && 
-                                    <Text
-                                        style={{
-                                            color: focused ? 'white' : 'black',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Jogo
-                                    </Text>}
-                                </View>
-                            )} 
+                            tabBarLabel={'Jogo'}
+                            activeTintColor={'white'}
                         />
                         <Scene 
                             key={'escalacaoTabH'}
                             hideNavBar 
                             component={EscalacaoH}
-                            icon={({ focused }) => (
-                                <View
-                                    style={{
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: 500
-                                    }}
-                                >
-                                    <Icon
-                                        color={focused ? 'white' : 'black'}
-                                        size={focused ? 24 : 36}
-                                        name='soccer-field'
-                                        type='material-community'
-                                        iconStyle={{ transform: [{ rotate: '90deg' }] }}
-                                    />
-                                    { focused && 
-                                    <Text
-                                        style={{
-                                            color: focused ? 'white' : 'black',
-                                            fontWeight: 'bold'
-                                        }}
-                                    >
-                                        Escalação
-                                    </Text>}
-                                </View>
-                            )} 
+                            tabBarLabel={'Escalação'}
+                            activeTintColor={'white'}
                         />
                     </Scene>
                 </Scene>

@@ -22,7 +22,7 @@
     "react-native-modal-dropdown": "^0.6.2",
     "react-native-parallax-scrollview": "^3.0.0",
     "react-native-progress": "^3.5.0",
-    "react-native-router-flux": "^4.0.1",
+    "react-native-router-flux": "^4.0.5",
     "react-native-scl-alert": "^1.2.1",
     "react-native-share": "^1.1.2",
     "react-native-simple-dialogs": "^1.0.0",

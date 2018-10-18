@@ -5,8 +5,10 @@ import {
     View, 
     Modal, 
     TextInput, 
-    TouchableOpacity, 
-    Platform 
+    TouchableOpacity,
+    TouchableWithoutFeedback, 
+    Platform,
+    Keyboard
 } from 'react-native';
 
 class DialogInput extends React.Component {
@@ -22,54 +24,65 @@ class DialogInput extends React.Component {
             <Modal
                 animationType="fade"
                 transparent
+                supportedOrientations={['portrait']}
                 visible={this.props.isDialogVisible}
                 onRequestClose={() => {
                     this.props.closeDialog();
                 }}
             >
-                <View style={styles.container}>
-                    <View style={styles.modal_container}>
-                    <View style={styles.modal_body}>
-                        <Text style={styles.title_modal}>{this.props.title}</Text>
-                        <Text style={styles.message_modal}>{this.props.message}</Text>
-                        <TextInput 
-                            style={styles.input_container}
-                            autoCorrect={false}
-                            autoCapitalize={'none'}
-                            keyboardType={'numeric'}
-                            placeholder={`Tempo atual: ${Math.floor(this.props.hint / 60)} minutos`}
-                            underlineColorAndroid='transparent'
-                            onChangeText={(input) => {
-                                const txtParsed = input.replace(/[^0-9]/g, '');
-                                this.setState({ input: txtParsed });
-                            }}
-                            value={this.state.input}
-                        />
-                    </View>
-                    <View style={styles.btn_container}>
-                        <TouchableOpacity 
-                            style={styles.touch_modal}
-                            onPress={() => {
-                                this.setState({ input: '' });
-                                this.props.closeDialog();
-                            }}
-                        >
-                        <Text style={styles.btn_modal_left}>{this.props.cancelText}</Text>
-                        </TouchableOpacity>
-                            <View style={styles.divider_btn} />
-                        <TouchableOpacity  
-                            style={styles.touch_modal}
-                            onPress={() => {
-                                this.props.submitInput(this.state.input);
-                                this.setState({ input: '' });
-                                this.props.closeDialog();
-                            }}
-                        >
-                        <Text style={styles.btn_modal_right}>{this.props.submitText}</Text>
-                        </TouchableOpacity>
+                <TouchableWithoutFeedback
+                    onPress={() => Keyboard.dismiss()}
+                >
+                    <View style={styles.container}>
+                        <View style={styles.modal_container}>
+                            <View style={styles.modal_body}>
+                                <Text style={styles.title_modal}>{this.props.title}</Text>
+                                <Text style={styles.message_modal}>{this.props.message}</Text>
+                                <TextInput 
+                                    style={styles.input_container}
+                                    autoCorrect={false}
+                                    autoCapitalize={'none'}
+                                    keyboardType={'numeric'}
+                                    placeholder={
+                                        `Tempo atual: ${Math.floor(this.props.hint / 60)} minutos`
+                                    }
+                                    underlineColorAndroid='transparent'
+                                    onChangeText={(input) => {
+                                        const txtParsed = input.replace(/[^0-9]/g, '');
+                                        this.setState({ input: txtParsed });
+                                    }}
+                                    value={this.state.input}
+                                />
+                            </View>
+                            <View style={styles.btn_container}>
+                                <TouchableOpacity 
+                                    style={styles.touch_modal}
+                                    onPress={() => {
+                                        this.setState({ input: '' });
+                                        this.props.closeDialog();
+                                    }}
+                                >
+                                    <Text style={styles.btn_modal_left}>
+                                        {this.props.cancelText}
+                                    </Text>
+                                    </TouchableOpacity>
+                                        <View style={styles.divider_btn} />
+                                    <TouchableOpacity  
+                                        style={styles.touch_modal}
+                                        onPress={() => {
+                                            this.props.submitInput(this.state.input);
+                                            this.setState({ input: '' });
+                                            this.props.closeDialog();
+                                        }}
+                                    >
+                                    <Text style={styles.btn_modal_right}>
+                                        {this.props.submitText}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
-                </View>
+                </TouchableWithoutFeedback>
             </Modal>
         );
     }
@@ -80,18 +93,14 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    ...Platform.select({
-      android: {
-        backgroundColor: 'rgba(0,0,0,0.62)'
-      }
-    }),
+    backgroundColor: 'rgba(0,0,0,0.62)'
   },
   modal_container: {
     marginLeft: 30,
     marginRight: 30,
     ...Platform.select({
       ios: {
-        backgroundColor: 'rgba(220,220,220, 0.6)',
+        backgroundColor: '#fff',
         borderRadius: 10,
         minWidth: 300,
       },
