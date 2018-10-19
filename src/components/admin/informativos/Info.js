@@ -249,7 +249,11 @@ class Info extends React.Component {
                     autoCapitalize={'none'}
                     autoCorrect={false}
                     clearIcon={!!this.props.filterStr}
-                    showLoadingIcon={this.props.filterLoad}
+                    showLoadingIcon={
+                        this.props.listInfos &&
+                        this.props.listInfos.length > 0 && 
+                        this.props.filterLoad
+                    }
                     containerStyle={{ 
                         backgroundColor: 'transparent',
                         borderTopWidth: 0, 

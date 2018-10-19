@@ -48,185 +48,193 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
         return false;
     }
 
-    // Altera o status do jogo para encerrado
-    dbFirebaseRef.child(`jogos/${jogo.key}`).update({
-        status: '3'
-    })
-    .then(() => true)
-    .catch(() => true);
-
-    // Inicia a atualizacao dos usuarios para vitorias derrotas e escalacao
-    if (placarCasa > placarVisit) {
-        const jogadoresVit = _.filter(jogadores, (jogv) => jogv.side === 'casa');
-        const jogadoresDer = _.filter(jogadores, (jogd) => jogd.side === 'visit');
-        let numJogs = jogadoresVit.length + jogadoresDer.length;
-
-        iFix = 1 / (jogadoresVit.length + jogadoresDer.length);
-
-        // Jogadores vitoriosos atualizados primeiro
-        jogadoresVit.forEach((jogador) => {
-            dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
-                dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
-                    vitorias: (parseInt(snapshot.val().vitorias, 10) + 1).toString(),
-                    jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
-                })
-                .then(() => {
-                    i += iFix;
-                    numJogs--;
-
-                    store.dispatch({
-                        type: 'modifica_endgamemodalperc_gerenciar',
-                        payload: roundTo(i, 2)
+    store.dispatch({
+        type: 'modifica_endgamemodal_gerenciar',
+        payload: true
+    });
+    
+    // Timeout utilizado para dar tempo de renderizar o modal de loading
+    setTimeout(() => {
+        // Altera o status do jogo para encerrado
+        dbFirebaseRef.child(`jogos/${jogo.key}`).update({
+            status: '3'
+        })
+        .then(() => true)
+        .catch(() => true);
+    
+        // Inicia a atualizacao dos usuarios para vitorias derrotas e escalacao
+        if (placarCasa > placarVisit) {
+            const jogadoresVit = _.filter(jogadores, (jogv) => jogv.side === 'casa');
+            const jogadoresDer = _.filter(jogadores, (jogd) => jogd.side === 'visit');
+            let numJogs = jogadoresVit.length + jogadoresDer.length;
+    
+            iFix = 1 / (jogadoresVit.length + jogadoresDer.length);
+    
+            // Jogadores vitoriosos atualizados primeiro
+            jogadoresVit.forEach((jogador) => {
+                dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
+                    dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
+                        vitorias: (parseInt(snapshot.val().vitorias, 10) + 1).toString(),
+                        jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
+                    })
+                    .then(() => {
+                        i += iFix;
+                        numJogs--;
+    
+                        store.dispatch({
+                            type: 'modifica_endgamemodalperc_gerenciar',
+                            payload: roundTo(i, 2)
+                        });
+    
+                        if (numJogs <= 0) {
+                            setTimeout(() => 
+                            changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
+                        }
+                    })
+                    .catch(() => {
+                        Toast.show(
+                            'Falha ao contabilizar dados. Verifique a conexão.',
+                                Toast.SHORT
+                        );
+                        closeEndGameModal(store);
                     });
-
-                    if (numJogs <= 0) {
-                        setTimeout(() => 
-                        changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
-                    }
-                })
-                .catch(() => {
-                    Toast.show(
-                        'Falha ao contabilizar dados. Verifique a conexão.',
-                            Toast.SHORT
-                    );
-                    closeEndGameModal(store);
                 });
             });
-        });
-
-        // Jogadores vitoriosos atualizados primeiro
-        jogadoresDer.forEach((jogador) => {
-            dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
-                dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
-                    derrotas: (parseInt(snapshot.val().derrotas, 10) + 1).toString(),
-                    jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
-                })
-                .then(() => {
-                    i += iFix;
-                    numJogs--;
-
-                    store.dispatch({
-                        type: 'modifica_endgamemodalperc_gerenciar',
-                        payload: roundTo(i, 2)
+    
+            // Jogadores vitoriosos atualizados primeiro
+            jogadoresDer.forEach((jogador) => {
+                dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
+                    dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
+                        derrotas: (parseInt(snapshot.val().derrotas, 10) + 1).toString(),
+                        jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
+                    })
+                    .then(() => {
+                        i += iFix;
+                        numJogs--;
+    
+                        store.dispatch({
+                            type: 'modifica_endgamemodalperc_gerenciar',
+                            payload: roundTo(i, 2)
+                        });
+    
+                        if (numJogs <= 0) {
+                            setTimeout(() => 
+                            changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
+                        }
+                    })
+                    .catch(() => {
+                        Toast.show(
+                            'Falha ao contabilizar dados. Verifique a conexão.',
+                                Toast.SHORT
+                        );
+                        closeEndGameModal(store);
                     });
-
-                    if (numJogs <= 0) {
-                        setTimeout(() => 
-                        changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
-                    }
-                })
-                .catch(() => {
-                    Toast.show(
-                        'Falha ao contabilizar dados. Verifique a conexão.',
-                            Toast.SHORT
-                    );
-                    closeEndGameModal(store);
                 });
             });
-        });
-    } else if (placarVisit > placarCasa) {
-        const jogadoresVit = _.filter(jogadores, (jogv) => jogv.side === 'visit');
-        const jogadoresDer = _.filter(jogadores, (jogd) => jogd.side === 'casa');
-        let numJogs = jogadoresVit.length + jogadoresDer.length;
-
-        iFix = 1 / (jogadoresVit.length + jogadoresDer.length);
-
-        // Jogadores vitoriosos atualizados primeiro
-        jogadoresVit.forEach((jogador) => {
-            dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
-                dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
-                    vitorias: (parseInt(snapshot.val().vitorias, 10) + 1).toString(),
-                    jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
-                })
-                .then(() => {
-                    i += iFix;
-                    numJogs--;
-
-                    store.dispatch({
-                        type: 'modifica_endgamemodalperc_gerenciar',
-                        payload: roundTo(i, 2)
+        } else if (placarVisit > placarCasa) {
+            const jogadoresVit = _.filter(jogadores, (jogv) => jogv.side === 'visit');
+            const jogadoresDer = _.filter(jogadores, (jogd) => jogd.side === 'casa');
+            let numJogs = jogadoresVit.length + jogadoresDer.length;
+    
+            iFix = 1 / (jogadoresVit.length + jogadoresDer.length);
+    
+            // Jogadores vitoriosos atualizados primeiro
+            jogadoresVit.forEach((jogador) => {
+                dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
+                    dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
+                        vitorias: (parseInt(snapshot.val().vitorias, 10) + 1).toString(),
+                        jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
+                    })
+                    .then(() => {
+                        i += iFix;
+                        numJogs--;
+    
+                        store.dispatch({
+                            type: 'modifica_endgamemodalperc_gerenciar',
+                            payload: roundTo(i, 2)
+                        });
+    
+                        if (numJogs <= 0) {
+                            setTimeout(() => 
+                            changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
+                        }
+                    })
+                    .catch(() => {
+                        Toast.show(
+                            'Falha ao contabilizar dados. Verifique a conexão.',
+                                Toast.SHORT
+                        );
+                        closeEndGameModal(store);
                     });
-
-                    if (numJogs <= 0) {
-                        setTimeout(() => 
-                        changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
-                    }
-                })
-                .catch(() => {
-                    Toast.show(
-                        'Falha ao contabilizar dados. Verifique a conexão.',
-                            Toast.SHORT
-                    );
-                    closeEndGameModal(store);
                 });
             });
-        });
-
-        // Jogadores vitoriosos atualizados primeiro
-        jogadoresDer.forEach((jogador) => {
-            dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
-                dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
-                    derrotas: (parseInt(snapshot.val().derrotas, 10) + 1).toString(),
-                    jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
-                })
-                .then(() => {
-                    i += iFix;
-                    numJogs--;
-
-                    store.dispatch({
-                        type: 'modifica_endgamemodalperc_gerenciar',
-                        payload: roundTo(i, 2)
+    
+            // Jogadores vitoriosos atualizados primeiro
+            jogadoresDer.forEach((jogador) => {
+                dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
+                    dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
+                        derrotas: (parseInt(snapshot.val().derrotas, 10) + 1).toString(),
+                        jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
+                    })
+                    .then(() => {
+                        i += iFix;
+                        numJogs--;
+    
+                        store.dispatch({
+                            type: 'modifica_endgamemodalperc_gerenciar',
+                            payload: roundTo(i, 2)
+                        });
+    
+                        if (numJogs <= 0) {
+                            setTimeout(() => 
+                            changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
+                        }
+                    })
+                    .catch(() => {
+                        Toast.show(
+                            'Falha ao contabilizar dados. Verifique a conexão.',
+                                Toast.SHORT
+                        );
+                        closeEndGameModal(store);
                     });
-
-                    if (numJogs <= 0) {
-                        setTimeout(() => 
-                        changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
-                    }
-                })
-                .catch(() => {
-                    Toast.show(
-                        'Falha ao contabilizar dados. Verifique a conexão.',
-                            Toast.SHORT
-                    );
-                    closeEndGameModal(store);
                 });
             });
-        });
-    } else {
-        iFix = 1 / jogadores.length;
-        let numJogs = jogadores.length;
-
-        jogadores.forEach((jogador) => {
-            dbFirebaseRef.child(`usuarios/${jogador.key}`)
-            .once('value', (snapshot) => {
-                dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
-                    empates: (parseInt(snapshot.val().empates, 10) + 1).toString(),
-                    jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
-                })
-                .then(() => {
-                    i += iFix;
-                    numJogs--;
-
-                    store.dispatch({
-                        type: 'modifica_endgamemodalperc_gerenciar',
-                        payload: roundTo(i, 2)
+        } else {
+            iFix = 1 / jogadores.length;
+            let numJogs = jogadores.length;
+    
+            jogadores.forEach((jogador) => {
+                dbFirebaseRef.child(`usuarios/${jogador.key}`)
+                .once('value', (snapshot) => {
+                    dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
+                        empates: (parseInt(snapshot.val().empates, 10) + 1).toString(),
+                        jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
+                    })
+                    .then(() => {
+                        i += iFix;
+                        numJogs--;
+    
+                        store.dispatch({
+                            type: 'modifica_endgamemodalperc_gerenciar',
+                            payload: roundTo(i, 2)
+                        });
+    
+                        if (numJogs <= 0) {
+                            setTimeout(() => 
+                            changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
+                        }
+                    })
+                    .catch(() => {
+                        Toast.show(
+                            'Falha ao contabilizar dados. Verifique a conexão.',
+                                Toast.SHORT
+                        );
+                        closeEndGameModal(store);
                     });
-
-                    if (numJogs <= 0) {
-                        setTimeout(() => 
-                        changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
-                    }
-                })
-                .catch(() => {
-                    Toast.show(
-                        'Falha ao contabilizar dados. Verifique a conexão.',
-                            Toast.SHORT
-                    );
-                    closeEndGameModal(store);
-                });
-            });  
-        });
-    }
+                });  
+            });
+        }
+    }, 500);
 };
 
 const closeEndGameModal = (store) => {

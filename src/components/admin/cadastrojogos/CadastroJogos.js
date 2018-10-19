@@ -219,7 +219,11 @@ class CadastroJogos extends React.Component {
                     autoCapitalize={'none'}
                     autoCorrect={false}
                     clearIcon={!!this.props.filterStr}
-                    showLoadingIcon={this.props.filterLoad}
+                    showLoadingIcon={
+                        this.props.listJogos &&
+                        this.props.listJogos.length > 0 && 
+                        this.props.filterLoad
+                    }
                     containerStyle={{ 
                         backgroundColor: 'transparent',
                         borderTopWidth: 0, 

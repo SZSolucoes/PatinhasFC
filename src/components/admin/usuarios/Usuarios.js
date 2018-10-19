@@ -236,7 +236,11 @@ class Usuarios extends React.Component {
                     autoCapitalize={'none'}
                     autoCorrect={false}
                     clearIcon={!!this.props.filterStr}
-                    showLoadingIcon={this.props.filterLoad}
+                    showLoadingIcon={
+                        this.props.listUsuarios &&
+                        this.props.listUsuarios.length > 0 && 
+                        this.props.filterLoad
+                    }
                     containerStyle={{ 
                         backgroundColor: 'transparent',
                         borderTopWidth: 0, 

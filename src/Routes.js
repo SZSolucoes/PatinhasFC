@@ -30,6 +30,9 @@ import Escalacao from './components/core/escalacao/Escalacao';
 import EscalacaoG from './components/admin/gerenciar/EscalacaoG';
 import Informativos from './components/informativos/Informativos';
 import Profile from './components/profile/Profile';
+import Notifications from './components/profile/Notifications';
+import EditPerfil from './components/profile/EditPerfil';
+import Preferencias from './components/profile/Preferencias';
 import Admin from './components/admin/Admin';
 import CadastroJogos from './components/admin/cadastrojogos/CadastroJogos';
 import Usuarios from './components/admin/usuarios/Usuarios';
@@ -255,15 +258,7 @@ class Routes extends React.Component {
                                 },
                                 { 
                                     text: 'Ok', 
-                                    onPress: () => {
-                                        store.dispatch({
-                                            type: 'modifica_endgamemodal_gerenciar',
-                                            payload: true
-                                        });
-                                        setTimeout(() =>
-                                            doEndGame(jogo, store, firebase, Actions, Toast)
-                                        , 500);
-                                    }
+                                    onPress: () => doEndGame(jogo, store, firebase, Actions, Toast)
                                 }
                             ]
                         );
@@ -550,6 +545,33 @@ class Routes extends React.Component {
                         key={'historico'}
                         title={'Histórico de Jogos'} 
                         component={Historico}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'profileNotifiations'}
+                        title={'Notificações'} 
+                        component={Notifications}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'profileEditPerfil'}
+                        title={'Editar Perfil'} 
+                        component={EditPerfil}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'profilePreferencias'}
+                        title={'Preferências'}
+                        component={Preferencias}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}

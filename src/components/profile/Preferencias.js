@@ -198,7 +198,7 @@ class Profile extends React.Component {
                             title={'Notificações'}
                             leftIcon={{ name: 'bell', type: 'material-community' }}
                             onPress={() => this.checkConInfo(
-                                () => Actions.profileNotifiations()
+                                () => Actions.userNotifiations()
                             )}
                         />
                         <ListItem
@@ -206,7 +206,7 @@ class Profile extends React.Component {
                             title={'Editar Perfil'}
                             leftIcon={{ name: 'account', type: 'material-community' }}
                             onPress={() => this.checkConInfo(
-                                () => Actions.profileEditPerfil()
+                                () => showAlertDesenv()
                             )}
                         />
                         <ListItem
@@ -214,7 +214,7 @@ class Profile extends React.Component {
                             title={'Preferências'}
                             leftIcon={{ name: 'settings', type: 'material-community' }}
                             onPress={() => this.checkConInfo(
-                                () => Actions.profilePreferencias()
+                                () => showAlertDesenv()
                             )}
                         />
                     </List>

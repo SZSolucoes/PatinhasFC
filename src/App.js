@@ -130,7 +130,16 @@ class App extends React.Component {
             }
         });
 
-        FCM.subscribeToTopic('all');
+        AsyncStorage.getItem('notifAllTopicEnabled').then((enabled) => {
+            if (enabled && enabled === 'true') {
+                FCM.subscribeToTopic('all');
+            } else if (enabled && enabled === 'false') {
+                FCM.unsubscribeFromTopic('all');
+            } else {
+                FCM.subscribeToTopic('all');
+                setTimeout(() => AsyncStorage.setItem('notifAllTopicEnabled', 'true'), 500);
+            }
+        });
     }
 
     onNetInfoChanged(conInfo) {

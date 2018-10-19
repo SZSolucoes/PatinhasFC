@@ -236,7 +236,11 @@ class PlayersModal extends React.Component {
                                             autoCapitalize={'none'}
                                             autoCorrect={false}
                                             clearIcon={!!this.props.filterModalStr}
-                                            showLoadingIcon={this.props.filterModalLoad}
+                                            showLoadingIcon={
+                                                this.props.listUsuarios &&
+                                                this.props.listUsuarios.length > 0 && 
+                                                this.props.filterModalLoad
+                                            }
                                             containerStyle={{ 
                                                 backgroundColor: 'transparent',
                                                 borderTopWidth: 0, 

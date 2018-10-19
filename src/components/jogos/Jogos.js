@@ -542,7 +542,11 @@ class Jogos extends React.Component {
                                         onFocus={() => this.props.modificaAnimatedHeigth(1)}
                                         onBlur={() => this.props.modificaAnimatedHeigth(false)}
                                         clearIcon={!!this.props.filterStr}
-                                        showLoadingIcon={this.props.filterLoad}
+                                        showLoadingIcon={
+                                            this.props.listJogos &&
+                                            this.props.listJogos.length > 0 && 
+                                            this.props.filterLoad
+                                        }
                                         containerStyle={{ 
                                             backgroundColor: 'transparent',
                                             borderTopWidth: 0, 
