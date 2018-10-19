@@ -88,7 +88,8 @@ const onLoginSuccess = (dispatch, params) => {
                 faltas: '0',
                 cartoesAmarelos: '0',
                 cartoesVermelhos: '0',
-                posicao: ''
+                posicao: '',
+                userNotifToken: ''
             };
 
             dbUsuarioRef.set({ ...usuarioLogged })

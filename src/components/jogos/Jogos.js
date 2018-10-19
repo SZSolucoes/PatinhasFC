@@ -11,7 +11,8 @@ import {
     TouchableWithoutFeedback,
     FlatList,
     ActivityIndicator,
-    Dimensions
+    Dimensions,
+    AsyncStorage
 } from 'react-native';
 import _ from 'lodash';
 import b64 from 'base-64';
@@ -88,15 +89,26 @@ class Jogos extends React.Component {
 
     componentDidMount() {
         this.startOrStopFBJogosListener(true);
-        const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
-        firebase
-        .database()
-        .ref()
-        .child(`usuarios/${b64.encode(this.props.username)}`).update({
-            dataHoraUltimoLogin: dataAtual
-        })
-        .then(() => true)
-        .catch(() => true);
+        
+        AsyncStorage.getItem('userNotifToken').then((userNotifToken) => {
+            const dbFbRef = firebase.database().ref();
+            const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
+            if (userNotifToken) {
+                dbFbRef.child(`usuarios/${b64.encode(this.props.username)}`).update({
+                    dataHoraUltimoLogin: dataAtual,
+                    userNotifToken
+                })
+                .then(() => true)
+                .catch(() => true);
+            } else {
+                dbFbRef.child(`usuarios/${b64.encode(this.props.username)}`).update({
+                    dataHoraUltimoLogin: dataAtual
+                })
+                .then(() => true)
+                .catch(() => true);
+            }
+        });
+        
         Dimensions.addEventListener('change', this.onChangeDimensions);
     }
 

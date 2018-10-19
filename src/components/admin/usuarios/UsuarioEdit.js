@@ -139,7 +139,8 @@ class UsuarioEdit extends React.Component {
                     faltas: '0',
                     cartoesAmarelos: '0',
                     cartoesVermelhos: '0',
-                    posicao: ''
+                    posicao: '',
+                    userNotifToken: ''
                 };
                 dbUsuariosRef.set({ ...newUser })
                 .then(() => {

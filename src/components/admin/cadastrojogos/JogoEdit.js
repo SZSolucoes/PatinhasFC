@@ -26,6 +26,7 @@ import DatePicker from 'react-native-datepicker';
 import firebase from '../../../Firebase';
 import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
+import { sendCadJogoPushNotifForAll } from '../../../utils/fcmPushNotifications';
 
 class JogoEdit extends React.Component {
 
@@ -201,6 +202,7 @@ class JogoEdit extends React.Component {
                     if (keyItem) {
                         showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');    
                     } else {
+                        sendCadJogoPushNotifForAll(titulo);
                         showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
                     }
                     global.XMLHttpRequest = glbXMLHttpRequest;
@@ -270,6 +272,7 @@ class JogoEdit extends React.Component {
                     endStatus: '0'
                 })
                 .then(() => {
+                    sendCadJogoPushNotifForAll(titulo);
                     this.setState({ loading: false, isTitValid: false });
                     showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
                 })
