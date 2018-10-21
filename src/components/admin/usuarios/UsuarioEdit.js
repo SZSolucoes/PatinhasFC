@@ -10,7 +10,6 @@ import {
     ActionSheetIOS
 } from 'react-native';
 
-import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { 
     FormLabel, 
@@ -27,6 +26,7 @@ import DatePicker from 'react-native-datepicker';
 import firebase from '../../../Firebase';
 import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
+import { checkConInfo } from '../../../utils/jogosUtils';
 
 class UsuarioEdit extends React.Component {
 
@@ -48,7 +48,6 @@ class UsuarioEdit extends React.Component {
         };
 
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
-        this.checkConInfo = this.checkConInfo.bind(this);
     }
 
     onPressConfirmar() {
@@ -184,17 +183,6 @@ class UsuarioEdit extends React.Component {
         }
     }
 
-    checkConInfo(funExec) {
-        if (this.props.conInfo.type === 'none' ||
-            this.props.conInfo.type === 'unknown'
-        ) {
-            Toast.show('Sem conexão.', Toast.SHORT);
-            return false;
-        }
-
-        return funExec();
-    }
-    
     render() {
         return (
             <View>
@@ -411,7 +399,7 @@ class UsuarioEdit extends React.Component {
                         loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                         title={this.state.loading ? ' ' : 'Confirmar'} 
                         buttonStyle={{ width: '100%', marginTop: 30 }}
-                        onPress={() => this.checkConInfo(() => this.onPressConfirmar())}
+                        onPress={() => checkConInfo(() => this.onPressConfirmar())}
                     />
                     <Button 
                         small
@@ -488,8 +476,7 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = (state) => ({
-    conInfo: state.LoginReducer.conInfo
+const mapStateToProps = () => ({
 });
 
 export default connect(mapStateToProps, {})(UsuarioEdit);

@@ -35,7 +35,6 @@ class PlayersModal extends React.Component {
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.onChoosePlayer = this.onChoosePlayer.bind(this);
-        this.checkConInfo = this.checkConInfo.bind(this);
 
         this.state = {
             fadeAnimValue: new Animated.Value(0)
@@ -70,17 +69,6 @@ class PlayersModal extends React.Component {
                 (usuario.tipoPerfil && usuario.tipoPerfil.toLowerCase().includes(lowerFilter)) ||
                 (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter))
         ));
-    }
-
-    checkConInfo(funExec) {
-        if (this.props.conInfo.type === 'none' ||
-            this.props.conInfo.type === 'unknown'
-        ) {
-            Toast.show('Sem conexão.', Toast.SHORT);
-            return false;
-        }
-
-        return funExec();
     }
 
     closeModal() {
@@ -292,8 +280,7 @@ const mapStateToProps = (state) => ({
     listUsuarios: state.UsuariosReducer.listUsuarios,
     filterModalStr: state.GerenciarReducer.filterModalStr,
     filterModalLoad: state.GerenciarReducer.filterModalLoad,
-    jogador: state.GerenciarReducer.jogador,
-    conInfo: state.LoginReducer.conInfo
+    jogador: state.GerenciarReducer.jogador
 });
 
 export default connect(mapStateToProps, { 

@@ -7,7 +7,6 @@ import {
     Text
 } from 'react-native';
 
-import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { 
     Card, 
@@ -20,6 +19,7 @@ import _ from 'lodash';
 import ModalDropdown from 'react-native-modal-dropdown';
 import { colorAppS, colorAppF } from '../../../utils/constantes';
 import { showAlert } from '../../../utils/store';
+import { checkConInfo } from '../../../utils/jogosUtils';
 import Versus from '../../jogos/Versus';
 import JogoEdit from './JogoEdit';
 import { modificaItemSelected } from '../../../actions/JogosActions';
@@ -60,7 +60,6 @@ class CadastroJogos extends React.Component {
         this.renderListJogosEdit = this.renderListJogosEdit.bind(this);
         this.onFilterJogosEdit = this.onFilterJogosEdit.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
-        this.checkConInfo = this.checkConInfo.bind(this);
     }
     
     componentWillUnmount() {
@@ -85,17 +84,6 @@ class CadastroJogos extends React.Component {
                 (jogo.data && jogo.data.toLowerCase().includes(lowerFilter)) ||
                 `${jogo.placarCasa}x${jogo.placarVisit}`.includes(lowerFilter)
         ));
-    }
-
-    checkConInfo(funExec) {
-        if (this.props.conInfo.type === 'none' ||
-            this.props.conInfo.type === 'unknown'
-        ) {
-            Toast.show('Sem conexão.', Toast.SHORT);
-            return false;
-        }
-
-        return funExec();
     }
 
     renderListJogosEdit(jogos) {
@@ -174,7 +162,7 @@ class CadastroJogos extends React.Component {
                                 }}
                             >
                                 <TouchableOpacity
-                                    onPress={() => this.checkConInfo(
+                                    onPress={() => checkConInfo(
                                         () => this.onPressEditRemove(item)
                                     )}
                                 >

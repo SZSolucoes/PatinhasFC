@@ -7,7 +7,6 @@ import {
     Text
 } from 'react-native';
 
-import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { 
     Card, 
@@ -22,6 +21,7 @@ import InfoEdit from './InfoEdit';
 
 import { colorAppS, colorAppF } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
+import { checkConInfo } from '../../../utils/jogosUtils';
 import { showAlert } from '../../../utils/store';
 import { limitDotText } from '../../../utils/strComplex';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
@@ -62,7 +62,6 @@ class Info extends React.Component {
         this.onFilterInfosEdit = this.onFilterInfosEdit.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.renderIcons = this.renderIcons.bind(this);
-        this.checkConInfo = this.checkConInfo.bind(this);
     }
 
     componentWillUnmount() {
@@ -89,17 +88,6 @@ class Info extends React.Component {
                 (usuario.textArticle && usuario.textArticle.toLowerCase().includes(lowerFilter)) ||
                 (usuario.dataPost && usuario.dataPost.toLowerCase().includes(lowerFilter))
         ));
-    }
-
-    checkConInfo(funExec) {
-        if (this.props.conInfo.type === 'none' ||
-            this.props.conInfo.type === 'unknown'
-        ) {
-            Toast.show('Sem conexão.', Toast.SHORT);
-            return false;
-        }
-
-        return funExec();
     }
 
     renderIcons(item) {
@@ -147,7 +135,7 @@ class Info extends React.Component {
                     }}
                 >
                     <TouchableOpacity
-                        onPress={() => this.checkConInfo(
+                        onPress={() => checkConInfo(
                             () => this.onPressEditRemove(item)
                         )}
                     >

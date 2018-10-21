@@ -137,7 +137,7 @@ class Jogos extends React.Component {
 
     onPressCardGame(item) {
         this.props.modificaJogoSelected(item.key);
-        Actions.jogoTabBar({ onBack: () => Actions.replace('mainTabBar') });
+        Actions.jogoTabBar({ onBack: () => Actions.popTo('_jogos') });
     }
 
     onPressConfirmP(item, b64UserKey) {
@@ -301,7 +301,16 @@ class Jogos extends React.Component {
                             (usuario) => usuario.key && usuario.key === b64UserKey) !== -1 ?
                             (
                                 <TouchableOpacity
-                                    onPress={() => this.onPressRemoveP(item, b64UserKey)}
+                                    onPress={() => {
+                                        if (this.props.conInfo.type === 'none' ||
+                                            this.props.conInfo.type === 'unknown'
+                                        ) {
+                                            Toast.show('Sem conexão.', Toast.SHORT);
+                                            return false;
+                                        }
+                                        
+                                        return this.onPressRemoveP(item, b64UserKey);
+                                    }}
                                 >
                                     <View
                                         style={{
@@ -329,7 +338,16 @@ class Jogos extends React.Component {
                             :
                             (
                                 <TouchableOpacity
-                                    onPress={() => this.onPressConfirmP(item, b64UserKey)}
+                                    onPress={() => {
+                                        if (this.props.conInfo.type === 'none' ||
+                                            this.props.conInfo.type === 'unknown'
+                                        ) {
+                                            Toast.show('Sem conexão.', Toast.SHORT);
+                                            return false;
+                                        }
+                                        
+                                        return this.onPressConfirmP(item, b64UserKey);
+                                    }}
                                 >
                                     <View
                                         style={{
@@ -378,16 +396,7 @@ class Jogos extends React.Component {
             <View>
                 <TouchableOpacity
                     activeOpacity={0.5}
-                    onPress={() => {
-                        if (this.props.conInfo.type === 'none' ||
-                            this.props.conInfo.type === 'unknown'
-                        ) {
-                            Toast.show('Sem conexão.', Toast.SHORT);
-                            return false;
-                        }
-
-                        return this.onPressCardGame(item);
-                    }}
+                    onPress={() => this.onPressCardGame(item)}
                 >
                     <Card 
                         title={titulo} 

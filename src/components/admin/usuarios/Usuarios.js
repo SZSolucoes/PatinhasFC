@@ -9,7 +9,6 @@ import {
     Platform
 } from 'react-native';
 
-import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { 
     Card, 
@@ -25,6 +24,7 @@ import b64 from 'base-64';
 import ModalDropdown from 'react-native-modal-dropdown';
 import { colorAppS, colorAppF } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
+import { checkConInfo } from '../../../utils/jogosUtils';
 import { showAlert } from '../../../utils/store';
 import UsuarioEdit from './UsuarioEdit';
 import {
@@ -64,7 +64,6 @@ class Usuarios extends React.Component {
         this.onFilterUsuariosEdit = this.onFilterUsuariosEdit.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.renderIcons = this.renderIcons.bind(this);
-        this.checkConInfo = this.checkConInfo.bind(this);
     }
 
     componentWillUnmount() {
@@ -94,17 +93,6 @@ class Usuarios extends React.Component {
                 (usuario.tipoPerfil && usuario.tipoPerfil.toLowerCase().includes(lowerFilter)) ||
                 (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter))
         ));
-    }
-
-    checkConInfo(funExec) {
-        if (this.props.conInfo.type === 'none' ||
-            this.props.conInfo.type === 'unknown'
-        ) {
-            Toast.show('Sem conexão.', Toast.SHORT);
-            return false;
-        }
-
-        return funExec();
     }
 
     renderIcons(item) {
@@ -157,7 +145,7 @@ class Usuarios extends React.Component {
                             <Switch 
                                 value={item.userDisabled === 'false'}
                                 onValueChange={
-                                    () => this.checkConInfo(() => this.onPressEditRemove(item))
+                                    () => checkConInfo(() => this.onPressEditRemove(item))
                                 }
                             />
                         )
@@ -166,7 +154,7 @@ class Usuarios extends React.Component {
                             <Switch 
                                 value={item.userDisabled === 'false'}
                                 onValueChange={
-                                    () => this.checkConInfo(() => this.onPressEditRemove(item))
+                                    () => checkConInfo(() => this.onPressEditRemove(item))
                                 }
                                 style={{ transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }] }}
                             />
@@ -467,8 +455,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => ({
     listUsuarios: state.UsuariosReducer.listUsuarios,
     filterStr: state.UsuariosReducer.filterStr,
-    filterLoad: state.UsuariosReducer.filterLoad,
-    conInfo: state.LoginReducer.conInfo
+    filterLoad: state.UsuariosReducer.filterLoad
 });
 
 export default connect(mapStateToProps, {

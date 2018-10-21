@@ -1,6 +1,8 @@
 import _ from 'lodash';
+import Toast from 'react-native-simple-toast';
 import { Alert } from 'react-native';
 import { roundTo } from './numComplex';
+import { store } from '../App';
 
 const deParaPos = {
     go: { name: 'Goleiro', index: 0 },
@@ -29,7 +31,7 @@ const deParaPos = {
 export const getPosName = (posvalue) => deParaPos[posvalue].name;
 export const getPosIndex = (posvalue) => deParaPos[posvalue].index;
 
-export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
+export const doEndGame = (jogo, firebase, Actions) => {
     const dbFirebaseRef = firebase.database().ref();
     const placarCasa = parseInt(jogo.placarCasa, 10);
     const placarVisit = parseInt(jogo.placarVisit, 10);
@@ -88,7 +90,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
+                            changeStsEndGame(jogo, firebase, Actions), 2000);
                         }
                     })
                     .catch(() => {
@@ -96,7 +98,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
                             'Falha ao contabilizar dados. Verifique a conexão.',
                                 Toast.SHORT
                         );
-                        closeEndGameModal(store);
+                        closeEndGameModal();
                     });
                 });
             });
@@ -119,7 +121,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
+                            changeStsEndGame(jogo, firebase, Actions), 2000);
                         }
                     })
                     .catch(() => {
@@ -127,7 +129,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
                             'Falha ao contabilizar dados. Verifique a conexão.',
                                 Toast.SHORT
                         );
-                        closeEndGameModal(store);
+                        closeEndGameModal();
                     });
                 });
             });
@@ -156,7 +158,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
+                            changeStsEndGame(jogo, firebase, Actions), 2000);
                         }
                     })
                     .catch(() => {
@@ -164,7 +166,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
                             'Falha ao contabilizar dados. Verifique a conexão.',
                                 Toast.SHORT
                         );
-                        closeEndGameModal(store);
+                        closeEndGameModal();
                     });
                 });
             });
@@ -187,7 +189,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
+                            changeStsEndGame(jogo, firebase, Actions), 2000);
                         }
                     })
                     .catch(() => {
@@ -195,7 +197,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
                             'Falha ao contabilizar dados. Verifique a conexão.',
                                 Toast.SHORT
                         );
-                        closeEndGameModal(store);
+                        closeEndGameModal();
                     });
                 });
             });
@@ -221,7 +223,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, store, firebase, Actions, Toast), 2000);
+                            changeStsEndGame(jogo, firebase, Actions), 2000);
                         }
                     })
                     .catch(() => {
@@ -229,7 +231,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
                             'Falha ao contabilizar dados. Verifique a conexão.',
                                 Toast.SHORT
                         );
-                        closeEndGameModal(store);
+                        closeEndGameModal();
                     });
                 });  
             });
@@ -237,7 +239,7 @@ export const doEndGame = (jogo, store, firebase, Actions, Toast) => {
     }, 500);
 };
 
-const closeEndGameModal = (store) => {
+const closeEndGameModal = () => {
     store.dispatch({
         type: 'modifica_endgamemodal_gerenciar',
         payload: false
@@ -248,14 +250,14 @@ const closeEndGameModal = (store) => {
     });
 };
 
-const changeStsEndGame = (jogo, store, firebase, Actions, Toast) => {
+const changeStsEndGame = (jogo, firebase, Actions) => {
     const dbFirebaseRef = firebase.database().ref();
 
     dbFirebaseRef.child(`jogos/${jogo.key}`).update({
         endStatus: '1'
     })
     .then(() => {
-        closeEndGameModal(store);
+        closeEndGameModal();
         Actions.popTo('gerenciar');
         Toast.show(
             'Jogo finalizado.',
@@ -263,11 +265,22 @@ const changeStsEndGame = (jogo, store, firebase, Actions, Toast) => {
         );
     })
     .catch(() => {
-        closeEndGameModal(store);
+        closeEndGameModal();
         Toast.show(
             'Falha ao finalizar jogo. Verifique a conexão.',
                 Toast.SHORT
         );
     });
 };
+
+export const checkConInfo = (funExec = () => true, params = []) => {
+    const conInfo = store.getState().LoginReducer.conInfo;
+    if (conInfo.type === 'none' || conInfo.type === 'unknown'
+    ) {
+        Toast.show('Sem conexão.', Toast.SHORT);
+        return false;
+    }
+
+    return funExec(...params);
+}
 

@@ -118,6 +118,29 @@ class Routes extends React.Component {
                 type: 'modifica_showimageview_info',
                 payload: false
             });
+
+            if (!('_'.includes(Actions.currentScene[0]))) {
+                Actions.pop();
+                return true;
+            }
+    
+            if (
+                Actions.currentScene.includes('jogo') || 
+                Actions.currentScene.includes('escalacao')
+            ) {
+                if ('|_jogoTab|_escalacaoTab|'.includes(Actions.currentScene)) {
+                    Actions.popTo('_jogos');
+                    return true;
+                }
+                if ('|_jogoTabG|_escalacaoTabG|'.includes(Actions.currentScene)) {
+                    Actions.popTo('gerenciar');
+                    return true;
+                }
+                if ('|_jogoTabH|_escalacaoTabH|'.includes(Actions.currentScene)) {
+                    Actions.popTo('historico');
+                    return true;
+                }
+            }
             
             return true;
         });
@@ -147,6 +170,29 @@ class Routes extends React.Component {
             payload: false
         });
 
+        if (!('_'.includes(Actions.currentScene[0]))) {
+            Actions.pop();
+            return true;
+        }
+
+        if (
+            Actions.currentScene.includes('jogo') || 
+            Actions.currentScene.includes('escalacao')
+        ) {
+            if ('|_jogoTab|_escalacaoTab|'.includes(Actions.currentScene)) {
+                Actions.popTo('_jogos');
+                return true;
+            }
+            if ('|_jogoTabG|_escalacaoTabG|'.includes(Actions.currentScene)) {
+                Actions.popTo('gerenciar');
+                return true;
+            }
+            if ('|_jogoTabH|_escalacaoTabH|'.includes(Actions.currentScene)) {
+                Actions.popTo('historico');
+                return true;
+            }
+        }
+
         return true;
     }
 
@@ -165,7 +211,10 @@ class Routes extends React.Component {
             ).start();
         } else {
             const isComentUp = store.getState().InfoReducer.startUpOrDownAnim === 'up';
-            StatusBar.setHidden(false);
+            if (!(this.state.loading || this.state.timingNotEnd)) {
+                StatusBar.setHidden(false);
+            }
+
             if (!isComentUp) {
                 this.doTabAnimation(false);
             }
@@ -258,7 +307,7 @@ class Routes extends React.Component {
                                 },
                                 { 
                                     text: 'Ok', 
-                                    onPress: () => doEndGame(jogo, store, firebase, Actions, Toast)
+                                    onPress: () => doEndGame(jogo, firebase, Actions)
                                 }
                             ]
                         );

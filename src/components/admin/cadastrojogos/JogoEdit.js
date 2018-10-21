@@ -7,7 +7,6 @@ import {
     Image
 } from 'react-native';
 
-import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import RNFetchBlob from 'rn-fetch-blob';
 import { 
@@ -26,6 +25,7 @@ import DatePicker from 'react-native-datepicker';
 import firebase from '../../../Firebase';
 import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
+import { checkConInfo } from '../../../utils/jogosUtils';
 import { sendCadJogoPushNotifForAll } from '../../../utils/fcmPushNotifications';
 
 class JogoEdit extends React.Component {
@@ -55,7 +55,6 @@ class JogoEdit extends React.Component {
         this.setImgProperties = this.setImgProperties.bind(this);
         this.clearContentImg = this.clearContentImg.bind(this);
         this.limitNomeTime = this.limitNomeTime.bind(this);
-        this.checkConInfo = this.checkConInfo.bind(this);
     }
 
     onPressSelectImg() {
@@ -298,17 +297,6 @@ class JogoEdit extends React.Component {
         this.contentType = '';
     }
 
-    checkConInfo(funExec) {
-        if (this.props.conInfo.type === 'none' ||
-            this.props.conInfo.type === 'unknown'
-        ) {
-            Toast.show('Sem conexão.', Toast.SHORT);
-            return false;
-        }
-
-        return funExec();
-    }
-
     limitNomeTime(value, type) {
         if (value.length > 16) {
             return;
@@ -487,7 +475,7 @@ class JogoEdit extends React.Component {
                     loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                     title={this.state.loading ? ' ' : 'Confirmar'} 
                     buttonStyle={{ width: '100%', marginTop: 30 }}
-                        onPress={() => this.checkConInfo(() => this.onPressConfirmar())}
+                        onPress={() => checkConInfo(() => this.onPressConfirmar())}
                 />
                 <Button 
                     small

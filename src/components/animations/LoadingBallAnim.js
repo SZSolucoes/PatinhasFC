@@ -83,7 +83,7 @@ export default class LoadingBallAnim extends React.Component {
         if (info.type === 'none' ||
             info.type === 'unknown'
         ) {
-            this.animNetView(-100, Dimensions.get('window').height / 2, 3000);
+            this.animNetView(-100, (Dimensions.get('window').height / 2) - 35, 3000);
             return false;
         }
 
@@ -106,7 +106,8 @@ export default class LoadingBallAnim extends React.Component {
         Animated.timing(this.viewAnim, {
             toValue,
             duration,
-            easing: Easing.linear
+            easing: Easing.linear,
+            useNativeDriver: true
         }).start();
     }
 
@@ -247,6 +248,7 @@ export default class LoadingBallAnim extends React.Component {
                         height: 50
                     }}
                 />
+                <View style={{ marginVertical: 15 }} />
                 <Animated.Text 
                     style={{ 
                         color: 'white',

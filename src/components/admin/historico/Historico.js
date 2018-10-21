@@ -48,7 +48,6 @@ class Historico extends React.Component {
         this.renderListJogos = this.renderListJogos.bind(this);
         this.onFilterJogos = this.onFilterJogos.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
-        this.checkConInfo = this.checkConInfo.bind(this);
         this.onPressCardGame = this.onPressCardGame.bind(this);
     }
 
@@ -89,17 +88,6 @@ class Historico extends React.Component {
         } else if (type === 'year') {
             this.setState({ yearFilter: value });
         }
-    }
-
-    checkConInfo(funExec) {
-        if (this.props.conInfo.type === 'none' ||
-            this.props.conInfo.type === 'unknown'
-        ) {
-            Toast.show('Sem conexão.', Toast.SHORT);
-            return false;
-        }
-
-        return funExec();
     }
 
     renderListJogos(jogos) {

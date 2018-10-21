@@ -7,15 +7,14 @@ import {
 
 import { connect } from 'react-redux';
 import { CheckBox } from 'react-native-elements';
-import Toast from 'react-native-simple-toast';
 import FCM from 'react-native-fcm';
+import { checkConInfo } from '../../utils/jogosUtils';
 
 class Notifications extends React.Component {
 
     constructor(props) {
         super(props);
 
-        this.checkConInfo = this.checkConInfo.bind(this);
         this.onPressCheck = this.onPressCheck.bind(this);
 
         this.state = {
@@ -47,17 +46,6 @@ class Notifications extends React.Component {
         }
     }
 
-    checkConInfo(funExec) {
-        if (this.props.conInfo.type === 'none' ||
-            this.props.conInfo.type === 'unknown'
-        ) {
-            Toast.show('Sem conexão.', Toast.SHORT);
-            return false;
-        }
-
-        return funExec();
-    }
-
     render() {
         return (
             <View style={styles.viewPrinc}>
@@ -66,7 +54,7 @@ class Notifications extends React.Component {
                     title='Notificar quando jogos são criados.'
                     iconRight
                     checked={this.state.notifAllTopicEnabled}
-                    onPress={() => this.onPressCheck('notifAllTopicEnabled')}
+                    onPress={() => checkConInfo(this.onPressCheck, ['notifAllTopicEnabled'])}
                 />
             </View>
         );

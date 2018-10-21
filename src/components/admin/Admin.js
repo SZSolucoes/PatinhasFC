@@ -8,30 +8,12 @@ import {
     TouchableOpacity
 } from 'react-native';
 
-import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Card, Icon } from 'react-native-elements';
 import { Actions } from 'react-native-router-flux';
 import { colorAppF } from '../../utils/constantes';
 
 class Admin extends React.Component {
-
-    constructor(props) {
-        super(props);
-
-        this.checkConInfo = this.checkConInfo.bind(this);
-    }
-
-    checkConInfo(funExec) {
-        if (this.props.conInfo.type === 'none' ||
-            this.props.conInfo.type === 'unknown'
-        ) {
-            Toast.show('Sem conexão.', Toast.SHORT);
-            return false;
-        }
-
-        return funExec();
-    }
 
     render() {
         return (
@@ -175,8 +157,7 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = (state) => ({
-    conInfo: state.LoginReducer.conInfo
+const mapStateToProps = () => ({
 });
 
 export default connect(mapStateToProps, {})(Admin);
