@@ -24,6 +24,7 @@ import { connect } from 'react-redux';
 import firebase from '../../Firebase';
 import { isPortrait } from '../../utils/orientation';
 import { retrieveImgSource } from '../../utils/imageStorage';
+import { checkConInfo } from '../../utils/jogosUtils';
 import { modificaStartUpOrDownAnim, modificaInfoMsgSelected } from '../../actions/InfoActions';
 import { modificaAnimatedHeigth } from '../../actions/JogosActions';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -259,7 +260,7 @@ class Coment extends React.Component {
                             <View style={{ marginLeft: 10 }}>
                                 <Text 
                                     style={{ fontWeight: 'bold', color: '#707070' }}
-                                    onPress={() => {
+                                    onPress={() => checkConInfo(() => {
                                         Alert.alert(
                                             'Remover!', 
                                             'Deseja remover o comentário selecionado ?',
@@ -271,11 +272,11 @@ class Coment extends React.Component {
                                                 },
                                                 { 
                                                     text: 'Ok', 
-                                                    onPress: () => this.removeComent(item) 
+                                                    onPress: () => this.removeComent(item)
                                                 }
                                             ]
                                         );
-                                    }}
+                                    })}
                                 >
                                     Remover
                                 </Text>
@@ -309,7 +310,7 @@ class Coment extends React.Component {
                                 />
                             </View>
                             <TouchableOpacity
-                                onPress={() => this.onPressSendMessage()}
+                                onPress={() => checkConInfo(() => this.onPressSendMessage())}
                                 style={{ 
                                     flex: 0.5,
                                     ...Platform.select({
@@ -346,7 +347,7 @@ class Coment extends React.Component {
                         />
                     </View>
                     <TouchableOpacity
-                        onPress={() => this.onPressSendMessage()}
+                        onPress={() => checkConInfo(() => this.onPressSendMessage())}
                         style={{ 
                             flex: 0.5,
                             ...Platform.select({

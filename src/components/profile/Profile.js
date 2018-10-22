@@ -17,6 +17,7 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { showAlert } from '../../utils/store';
 import { colorAppP } from '../../utils/constantes';
 import { retrieveImgSource } from '../../utils/imageStorage';
+import { checkConInfo } from '../../utils/jogosUtils';
 
 import firebase from '../../Firebase';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -29,6 +30,7 @@ class Profile extends React.Component {
 
         this.onPressLogout = this.onPressLogout.bind(this);
         this.onPressUserImg = this.onPressUserImg.bind(this);
+        this.doUploadUserImg = this.doUploadUserImg.bind(this);
 
         this.state = {
             progress: 0
@@ -53,89 +55,92 @@ class Profile extends React.Component {
             cropperCircleOverlay,
             includeBase64: true,
             mediaType: 'photo'
-          }).then(image => {
-            if (image) {
-                const metadata = {
-                    contentType: image.mime
-                };
-    
-                const storageRef = firebase.storage().ref();
-                const databaseRef = firebase.database().ref();
-    
-                const Blob = RNFetchBlob.polyfill.Blob;
-    
-                const glbXMLHttpRequest = global.XMLHttpRequest;
-                const glbBlob = global.Blob;
-    
-                let uploadBlob = null;
-    
-                global.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
-                global.Blob = Blob;
-    
-                const { userLogged, username } = this.props;
-                const imgUrl = type === 'userImg' ? userLogged.imgAvatar : userLogged.imgBackground;
-                const usuariob64 = b64.encode(username);
-                const fileName = b64.encode(new Date().getTime().toString());
-                const imgExt = image.mime.slice(image.mime.indexOf('/') + 1);
-                const imgRef = storageRef
-                    .child(`usuarios/${usuariob64}/${fileName}.${imgExt}`);
-    
-                Blob.build(image.data, { type: `${image.mime};BASE64` })
-                .then((blob) => { 
-                    uploadBlob = blob;
-                    const uploadTask = imgRef.put(blob, metadata);
-                    uploadTask.on('state_changed', (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        if (progress === 1) {
-                            this.setState({ progress: 0.85 }); 
-                        } else if (progress === 0) {
-                            this.setState({ progress: 0.10 }); 
-                        } else {
-                            this.setState({ progress }); 
-                        }
-                    });
-                    return uploadTask;
-                })
-                .then(() => {
-                    if (uploadBlob) {
-                        uploadBlob.close();
-                        uploadBlob = null;
-                    }
-                    return imgRef.getDownloadURL();
-                })
-                .then((url) => {
-                    const imgUpd = type === 'userImg' ? { imgAvatar: url } : { imgBackground: url };
-                    databaseRef.child(`usuarios/${usuariob64}`).update(imgUpd);
-                })
-                .then(() => {
-                    if (imgUrl) {
-                        firebase.storage().refFromURL(imgUrl).delete()
-                        .then(() => true)
-                        .catch(() => true);
-                    }
-                    global.XMLHttpRequest = glbXMLHttpRequest;
-                    global.Blob = glbBlob;
+          }).then(image => checkConInfo(() => this.doUploadUserImg(image, type)))
+          .catch(() => false);
+    }
 
-                    this.setState({ progress: 1 });
-                    setTimeout(() => this.setState({ progress: 0 }), 1500);
-                })
-                .catch(() => {
-                    global.XMLHttpRequest = glbXMLHttpRequest;
-                    global.Blob = glbBlob;
+    doUploadUserImg(image, type) {
+        if (image) {
+            const metadata = {
+                contentType: image.mime
+            };
 
-                    if (uploadBlob) {
-                        uploadBlob.close();
+            const storageRef = firebase.storage().ref();
+            const databaseRef = firebase.database().ref();
+
+            const Blob = RNFetchBlob.polyfill.Blob;
+
+            const glbXMLHttpRequest = global.XMLHttpRequest;
+            const glbBlob = global.Blob;
+
+            let uploadBlob = null;
+
+            global.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
+            global.Blob = Blob;
+
+            const { userLogged, username } = this.props;
+            const imgUrl = type === 'userImg' ? userLogged.imgAvatar : userLogged.imgBackground;
+            const usuariob64 = b64.encode(username);
+            const fileName = b64.encode(new Date().getTime().toString());
+            const imgExt = image.mime.slice(image.mime.indexOf('/') + 1);
+            const imgRef = storageRef
+                .child(`usuarios/${usuariob64}/${fileName}.${imgExt}`);
+
+            Blob.build(image.data, { type: `${image.mime};BASE64` })
+            .then((blob) => { 
+                uploadBlob = blob;
+                const uploadTask = imgRef.put(blob, metadata);
+                uploadTask.on('state_changed', (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    if (progress === 1) {
+                        this.setState({ progress: 0.85 }); 
+                    } else if (progress === 0) {
+                        this.setState({ progress: 0.10 }); 
+                    } else {
+                        this.setState({ progress }); 
                     }
-                    showAlert(
-                        'danger', 
-                        'Ops!', 
-                        'Falha no upload de imagem.'
-                    );
-                    this.setState({ progress: 1 });
-                    setTimeout(() => this.setState({ progress: 0 }), 1500);
-                }); 
-            }
-          }).catch(() => false);
+                });
+                return uploadTask;
+            })
+            .then(() => {
+                if (uploadBlob) {
+                    uploadBlob.close();
+                    uploadBlob = null;
+                }
+                return imgRef.getDownloadURL();
+            })
+            .then((url) => {
+                const imgUpd = type === 'userImg' ? { imgAvatar: url } : { imgBackground: url };
+                databaseRef.child(`usuarios/${usuariob64}`).update(imgUpd);
+            })
+            .then(() => {
+                if (imgUrl) {
+                    firebase.storage().refFromURL(imgUrl).delete()
+                    .then(() => true)
+                    .catch(() => true);
+                }
+                global.XMLHttpRequest = glbXMLHttpRequest;
+                global.Blob = glbBlob;
+
+                this.setState({ progress: 1 });
+                setTimeout(() => this.setState({ progress: 0 }), 1500);
+            })
+            .catch(() => {
+                global.XMLHttpRequest = glbXMLHttpRequest;
+                global.Blob = glbBlob;
+
+                if (uploadBlob) {
+                    uploadBlob.close();
+                }
+                showAlert(
+                    'danger', 
+                    'Ops!', 
+                    'Falha no upload de imagem.'
+                );
+                this.setState({ progress: 1 });
+                setTimeout(() => this.setState({ progress: 0 }), 1500);
+            }); 
+        }
     }
 
     render() {
@@ -145,11 +150,12 @@ class Profile extends React.Component {
             { uri: userLogged.imgBackground } : perfilBgUserImg;
         const username = userLogged.nome ? userLogged.nome : 'Patinhas';
         const posicao = userLogged.posicao ? userLogged.posicao : 'Técnico';
+
         return (
             <View style={styles.viewPrinc}>
                 <ParallaxScrollView
-                    onPressBackgroundImg={() => this.onPressUserImg('userBg')}
-                    onPressUserImg={() => this.onPressUserImg('userImg')}
+                    onPressBackgroundImg={() => checkConInfo(() => this.onPressUserImg('userBg'))}
+                    onPressUserImg={() => checkConInfo(() => this.onPressUserImg('userImg'))}
                     userImage={retrieveImgSource(userImg)}
                     backgroundSource={retrieveImgSource(imgBg)}
                     userName={username}

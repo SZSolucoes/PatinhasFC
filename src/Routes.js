@@ -18,7 +18,6 @@ import {
 import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-import Toast from 'react-native-simple-toast';
 
 import { isPortrait, isLandscape } from './utils/orientation';
 import AlertScl from './components/tools/AlertScl';
@@ -47,7 +46,7 @@ import { store } from './App';
 import firebase from './Firebase';
 import SplashScreenAnim from './components/animations/SplashScreenAnim';
 import AnimScene from './components/tools/AnimatedScene';
-import { doEndGame } from './utils/jogosUtils';
+import { doEndGame, checkConInfo } from './utils/jogosUtils';
 
 import imgFinishFlag from './imgs/finishflag.png';
 
@@ -284,7 +283,7 @@ class Routes extends React.Component {
                     />
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={() => {
+                    onPress={() => checkConInfo(() => {
                         const { listJogos } = store.getState().JogosReducer;
                         const { itemSelected } = store.getState().GerenciarReducer;
                         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
@@ -307,11 +306,13 @@ class Routes extends React.Component {
                                 },
                                 { 
                                     text: 'Ok', 
-                                    onPress: () => doEndGame(jogo, firebase, Actions)
+                                    onPress: () => checkConInfo(
+                                        () => doEndGame(jogo, firebase, Actions)
+                                    )
                                 }
                             ]
                         );
-                    }}
+                    })}
                 >
                     <Image
                         source={imgFinishFlag}

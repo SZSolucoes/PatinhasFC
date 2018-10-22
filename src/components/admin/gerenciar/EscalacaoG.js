@@ -23,7 +23,7 @@ import { retrieveImgSource } from '../../../utils/imageStorage';
 import Campo from '../../campo/Campo';
 import PlayersModal from './PlayersModal';
 import { isPortrait } from '../../../utils/orientation';
-import { getPosIndex } from '../../../utils/jogosUtils';
+import { getPosIndex, checkConInfo } from '../../../utils/jogosUtils';
 import { 
     modificaShowPlayersModal,
     modificaIsSubstitute,
@@ -237,7 +237,7 @@ class EscalacaoG extends React.Component {
                     }}
                 >
                     <TouchableOpacity
-                        onPress={() => {
+                        onPress={() => checkConInfo(() => {
                             Alert.alert(
                                 'Aviso',
                                 `Confirma a remoção do jogador:\n${item.nome} ?`,
@@ -248,11 +248,13 @@ class EscalacaoG extends React.Component {
                                     },
                                     { 
                                         text: 'Ok', 
-                                        onPress: () => this.doInOrOut(item, false, jogo) 
+                                        onPress: () => checkConInfo(
+                                            () => this.doInOrOut(item, false, jogo)
+                                        )
                                     },
                                 ]
                             );
-                        }}
+                        })}
                     >
                         <Icon
                             name='delete' 
@@ -487,7 +489,9 @@ class EscalacaoG extends React.Component {
                                         tatics={'4-4-2'}
                                         doInOrOut={
                                             (jogador, inOrOut) => 
-                                            this.doInOrOut(jogador, inOrOut, jogo)
+                                            checkConInfo(
+                                                () => this.doInOrOut(jogador, inOrOut, jogo)
+                                            )
                                         }
                                     />
                                 </View>
@@ -536,7 +540,9 @@ class EscalacaoG extends React.Component {
                                         tatics={'4-4-2'}
                                         doInOrOut={
                                             (jogador, inOrOut) => 
-                                            this.doInOrOut(jogador, inOrOut, jogo)
+                                            checkConInfo(
+                                                () => this.doInOrOut(jogador, inOrOut, jogo)
+                                            )
                                         }
                                         enableTouch
                                     />
@@ -554,7 +560,7 @@ class EscalacaoG extends React.Component {
                     showPlayersModal={this.props.showPlayersModal} 
                     doInOrOut={
                         (jogador, inOrOut) => 
-                        this.doInOrOut(jogador, inOrOut, jogo)
+                        checkConInfo(() => this.doInOrOut(jogador, inOrOut, jogo))
                     }
                     jogadoresCasaFt={jogadoresCasaFt}
                     jogadoresVisitFt={jogadoresVisitFt}

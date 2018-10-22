@@ -6,7 +6,6 @@ import {
     TouchableOpacity
 } from 'react-native';
 
-import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import { 

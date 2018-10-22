@@ -21,7 +21,7 @@ import PlayersModal from './PlayersModal';
 import firebase from '../../../Firebase';
 import { colorAppF, colorAppP, colorAppS, colorAppW } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
-import { getPosIndex } from '../../../utils/jogosUtils';
+import { getPosIndex, checkConInfo } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
 import { 
     modificaClean, 
@@ -69,6 +69,8 @@ class JogoG extends React.Component {
         this.onAddPressRemoveCard = this.onAddPressRemoveCard.bind(this);
         this.onConfirmManualTimer = this.onConfirmManualTimer.bind(this);
         this.onPressSubs = this.onPressSubs.bind(this);
+        this.onAddPressRemoveSubs = this.onAddPressRemoveSubs.bind(this);
+        this.onPressRemoveSubs = this.onPressRemoveSubs.bind(this);
         this.renderGolJogador = this.renderGolJogador.bind(this);
         this.renderCartaoJogador = this.renderCartaoJogador.bind(this);
         this.renderEscalados = this.renderEscalados.bind(this);
@@ -286,7 +288,7 @@ class JogoG extends React.Component {
                     },
                     { 
                         text: 'Ok', 
-                        onPress: () => {
+                        onPress: () => checkConInfo(() => {
                             this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
                                 status: '2',
                                 currentTime: '0'
@@ -304,7 +306,7 @@ class JogoG extends React.Component {
                                     Toast.SHORT
                                 )
                             );
-                        }
+                        })
                     }
                 ]
             ); 
@@ -335,7 +337,7 @@ class JogoG extends React.Component {
                 },
                 { 
                     text: 'Ok', 
-                    onPress: () => {
+                    onPress: () => checkConInfo(() => {
                         let payload = {};
                         if (jogador.side === 'casa') {
                             payload = { gols, placarCasa };
@@ -361,14 +363,14 @@ class JogoG extends React.Component {
                         .catch(() => 
                             Toast.show('Falha ao marcar o gol. Verifique a conexão.', Toast.SHORT)
                         );
-                    }
+                    })
                 }
             ]
         );
     }
 
     onAddPressRemoveGol(jogador, jogo) {
-        return () => this.onPressRemoveGol(jogador, jogo);
+        return () => checkConInfo(() => this.onPressRemoveGol(jogador, jogo));
     }
 
     onPressRemoveGol(jogador, jogo) {
@@ -398,7 +400,7 @@ class JogoG extends React.Component {
                 },
                 { 
                     text: 'Ok', 
-                    onPress: () => {
+                    onPress: () => checkConInfo(() => {
                         let payload = {};
                         if (jogador.side === 'casa') {
                             payload = { gols, placarCasa };
@@ -424,7 +426,7 @@ class JogoG extends React.Component {
                         .catch(() => 
                             Toast.show('Falha ao remover o gol. Verifique a conexão.', Toast.SHORT)
                         );
-                    }
+                    })
                 }
             ]
         );
@@ -453,7 +455,7 @@ class JogoG extends React.Component {
                 },
                 { 
                     text: 'Ok', 
-                    onPress: () => {
+                    onPress: () => checkConInfo(() => {
                         this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
                             cartoes
                         })
@@ -480,14 +482,14 @@ class JogoG extends React.Component {
                         .catch(() => 
                             Toast.show('Falha ao aplicar cartão. Verifique a conexão.', Toast.SHORT)
                         );
-                    }
+                    })
                 }
             ]
         );
     }
 
     onAddPressRemoveCard(jogador, jogo) {
-        return () => this.onPressRemoveCard(jogador, jogo);
+        return () => checkConInfo(() => this.onPressRemoveCard(jogador, jogo));
     }
 
     onPressRemoveCard(jogador, jogo) {
@@ -514,7 +516,7 @@ class JogoG extends React.Component {
                 },
                 { 
                     text: 'Ok', 
-                    onPress: () => {
+                    onPress: () => checkConInfo(() => {
                         this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
                             cartoes
                         })
@@ -541,14 +543,14 @@ class JogoG extends React.Component {
                         .catch(() => 
                             Toast.show('Falha ao remover cartão. Verifique a conexão.', Toast.SHORT)
                         );
-                    }
+                    })
                 }
             ]
         );
     }
 
     onAddPressRemoveSubs(sub, jogo) {
-        return () => this.onPressRemoveSubs(sub, jogo);
+        return () => checkConInfo(() => this.onPressRemoveSubs(sub, jogo));
     }
 
     onPressRemoveSubs(sub, jogo) {
@@ -575,7 +577,7 @@ class JogoG extends React.Component {
                 },
                 { 
                     text: 'Ok', 
-                    onPress: () => {
+                    onPress: () => checkConInfo(() => {
                         this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
                             subs
                         })
@@ -587,7 +589,7 @@ class JogoG extends React.Component {
                                 'Falha ao remover substituição. Verifique a conexão.', Toast.SHORT
                             )
                         );
-                    }
+                    })
                 }
             ]
         );
@@ -875,7 +877,9 @@ class JogoG extends React.Component {
                 >
                     <View style={[styles.centerFlex, { opacity: btnStartEnabled ? 1 : 0.5 }]}>
                         <TouchableOpacity
-                            onPress={() => this.onStartTimer(btnStartEnabled, jogo)}
+                            onPress={() => checkConInfo(
+                                () => this.onStartTimer(btnStartEnabled, jogo)
+                            )}
                         >
                             <View 
                                 style={[
@@ -899,7 +903,9 @@ class JogoG extends React.Component {
                     </View>
                     <View style={[styles.centerFlex, { opacity: btnPauseEnabled ? 1 : 0.5 }]}>
                         <TouchableOpacity
-                            onPress={() => this.onPauseTimer(btnPauseEnabled, jogo)}
+                            onPress={() => checkConInfo(
+                                () => this.onPauseTimer(btnPauseEnabled, jogo)
+                            )}
                         >
                             <View 
                                 style={[
@@ -923,7 +929,9 @@ class JogoG extends React.Component {
                     </View>
                     <View style={[styles.centerFlex, { opacity: btnResetEnabled ? 1 : 0.5 }]}>
                         <TouchableOpacity
-                            onPress={() => this.onResetTimer(btnResetEnabled, jogo)}
+                            onPress={() => checkConInfo(
+                                () => this.onResetTimer(btnResetEnabled, jogo)
+                            )}
                         >
                             <View 
                                 style={[
@@ -2452,7 +2460,9 @@ class JogoG extends React.Component {
                                 }}
                             >
                                 <TouchableOpacity
-                                    onPress={() => this.onPressPlayerGol(jogador, jogo)}
+                                    onPress={() => checkConInfo(
+                                        () => this.onPressPlayerGol(jogador, jogo)
+                                    )}
                                 >
                                     <Image 
                                         source={imgBola}
@@ -2470,7 +2480,9 @@ class JogoG extends React.Component {
                                 }}
                             >
                                 <TouchableOpacity
-                                    onPress={() => this.onPressCard(jogador, jogo, 'amarelo')}
+                                    onPress={() => checkConInfo(
+                                        () => this.onPressCard(jogador, jogo, 'amarelo')
+                                    )}
                                 >
                                     <Image 
                                         source={imgYellowCard}
@@ -2488,7 +2500,9 @@ class JogoG extends React.Component {
                                 }}
                             >
                                 <TouchableOpacity
-                                    onPress={() => this.onPressCard(jogador, jogo, 'vermelho')}
+                                    onPress={() => checkConInfo(
+                                        () => this.onPressCard(jogador, jogo, 'vermelho')
+                                    )}
                                 >
                                     <Image 
                                         source={imgRedCard}
@@ -2506,7 +2520,9 @@ class JogoG extends React.Component {
                                 }}
                             >
                                 <TouchableOpacity
-                                    onPress={() => this.onPressSubs(jogador)}
+                                    onPress={() => checkConInfo(
+                                        () => this.onPressSubs(jogador)
+                                    )}
                                 >
                                     <Image 
                                         source={imgInOut}
@@ -2560,7 +2576,7 @@ class JogoG extends React.Component {
                     showPlayersModal={this.props.showPlayersModalJ}  
                     doInOrOut={
                         (jogador, inOrOut, newJogador = false) => 
-                        this.doInOrOut(jogador, inOrOut, jogo, newJogador)
+                        checkConInfo(() => this.doInOrOut(jogador, inOrOut, jogo, newJogador))
                     }
                     jogadoresCasaFt={jogadoresCasaFt}
                     jogadoresVisitFt={jogadoresVisitFt}

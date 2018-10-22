@@ -7,7 +7,6 @@ import {
     ActivityIndicator
 } from 'react-native';
 
-import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import { 
@@ -52,15 +51,27 @@ class Historico extends React.Component {
     }
 
     componentDidMount() {
-        this.fbDatabaseRef.child('jogos')
-        .orderByChild('endStatus')
-        .equalTo('1')
-        .once('value', (snapshot) => {
-            this.props.modificaListJogos(
-                _.map(snapshot.val(), (value, key) => ({ key, ...value }))
-            );
-            this.setState({ indicatorOn: false });     
-        });
+        const { conInfo } = this.props;
+        if (conInfo) {
+            if (!(conInfo.type === 'none' || conInfo.type === 'unknown')
+            ) {
+                this.fbDatabaseRef.child('jogos')
+                .orderByChild('endStatus')
+                .equalTo('1')
+                .once('value', (snapshot) => {
+                    if (snapshot) {
+                        this.props.modificaListJogos(
+                            _.map(snapshot.val(), (value, key) => ({ key, ...value }))
+                        );
+                    }
+                    this.setState({ indicatorOn: false });     
+                });
+            } else {
+                this.setState({ indicatorOn: false });
+            }
+        } else {
+            this.setState({ indicatorOn: false });
+        }
     }
 
     componentWillUnmount() {

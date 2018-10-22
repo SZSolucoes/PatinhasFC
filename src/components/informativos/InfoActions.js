@@ -11,6 +11,7 @@ import { Icon, Divider } from 'react-native-elements';
 import _ from 'lodash';
 import b64 from 'base-64';
 import { store } from '../../App';
+import { checkConInfo } from '../../utils/jogosUtils';
 
 export default class InfoActions extends React.Component {
 
@@ -138,7 +139,9 @@ export default class InfoActions extends React.Component {
                                 }
                             ).start();
                         }}
-                        onPress={() => this.props.onPressLikeBtn(likeOrDeslike, item)}
+                        onPress={() => checkConInfo(
+                            () => this.props.onPressLikeBtn(likeOrDeslike, item)
+                        )}
                     >
                         <Animated.View 
                             style={{ 

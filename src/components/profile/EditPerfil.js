@@ -2,208 +2,233 @@ import React from 'react';
 import { 
     View, 
     StyleSheet,
-    AsyncStorage,
-    Dimensions
+    ScrollView,
+    Platform,
+    TouchableOpacity
 } from 'react-native';
+import { 
+    FormLabel, 
+    FormInput, 
+    FormValidationMessage, 
+    Card, 
+    Button, 
+    Icon
+} from 'react-native-elements';
+import DatePicker from 'react-native-datepicker';
 
 import { connect } from 'react-redux';
-import { Actions } from 'react-native-router-flux';
-import * as Progress from 'react-native-progress';
-import RNFetchBlob from 'rn-fetch-blob';
-import b64 from 'base-64';
-import { Button, List, ListItem } from 'react-native-elements';
-import ParallaxScrollView from 'react-native-parallax-scrollview';
-import ImagePicker from 'react-native-image-crop-picker';
-import { showAlert, showAlertDesenv } from '../../utils/store';
-import { colorAppP } from '../../utils/constantes';
-import { retrieveImgSource } from '../../utils/imageStorage';
+import { checkConInfo } from '../../utils/jogosUtils';
 
-import firebase from '../../Firebase';
-import perfilUserImg from '../../imgs/perfiluserimg.png';
-import perfilBgUserImg from '../../imgs/backgrounduserimg.jpg';
-
-class Profile extends React.Component {
+class EditPerfil extends React.Component {
 
     constructor(props) {
         super(props);
 
-        this.onPressLogout = this.onPressLogout.bind(this);
-        this.onPressUserImg = this.onPressUserImg.bind(this);
-
         this.state = {
-            progress: 0
+            userLogged: { ...this.props.userLogged }
         };
     }
 
-    onPressLogout() {
-        AsyncStorage.removeItem('username');
-        AsyncStorage.removeItem('password');
-
-        Actions.replace('login');
-    }
-
-    onPressUserImg(type) {
-        const width = type === 'userImg' ? 400 : 600;
-        const height = type === 'userImg' ? 400 : 400;
-        const cropperCircleOverlay = type === 'userImg';
-        ImagePicker.openPicker({
-            width,
-            height,
-            cropping: true,
-            cropperCircleOverlay,
-            includeBase64: true,
-            mediaType: 'photo'
-          }).then(image => {
-            if (image) {
-                const metadata = {
-                    contentType: image.mime
-                };
-    
-                const storageRef = firebase.storage().ref();
-                const databaseRef = firebase.database().ref();
-    
-                const Blob = RNFetchBlob.polyfill.Blob;
-    
-                const glbXMLHttpRequest = global.XMLHttpRequest;
-                const glbBlob = global.Blob;
-    
-                let uploadBlob = null;
-    
-                global.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
-                global.Blob = Blob;
-    
-                const { userLogged, username } = this.props;
-                const imgUrl = type === 'userImg' ? userLogged.imgAvatar : userLogged.imgBackground;
-                const usuariob64 = b64.encode(username);
-                const fileName = b64.encode(new Date().getTime().toString());
-                const imgExt = image.mime.slice(image.mime.indexOf('/') + 1);
-                const imgRef = storageRef
-                    .child(`usuarios/${usuariob64}/${fileName}.${imgExt}`);
-    
-                Blob.build(image.data, { type: `${image.mime};BASE64` })
-                .then((blob) => { 
-                    uploadBlob = blob;
-                    const uploadTask = imgRef.put(blob, metadata);
-                    uploadTask.on('state_changed', (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        if (progress === 1) {
-                            this.setState({ progress: 0.85 }); 
-                        } else if (progress === 0) {
-                            this.setState({ progress: 0.10 }); 
-                        } else {
-                            this.setState({ progress }); 
-                        }
-                    });
-                    return uploadTask;
-                })
-                .then(() => {
-                    if (uploadBlob) {
-                        uploadBlob.close();
-                        uploadBlob = null;
-                    }
-                    return imgRef.getDownloadURL();
-                })
-                .then((url) => {
-                    const imgUpd = type === 'userImg' ? { imgAvatar: url } : { imgBackground: url };
-                    databaseRef.child(`usuarios/${usuariob64}`).update(imgUpd);
-                })
-                .then(() => {
-                    if (imgUrl) {
-                        firebase.storage().refFromURL(imgUrl).delete()
-                        .then(() => true)
-                        .catch(() => true);
-                    }
-                    global.XMLHttpRequest = glbXMLHttpRequest;
-                    global.Blob = glbBlob;
-
-                    this.setState({ progress: 1 });
-                    setTimeout(() => this.setState({ progress: 0 }), 1500);
-                })
-                .catch(() => {
-                    global.XMLHttpRequest = glbXMLHttpRequest;
-                    global.Blob = glbBlob;
-
-                    if (uploadBlob) {
-                        uploadBlob.close();
-                    }
-                    showAlert(
-                        'danger', 
-                        'Ops!', 
-                        'Falha no upload de imagem.'
-                    );
-                    this.setState({ progress: 1 });
-                    setTimeout(() => this.setState({ progress: 0 }), 1500);
-                }); 
-            }
-          }).catch(() => false);
-    }
-
     render() {
-        const { userLogged } = this.props;
-        const userImg = userLogged.imgAvatar ? { uri: userLogged.imgAvatar } : perfilUserImg;
-        const imgBg = userLogged.imgBackground ? 
-            { uri: userLogged.imgBackground } : perfilBgUserImg;
-        const username = userLogged.nome ? userLogged.nome : 'Patinhas';
-        const posicao = userLogged.posicao ? userLogged.posicao : 'Técnico';
         return (
-            <View style={styles.viewPrinc}>
-                <ParallaxScrollView
-                    onPressBackgroundImg={() => this.onPressUserImg('userBg')}
-                    onPressUserImg={() => this.onPressUserImg('userImg')}
-                    userImage={retrieveImgSource(userImg)}
-                    backgroundSource={retrieveImgSource(imgBg)}
-                    userName={username}
-                    userTitle={posicao}
-                    navBarHeight={0.1}
-                    navBarTitle={' '}
-                >
-                    {
-                        this.state.progress > 0 &&
-                        <View
-                            style={{ 
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}
-                        >
-                            <Progress.Bar 
-                                progress={this.state.progress} 
-                                width={Dimensions.get('screen').width} 
-                                color={colorAppP}
-                                borderRadius={0}
-                                borderWidth={0}
-                            />
-                        </View>
-                    }
-                    <List>
-                        <ListItem
-                            key={'Notificações'}
-                            title={'Notificações'}
-                            leftIcon={{ name: 'bell', type: 'material-community' }}
-                            onPress={() => Actions.userNotifiations()}
-                        />
-                        <ListItem
-                            key={'Editar Perfil'}
-                            title={'Editar Perfil'}
-                            leftIcon={{ name: 'account', type: 'material-community' }}
-                            onPress={() => showAlertDesenv()}
-                        />
-                        <ListItem
-                            key={'Preferências'}
-                            title={'Preferências'}
-                            leftIcon={{ name: 'settings', type: 'material-community' }}
-                            onPress={() => showAlertDesenv()}
-                        />
-                    </List>
-                    <Button 
-                        small 
-                        title={'Sair'} 
-                        buttonStyle={{ width: '100%', marginVertical: 20 }}
-                        onPress={() => this.onPressLogout()}
+            <ScrollView style={styles.viewPrinc}>
+                <Card containerStyle={styles.card}>
+                    <FormLabel labelStyle={styles.text}>NOME</FormLabel>
+                    <FormInput
+                        selectTextOnFocus
+                        containerStyle={styles.inputContainer}
+                        returnKeyType={'next'}
+                        inputStyle={[styles.text, styles.input]}
+                        value={this.state.userLogged.nome}
+                        onChangeText={(value) => this.setState(
+                            { userLogged: { ...this.state.userLogged, nome: value } }
+                        )}
+                        underlineColorAndroid={'transparent'}
+                        onSubmitEditing={() => this.inputSenha.focus()}
                     />
-                    <View style={{ marginBottom: 100 }} />
-                </ParallaxScrollView>
-            </View>
+                    <FormLabel labelStyle={styles.text}>DATA NASCIMENTO</FormLabel>
+                    <View 
+                        style={[styles.inputContainer, { 
+                            flex: 1, 
+                            flexDirection: 'row',
+                            ...Platform.select({
+                            android: {
+                                marginHorizontal: 16
+                            },
+                            ios: {
+                                marginHorizontal: 20
+                            }
+                        }) }]}
+                    >
+                        <DatePicker
+                            ref={(ref) => { this.inputDate = ref; }}
+                            style={[styles.inputContainer, { flex: 1 }]}
+                            date={this.state.data}
+                            mode='date'
+                            format='DD/MM/YYYY'
+                            confirmBtnText='Ok'
+                            cancelBtnText='Cancelar'
+                            placeholder=' '
+                            showIcon={false}
+                            customStyles={{
+                                dateInput: StyleSheet.flatten(styles.dateInput),
+                                dateText: StyleSheet.flatten(styles.dateText)
+                            }}
+                            onDateChange={(date) => {
+                                if (this.props.keyItem) {
+                                    this.setState({ data: date }); 
+                                } else {
+                                    this.setState({ data: date }); 
+                                    this.props.onChangeSuperState({ data: date });
+                                }
+                            }}
+                        />
+                    </View>
+                    <FormLabel labelStyle={styles.text}>ENDEREÇO</FormLabel>
+                    <FormInput
+                        selectTextOnFocus
+                        containerStyle={styles.inputContainer}
+                        returnKeyType={'next'}
+                        inputStyle={[styles.text, styles.input]}
+                        value={this.state.userLogged.endereco}
+                        onChangeText={(value) => this.setState(
+                            { userLogged: { ...this.state.userLogged, endereco: value } }
+                        )}
+                        underlineColorAndroid={'transparent'}
+                        onSubmitEditing={() => this.inputSenha.focus()}
+                    />
+                    <FormLabel labelStyle={styles.text}>TELEFONE</FormLabel>
+                    <FormInput
+                        selectTextOnFocus
+                        containerStyle={styles.inputContainer}
+                        returnKeyType={'next'}
+                        inputStyle={[styles.text, styles.input]}
+                        value={this.state.userLogged.telefone}
+                        onChangeText={(value) => this.setState(
+                            { userLogged: { ...this.state.userLogged, telefone: value } }
+                        )}
+                        underlineColorAndroid={'transparent'}
+                        onSubmitEditing={() => this.inputSenha.focus()}
+                    />
+                    <Button 
+                        small
+                        loading={this.state.loading}
+                        disabled={this.state.loading}
+                        loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
+                        title={this.state.loading ? ' ' : 'Confirmar'} 
+                        buttonStyle={{ width: '100%', marginTop: 30 }}
+                        onPress={() => checkConInfo(() => this.onPressConfirmar())}
+                    />
+                    <Button 
+                        small
+                        loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
+                        title={'Limpar'} 
+                        buttonStyle={{ width: '100%', marginVertical: 10 }}
+                        onPress={() => this.setState({
+                            email: '',
+                            senha: '',
+                            nome: '',
+                            data: new Date(),
+                            tipoPerfil: '',
+                            tipoPerfilIos: 'Sócio'
+                        })}
+                    />
+                </Card>
+                <Card containerStyle={styles.card}>
+                    <FormLabel labelStyle={styles.text}>SENHA</FormLabel>
+                    <View>
+                        <FormInput
+                            selectTextOnFocus
+                            autoCorrect={false}
+                            secureTextEntry={this.state.secureOn}
+                            ref={(ref) => { this.inputSenha = ref; }}
+                            containerStyle={styles.inputContainer}
+                            returnKeyType={'next'}
+                            inputStyle={[styles.text, styles.input]}
+                            value={this.state.senha}
+                            onChangeText={(value) => {
+                                if (this.props.keyItem) {
+                                    this.setState({ senha: value });
+                                } else {
+                                    this.setState({ senha: value });
+                                    this.props.onChangeSuperState({ senha: value });
+                                }
+                            }}
+                            underlineColorAndroid={'transparent'}
+                            onSubmitEditing={() => this.inputNome.focus()}
+                        />
+                        <TouchableOpacity 
+                            style={styles.eye}
+                            onPressIn={() => this.setState({ secureOn: false })}
+                            onPressOut={() => this.setState({ secureOn: true })}
+                        >
+                            <Icon
+                                name='eye' 
+                                type='material-community' 
+                                size={24} color='#9E9E9E' 
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    <FormLabel labelStyle={styles.text}>NOVA SENHA</FormLabel>
+                    <View>
+                        <FormInput
+                            selectTextOnFocus
+                            autoCorrect={false}
+                            secureTextEntry={this.state.secureOn}
+                            ref={(ref) => { this.inputSenha = ref; }}
+                            containerStyle={styles.inputContainer}
+                            returnKeyType={'next'}
+                            inputStyle={[styles.text, styles.input]}
+                            value={this.state.senha}
+                            onChangeText={(value) => {
+                                if (this.props.keyItem) {
+                                    this.setState({ senha: value });
+                                } else {
+                                    this.setState({ senha: value });
+                                    this.props.onChangeSuperState({ senha: value });
+                                }
+                            }}
+                            underlineColorAndroid={'transparent'}
+                            onSubmitEditing={() => this.inputNome.focus()}
+                        />
+                        <TouchableOpacity 
+                            style={styles.eye}
+                            onPressIn={() => this.setState({ secureOn: false })}
+                            onPressOut={() => this.setState({ secureOn: true })}
+                        >
+                            <Icon
+                                name='eye' 
+                                type='material-community' 
+                                size={24} color='#9E9E9E' 
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    <Button 
+                        small
+                        loading={this.state.loading}
+                        disabled={this.state.loading}
+                        loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
+                        title={this.state.loading ? ' ' : 'Confirmar'} 
+                        buttonStyle={{ width: '100%', marginTop: 30 }}
+                        onPress={() => checkConInfo(() => this.onPressConfirmar())}
+                    />
+                    <Button 
+                        small
+                        loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
+                        title={'Limpar'} 
+                        buttonStyle={{ width: '100%', marginVertical: 10 }}
+                        onPress={() => this.setState({
+                            email: '',
+                            senha: '',
+                            nome: '',
+                            data: new Date(),
+                            tipoPerfil: '',
+                            tipoPerfilIos: 'Sócio'
+                        })}
+                    />
+                </Card>
+                <View style={{ marginBottom: 30 }} />
+            </ScrollView>
         );
     }
 }
@@ -212,6 +237,53 @@ const styles = StyleSheet.create({
     viewPrinc: {
         flex: 1,
         backgroundColor: '#EEEEEE'
+    },
+    text: {
+        fontSize: 14,
+    },
+    inputContainer: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#9E9E9E',
+        height: Platform.OS === 'android' ? 45 : 40,
+    },
+    input: {
+        paddingBottom: 0, 
+        width: null,
+        color: 'black',
+        height: 35
+    },
+    card: {
+        paddingHorizontal: 10,
+    },
+    viewImageSelect: {
+        flexDirection: 'row', 
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2, 
+        borderColor: '#EEEEEE',
+        borderRadius: 0.9
+    },
+    dateInput: {
+        borderWidth: 0,
+        alignItems: 'flex-start',
+        height: 35,
+        ...Platform.select({
+            android: {
+                paddingLeft: 3,
+                justifyContent: 'flex-end'
+            },
+            ios: {
+                paddingLeft: 0,
+                justifyContent: 'center'
+            }
+        })
+    },
+    eye: { 
+        position: 'absolute', 
+        right: 0, 
+        marginHorizontal: 20,
+        marginTop: 5,
+        zIndex: 1
     }
 });
 
@@ -220,4 +292,4 @@ const mapStateToProps = (state) => ({
     username: state.LoginReducer.username
 });
 
-export default connect(mapStateToProps, {})(Profile);
+export default connect(mapStateToProps, {})(EditPerfil);

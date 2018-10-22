@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { SearchBar, Card, List, ListItem, Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
-import Toast from 'react-native-simple-toast';
 import _ from 'lodash';
 import {
     modificaShowPlayersModal,
@@ -21,6 +20,7 @@ import {
     modificaFilterModalStr
 } from '../../../actions/GerenciarActions';
 import { retrieveImgSource } from '../../../utils/imageStorage';
+import { checkConInfo } from '../../../utils/jogosUtils';
 
 import perfilUserImg from '../../../imgs/perfiluserimg.png';
 
@@ -118,7 +118,7 @@ class PlayersModal extends React.Component {
                                 rightIcon={(<View />)}
                                 onPress={() => {
                                     Keyboard.dismiss();
-                                    this.onChoosePlayer(item);
+                                    checkConInfo(() => this.onChoosePlayer(item));
                                 }}
                             />
                         );

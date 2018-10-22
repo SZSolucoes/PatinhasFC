@@ -14,7 +14,7 @@ import {
     modificaShowPlayersModal,
     modificaJogador
 } from '../../actions/GerenciarActions';
-import { getPosName } from '../../utils/jogosUtils';
+import { getPosName, checkConInfo } from '../../utils/jogosUtils';
 
 import imgCampo from '../../imgs/campo.jpg';
 import imgAvatar from '../../imgs/perfiluserimg.png';
@@ -27,9 +27,14 @@ class Campo extends React.Component {
         this.renderTatics = this.renderTatics.bind(this);
         this.retrieveSource = this.retrieveSource.bind(this);
         this.onTouchPlayer = this.onTouchPlayer.bind(this);
+        this.checkConInfoTouchPlayer = this.checkConInfoTouchPlayer.bind(this);
     }
 
     onTouchPlayer(jogador, side, pos) {
+        return checkConInfo(() => this.checkConInfoTouchPlayer(jogador, side, pos)); 
+    }
+
+    checkConInfoTouchPlayer(jogador, side, pos) {
         const incluir = jogador.length === 0;
 
         if (incluir) {
