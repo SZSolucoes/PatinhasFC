@@ -71,7 +71,7 @@ export const startFbListener = (name, params) => {
                         }
                         store.dispatch({
                             type: 'modifica_userlogged_login',
-                            payload: snapshot.val()
+                            payload: { key: snapshot.key, ...snapshot.val() }
                         }); 
                     }
                 });

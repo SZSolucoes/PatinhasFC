@@ -30,7 +30,7 @@ import {
     modificaClean
 } from '../../../actions/HistoricoActions';
 
-class Historico extends React.Component {
+class HistoricoP extends React.Component {
 
     constructor(props) {
         super(props);
@@ -54,7 +54,7 @@ class Historico extends React.Component {
     }
 
     componentDidMount() {
-        const { conInfo } = this.props;
+        const { conInfo, userLogged } = this.props;
         if (conInfo) {
             if (!(conInfo.type === 'none' || conInfo.type === 'unknown')
             ) {
@@ -63,8 +63,24 @@ class Historico extends React.Component {
                 .equalTo('1')
                 .once('value', (snapshot) => {
                     if (snapshot) {
+                        const filteredGame = _.filter(snapshot.val(), (jogo) => {
+                            if (_.findIndex(jogo.escalacao.casa, (jogador) => 
+                            jogador.key && (jogador.key === userLogged.key)) !== -1) {
+                                return true;
+                            }
+                            if (_.findIndex(jogo.escalacao.visit, (jogador) => 
+                            jogador.key && (jogador.key === userLogged.key)) !== -1) {
+                                return true;
+                            }
+                            if (_.findIndex(jogo.escalacao.banco, (jogador) => 
+                            jogador.key && (jogador.key === userLogged.key)) !== -1) {
+                                return true;
+                            }
+
+                            return false;
+                        });
                         this.props.modificaListJogos(
-                            _.map(snapshot.val(), (value, key) => ({ key, ...value }))
+                            _.map(filteredGame, (value, key) => ({ key, ...value }))
                         );
                     }
                     this.setState({ indicatorOn: false });     
@@ -93,7 +109,7 @@ class Historico extends React.Component {
 
     onPressCardGame(item) {
         this.props.modificaItemSelected(item.key);
-        Actions.historicoJogoTab({ onBack: () => Actions.popTo('historico') });
+        Actions.historicoJogoTabP({ onBack: () => Actions.popTo('profileHistorico') });
     }
 
     doDateFilter(value, type) {
@@ -323,6 +339,7 @@ const mapStateToProps = (state) => ({
     listJogos: state.HistoricoReducer.listJogos,
     filterStr: state.HistoricoReducer.filterStr,
     filterLoad: state.HistoricoReducer.filterLoad,
+    userLogged: state.LoginReducer.userLogged,
     conInfo: state.LoginReducer.conInfo
 });
 
@@ -332,4 +349,4 @@ export default connect(mapStateToProps, {
     modificaItemSelected,
     modificaListJogos,
     modificaClean
-})(Historico);
+})(HistoricoP);

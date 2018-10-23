@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { Icon, Divider } from 'react-native-elements';
 import _ from 'lodash';
-import b64 from 'base-64';
 import { store } from '../../App';
 import { checkConInfo } from '../../utils/jogosUtils';
 
@@ -42,7 +41,6 @@ export default class InfoActions extends React.Component {
 
     render() {
         const { item, userLogged } = this.props;
-        const b64UserKey = b64.encode(userLogged.email);
         let qtdLikes = item.listLikes ? item.listLikes.length : 0;
         let qtdComents = item.listComents ? item.listComents.length : 0;
         let txtQtdLikes = '';
@@ -57,7 +55,7 @@ export default class InfoActions extends React.Component {
             );
             likeFound = _.findIndex(
                 item.listLikes, 
-                (itemLike) => itemLike.key && (itemLike.key === b64UserKey)
+                (itemLike) => itemLike.key && (itemLike.key === userLogged.key)
             );
             if (isPushed !== -1) {
                 qtdLikes--;

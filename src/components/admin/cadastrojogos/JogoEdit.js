@@ -188,7 +188,8 @@ class JogoEdit extends React.Component {
                             },
                             status: '0',
                             currentTime: '0',
-                            endStatus: '0'
+                            endStatus: '0',
+                            imagens: [{ push: 'push' }]
                         });
                 })
                 .then(() => {
@@ -268,7 +269,8 @@ class JogoEdit extends React.Component {
                     },
                     status: '0',
                     currentTime: '0',
-                    endStatus: '0'
+                    endStatus: '0',
+                    imagens: [{ push: 'push' }]
                 })
                 .then(() => {
                     sendCadJogoPushNotifForAll(titulo);

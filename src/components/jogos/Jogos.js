@@ -285,7 +285,7 @@ class Jogos extends React.Component {
 
     renderCardFooter(item) {
         if (item.endStatus && item.endStatus === '0') {
-            const b64UserKey = b64.encode(this.props.userLogged.email);
+            const b64UserKey = this.props.userLogged.key;
             return (
                 <View>
                     <Divider

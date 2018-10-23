@@ -4,47 +4,218 @@ import {
     StyleSheet,
     ScrollView,
     Platform,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert,
+    AsyncStorage
 } from 'react-native';
 import { 
     FormLabel, 
-    FormInput, 
-    FormValidationMessage, 
+    FormInput,
+    FormValidationMessage,
     Card, 
     Button, 
     Icon
 } from 'react-native-elements';
 import DatePicker from 'react-native-datepicker';
+import { TextInputMask } from 'react-native-masked-text';
+import Moment from 'moment';
 
 import { connect } from 'react-redux';
+import firebase from '../../Firebase';
 import { checkConInfo } from '../../utils/jogosUtils';
+import { showAlert } from '../../utils/store';
 
 class EditPerfil extends React.Component {
 
     constructor(props) {
         super(props);
 
+        this.onPressConfirmarEdit = this.onPressConfirmarEdit.bind(this);
+        this.onPressConfirmarSenha = this.onPressConfirmarSenha.bind(this);
+        this.onValidField = this.onValidField.bind(this);
+
         this.state = {
-            userLogged: { ...this.props.userLogged }
+            userLogged: { ...this.props.userLogged },
+            novaSenha: '',
+            novaSenhaRep: '',
+            secureOnNovaSenha: true,
+            secureOnNovaSenhaRep: true,
+            isTelefoneValid: true,
+            cleanEditPerfil: false,
+            loadingEditP: false,
+            loadingSenha: false
         };
+    }
+
+    shouldComponentUpdate(nextProps, nextStates) {
+        if (!nextStates.cleanEditPerfil &&
+            (nextStates.userLogged.telefone !== this.inputTelefone.getRawValue())) {
+            this.setState({ 
+                userLogged: {
+                    ...this.state.userLogged, 
+                    telefone: this.inputTelefone.getRawValue()
+                }
+            });
+        } else if (nextStates.cleanEditPerfil) {
+            this.setState({
+                cleanEditPerfil: false
+            });
+        }
+        
+        return nextProps !== this.props || nextStates !== this.state;
+    }
+
+    onPressConfirmarEdit() {
+        const telefone = this.inputTelefone.getRawValue();
+
+        if (telefone && !this.inputTelefone.isValid()) {
+            this.setState({ isTelefoneValid: false });
+            return;
+        }
+
+        this.setState({ loadingEditP: true });
+
+        const {
+            key,
+            nome,
+            dtnasc,
+            endereco
+        } = this.state.userLogged;
+
+        const dbUsuariosRef = firebase.database().ref().child(`usuarios/${key}`);
+
+        dbUsuariosRef.update({
+            nome,
+            endereco,
+            dtnasc,
+            telefone
+        })
+        .then(() => {
+            this.setState({ loadingEditP: false, isTelefoneValid: true });
+            showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
+        })
+        .catch(() => {
+            this.setState({ loadingEditP: false, isTelefoneValid: true });
+            showAlert(
+                'danger', 
+                'Ops!', 
+                'Ocorreu um erro ao editar o perfil.'
+            );
+        });
+    }
+
+    onPressConfirmarSenha() {
+        const { novaSenha, novaSenhaRep, userLogged } = this.state;
+
+        if (novaSenha.trim() !== novaSenhaRep.trim()) {
+            Alert.alert('Aviso!', 'As senhas informadas devem ser iguais.');
+            return;
+        }
+
+        if (novaSenha.trim().length < 6) {
+            Alert.alert('Aviso!', 'As senha devem possuir 6 ou mais caracteres.');
+            return;
+        }
+
+        this.setState({ loadingSenha: true });
+
+        const user = firebase.auth().currentUser;
+        const dbUsuariosRef = firebase.database().ref().child(`usuarios/${userLogged.key}`);
+
+        firebase.auth().signInWithEmailAndPassword(user.email, userLogged.senha)
+        .then(() => {
+            dbUsuariosRef.update({
+                senha: novaSenha
+            })
+            .then(() => {
+                user.updatePassword(novaSenha).then(() => {
+                    this.setState({ loadingSenha: false });
+                    AsyncStorage.setItem('password', novaSenha);
+                    showAlert('success', 'Sucesso!', 'Senha alterada com sucesso.');
+                }).catch((error) => {
+                    this.setState({ loadingSenha: false });
+
+                    if (error && error.code && error.code === 'auth/weak-password') {
+                        showAlert('danger', 'Erro!', 'A senha informada é insegura.');
+                    } else {
+                        showAlert(
+                            'danger', 
+                            'Ops!', 
+                            'Ocorreu um erro ao alterar a senha.'
+                        );
+                    }
+                });
+            })
+            .catch(() => {
+                this.setState({ loadingSenha: false });
+                showAlert(
+                    'danger', 
+                    'Ops!', 
+                    'Ocorreu um erro ao alterar a senha.'
+                );
+            });
+        })
+        .catch(() => {
+            this.setState({ loadingSenha: false });
+            showAlert(
+                'danger', 
+                'Ops!', 
+                'Ocorreu um erro ao alterar a senha.'
+            );
+        });
+    }
+
+    onValidField(value, field) {
+        let newValue = value;
+
+        switch (field) {
+            case 'nome':
+                newValue = value.length <= 40 ? value : this.state.userLogged.nome;
+                newValue = newValue.replace(/[^a-zA-Z0-9 ]/g, '');
+                break;
+            case 'endereco':
+                newValue = value.length <= 100 ? value : this.state.userLogged.endereco;
+                newValue = newValue.replace(/[^a-zA-Z0-9 ]/g, '');
+                break;
+            case 'novasenha':
+                newValue = value.length <= 20 ? value : this.state.novaSenha;
+                break;
+            case 'novasenharep':
+                newValue = value.length <= 20 ? value : this.state.novaSenhaRep;
+                break;
+            default:
+        }
+
+        return newValue;
     }
 
     render() {
         return (
             <ScrollView style={styles.viewPrinc}>
-                <Card containerStyle={styles.card}>
+                <Card 
+                    containerStyle={styles.card}
+                    title={'Dados do Perfil'}
+                    titleStyle={{ fontSize: 18 }}
+                >
                     <FormLabel labelStyle={styles.text}>NOME</FormLabel>
                     <FormInput
                         selectTextOnFocus
+                        autoCapitalize={'none'}
+                        autoCorrect={false}
                         containerStyle={styles.inputContainer}
                         returnKeyType={'next'}
                         inputStyle={[styles.text, styles.input]}
                         value={this.state.userLogged.nome}
                         onChangeText={(value) => this.setState(
-                            { userLogged: { ...this.state.userLogged, nome: value } }
+                            { 
+                                userLogged: { 
+                                    ...this.state.userLogged, 
+                                    nome: this.onValidField(value, 'nome') 
+                                } 
+                            }
                         )}
                         underlineColorAndroid={'transparent'}
-                        onSubmitEditing={() => this.inputSenha.focus()}
+                        onSubmitEditing={() => this.inputDate.onPressDate()}
                     />
                     <FormLabel labelStyle={styles.text}>DATA NASCIMENTO</FormLabel>
                     <View 
@@ -63,9 +234,10 @@ class EditPerfil extends React.Component {
                         <DatePicker
                             ref={(ref) => { this.inputDate = ref; }}
                             style={[styles.inputContainer, { flex: 1 }]}
-                            date={this.state.data}
+                            date={this.state.userLogged.dtnasc}
                             mode='date'
                             format='DD/MM/YYYY'
+                            maxDate={Moment().format('DD/MM/YYYY')}
                             confirmBtnText='Ok'
                             cancelBtnText='Cancelar'
                             placeholder=' '
@@ -74,127 +246,128 @@ class EditPerfil extends React.Component {
                                 dateInput: StyleSheet.flatten(styles.dateInput),
                                 dateText: StyleSheet.flatten(styles.dateText)
                             }}
-                            onDateChange={(date) => {
-                                if (this.props.keyItem) {
-                                    this.setState({ data: date }); 
-                                } else {
-                                    this.setState({ data: date }); 
-                                    this.props.onChangeSuperState({ data: date });
-                                }
-                            }}
+                            onDateChange={(value) => this.setState(
+                                { userLogged: { ...this.state.userLogged, dtnasc: value } }
+                            )}
                         />
                     </View>
                     <FormLabel labelStyle={styles.text}>ENDEREÇO</FormLabel>
                     <FormInput
                         selectTextOnFocus
+                        autoCapitalize={'none'}
+                        autoCorrect={false}
                         containerStyle={styles.inputContainer}
                         returnKeyType={'next'}
                         inputStyle={[styles.text, styles.input]}
                         value={this.state.userLogged.endereco}
                         onChangeText={(value) => this.setState(
-                            { userLogged: { ...this.state.userLogged, endereco: value } }
+                            { 
+                                userLogged: { 
+                                    ...this.state.userLogged, 
+                                    endereco: this.onValidField(value, 'endereco') 
+                                } 
+                            }
                         )}
                         underlineColorAndroid={'transparent'}
-                        onSubmitEditing={() => this.inputSenha.focus()}
+                        onSubmitEditing={() => this.inputTelefone.getElement().focus()}
                     />
                     <FormLabel labelStyle={styles.text}>TELEFONE</FormLabel>
-                    <FormInput
-                        selectTextOnFocus
-                        containerStyle={styles.inputContainer}
-                        returnKeyType={'next'}
-                        inputStyle={[styles.text, styles.input]}
-                        value={this.state.userLogged.telefone}
-                        onChangeText={(value) => this.setState(
-                            { userLogged: { ...this.state.userLogged, telefone: value } }
-                        )}
+                    <TextInputMask
+                        ref={ref => { this.inputTelefone = ref; }}
+                        type={'cel-phone'}
+                        style={styles.input}
+                        customTextInput={FormInput}
+                        customTextInputProps={{
+                            containerStyle: styles.inputContainer,
+                            inputStyle: [styles.text, styles.input]
+                        }}
                         underlineColorAndroid={'transparent'}
-                        onSubmitEditing={() => this.inputSenha.focus()}
+                        value={this.state.userLogged.telefone}
                     />
+                    { 
+                        !this.state.isTelefoneValid &&
+                        <FormValidationMessage>Telefone inválido</FormValidationMessage> 
+                    }
                     <Button 
                         small
-                        loading={this.state.loading}
-                        disabled={this.state.loading}
+                        loading={this.state.loadingEditP}
+                        disabled={this.state.loadingEditP}
                         loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
-                        title={this.state.loading ? ' ' : 'Confirmar'} 
+                        title={this.state.loadingEditP ? ' ' : 'Confirmar'} 
                         buttonStyle={{ width: '100%', marginTop: 30 }}
-                        onPress={() => checkConInfo(() => this.onPressConfirmar())}
+                        onPress={() => checkConInfo(() => this.onPressConfirmarEdit())}
                     />
                     <Button 
                         small
                         loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
-                        title={'Limpar'} 
+                        title={'Restaurar'} 
                         buttonStyle={{ width: '100%', marginVertical: 10 }}
                         onPress={() => this.setState({
-                            email: '',
-                            senha: '',
-                            nome: '',
-                            data: new Date(),
-                            tipoPerfil: '',
-                            tipoPerfilIos: 'Sócio'
+                            userLogged: { 
+                                ...this.state.userLogged,
+                                nome: this.props.userLogged.nome, 
+                                dtnasc: this.props.userLogged.dtnasc, 
+                                endereco: this.props.userLogged.endereco, 
+                                telefone: this.props.userLogged.telefone,
+                            },
+                            isTelefoneValid: true,
+                            cleanEditPerfil: true
                         })}
                     />
                 </Card>
-                <Card containerStyle={styles.card}>
-                    <FormLabel labelStyle={styles.text}>SENHA</FormLabel>
-                    <View>
-                        <FormInput
-                            selectTextOnFocus
-                            autoCorrect={false}
-                            secureTextEntry={this.state.secureOn}
-                            ref={(ref) => { this.inputSenha = ref; }}
-                            containerStyle={styles.inputContainer}
-                            returnKeyType={'next'}
-                            inputStyle={[styles.text, styles.input]}
-                            value={this.state.senha}
-                            onChangeText={(value) => {
-                                if (this.props.keyItem) {
-                                    this.setState({ senha: value });
-                                } else {
-                                    this.setState({ senha: value });
-                                    this.props.onChangeSuperState({ senha: value });
-                                }
-                            }}
-                            underlineColorAndroid={'transparent'}
-                            onSubmitEditing={() => this.inputNome.focus()}
-                        />
-                        <TouchableOpacity 
-                            style={styles.eye}
-                            onPressIn={() => this.setState({ secureOn: false })}
-                            onPressOut={() => this.setState({ secureOn: true })}
-                        >
-                            <Icon
-                                name='eye' 
-                                type='material-community' 
-                                size={24} color='#9E9E9E' 
-                            />
-                        </TouchableOpacity>
-                    </View>
+                <Card 
+                    containerStyle={styles.card}
+                    title={'Modificar Senha'}
+                    titleStyle={{ fontSize: 18 }}
+                >
                     <FormLabel labelStyle={styles.text}>NOVA SENHA</FormLabel>
                     <View>
                         <FormInput
                             selectTextOnFocus
                             autoCorrect={false}
-                            secureTextEntry={this.state.secureOn}
-                            ref={(ref) => { this.inputSenha = ref; }}
+                            secureTextEntry={this.state.secureOnNovaSenha}
                             containerStyle={styles.inputContainer}
                             returnKeyType={'next'}
                             inputStyle={[styles.text, styles.input]}
-                            value={this.state.senha}
-                            onChangeText={(value) => {
-                                if (this.props.keyItem) {
-                                    this.setState({ senha: value });
-                                } else {
-                                    this.setState({ senha: value });
-                                    this.props.onChangeSuperState({ senha: value });
-                                }
-                            }}
+                            value={this.state.novaSenha}
+                            onChangeText={(value) => this.setState(
+                                { novaSenha: this.onValidField(value, 'novasenha') }
+                            )}
                             underlineColorAndroid={'transparent'}
-                            onSubmitEditing={() => this.inputNome.focus()}
+                            onSubmitEditing={() => this.inputNovaSenhaRep.focus()}
                         />
                         <TouchableOpacity 
                             style={styles.eye}
-                            onPressIn={() => this.setState({ secureOn: false })}
-                            onPressOut={() => this.setState({ secureOn: true })}
+                            onPressIn={() => this.setState({ secureOnNovaSenha: false })}
+                            onPressOut={() => this.setState({ secureOnNovaSenha: true })}
+                        >
+                            <Icon
+                                name='eye' 
+                                type='material-community' 
+                                size={24} color='#9E9E9E' 
+                            />
+                        </TouchableOpacity>
+                    </View>
+                    <FormLabel labelStyle={styles.text}>REPETIR NOVA SENHA</FormLabel>
+                    <View>
+                        <FormInput
+                            selectTextOnFocus
+                            autoCorrect={false}
+                            secureTextEntry={this.state.secureOnNovaSenhaRep}
+                            ref={(ref) => { this.inputNovaSenhaRep = ref; }}
+                            containerStyle={styles.inputContainer}
+                            returnKeyType={'next'}
+                            inputStyle={[styles.text, styles.input]}
+                            value={this.state.novaSenhaRep}
+                            onChangeText={(value) => this.setState(
+                                { novaSenhaRep: this.onValidField(value, 'novasenharep') }
+                            )}
+                            underlineColorAndroid={'transparent'}
+                        />
+                        <TouchableOpacity 
+                            style={styles.eye}
+                            onPressIn={() => this.setState({ secureOnNovaSenhaRep: false })}
+                            onPressOut={() => this.setState({ secureOnNovaSenhaRep: true })}
                         >
                             <Icon
                                 name='eye' 
@@ -205,12 +378,12 @@ class EditPerfil extends React.Component {
                     </View>
                     <Button 
                         small
-                        loading={this.state.loading}
-                        disabled={this.state.loading}
+                        loading={this.state.loadingSenha}
+                        disabled={this.state.loadingSenha}
                         loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
-                        title={this.state.loading ? ' ' : 'Confirmar'} 
+                        title={this.state.loadingSenha ? ' ' : 'Confirmar'} 
                         buttonStyle={{ width: '100%', marginTop: 30 }}
-                        onPress={() => checkConInfo(() => this.onPressConfirmar())}
+                        onPress={() => checkConInfo(() => this.onPressConfirmarSenha())}
                     />
                     <Button 
                         small
@@ -218,12 +391,8 @@ class EditPerfil extends React.Component {
                         title={'Limpar'} 
                         buttonStyle={{ width: '100%', marginVertical: 10 }}
                         onPress={() => this.setState({
-                            email: '',
-                            senha: '',
-                            nome: '',
-                            data: new Date(),
-                            tipoPerfil: '',
-                            tipoPerfilIos: 'Sócio'
+                            senhaAtual: '',
+                            novaSenha: ''
                         })}
                     />
                 </Card>

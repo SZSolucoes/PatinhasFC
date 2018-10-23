@@ -156,17 +156,16 @@ class UsuarioEdit extends React.Component {
                 });
             })
             .catch((error) => {
+                this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
+                
                 switch (error.code) {
                     case 'auth/email-already-in-use':
-                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                         showAlert('danger', 'Erro!', 'Email já cadastrado.');
                         break;
                     case 'auth/invalid-email':
-                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                         showAlert('danger', 'Erro!', 'Email informado não é válido..');
                         break;
                     case 'auth/operation-not-allowed':
-                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                         showAlert(
                             'danger', 
                             'Erro!', 
@@ -174,7 +173,6 @@ class UsuarioEdit extends React.Component {
                         );
                         break;
                     case 'auth/weak-password':
-                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                         showAlert('danger', 'Erro!', 'A senha informada é insegura.');
                         break;
                     default:

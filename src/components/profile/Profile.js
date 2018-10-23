@@ -195,6 +195,12 @@ class Profile extends React.Component {
                             onPress={() => Actions.profileEditPerfil()}
                         />
                         <ListItem
+                            key={'Histórico de Jogos'}
+                            title={'Histórico de Jogos'}
+                            leftIcon={{ name: 'history', type: 'material-community' }}
+                            onPress={() => Actions.profileHistorico()}
+                        />
+                        <ListItem
                             key={'Preferências'}
                             title={'Preferências'}
                             leftIcon={{ name: 'settings', type: 'material-community' }}

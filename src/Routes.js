@@ -25,8 +25,10 @@ import Login from './components/login/Login';
 import Jogos from './components/jogos/Jogos';
 import Jogo from './components/core/jogo/Jogo';
 import JogoG from './components/admin/gerenciar/JogoG';
+import JogoP from './components/profile/historico/JogoP';
 import Escalacao from './components/core/escalacao/Escalacao';
 import EscalacaoG from './components/admin/gerenciar/EscalacaoG';
+import EscalacaoP from './components/profile/historico/EscalacaoP';
 import Informativos from './components/informativos/Informativos';
 import Profile from './components/profile/Profile';
 import Notifications from './components/profile/Notifications';
@@ -38,8 +40,10 @@ import Usuarios from './components/admin/usuarios/Usuarios';
 import Info from './components/admin/informativos/Info';
 import Gerenciar from './components/admin/gerenciar/Gerenciar';
 import Historico from './components/admin/historico/Historico';
+import HistoricoP from './components/profile/historico/HistoricoP';
 import JogoH from './components/admin/historico/JogoH';
 import EscalacaoH from './components/admin/historico/EscalacaoH';
+import Imagens from './components/imagens/Imagens';
 import { colorAppS } from './utils/constantes';
 
 import { store } from './App';
@@ -139,6 +143,10 @@ class Routes extends React.Component {
                     Actions.popTo('historico');
                     return true;
                 }
+                if ('|_jogoTabP|_escalacaoTabP|'.includes(Actions.currentScene)) {
+                    Actions.popTo('profileHistorico');
+                    return true;
+                }
             }
             
             return true;
@@ -188,6 +196,10 @@ class Routes extends React.Component {
             }
             if ('|_jogoTabH|_escalacaoTabH|'.includes(Actions.currentScene)) {
                 Actions.popTo('historico');
+                return true;
+            }
+            if ('|_jogoTabP|_escalacaoTabP|'.includes(Actions.currentScene)) {
+                Actions.popTo('profileHistorico');
                 return true;
             }
         }
@@ -619,9 +631,27 @@ class Routes extends React.Component {
                         //initial
                     />
                     <Scene 
+                        key={'profileHistorico'}
+                        title={'Histórico de Jogos'} 
+                        component={HistoricoP}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
                         key={'profilePreferencias'}
                         title={'Preferências'}
                         component={Preferencias}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'imagens'}
+                        title={'Imagens'}
+                        component={Imagens}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
@@ -715,6 +745,36 @@ class Routes extends React.Component {
                             key={'escalacaoTabH'}
                             hideNavBar 
                             component={EscalacaoH}
+                            tabBarLabel={'Escalação'}
+                            activeTintColor={'white'}
+                        />
+                    </Scene>
+                    <Scene 
+                        key={'historicoJogoTabP'}
+                        tabs
+                        showLabel
+                        tabBarPosition={'top'}
+                        lazy={false}
+                        swipeEnabled
+                        title={'Histórico de Jogo'} 
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        tabBarStyle={{ backgroundColor: colorAppS }}
+                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                    >
+                        <Scene 
+                            key={'jogoTabP'}
+                            hideNavBar 
+                            component={JogoP}
+                            initial
+                            tabBarLabel={'Jogo'}
+                            activeTintColor={'white'}
+                        />
+                        <Scene 
+                            key={'escalacaoTabP'}
+                            hideNavBar 
+                            component={EscalacaoP}
                             tabBarLabel={'Escalação'}
                             activeTintColor={'white'}
                         />

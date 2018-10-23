@@ -16,7 +16,6 @@ import {
     KeyboardAvoidingView
 } from 'react-native';
 import _ from 'lodash';
-import b64 from 'base-64';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Moment from 'moment';
 import { Icon, Divider, Avatar } from 'react-native-elements';
@@ -90,7 +89,6 @@ class Coment extends React.Component {
 
     onPressSendMessage() {
         const { infoMsgSelected, userLogged } = this.props;
-        const b64UserKey = b64.encode(userLogged.email);
         const { comentario } = this.state;
         const dataAtual = Moment().format('YYYY-MM-DD HH:mm:ss');
         const newInfoMsgSelectedList = infoMsgSelected.listComents ? 
@@ -103,7 +101,7 @@ class Coment extends React.Component {
         }
 
         newInfoMsgSelectedList.push({
-            key: b64UserKey,
+            key: userLogged.key,
             imgAvatar: userLogged.imgAvatar,
             nome: userLogged.nome,
             comentario: comentario.trim(),
@@ -175,7 +173,6 @@ class Coment extends React.Component {
 
     renderComents() {
         const { infoMsgSelected, userLogged } = this.props;
-        const b64UserKey = b64.encode(userLogged.email);
         const newListComents = [...infoMsgSelected.listComents];
         const isPushed = _.findIndex(
             newListComents, (coment) => coment.push && coment.push === 'push'
@@ -193,7 +190,7 @@ class Coment extends React.Component {
 
         viewComents = newListComents.map((item, index) => {
             const userImg = item.imgAvatar ? { uri: item.imgAvatar } : perfilUserImg;
-            const isMsgUser = item.key && item.key === b64UserKey;
+            const isMsgUser = item.key && item.key === userLogged.key;
             let timeDiff = '';
             let timeAppend = '';
 

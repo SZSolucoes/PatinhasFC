@@ -9,6 +9,7 @@ import InfoReducer from './InfoReducer';
 import JogoReducer from './JogoReducer';
 import GerenciarReducer from './GerenciarReducer';
 import HistoricoReducer from './HistoricoReducer';
+import ImagensReducer from './ImagensReducer';
 
 export default combineReducers({
     LoginReducer,
@@ -19,5 +20,6 @@ export default combineReducers({
     InfoReducer,
     JogoReducer,
     GerenciarReducer,
-    HistoricoReducer
+    HistoricoReducer,
+    ImagensReducer
 });

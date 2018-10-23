@@ -7,8 +7,8 @@ export const sendCadJogoPushNotifForAll = (jogo) => {
       {
         to: '/topics/all',
         notification: {
-            title: `Jogo (${jogo}) foi criado.`,
-            body: 'Aproveite e já confirme sua presença.',
+            title: `Jogo (${jogo}) foi criado`,
+            body: 'Aproveite e já confirme sua presença',
             show_in_foreground: 'true'
         }, 
         data: {

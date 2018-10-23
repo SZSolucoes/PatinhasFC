@@ -11,7 +11,6 @@ import {
     ActivityIndicator,
     Platform
 } from 'react-native';
-import b64 from 'base-64';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import { Card, ListItem } from 'react-native-elements';
@@ -71,7 +70,6 @@ class Informativos extends React.Component {
     
     onPressLikeBtn(likeOrDeslike, item) {
         const { userLogged } = this.props;
-        const b64UserKey = b64.encode(userLogged.email);
         const itemListLikes = item.listLikes ? item.listLikes : [];
         if (likeOrDeslike === 'like') {
             const isPushed = _.findIndex(
@@ -83,9 +81,9 @@ class Informativos extends React.Component {
                 if (isPushed !== -1) {
                     auxArr.splice(isPushed, 1);
                 }
-                newArray = [...auxArr, { key: b64UserKey }];
+                newArray = [...auxArr, { key: userLogged.key }];
             } else {
-                newArray = [...itemListLikes, { key: b64UserKey }];
+                newArray = [...itemListLikes, { key: userLogged.key }];
             }
             this.dbFbRef.child(`informativos/${item.key}`).update({
                 listLikes: newArray
@@ -95,7 +93,7 @@ class Informativos extends React.Component {
         } else {
             const newArray = [...itemListLikes];
             const indexPushed = _.findIndex(
-                itemListLikes, (itemInfo) => itemInfo.key === b64UserKey
+                itemListLikes, (itemInfo) => itemInfo.key === userLogged.key
             );
             if (indexPushed !== -1) {
                 newArray.splice(indexPushed, 1);
