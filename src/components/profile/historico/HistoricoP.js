@@ -11,10 +11,7 @@ import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import { 
     Card,
-    SearchBar,
-    Divider,
-    Icon,
-    FormLabel
+    SearchBar
 } from 'react-native-elements';
 import _ from 'lodash';
 
@@ -152,31 +149,6 @@ class HistoricoP extends React.Component {
                                 placarCasa={placarCasa} 
                                 placarVisit={placarVisit}  
                             />
-                            <View style={{ marginVertical: 10 }} >
-                                <Divider />
-                            </View>
-                            <TouchableOpacity
-                                onPress={() => Actions.imagens({ jogo: item })}
-                            >
-                                <View style={styles.viewImageSelect}>
-                                    <Icon 
-                                        name='folder-image' 
-                                        type='material-community' 
-                                        size={28} color='white' 
-                                    />
-                                    <FormLabel 
-                                        labelStyle={{ 
-                                            color: 'white',
-                                            fontSize: 12, 
-                                            fontWeight: '500',
-                                            marginTop: 0, 
-                                            marginBottom: 0 
-                                        }}
-                                    >
-                                        Visualizar imagens
-                                    </FormLabel> 
-                                </View>
-                            </TouchableOpacity>
                         </Card>
                     </TouchableOpacity>
                     <View style={{ marginBottom: 10 }} />
@@ -323,15 +295,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginVertical: 8,
         marginRight: 5
-    },
-    viewImageSelect: {
-        flexDirection: 'row', 
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 2, 
-        borderColor: '#EEEEEE',
-        backgroundColor: '#9E9E9E',
-        borderRadius: 5
     }
 });
 

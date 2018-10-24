@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Toast from 'react-native-simple-toast';
-import { Alert } from 'react-native';
+import { Alert, NetInfo } from 'react-native';
 import { roundTo } from './numComplex';
 import { store } from '../App';
 
@@ -273,14 +273,37 @@ const changeStsEndGame = (jogo, firebase, Actions) => {
     });
 };
 
-export const checkConInfo = (funExec = () => true, params = []) => {
-    const conInfo = store.getState().LoginReducer.conInfo;
-    if (conInfo.type === 'none' || conInfo.type === 'unknown'
-    ) {
-        Toast.show('Sem conexão.', Toast.SHORT);
-        return false;
+export const checkConInfo = (funExec = () => true, params = [], delay = 0) => {
+    if (delay) {
+        setTimeout(() => {
+            NetInfo.getConnectionInfo()
+            .then((conInfo) => {
+                if (conInfo.type === 'none' || conInfo.type === 'unknown'
+                ) {
+                    Toast.show('Sem conexão.', Toast.SHORT);
+                    return false;
+                }
+                return funExec(...params);
+            })
+            .catch(() => {
+                Toast.show('Sem conexão.', Toast.SHORT);
+                return false;
+            });
+        }, delay); 
+    } else {
+        NetInfo.getConnectionInfo()
+        .then((conInfo) => {
+            if (conInfo.type === 'none' || conInfo.type === 'unknown'
+            ) {
+                Toast.show('Sem conexão.', Toast.SHORT);
+                return false;
+            }
+            return funExec(...params);
+        })
+        .catch(() => {
+            Toast.show('Sem conexão.', Toast.SHORT);
+            return false;
+        });
     }
-
-    return funExec(...params);
-}
+};
 

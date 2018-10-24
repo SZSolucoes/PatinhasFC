@@ -112,7 +112,7 @@ class Gerenciar extends React.Component {
                                             marginBottom: 0 
                                         }}
                                     >
-                                        Visualizar imagens
+                                        Imagens
                                     </FormLabel> 
                                 </View>
                             </TouchableOpacity>

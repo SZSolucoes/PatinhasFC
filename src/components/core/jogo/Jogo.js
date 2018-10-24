@@ -15,6 +15,7 @@ import { colorAppF, colorAppP } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
 import { getPosIndex } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
+import { modificaJogoSelected } from '../../../actions/ImagensActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
@@ -60,6 +61,7 @@ class Jogo extends React.Component {
                 })
             , 1000);
         }
+        this.props.modificaJogoSelected(jogo);
     }
 
     shouldComponentUpdate(nextProps, nextStates) {
@@ -1876,4 +1878,4 @@ const mapStateToProps = (state) => ({
     listJogos: state.JogosReducer.listJogos
 });
 
-export default connect(mapStateToProps, {})(Jogo);
+export default connect(mapStateToProps, { modificaJogoSelected })(Jogo);

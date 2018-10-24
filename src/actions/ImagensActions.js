@@ -4,6 +4,11 @@ export const modificaJogoSelected = (jogo) => ({
     payload: jogo
 });
 
+export const modificaShowImageView = (value) => ({
+    type: 'modifica_showimageview_imagens',
+    payload: value
+});
+
 export const modificaClean = () => ({
     type: 'modifica_clean_imagens'
 });

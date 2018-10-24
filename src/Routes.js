@@ -67,6 +67,7 @@ class Routes extends React.Component {
         this.renderAdminTab = this.renderAdminTab.bind(this);
         this.onChangeDimension = this.onChangeDimension.bind(this);
         this.rightButtonGerenciarTab = this.rightButtonGerenciarTab.bind(this);
+        this.rightButtonImagens = this.rightButtonImagens.bind(this);
 
         this.state = {
             logged: false,
@@ -119,6 +120,10 @@ class Routes extends React.Component {
             });
             store.dispatch({
                 type: 'modifica_showimageview_info',
+                payload: false
+            });
+            store.dispatch({
+                type: 'modifica_showimageview_imagens',
                 payload: false
             });
 
@@ -174,6 +179,10 @@ class Routes extends React.Component {
         });
         store.dispatch({
             type: 'modifica_showimageview_info',
+            payload: false
+        });
+        store.dispatch({
+            type: 'modifica_showimageview_imagens',
             payload: false
         });
 
@@ -319,7 +328,7 @@ class Routes extends React.Component {
                                 { 
                                     text: 'Ok', 
                                     onPress: () => checkConInfo(
-                                        () => doEndGame(jogo, firebase, Actions)
+                                        () => doEndGame(jogo, firebase, Actions), [], 500
                                     )
                                 }
                             ]
@@ -334,6 +343,34 @@ class Routes extends React.Component {
                             tintColor: 'white',
                             marginHorizontal: 5
                         }}
+                    />
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
+    rightButtonImagens() {
+        return (
+            <View 
+                style={{
+                    flexDirection: 'row',
+                    marginHorizontal: 5,
+                    paddingHorizontal: 10,
+                    justifyContent: 'space-between'
+                }}
+            >
+                <TouchableOpacity
+                    onPress={() => {
+                        const { jogoSelected } = store.getState().ImagensReducer;
+                        Actions.imagens({ jogo: jogoSelected });
+                    }}
+                >
+                    <Icon
+                        iconStyle={{ marginHorizontal: 5 }}
+                        color={'white'}
+                        name='folder-image'
+                        type='material-community'
+                        size={26}
                     />
                 </TouchableOpacity>
             </View>
@@ -670,6 +707,7 @@ class Routes extends React.Component {
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
                         labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        renderRightButton={() => this.rightButtonImagens()}
                     >
                         <Scene 
                             key={'jogoTab'}
@@ -732,6 +770,7 @@ class Routes extends React.Component {
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
                         labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        renderRightButton={() => this.rightButtonImagens()}
                     >
                         <Scene 
                             key={'jogoTabH'}
@@ -762,6 +801,7 @@ class Routes extends React.Component {
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
                         labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        renderRightButton={() => this.rightButtonImagens()}
                     >
                         <Scene 
                             key={'jogoTabP'}

@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 
 import { connect } from 'react-redux';
-import { CheckBox } from 'react-native-elements';
+import { CheckBox, List, ListItem } from 'react-native-elements';
 import FCM from 'react-native-fcm';
 import { checkConInfo } from '../../utils/jogosUtils';
 
@@ -49,13 +49,22 @@ class Notifications extends React.Component {
     render() {
         return (
             <View style={styles.viewPrinc}>
-                <CheckBox
-                    center
-                    title='Notificar quando jogos são criados.'
-                    iconRight
-                    checked={this.state.notifAllTopicEnabled}
-                    onPress={() => checkConInfo(this.onPressCheck, ['notifAllTopicEnabled'])}
-                />
+                <List>
+                    <ListItem
+                        title='Criação de jogos'
+                        subtitle={'Receber notificações quando um jogo for criado.'}
+                        subtitleNumberOfLines={5}
+                        rightIcon={(
+                            <CheckBox
+                                title={this.state.notifAllTopicEnabled ? 'Ativo  ' : 'Inativo'}
+                                checked={this.state.notifAllTopicEnabled}
+                                onPress={() => 
+                                    checkConInfo(this.onPressCheck, ['notifAllTopicEnabled'])
+                                }
+                            />
+                        )}
+                    />
+                </List>
             </View>
         );
     }

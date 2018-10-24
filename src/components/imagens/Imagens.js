@@ -4,7 +4,8 @@ import {
     ScrollView, 
     StyleSheet,
     TouchableOpacity,
-    Image
+    Image,
+    ActivityIndicator
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -20,14 +21,15 @@ import ImagePicker from 'react-native-image-crop-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import b64 from 'base-64';
 import ImageView from 'react-native-image-view';
+import { Dialog } from 'react-native-simple-dialogs';
+import * as Progress from 'react-native-progress';
+import Toast from 'react-native-simple-toast';
 
 import firebase from '../../Firebase';
+import { modificaShowImageView } from '../../actions/ImagensActions';
+import { checkConInfo } from '../../utils/jogosUtils';
 import { colorAppS, colorAppF } from '../../utils/constantes';
 import { retrieveImgSource } from '../../utils/imageStorage';
-import { 
-    modificaJogoSelected,
-    modificaClean 
-} from '../../actions/ImagensActions';
 
 class Imagens extends React.Component {
 
@@ -41,23 +43,24 @@ class Imagens extends React.Component {
         this.onPressSelectImgCamera = this.onPressSelectImgCamera.bind(this);
         this.onPressSelectImgGallery = this.onPressSelectImgGallery.bind(this);
         this.onPressRemoveImage = this.onPressRemoveImage.bind(this);
+        this.doUploadImageCamera = this.doUploadImageCamera.bind(this);
+        this.doUploadImageGallery = this.doUploadImageGallery.bind(this);
+        this.updateProps = this.updateProps.bind(this);
 
         this.state = {
             jogo: props.jogo,
             showImageView: false,
-            imgSelected: 0
+            imgSelected: 0,
+            uploadModal: false,
+            uploadModalPerc: 0,
+            uploadModalText: 'Enviando imagem...'
         };
     }
 
     componentDidMount() {
-        this.props.modificaJogoSelected(this.props.jogo);
         if (this.props.enableButtons) {
             setTimeout(() => Actions.refresh({ right: this.rightButtonImagens }), 500);
         }
-    }
-
-    componentWillUnmount() {
-        this.props.modificaClean();
     }
 
     onPressSelectImgCamera() {
@@ -67,23 +70,191 @@ class Imagens extends React.Component {
             cropping: true,
             includeBase64: true,
             mediaType: 'photo',
-          }).then(image => {
-              if (image) {
-                const storageRef = firebase.storage().ref();
-                const databaseRef = firebase.database().ref();
-    
-                const Blob = RNFetchBlob.polyfill.Blob;
-    
-                const glbXMLHttpRequest = global.XMLHttpRequest;
-                const glbBlob = global.Blob;
-    
-                let uploadBlob = null;
-    
-                global.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
-                global.Blob = Blob;
+            freeStyleCropEnabled: true,
+            compressImageMaxWidth: 600,
+            compressImageMaxHeight: 400,
+            compressImageQuality: 0.7
+        })
+        .then(image => checkConInfo(() => this.doUploadImageCamera(image), [], 500))
+        .catch(() => {
+            setTimeout(() => {
+                this.setState({ uploadModal: false });
+                this.setState({ uploadModalPerc: 0 });
+            }, 2000);
+        });
+    }
 
+    onPressSelectImgGallery() {
+        ImagePicker.openPicker({
+            width: 600,
+            height: 400,
+            cropping: true,
+            includeBase64: true,
+            mediaType: 'photo',
+            multiple: true,
+            freeStyleCropEnabled: true,
+            compressImageMaxWidth: 600,
+            compressImageMaxHeight: 400,
+            compressImageQuality: 0.7
+        })
+        .then(images => checkConInfo(() => this.doUploadImageGallery(images), [], 500))
+        .catch(() => {
+            setTimeout(() => {
+                this.setState({ uploadModal: false });
+                this.setState({ uploadModalPerc: 0 });
+            }, 2000);
+        });
+    }
+
+    onPressRemoveImage(image, loadingState) {
+        this.setState({ [loadingState]: true });
+
+        const databaseRef = firebase.database().ref();
+        const dbJogosRef = databaseRef.child(`jogos/${this.props.jogo.key}`);
+
+        const newImages = _.filter(
+            this.state.jogo.imagens, (img) => !typeof img === 'string' || img !== image
+        );
+
+        dbJogosRef.update({
+            imagens: newImages
+        })
+        .then(() => {
+            firebase.storage().refFromURL(image).delete()
+            .then(() => {
+                const newJogo = { ...this.state.jogo, imagens: newImages };
+                this.setState({ [loadingState]: false, jogo: newJogo });
+                this.updateProps();
+                Toast.show('Imagem removida.', Toast.SHORT);
+            })
+            .catch(() => { 
+                this.setState({ [loadingState]: false });
+                this.updateProps();
+            });
+        })
+        .catch(() => { 
+            this.setState({ [loadingState]: false });
+            this.updateProps();
+        });
+    }
+
+    doUploadImageCamera(image) {
+        if (image) {
+            this.setState({ 
+                uploadModal: true,
+                uploadModalPerc: 0,
+                uploadModalText: 'Enviando imagem...'
+            });
+
+            const storageRef = firebase.storage().ref();
+            const databaseRef = firebase.database().ref();
+
+            const Blob = RNFetchBlob.polyfill.Blob;
+
+            const glbXMLHttpRequest = global.XMLHttpRequest;
+            const glbBlob = global.Blob;
+
+            let uploadBlob = null;
+
+            global.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
+            global.Blob = Blob;
+
+            let contentType = '';
+            
+            if (image.mime) {
+                contentType = image.mime;
+            }
+
+            const metadata = {
+                contentType
+            };
+
+            const fileName = b64.encode(new Date().getTime().toString());
+            const imgExt = contentType.slice(contentType.indexOf('/') + 1);
+            const imgRef = storageRef.child(`jogos/${fileName}.${imgExt}`);
+            const dbJogosRef = databaseRef.child(`jogos/${this.props.jogo.key}`);
+
+            Blob.build(image.data, { type: `${contentType};BASE64` })
+            .then((blob) => { 
+                uploadBlob = blob;
+                const uploadTask = imgRef.put(blob, metadata);
+                uploadTask.on('state_changed', (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+                    this.setState({ uploadModalPerc: progress });
+                });
+
+                return uploadTask;
+            })
+            .then(() => {
+                if (uploadBlob) {
+                    uploadBlob.close();
+                    uploadBlob = null;
+                }
+                return imgRef.getDownloadURL();
+            })
+            .then((url) => {
+                const newImgs = [...this.state.jogo.imagens, url];
+                const newJogo = { ...this.state.jogo, imagens: newImgs };
+                this.setState({ jogo: newJogo });
+                return dbJogosRef.update({ imagens: newImgs });
+            })
+            .then(() => {
+                setTimeout(() => {
+                    this.setState({ uploadModal: false, uploadModalPerc: 0 });
+                    this.updateProps();
+                }, 2000);
+
+                global.XMLHttpRequest = glbXMLHttpRequest;
+                global.Blob = glbBlob;
+            })
+            .catch(() => {
+                setTimeout(() => {
+                    this.setState({ uploadModal: false, uploadModalPerc: 0 });
+                    this.updateProps();
+                }, 2000);
+
+                global.XMLHttpRequest = glbXMLHttpRequest;
+                global.Blob = glbBlob;
+            
+                if (uploadBlob) {
+                    uploadBlob.close();
+                }
+            });
+        }
+    }
+
+    async doUploadImageGallery(images) {
+        if (images && images.length > 0) {
+            if (images.length > 1) {
+                this.setState({ 
+                    uploadModal: true,
+                    uploadModalPerc: 0,
+                    uploadModalText: 'Enviando imagens...'
+                });
+            } else {
+                this.setState({ 
+                    uploadModal: true,
+                    uploadModalPerc: 0,
+                    uploadModalText: 'Enviando imagem...'
+                });
+            }
+            const storageRef = firebase.storage().ref();
+            const databaseRef = firebase.database().ref();
+
+            const Blob = RNFetchBlob.polyfill.Blob;
+
+            const glbXMLHttpRequest = global.XMLHttpRequest;
+            const glbBlob = global.Blob;
+
+            let indexUpload = 0;
+
+            global.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
+            global.Blob = Blob;
+
+            const funExec = async (image) => {
+                let uploadBlob = null;
                 let contentType = '';
-                
+
                 if (image.mime) {
                     contentType = image.mime;
                 }
@@ -97,139 +268,76 @@ class Imagens extends React.Component {
                 const imgRef = storageRef.child(`jogos/${fileName}.${imgExt}`);
                 const dbJogosRef = databaseRef.child(`jogos/${this.props.jogo.key}`);
     
-                Blob.build(image.data, { type: `${contentType};BASE64` })
-                .then((blob) => { 
+                await Blob.build(image.data, { type: `${contentType};BASE64` })
+                .then(async (blob) => { 
                     uploadBlob = blob;
                     return imgRef.put(blob, metadata);
                 })
-                .then(() => {
+                .then(async () => {
                     if (uploadBlob) {
                         uploadBlob.close();
                         uploadBlob = null;
                     }
-                    return imgRef.getDownloadURL();
+                    return await imgRef.getDownloadURL();
                 })
-                .then((url) => {
+                .then(async (url) => {
                     const newImgs = [...this.state.jogo.imagens, url];
                     const newJogo = { ...this.state.jogo, imagens: newImgs };
                     this.setState({ jogo: newJogo });
-                    return dbJogosRef.update({ imagens: newImgs });
+                    return await dbJogosRef.update({ imagens: newImgs });
                 })
-                .then(() => {
-                    global.XMLHttpRequest = glbXMLHttpRequest;
-                    global.Blob = glbBlob;
+                .then(async () => {
+                    indexUpload++;
+                    this.setState({ uploadModalPerc: indexUpload / images.length });
+                    if (images.length === indexUpload) {
+                        setTimeout(() => {
+                            this.setState({ uploadModal: false, uploadModalPerc: 0 });
+                            this.updateProps();
+                        }, 2000);
+                    }
+
+                    if (images.length === indexUpload) {
+                        global.XMLHttpRequest = glbXMLHttpRequest;
+                        global.Blob = glbBlob;
+                    }
+
+                    return await true;
                 })
-                .catch(() => {
-                    global.XMLHttpRequest = glbXMLHttpRequest;
-                    global.Blob = glbBlob;
+                .catch(async () => {
+                    setTimeout(() => {
+                        this.setState({ uploadModal: false, uploadModalPerc: 0 });
+                        this.updateProps();
+                    }, 2000);
                 
+                    if (images.length === indexUpload) {
+                        global.XMLHttpRequest = glbXMLHttpRequest;
+                        global.Blob = glbBlob;
+                    }
+
                     if (uploadBlob) {
                         uploadBlob.close();
                     }
+
+                    return await true;
                 });
+            };
+
+            const reversedArray = _.reverse(images);
+
+            for (const image of reversedArray) {
+                await funExec(image);
             }
-        }).catch(() => false);
+        }
     }
 
-    onPressSelectImgGallery() {
-        ImagePicker.openPicker({
-            width: 600,
-            height: 400,
-            cropping: true,
-            includeBase64: true,
-            mediaType: 'photo',
-            multiple: true
-          })
-          .then(images => {
-              if (images && images.length > 0) {
-                const storageRef = firebase.storage().ref();
-                const databaseRef = firebase.database().ref();
-    
-                const Blob = RNFetchBlob.polyfill.Blob;
-    
-                const glbXMLHttpRequest = global.XMLHttpRequest;
-                const glbBlob = global.Blob;
-    
-                let uploadBlob = null;
-    
-                global.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
-                global.Blob = Blob;
-
-                images.forEach(async (image, index) => {
-                    let contentType = '';
-                    
-                    if (image.mime) {
-                        contentType = image.mime;
-                    }
-
-                    const metadata = {
-                        contentType
-                    };
-        
-                    const fileName = b64.encode(new Date().getTime().toString());
-                    const imgExt = contentType.slice(contentType.indexOf('/') + 1);
-                    const imgRef = storageRef.child(`jogos/${fileName}.${imgExt}`);
-                    const dbJogosRef = databaseRef.child(`jogos/${this.props.jogo.key}`);
-        
-                    await Blob.build(image.data, { type: `${contentType};BASE64` })
-                    .then((blob) => { 
-                        uploadBlob = blob;
-                        return imgRef.put(blob, metadata);
-                    })
-                    .then(() => {
-                        if (uploadBlob) {
-                            uploadBlob.close();
-                            uploadBlob = null;
-                        }
-                        return imgRef.getDownloadURL();
-                    })
-                    .then((url) => {
-                        const newImgs = [...this.state.jogo.imagens, url];
-                        const newJogo = { ...this.state.jogo, imagens: newImgs };
-                        this.setState({ jogo: newJogo });
-                        return dbJogosRef.update({ imagens: newImgs });
-                    })
-                    .then(() => {
-                        if (images.length === index + 1) {
-                            global.XMLHttpRequest = glbXMLHttpRequest;
-                            global.Blob = glbBlob;
-                        }
-                    })
-                    .catch(() => {
-                        if (images.length === index + 1) {
-                            global.XMLHttpRequest = glbXMLHttpRequest;
-                            global.Blob = glbBlob;
-                        }
-
-                        if (uploadBlob) {
-                            uploadBlob.close();
-                        }
-                    });
-                });
-            }
-        })
-        .catch(() => false);
-    }
-
-    onPressRemoveImage(image) {
+    updateProps() {
         const databaseRef = firebase.database().ref();
         const dbJogosRef = databaseRef.child(`jogos/${this.props.jogo.key}`);
-
-        const newImages = _.filter(
-            this.state.jogo.imagens, (img) => !typeof img === 'string' || img !== image
-        );
-
-        dbJogosRef.update({
-            imagens: newImages
-        })
-        .then(() => {
-            const newJogo = { ...this.state.jogo, imagens: newImages };
-            this.setState({ jogo: newJogo });
-            firebase.storage().refFromURL(image).delete()
-            .then(() => true)
-            .catch(() => true);
-        })
-        .catch(() => false);
+        dbJogosRef.once('value', (snapshot) => {
+            if (snapshot && snapshot.val()) {
+                this.setState({ jogo: { ...snapshot.val() } });
+            }
+        });
     }
 
     rightButtonImagens() {
@@ -243,7 +351,7 @@ class Imagens extends React.Component {
                 }}
             >
                 <TouchableOpacity
-                    onPress={() => this.onPressSelectImgCamera()}
+                    onPress={() => checkConInfo(() => this.onPressSelectImgCamera())}
                 >
                     <Icon
                         iconStyle={{ marginHorizontal: 5 }}
@@ -254,7 +362,7 @@ class Imagens extends React.Component {
                     />
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={() => this.onPressSelectImgGallery()}
+                    onPress={() => checkConInfo(() => this.onPressSelectImgGallery())}
                 >
                     <Icon
                         iconStyle={{ marginHorizontal: 5 }}
@@ -276,9 +384,10 @@ class Imagens extends React.Component {
             const imagensView = filteredImgs.map((item, index) => (
                     <View key={index}>
                         <TouchableOpacity
-                            onPress={() => 
-                                this.setState({ imgSelected: index, showImageView: true })
-                            }
+                            onPress={() => {
+                                this.setState({ imgSelected: index });
+                                this.props.modificaShowImageView(true);
+                            }}
                         >
                             <Card 
                                 containerStyle={styles.card}
@@ -294,20 +403,35 @@ class Imagens extends React.Component {
                                             <Divider />
                                         </View>
                                         <TouchableOpacity
-                                            onPress={() => this.onPressRemoveImage(item)}
+                                            onPress={() =>
+                                                checkConInfo(() => 
+                                                this.onPressRemoveImage(item, `loading${index}`))
+                                            }
                                         >
                                             <View style={styles.viewImageSelect}>
-                                                <FormLabel 
-                                                    labelStyle={{ 
-                                                        color: 'white',
-                                                        fontSize: 16, 
-                                                        fontWeight: '500',
-                                                        marginTop: 0, 
-                                                        marginBottom: 0 
-                                                    }}
-                                                >
-                                                    Remover
-                                                </FormLabel> 
+                                                {
+                                                    this.state[`loading${index}`] ?
+                                                    (
+                                                        <ActivityIndicator 
+                                                            size={'small'}
+                                                            color={'white'}
+                                                        />
+                                                    )
+                                                    :
+                                                    (
+                                                        <FormLabel 
+                                                            labelStyle={{ 
+                                                                color: 'white',
+                                                                fontSize: 14, 
+                                                                fontWeight: '500',
+                                                                marginTop: 0, 
+                                                                marginBottom: 0 
+                                                            }}
+                                                        >
+                                                            Remover
+                                                        </FormLabel>
+                                                    )
+                                                }
                                             </View>
                                         </TouchableOpacity>
                                     </View>
@@ -326,7 +450,9 @@ class Imagens extends React.Component {
 
     render() {
         let imagesForView = _.filter(this.state.jogo.imagens, (img) => !img.push);
-        imagesForView = imagesForView.map((item) => ({ source: { uri: item } }));
+        imagesForView = imagesForView.map(
+            (item) => ({ source: { uri: item, width: 600, height: 400 } })
+        );
 
         return (
             <View style={styles.viewPrinc}>
@@ -341,10 +467,29 @@ class Imagens extends React.Component {
                 <ImageView
                     images={imagesForView}
                     imageIndex={this.state.imgSelected}
-                    isVisible={this.state.showImageView}
+                    isVisible={this.props.showImageView}
                     renderFooter={() => (<View />)}
-                    onClose={() => this.setState({ showImageView: false })}
+                    onClose={() => this.props.modificaShowImageView(false)}
                 />
+                <Dialog 
+                    visible={this.state.uploadModal}
+                    title={this.state.uploadModalText}
+                    onTouchOutside={() => true}
+                >
+                    <View 
+                        style={{ 
+                            alignItems: 'center',
+                            justifyContent: 'center' 
+                        }}
+                    >
+                        <Progress.Circle 
+                            progress={this.state.uploadModalPerc}
+                            size={100}
+                            showsText
+                            color={colorAppS}
+                        />
+                    </View>
+                </Dialog>
             </View>
         );
     }
@@ -392,10 +537,8 @@ const styles = StyleSheet.create({
     }
 });
 
-const mapStateToProps = () => ({
+const mapStateToProps = (state) => ({
+    showImageView: state.ImagensReducer.showImageView
 });
 
-export default connect(mapStateToProps, {
-    modificaJogoSelected,
-    modificaClean
-})(Imagens);
+export default connect(mapStateToProps, { modificaShowImageView })(Imagens);

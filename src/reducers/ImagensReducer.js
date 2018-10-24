@@ -1,5 +1,6 @@
 const INITIAL_STATE = {
-    jogoSelected: {}
+    jogoSelected: {},
+    showImageView: false
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -9,10 +10,16 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 jogoSelected: { ...action.payload }
             };
+        case 'modifica_showimageview_imagens':
+            return { 
+                ...state, 
+                showImageView: action.payload
+            };
         case 'modifica_clean_imagens':
             return {
                 ...state,
-                jogoSelected: {}
+                jogoSelected: {},
+                showImageView: false
             };
         default:
             return state;
