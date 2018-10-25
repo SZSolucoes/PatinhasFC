@@ -565,7 +565,8 @@ class EscalacaoG extends React.Component {
                     jogadoresCasaFt={jogadoresCasaFt}
                     jogadoresVisitFt={jogadoresVisitFt}
                 />
-                <Dialog 
+                <Dialog
+                    animationType={'fade'}
                     visible={this.props.endGameModal && Actions.currentScene === '_escalacaoTabG'}
                     title='Gravando dados...'
                     onTouchOutside={() => true}

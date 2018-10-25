@@ -25,6 +25,7 @@ import { Actions } from 'react-native-router-flux';
 import { Card, Divider, SearchBar, Avatar } from 'react-native-elements';
 import { isPortrait } from '../../utils/orientation';
 import { startFbListener, stopFbListener } from '../../utils/firebaseListeners';
+import { updateUserImages } from '../../utils/userUtils';
 import LoadingBallAnim from '../animations/LoadingBallAnim';
 import Versus from './Versus';
 import imgCampoJogos from '../../imgs/campojogos.png';
@@ -89,23 +90,39 @@ class Jogos extends React.Component {
 
     componentDidMount() {
         this.startOrStopFBJogosListener(true);
+        const dbFbRef = firebase.database().ref();
+        const userNode = dbFbRef.child(`usuarios/${b64.encode(this.props.username)}`);
         
         AsyncStorage.getItem('userNotifToken').then((userNotifToken) => {
-            const dbFbRef = firebase.database().ref();
             const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
             if (userNotifToken) {
-                dbFbRef.child(`usuarios/${b64.encode(this.props.username)}`).update({
+                userNode.update({
                     dataHoraUltimoLogin: dataAtual,
                     userNotifToken
                 })
                 .then(() => true)
                 .catch(() => true);
             } else {
-                dbFbRef.child(`usuarios/${b64.encode(this.props.username)}`).update({
+                userNode.update({
                     dataHoraUltimoLogin: dataAtual
                 })
                 .then(() => true)
                 .catch(() => true);
+            }
+        });
+
+        userNode.once('value', (snapshot) => {
+            if (snapshot.val()) {
+                if (snapshot.val().infoImgUpdated === 'false' || 
+                snapshot.val().jogosImgUpdated === 'false') {
+                    setTimeout(() => updateUserImages(
+                        snapshot.val().infoImgUpdated,
+                        snapshot.val().jogosImgUpdated,
+                        snapshot.val().email, 
+                        snapshot.key, 
+                        snapshot.val().imgAvatar
+                    ), 2000);
+                }
             }
         });
         

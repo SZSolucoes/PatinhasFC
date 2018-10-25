@@ -139,7 +139,9 @@ class UsuarioEdit extends React.Component {
                     cartoesAmarelos: '0',
                     cartoesVermelhos: '0',
                     posicao: '',
-                    userNotifToken: ''
+                    userNotifToken: '',
+                    infoImgUpdated: 'true', 
+                    jogosImgUpdated: 'true'
                 };
                 dbUsuariosRef.set({ ...newUser })
                 .then(() => {

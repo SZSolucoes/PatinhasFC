@@ -89,7 +89,9 @@ const onLoginSuccess = (dispatch, params) => {
                 cartoesAmarelos: '0',
                 cartoesVermelhos: '0',
                 posicao: '',
-                userNotifToken: ''
+                userNotifToken: '',
+                infoImgUpdated: 'true', 
+                jogosImgUpdated: 'true'
             };
 
             dbUsuarioRef.set({ ...usuarioLogged })

@@ -2581,7 +2581,8 @@ class JogoG extends React.Component {
                     jogadoresCasaFt={jogadoresCasaFt}
                     jogadoresVisitFt={jogadoresVisitFt}
                 />
-                <Dialog 
+                <Dialog
+                    animationType={'fade'} 
                     visible={this.props.endGameModal && Actions.currentScene === '_jogoTabG'}
                     title='Gravando dados...'
                     onTouchOutside={() => true}

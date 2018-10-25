@@ -18,6 +18,7 @@ import { showAlert } from '../../utils/store';
 import { colorAppP } from '../../utils/constantes';
 import { retrieveImgSource } from '../../utils/imageStorage';
 import { checkConInfo } from '../../utils/jogosUtils';
+import { updateUserImages } from '../../utils/userUtils';
 
 import firebase from '../../Firebase';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -110,7 +111,18 @@ class Profile extends React.Component {
                 return imgRef.getDownloadURL();
             })
             .then((url) => {
-                const imgUpd = type === 'userImg' ? { imgAvatar: url } : { imgBackground: url };
+                const imgUpd = type === 'userImg' ? 
+                { imgAvatar: url, infoImgUpdated: 'false', jogosImgUpdated: 'false' } : 
+                { imgBackground: url };
+                if (type === 'userImg') {
+                    setTimeout(() => updateUserImages(
+                        'false',
+                        'false',
+                        userLogged.email, 
+                        userLogged.key, 
+                        url
+                    ), 2000);
+                }
                 databaseRef.child(`usuarios/${usuariob64}`).update(imgUpd);
             })
             .then(() => {

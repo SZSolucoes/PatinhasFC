@@ -4,6 +4,7 @@ import {
     ScrollView, 
     StyleSheet,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     Image,
     ActivityIndicator
 } from 'react-native';
@@ -383,7 +384,7 @@ class Imagens extends React.Component {
         if (filteredImgs.length > 0) {
             const imagensView = filteredImgs.map((item, index) => (
                     <View key={index}>
-                        <TouchableOpacity
+                        <TouchableWithoutFeedback
                             onPress={() => {
                                 this.setState({ imgSelected: index });
                                 this.props.modificaShowImageView(true);
@@ -437,7 +438,7 @@ class Imagens extends React.Component {
                                     </View>
                                 }
                             </Card>
-                        </TouchableOpacity>
+                        </TouchableWithoutFeedback>
                         <View style={{ marginBottom: 5 }} />
                     </View>
                 )
@@ -471,7 +472,8 @@ class Imagens extends React.Component {
                     renderFooter={() => (<View />)}
                     onClose={() => this.props.modificaShowImageView(false)}
                 />
-                <Dialog 
+                <Dialog
+                    animationType={'fade'}
                     visible={this.state.uploadModal}
                     title={this.state.uploadModalText}
                     onTouchOutside={() => true}
