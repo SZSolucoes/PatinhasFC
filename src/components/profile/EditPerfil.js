@@ -23,7 +23,7 @@ import Moment from 'moment';
 import { connect } from 'react-redux';
 import firebase from '../../Firebase';
 import { checkConInfo } from '../../utils/jogosUtils';
-import { showAlert } from '../../utils/store';
+import { showAlert, mappedKeyStorage } from '../../utils/store';
 
 class EditPerfil extends React.Component {
 
@@ -130,7 +130,7 @@ class EditPerfil extends React.Component {
             .then(() => {
                 user.updatePassword(novaSenha).then(() => {
                     this.setState({ loadingSenha: false });
-                    AsyncStorage.setItem('password', novaSenha);
+                    AsyncStorage.setItem(mappedKeyStorage('password'), novaSenha);
                     showAlert('success', 'Sucesso!', 'Senha alterada com sucesso.');
                 }).catch((error) => {
                     this.setState({ loadingSenha: false });

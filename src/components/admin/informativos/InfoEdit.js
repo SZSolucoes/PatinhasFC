@@ -59,6 +59,7 @@ class UsuarioEdit extends React.Component {
             height: 400,
             cropping: true,
             includeBase64: true,
+            cropperCircleOverlay: false,
             mediaType: 'photo'
           }).then(image => {
             if (image) {

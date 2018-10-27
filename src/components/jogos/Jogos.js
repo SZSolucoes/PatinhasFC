@@ -44,6 +44,7 @@ import firebase from '../../Firebase';
 import { modificaListUsuarios } from '../../actions/UsuariosActions';
 import { colorAppT } from '../../utils/constantes';
 import { retrieveImgSource } from '../../utils/imageStorage';
+import { mappedKeyStorage } from '../../utils/store';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
@@ -93,7 +94,7 @@ class Jogos extends React.Component {
         const dbFbRef = firebase.database().ref();
         const userNode = dbFbRef.child(`usuarios/${b64.encode(this.props.username)}`);
         
-        AsyncStorage.getItem('userNotifToken').then((userNotifToken) => {
+        AsyncStorage.getItem(mappedKeyStorage('userNotifToken')).then((userNotifToken) => {
             const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
             if (userNotifToken) {
                 userNode.update({
@@ -293,6 +294,9 @@ class Jogos extends React.Component {
         if (jogos) {
             if (filterStr) {
                 newJogos = this.onFilterJogos(jogos, filterStr);
+                if (!newJogos || newJogos.length === 0) {
+                    setTimeout(() => this.props.modificaFilterLoad(false), 1000);
+                }
             }
             this.lastIndexListJogos = newJogos.length - 1;
         }

@@ -52,7 +52,7 @@ class EscalacaoP extends React.Component {
         this.renderConfirmados = this.renderConfirmados.bind(this);
 
         this.state = {
-            heightDim: Dimensions.get('screen').height / 2.5,
+            heightDim: Dimensions.get('screen').height,
             animCasaValue: new Animated.Value(),
             animVisitValue: new Animated.Value(),
             isCasaExpanded: true,
@@ -62,6 +62,11 @@ class EscalacaoP extends React.Component {
 
     componentDidMount() {
         Dimensions.addEventListener('change', this.onChangeDimensions);
+        if (isPortrait()) {
+            this.setState({ heightDim: Dimensions.get('screen').height / 2.5 });
+        } else {
+            this.setState({ heightDim: Dimensions.get('screen').height / 1.5 });
+        }
     }
 
     shouldComponentUpdate(nextProps, nextStates) {

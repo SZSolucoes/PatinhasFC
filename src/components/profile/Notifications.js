@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import { CheckBox, List, ListItem } from 'react-native-elements';
 import FCM from 'react-native-fcm';
 import { checkConInfo } from '../../utils/jogosUtils';
+import { mappedKeyStorage } from '../../utils/store';
 
 class Notifications extends React.Component {
 
@@ -23,8 +24,8 @@ class Notifications extends React.Component {
     }
 
     componentDidMount() {
-        AsyncStorage.getItem('notifAllTopicEnabled').then((value) => {
-            if (value && value === 'true') {
+        AsyncStorage.getItem(mappedKeyStorage('notifAllTopicEnabled')).then((value) => {
+            if (value && value === 'yes') {
                 this.setState({ notifAllTopicEnabled: true });
             }
         });
@@ -33,12 +34,12 @@ class Notifications extends React.Component {
     onPressCheck(checkName) {
         if (checkName === 'notifAllTopicEnabled') {
             if (this.state.notifAllTopicEnabled) {
-                AsyncStorage.setItem('notifAllTopicEnabled', 'false').then(() => {
+                AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'no').then(() => {
                     FCM.unsubscribeFromTopic('all');
                     this.setState({ notifAllTopicEnabled: false });
                 });
             } else {
-                AsyncStorage.setItem('notifAllTopicEnabled', 'true').then(() => {
+                AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'yes').then(() => {
                     FCM.subscribeToTopic('all');
                     this.setState({ notifAllTopicEnabled: true });
                 });

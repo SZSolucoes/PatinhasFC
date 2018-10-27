@@ -51,6 +51,7 @@ import firebase from './Firebase';
 import SplashScreenAnim from './components/animations/SplashScreenAnim';
 import AnimScene from './components/tools/AnimatedScene';
 import { doEndGame, checkConInfo } from './utils/jogosUtils';
+import { mappedKeyStorage } from './utils/store';
 
 import imgFinishFlag from './imgs/finishflag.png';
 
@@ -79,24 +80,34 @@ class Routes extends React.Component {
 
     componentDidMount() {
         setTimeout(() => this.setState({ timingNotEnd: false }), 10000);
-        AsyncStorage.getItem('username')
-        .then((userName) => {
-            if (userName) {
-                AsyncStorage.getItem('password')
-                .then((password) => {
-                    if (password) {
-                        store.dispatch({
-                            type: 'modifica_username_login',
-                            payload: userName
-                        });
-                        store.dispatch({
-                            type: 'modifica_password_login',
-                            payload: password
-                        });
 
-                        this.setState({
-                            logged: true,
-                            loading: false,
+        AsyncStorage.getItem(mappedKeyStorage('loginAutomaticoEnabled'))
+        .then((loginAutomaticoEnabled) => {
+            if (loginAutomaticoEnabled && loginAutomaticoEnabled === 'yes') {
+                AsyncStorage.getItem(mappedKeyStorage('username'))
+                .then((userName) => {
+                    if (userName) {
+                        AsyncStorage.getItem(mappedKeyStorage('password'))
+                        .then((password) => {
+                            if (password) {
+                                store.dispatch({
+                                    type: 'modifica_username_login',
+                                    payload: userName
+                                });
+                                store.dispatch({
+                                    type: 'modifica_password_login',
+                                    payload: password
+                                });
+        
+                                this.setState({
+                                    logged: true,
+                                    loading: false,
+                                });
+                            } else {
+                                this.setState({
+                                    loading: false,
+                                });
+                            }
                         });
                     } else {
                         this.setState({
@@ -109,8 +120,12 @@ class Routes extends React.Component {
                     loading: false,
                 });
             }
-        }
-        );
+        })
+        .catch(() => {
+            this.setState({
+                loading: false,
+            });
+        });
 
         BackHandler.addEventListener('hardwareBackPress', () => {
             Keyboard.dismiss();
@@ -219,7 +234,10 @@ class Routes extends React.Component {
     onChangeDimension() {
         if (isLandscape()) {
             const toValue = Dimensions.get('screen').height;
-            StatusBar.setHidden(true);
+            
+            if (!this.state.timingNotEnd) {
+                StatusBar.setHidden(true);
+            }
             
             Animated.timing(
                 this.state.animHeigth, 
@@ -231,7 +249,7 @@ class Routes extends React.Component {
             ).start();
         } else {
             const isComentUp = store.getState().InfoReducer.startUpOrDownAnim === 'up';
-            if (!(this.state.loading || this.state.timingNotEnd)) {
+            if (!this.state.timingNotEnd) {
                 StatusBar.setHidden(false);
             }
 

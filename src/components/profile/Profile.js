@@ -14,7 +14,7 @@ import b64 from 'base-64';
 import { Button, List, ListItem } from 'react-native-elements';
 import ParallaxScrollView from 'react-native-parallax-scrollview';
 import ImagePicker from 'react-native-image-crop-picker';
-import { showAlert } from '../../utils/store';
+import { showAlert, mappedKeyStorage } from '../../utils/store';
 import { colorAppP } from '../../utils/constantes';
 import { retrieveImgSource } from '../../utils/imageStorage';
 import { checkConInfo } from '../../utils/jogosUtils';
@@ -39,8 +39,8 @@ class Profile extends React.Component {
     }
 
     onPressLogout() {
-        AsyncStorage.removeItem('username');
-        AsyncStorage.removeItem('password');
+        AsyncStorage.removeItem(mappedKeyStorage('username'));
+        AsyncStorage.removeItem(mappedKeyStorage('password'));
 
         Actions.replace('login');
     }

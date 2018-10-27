@@ -39,3 +39,15 @@ export const showAlertDesenv = () => {
     });
 };
 
+export const mappedKeyStorage = (key) => {
+    const keys = {
+        username: 'UID001',
+        password: 'UID002',
+        userNotifToken: 'UID003',
+        notifAllTopicEnabled: 'UID004',
+        loginAutomaticoEnabled: 'UID005'
+    };
+
+    return keys[key];
+};
+

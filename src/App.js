@@ -11,6 +11,7 @@ import { decode, encode } from 'base-64';
 import Routes from './Routes';
 import reducers from './reducers';
 import { startFbListener } from './utils/firebaseListeners';
+import { mappedKeyStorage } from './utils/store';
 
 if (!global.btoa) {
     global.btoa = encode;
@@ -40,20 +41,32 @@ class App extends React.Component {
         ]);
 
         setTimeout(() => 
-            AsyncStorage.getItem('username')
+            AsyncStorage.getItem(mappedKeyStorage('username'))
             .then((userName) => {
                 if (userName) {
-                    AsyncStorage.getItem('password')
-                    .then((password) => {
+                    AsyncStorage.getItem(mappedKeyStorage('password'))
+                    .then(async (password) => {
                         if (password) {
-                            store.dispatch({
-                                type: 'modifica_username_login',
-                                payload: userName
-                            });
-                            store.dispatch({
-                                type: 'modifica_password_login',
-                                payload: password
-                            });
+                            let loginAutomaticoEnabled = '';
+                            try {
+                                loginAutomaticoEnabled = await AsyncStorage.getItem(
+                                    mappedKeyStorage('loginAutomaticoEnabled')
+                                );
+                            } catch (e) {
+                                console.error(e);
+                                AsyncStorage
+                                .setItem(mappedKeyStorage('loginAutomaticoEnabled'), 'yes');
+                            }
+                            if (loginAutomaticoEnabled && loginAutomaticoEnabled === 'yes') {
+                                store.dispatch({
+                                    type: 'modifica_username_login',
+                                    payload: userName
+                                });
+                                store.dispatch({
+                                    type: 'modifica_password_login',
+                                    payload: password
+                                });
+                            }
 
                             startFbListener('usuario', { email: userName });
                         } 
@@ -61,7 +74,7 @@ class App extends React.Component {
                 } 
             }
         ), 1000);
-        
+
         NetInfo.addEventListener(
             'connectionChange',
             this.onNetInfoChanged
@@ -69,7 +82,7 @@ class App extends React.Component {
     }
 
     async componentDidMount() {
-        FCM.createNotificationChannel({
+        await FCM.createNotificationChannel({
             id: 'default',
             name: 'Default',
             description: 'used for example',
@@ -86,11 +99,6 @@ class App extends React.Component {
             console.error(e);
         }
 
-        FCM.getFCMToken().then(token => {
-            if (token) {
-                AsyncStorage.setItem('userNotifToken', token); 
-            }
-        });  
         FCM.on(FCMEvent.Notification, notif => {
                 if (AppState.currentState === 'active') {
                     if (Platform.OS === 'ios' && 
@@ -124,22 +132,50 @@ class App extends React.Component {
                 }
             }
         );
+
         FCM.on(FCMEvent.RefreshToken, (newToken) => {
             if (newToken) {
-                AsyncStorage.setItem('userNotifToken', newToken); 
+                AsyncStorage.setItem(mappedKeyStorage('userNotifToken'), newToken); 
             }
         });
 
-        AsyncStorage.getItem('notifAllTopicEnabled').then((enabled) => {
-            if (enabled && enabled === 'true') {
-                FCM.subscribeToTopic('all');
-            } else if (enabled && enabled === 'false') {
-                FCM.unsubscribeFromTopic('all');
-            } else {
-                FCM.subscribeToTopic('all');
-                setTimeout(() => AsyncStorage.setItem('notifAllTopicEnabled', 'true'), 500);
+        try {
+            const loginAutomaticoEnabled = await AsyncStorage.getItem(
+                mappedKeyStorage('loginAutomaticoEnabled')
+            );
+
+            if (!loginAutomaticoEnabled) {
+                AsyncStorage.setItem(mappedKeyStorage('loginAutomaticoEnabled'), 'yes');
+            }
+        } catch (e) {
+            console.error(e);
+            AsyncStorage.setItem(mappedKeyStorage('loginAutomaticoEnabled'), 'yes');
+        }
+
+        await FCM.getFCMToken().then(token => {
+            if (token) {
+                AsyncStorage.setItem(mappedKeyStorage('userNotifToken'), token); 
             }
         });
+
+        try {
+            const notifAllTopicEnabled = await AsyncStorage.getItem(
+                mappedKeyStorage('notifAllTopicEnabled')
+            );
+
+            if (notifAllTopicEnabled && notifAllTopicEnabled === 'yes') {
+                FCM.subscribeToTopic('all');
+            } else if (notifAllTopicEnabled && notifAllTopicEnabled === 'no') {
+                FCM.unsubscribeFromTopic('all');
+            } else {
+                FCM.subscribeToTopic('all'); 
+                AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'yes');
+            }
+        } catch (e) {
+            console.error(e);
+            FCM.subscribeToTopic('all'); 
+            AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'yes');
+        } 
     }
 
     onNetInfoChanged(conInfo) {

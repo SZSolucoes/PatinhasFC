@@ -4,7 +4,7 @@ import Moment from 'moment';
 import b64 from 'base-64';
 import { Actions } from 'react-native-router-flux';
 import firebase from '../Firebase';
-import { showAlert } from '../utils/store';
+import { showAlert, mappedKeyStorage } from '../utils/store';
 
 export const modificaUsername = (value) => ({
     type: 'modifica_username_login',
@@ -121,8 +121,8 @@ const onLoginSuccess = (dispatch, params) => {
                 payload: false
             });
         
-            AsyncStorage.setItem('username', params.email);
-            AsyncStorage.setItem('password', params.password);
+            AsyncStorage.setItem(mappedKeyStorage('username'), params.email);
+            AsyncStorage.setItem(mappedKeyStorage('password'), params.password);
         
             Actions.mainTabBar();
         }
