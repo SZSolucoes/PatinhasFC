@@ -362,7 +362,7 @@ class Info extends React.Component {
                                     }}
                                     selectedTextStyle={{
                                         color: 'white',
-                                        fontSize: 20,
+                                        fontSize: 16,
                                         fontWeight: 'bold',
                                         textAlign: 'center',
                                         marginVertical: 8,
@@ -452,7 +452,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'red',
         flex: 1,
         flexDirection: 'row',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         justifyContent: 'center',
         marginHorizontal: 15,
         marginVertical: 20,
@@ -464,7 +464,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'center',
-        marginVertical: 8,
         marginRight: 5
     }
 });
