@@ -3,7 +3,8 @@ import {
     View, 
     StyleSheet,
     AsyncStorage,
-    Dimensions
+    Dimensions,
+    Text
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -14,8 +15,9 @@ import b64 from 'base-64';
 import { Button, List, ListItem } from 'react-native-elements';
 import ParallaxScrollView from 'react-native-parallax-scrollview';
 import ImagePicker from 'react-native-image-crop-picker';
+import { Dialog } from 'react-native-simple-dialogs';
 import { showAlert, mappedKeyStorage } from '../../utils/store';
-import { colorAppP } from '../../utils/constantes';
+import { colorAppP, colorAppS } from '../../utils/constantes';
 import { retrieveImgSource } from '../../utils/imageStorage';
 import { checkConInfo } from '../../utils/jogosUtils';
 import { updateUserImages } from '../../utils/userUtils';
@@ -34,7 +36,8 @@ class Profile extends React.Component {
         this.doUploadUserImg = this.doUploadUserImg.bind(this);
 
         this.state = {
-            progress: 0
+            progress: 0,
+            showAbout: false
         };
     }
 
@@ -218,6 +221,13 @@ class Profile extends React.Component {
                             leftIcon={{ name: 'settings', type: 'material-community' }}
                             onPress={() => Actions.profilePreferencias()}
                         />
+                        <ListItem
+                            key={'Sobre'}
+                            title={'Sobre'}
+                            leftIcon={{ name: 'information-outline', type: 'material-community' }}
+                            onPress={() => this.setState({ showAbout: true })}
+                            hideChevron
+                        />
                     </List>
                     <Button 
                         small 
@@ -227,6 +237,43 @@ class Profile extends React.Component {
                     />
                     <View style={{ marginBottom: 100 }} />
                 </ParallaxScrollView>
+                <Dialog
+                    animationType={'fade'}
+                    visible={this.state.showAbout}
+                    title={'Patinhas FC'}
+                    onTouchOutside={() => this.setState({ showAbout: false })}
+                >
+                    <View 
+                        style={{
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%' 
+                        }}
+                    >
+                        <View style={{ marginVertical: 20, flexDirection: 'row' }}>
+                            <View style={{ marginHorizontal: 10 }}>
+                                <Text style={{ fontSize: 16, color: 'black' }}>
+                                    Versão:
+                                </Text>
+                            </View>
+                            <View style={{ marginHorizontal: 10 }}>
+                                <Text style={{ fontSize: 16, color: 'black' }}>
+                                    1.0.0
+                                </Text>
+                            </View>
+                        </View>
+                        <View style={{ marginTop: 5 }}>
+                            <Button 
+                                small 
+                                title={'Fechar'}
+                                backgroundColor={colorAppS}
+                                textStyle={{ color: 'white' }}
+                                buttonStyle={{ width: '100%' }}
+                                onPress={() => this.setState({ showAbout: false })}
+                            />
+                        </View>
+                    </View>
+                </Dialog>
             </View>
         );
     }

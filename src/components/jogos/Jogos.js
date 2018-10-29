@@ -561,7 +561,10 @@ class Jogos extends React.Component {
                                         rounded
                                         title={'GO'}
                                         source={retrieveImgSource(userImg)}
-                                        onPress={() => Keyboard.dismiss()}
+                                        onPress={() => { 
+                                            Keyboard.dismiss();
+                                            Actions.replace('_perfil');
+                                        }}
                                         activeOpacity={0.7}
                                     /> 
                                 </View>
