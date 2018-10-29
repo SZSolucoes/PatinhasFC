@@ -12,11 +12,11 @@ import {
     Card, 
     Icon,
     SearchBar,
-    Divider
+    Divider,
+    ButtonGroup
 } from 'react-native-elements';
 import _ from 'lodash';
 
-import ModalDropdown from 'react-native-modal-dropdown';
 import { colorAppS, colorAppF } from '../../../utils/constantes';
 import { showAlert } from '../../../utils/store';
 import { checkConInfo } from '../../../utils/jogosUtils';
@@ -36,7 +36,6 @@ class CadastroJogos extends React.Component {
         super(props);
 
         this.state = {
-            dropWidth: 0,
             modalOpt: 'Cadastrar',
             itemEdit: {},
             idxMdl: 0,
@@ -200,34 +199,37 @@ class CadastroJogos extends React.Component {
 
     renderEditar() {
         return (
-            <Card containerStyle={styles.card}>
-                <SearchBar
-                    round
-                    lightTheme
-                    autoCapitalize={'none'}
-                    autoCorrect={false}
-                    clearIcon={!!this.props.filterStr}
-                    showLoadingIcon={
-                        this.props.listJogos &&
-                        this.props.listJogos.length > 0 && 
-                        this.props.filterLoad
-                    }
-                    containerStyle={{ 
-                        backgroundColor: 'transparent',
-                        borderTopWidth: 0, 
-                        borderBottomWidth: 0
-                    }}
-                    searchIcon={{ size: 26 }}
-                    value={this.props.filterStr}
-                    onChangeText={(value) => {
-                        this.props.modificaFilterStr(value);
-                        this.props.modificaFilterLoad(true);
-                    }}
-                    onClear={() => this.props.modificaFilterStr('')}
-                    placeholder='Buscar jogo...' 
-                />
-                { this.renderBasedFilterOrNot() }
-            </Card>
+            <View>
+                <Card containerStyle={styles.card}>
+                    <SearchBar
+                        round
+                        lightTheme
+                        autoCapitalize={'none'}
+                        autoCorrect={false}
+                        clearIcon={!!this.props.filterStr}
+                        showLoadingIcon={
+                            this.props.listJogos &&
+                            this.props.listJogos.length > 0 && 
+                            this.props.filterLoad
+                        }
+                        containerStyle={{ 
+                            backgroundColor: 'transparent',
+                            borderTopWidth: 0, 
+                            borderBottomWidth: 0
+                        }}
+                        searchIcon={{ size: 26 }}
+                        value={this.props.filterStr}
+                        onChangeText={(value) => {
+                            this.props.modificaFilterStr(value);
+                            this.props.modificaFilterLoad(true);
+                        }}
+                        onClear={() => this.props.modificaFilterStr('')}
+                        placeholder='Buscar jogo...' 
+                    />
+                    { this.renderBasedFilterOrNot() }
+                </Card>
+                <View style={{ marginBottom: 30 }} />
+            </View>
         );
     }
 
@@ -281,49 +283,91 @@ class CadastroJogos extends React.Component {
     }
 
     render() {
+        const buttonsGroup = ['Cadastrar', 'Editar'];
         return (
             <View style={styles.viewPrinc}>
                 <View style={{ flexDirection: 'row' }}>
-                    <View 
-                        style={{ flex: 1 }}
-                        onLayout={
-                            (event) =>
-                                this.setState({
-                                    dropWidth: event.nativeEvent.layout.width
-                        })}
-                    />
-                    <Card
-                        containerStyle={
-                            this.state.modalOpt !== 'Em Edição' ?
-                            styles.dropCard : styles.dropCardRed
-                        }
-                    >
-                        { 
-                            this.state.dropWidth && this.state.modalOpt !== 'Em Edição' ?
-                            (
-                                <View style={{ flexDirection: 'row' }}>
-                                    <ModalDropdown
-                                        ref={(ref) => { this.modalDropRef = ref; }}
-                                        style={{
-                                            width: this.state.dropWidth - 1
-                                        }}
-                                        textStyle={styles.dropModalBtnText}
-                                        dropdownTextStyle={{ fontSize: 16 }}
-                                        options={['Cadastrar', 'Editar']}
-                                        onSelect={(index, value) => {
-                                            this.scrollView.scrollTo({
-                                                y: 0,
-                                                duration: 0,
-                                                animated: false
-                                            });
-                                            this.setState({
-                                                modalOpt: value,
-                                                idxMdl: parseInt(index, 10)
-                                            });
-                                        }}
-                                        defaultIndex={this.state.idxMdl}
-                                        defaultValue={this.state.modalOpt}
-                                    />
+                    {
+                        this.state.modalOpt !== 'Em Edição' ?
+                        null : (<View style={{ flex: 1 }} />)
+                    }
+                    {
+                        this.state.modalOpt !== 'Em Edição' ?
+                        (
+                            <View
+                                style={styles.viewGroupBtn}
+                            >
+                                <ButtonGroup
+                                    onPress={(index) => {
+                                        this.scrollView.scrollTo({
+                                            y: 0,
+                                            duration: 0,
+                                            animated: false
+                                        });
+                                        this.setState({
+                                            modalOpt: buttonsGroup[index],
+                                            idxMdl: index
+                                        });
+                                    }}
+                                    selectedIndex={this.state.idxMdl}
+                                    containerStyle={{ 
+                                        width: '100%',
+                                        backgroundColor: 'transparent',
+                                        height: 40,
+                                        borderRadius: 5
+                                    }}
+                                    buttons={buttonsGroup}
+                                    textStyle={{
+                                        color: 'gray',
+                                        fontSize: 16,
+                                        fontWeight: 'bold',
+                                        textAlign: 'center',
+                                        marginVertical: 8,
+                                        marginRight: 5
+                                    }}
+                                    buttonStyle={{
+                                        backgroundColor: 'transparent',
+                                        borderColor: colorAppS,
+                                        borderWidth: 2,
+                                    }}
+                                    selectedButtonStyle={{
+                                        backgroundColor: colorAppS,
+                                        borderColor: colorAppS,
+                                        borderWidth: 2,
+                                    }}
+                                    selectedTextStyle={{
+                                        color: 'white',
+                                        fontSize: 20,
+                                        fontWeight: 'bold',
+                                        textAlign: 'center',
+                                        marginVertical: 8,
+                                        marginRight: 5
+                                    }}
+                                />
+                            </View>
+                        )
+                        :
+                        (
+                            <TouchableOpacity
+                                style={styles.viewGroupBtnRed}
+                                onPress={() => {
+                                    this.scrollView.scrollTo({
+                                        y: 0,
+                                        duration: 0,
+                                        animated: false
+                                    });
+                                    this.setState({
+                                        modalOpt: 'Editar',
+                                        idxMdl: 1
+                                    }); 
+                                }}
+                            >
+                                <View>
+                                    <Text 
+                                        style={[styles.dropModalBtnText, { marginHorizontal: 40 }]}
+                                    >
+                                        Voltar
+                                    </Text>
                                     <Icon
                                         pointerEvents={'none'}
                                         containerStyle={{
@@ -333,64 +377,21 @@ class CadastroJogos extends React.Component {
                                             bottom: 0, 
                                             position: 'absolute', 
                                             zIndex: 1,
-                                            alignItems: 'flex-end',
-                                            paddingRight: 5
+                                            alignItems: 'flex-start',
+                                            paddingRight: 8
 
                                         }}
-                                        name='arrow-down-thick' 
+                                        name='arrow-left-thick' 
                                         type='material-community' 
-                                        size={26} color='white' 
-                                    />
+                                        size={25} color='white' 
+                                    /> 
                                 </View>
-                            )
-                            :
-                            (
-                                <TouchableOpacity 
-                                    onPress={() => {
-                                        this.scrollView.scrollTo({
-                                            y: 0,
-                                            duration: 0,
-                                            animated: false
-                                        });
-                                        this.setState({
-                                        modalOpt: 'Editar',
-                                        idxMdl: 1
-                                    }); 
-                                }}
-                                >
-                                    <Text 
-                                        style={[styles.dropModalBtnText, { marginHorizontal: 40 }]}
-                                    >
-                                        {this.state.modalOpt !== 'Em Edição' ? ' ' : 'Voltar'}
-                                    </Text>
-                                    {
-                                        this.state.modalOpt === 'Em Edição' && 
-                                        <Icon
-                                            pointerEvents={'none'}
-                                            containerStyle={{
-                                                left: 0,
-                                                top: 0,
-                                                right: 0,
-                                                bottom: 0, 
-                                                position: 'absolute', 
-                                                zIndex: 1,
-                                                alignItems: 'flex-start',
-                                                paddingRight: 5
-
-                                            }}
-                                            name='arrow-left-thick' 
-                                            type='material-community' 
-                                            size={26} color='white' 
-                                        />
-                                    }
-                                </TouchableOpacity>
-                            )
-                        }
-                    </Card>
+                            </TouchableOpacity>
+                        )
+                    }
                 </View>
                 <Divider
                     style={{
-                        marginTop: 10,
                         marginHorizontal: 15,
                         height: 2,
                         backgroundColor: colorAppS,
@@ -416,21 +417,22 @@ const styles = StyleSheet.create({
     card: {
         paddingHorizontal: 10,
     },
-    dropCard: { 
-        backgroundColor: colorAppS,
+    viewGroupBtn: {
         flex: 1,
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        justifyContent: 'flex-end',
-        padding: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: 15
     },
-    dropCardRed: { 
+    viewGroupBtnRed: { 
         backgroundColor: 'red',
         flex: 1,
         flexDirection: 'row',
         alignItems: 'flex-end',
         justifyContent: 'center',
-        padding: 0,
+        marginHorizontal: 15,
+        marginVertical: 20,
+        height: 40,
+        borderRadius: 4
     },
     dropModalBtnText: {
         color: 'white',

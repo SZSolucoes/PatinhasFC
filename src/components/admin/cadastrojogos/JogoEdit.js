@@ -323,183 +323,186 @@ class JogoEdit extends React.Component {
     
     render() {
         return (
-            <Card containerStyle={styles.card}>
-                <FormLabel labelStyle={styles.text}>TÍTULO</FormLabel>
-                <FormInput
-                    selectTextOnFocus
-                    containerStyle={styles.inputContainer}
-                    returnKeyType={'next'}
-                    inputStyle={[styles.text, styles.input]}
-                    value={this.state.titulo}
-                    onChangeText={(value) => {
-                        if (this.props.keyItem) {
-                            this.setState({ titulo: value });
-                        } else {
-                            this.setState({ titulo: value });
-                            this.props.onChangeSuperState({ titulo: value });
-                        }
-                    }}
-                    underlineColorAndroid={'transparent'}
-                    onSubmitEditing={() => this.inputDate.onPressDate()}
-                />
-                { 
-                    this.state.isTitValid &&
-                    <FormValidationMessage>Campo obrigatório</FormValidationMessage> 
-                }
-                <FormLabel labelStyle={styles.text}>DATA</FormLabel>
-                <View 
-                    style={[styles.inputContainer, { 
-                        flex: 1, 
-                        flexDirection: 'row',
-                        ...Platform.select({
-                        android: {
-                            marginHorizontal: 16
-                        },
-                        ios: {
-                            marginHorizontal: 20
-                        }
-                    }) }]}
-                >
-                    <DatePicker
-                        ref={(ref) => { this.inputDate = ref; }}
-                        style={[styles.inputContainer, { flex: 1 }]}
-                        date={this.state.data}
-                        mode='date'
-                        format='DD/MM/YYYY'
-                        confirmBtnText='Ok'
-                        cancelBtnText='Cancelar'
-                        placeholder=' '
-                        showIcon={false}
-                        customStyles={{
-                            dateInput: StyleSheet.flatten(styles.dateInput),
-                            dateText: StyleSheet.flatten(styles.dateText)
-                        }}
-                        onDateChange={(date) => {
+            <View>
+                <Card containerStyle={styles.card}>
+                    <FormLabel labelStyle={styles.text}>TÍTULO</FormLabel>
+                    <FormInput
+                        selectTextOnFocus
+                        containerStyle={styles.inputContainer}
+                        returnKeyType={'next'}
+                        inputStyle={[styles.text, styles.input]}
+                        value={this.state.titulo}
+                        onChangeText={(value) => {
                             if (this.props.keyItem) {
-                                this.setState({ data: date }); 
+                                this.setState({ titulo: value });
                             } else {
-                                this.setState({ data: date }); 
-                                this.props.onChangeSuperState({ data: date });
+                                this.setState({ titulo: value });
+                                this.props.onChangeSuperState({ titulo: value });
                             }
-                            this.descricao.focus();
+                        }}
+                        underlineColorAndroid={'transparent'}
+                        onSubmitEditing={() => this.inputDate.onPressDate()}
+                    />
+                    { 
+                        this.state.isTitValid &&
+                        <FormValidationMessage>Campo obrigatório</FormValidationMessage> 
+                    }
+                    <FormLabel labelStyle={styles.text}>DATA</FormLabel>
+                    <View 
+                        style={[styles.inputContainer, { 
+                            flex: 1, 
+                            flexDirection: 'row',
+                            ...Platform.select({
+                            android: {
+                                marginHorizontal: 16
+                            },
+                            ios: {
+                                marginHorizontal: 20
+                            }
+                        }) }]}
+                    >
+                        <DatePicker
+                            ref={(ref) => { this.inputDate = ref; }}
+                            style={[styles.inputContainer, { flex: 1 }]}
+                            date={this.state.data}
+                            mode='date'
+                            format='DD/MM/YYYY'
+                            confirmBtnText='Ok'
+                            cancelBtnText='Cancelar'
+                            placeholder=' '
+                            showIcon={false}
+                            customStyles={{
+                                dateInput: StyleSheet.flatten(styles.dateInput),
+                                dateText: StyleSheet.flatten(styles.dateText)
+                            }}
+                            onDateChange={(date) => {
+                                if (this.props.keyItem) {
+                                    this.setState({ data: date }); 
+                                } else {
+                                    this.setState({ data: date }); 
+                                    this.props.onChangeSuperState({ data: date });
+                                }
+                                this.descricao.focus();
+                            }}
+                        />
+                    </View>
+                    <FormLabel labelStyle={styles.text}>DESCRIÇÃO</FormLabel>
+                    <FormInput
+                        ref={(ref) => {
+                            this.descricao = ref;
+                        }}
+                        selectTextOnFocus
+                        containerStyle={styles.inputContainer}
+                        inputStyle={[styles.text, styles.input]} 
+                        value={this.state.descricao}
+                        onChangeText={(value) => {
+                            if (this.props.keyItem) {
+                                this.setState({ descricao: value });
+                            } else {
+                                this.setState({ descricao: value });
+                                this.props.onChangeSuperState({ descricao: value });
+                            }
+                        }}
+                        underlineColorAndroid={'transparent'}
+                        multiline
+                        onSubmitEditing={() => this.timeCasa.focus()}
+                    />
+                    <FormLabel labelStyle={styles.text}>TIME CASA (NOME)</FormLabel>
+                    <FormInput
+                        ref={(ref) => {
+                            this.timeCasa = ref;
+                        }}
+                        selectTextOnFocus
+                        containerStyle={styles.inputContainer}
+                        returnKeyType={'next'}
+                        inputStyle={[styles.text, styles.input]}
+                        value={this.state.timeCasa}
+                        onChangeText={(value) => {
+                            this.limitNomeTime(value, 'casa');
+                        }}
+                        underlineColorAndroid={'transparent'}
+                        onSubmitEditing={() => this.timeVisit.focus()}
+                    />
+                    <FormLabel labelStyle={styles.text}>TIME VISITANTES (NOME)</FormLabel>
+                    <FormInput
+                        ref={(ref) => {
+                            this.timeVisit = ref;
+                        }}
+                        selectTextOnFocus
+                        containerStyle={styles.inputContainer}
+                        returnKeyType={'next'}
+                        inputStyle={[styles.text, styles.input]}
+                        value={this.state.timeVisit}
+                        onChangeText={(value) => {
+                            this.limitNomeTime(value, 'visit');
+                        }}
+                        underlineColorAndroid={'transparent'}
+                    />
+                    <FormLabel labelStyle={styles.text}>IMAGEM DE EXIBIÇÃO</FormLabel>
+                    <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
+                        <TouchableOpacity
+                            onPress={() => this.onPressSelectImg()}
+                        >
+                            <View style={styles.viewImageSelect}>
+                                <Icon 
+                                    name='folder-image' 
+                                    type='material-community' 
+                                    size={34} color='#9E9E9E' 
+                                />
+                                <FormLabel 
+                                    labelStyle={[styles.text, { marginTop: 0, marginBottom: 0 }]}
+                                >
+                                    Selecionar imagem
+                                </FormLabel> 
+                            </View>
+                            <View style={[styles.viewImageSelect, { height: 200 }]}>
+                                { 
+                                    this.state.imgJogoUri && 
+                                    (<Image 
+                                        source={{ uri: this.state.imgJogoUri }}
+                                        style={{
+                                            flex: 1,
+                                            alignSelf: 'stretch',
+                                            resizeMode: 'stretch',
+                                            width: undefined,
+                                            height: undefined
+                                            }}
+                                    />)
+                                }
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    <Button 
+                        small
+                        loading={this.state.loading}
+                        disabled={this.state.loading}
+                        loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
+                        title={this.state.loading ? ' ' : 'Confirmar'} 
+                        buttonStyle={{ width: '100%', marginTop: 30 }}
+                            onPress={() => checkConInfo(() => this.onPressConfirmar())}
+                    />
+                    <Button 
+                        small
+                        loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
+                        title={'Limpar'} 
+                        buttonStyle={{ width: '100%', marginVertical: 10 }}
+                        onPress={() => {
+                            this.clearContentImg();
+                            this.setState({
+                                contentType: '',
+                                imgJogoUri: null,
+                                imgPath: '',
+                                titulo: '',
+                                data: new Date(),
+                                descricao: '',
+                                timeCasa: '',
+                                timeVisit: ''
+                            });
                         }}
                     />
-                </View>
-                <FormLabel labelStyle={styles.text}>DESCRIÇÃO</FormLabel>
-                <FormInput
-                    ref={(ref) => {
-                        this.descricao = ref;
-                    }}
-                    selectTextOnFocus
-                    containerStyle={styles.inputContainer}
-                    inputStyle={[styles.text, styles.input]} 
-                    value={this.state.descricao}
-                    onChangeText={(value) => {
-                        if (this.props.keyItem) {
-                            this.setState({ descricao: value });
-                        } else {
-                            this.setState({ descricao: value });
-                            this.props.onChangeSuperState({ descricao: value });
-                        }
-                    }}
-                    underlineColorAndroid={'transparent'}
-                    multiline
-                    onSubmitEditing={() => this.timeCasa.focus()}
-                />
-                <FormLabel labelStyle={styles.text}>TIME CASA (NOME)</FormLabel>
-                <FormInput
-                    ref={(ref) => {
-                        this.timeCasa = ref;
-                    }}
-                    selectTextOnFocus
-                    containerStyle={styles.inputContainer}
-                    returnKeyType={'next'}
-                    inputStyle={[styles.text, styles.input]}
-                    value={this.state.timeCasa}
-                    onChangeText={(value) => {
-                        this.limitNomeTime(value, 'casa');
-                    }}
-                    underlineColorAndroid={'transparent'}
-                    onSubmitEditing={() => this.timeVisit.focus()}
-                />
-                <FormLabel labelStyle={styles.text}>TIME VISITANTES (NOME)</FormLabel>
-                <FormInput
-                    ref={(ref) => {
-                        this.timeVisit = ref;
-                    }}
-                    selectTextOnFocus
-                    containerStyle={styles.inputContainer}
-                    returnKeyType={'next'}
-                    inputStyle={[styles.text, styles.input]}
-                    value={this.state.timeVisit}
-                    onChangeText={(value) => {
-                        this.limitNomeTime(value, 'visit');
-                    }}
-                    underlineColorAndroid={'transparent'}
-                />
-                <FormLabel labelStyle={styles.text}>IMAGEM DE EXIBIÇÃO</FormLabel>
-                <View style={{ marginVertical: 20, marginHorizontal: 10 }}>
-                    <TouchableOpacity
-                        onPress={() => this.onPressSelectImg()}
-                    >
-                        <View style={styles.viewImageSelect}>
-                            <Icon 
-                                name='folder-image' 
-                                type='material-community' 
-                                size={34} color='#9E9E9E' 
-                            />
-                            <FormLabel 
-                                labelStyle={[styles.text, { marginTop: 0, marginBottom: 0 }]}
-                            >
-                                Selecionar imagem
-                            </FormLabel> 
-                        </View>
-                        <View style={[styles.viewImageSelect, { height: 200 }]}>
-                            { 
-                                this.state.imgJogoUri && 
-                                (<Image 
-                                    source={{ uri: this.state.imgJogoUri }}
-                                    style={{
-                                        flex: 1,
-                                        alignSelf: 'stretch',
-                                        resizeMode: 'stretch',
-                                        width: undefined,
-                                        height: undefined
-                                        }}
-                                />)
-                            }
-                        </View>
-                    </TouchableOpacity>
-                </View>
-                <Button 
-                    small
-                    loading={this.state.loading}
-                    disabled={this.state.loading}
-                    loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
-                    title={this.state.loading ? ' ' : 'Confirmar'} 
-                    buttonStyle={{ width: '100%', marginTop: 30 }}
-                        onPress={() => checkConInfo(() => this.onPressConfirmar())}
-                />
-                <Button 
-                    small
-                    loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
-                    title={'Limpar'} 
-                    buttonStyle={{ width: '100%', marginVertical: 10 }}
-                    onPress={() => {
-                        this.clearContentImg();
-                        this.setState({
-                            contentType: '',
-                            imgJogoUri: null,
-                            imgPath: '',
-                            titulo: '',
-                            data: new Date(),
-                            descricao: '',
-                            timeCasa: '',
-                            timeVisit: ''
-                        });
-                    }}
-                />
-            </Card>
+                </Card>
+                <View style={{ marginBottom: 30 }} />
+            </View>
         );
     }
 }
