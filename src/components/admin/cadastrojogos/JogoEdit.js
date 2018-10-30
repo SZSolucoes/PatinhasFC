@@ -367,6 +367,7 @@ class JogoEdit extends React.Component {
                             date={this.state.data}
                             mode='date'
                             format='DD/MM/YYYY'
+                            minDate={Moment().format('DD/MM/YYYY')}
                             confirmBtnText='Ok'
                             cancelBtnText='Cancelar'
                             placeholder=' '
@@ -484,19 +485,22 @@ class JogoEdit extends React.Component {
                     <Button 
                         small
                         loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
-                        title={'Limpar'} 
+                        title={this.props.keyItem ? 'Restaurar' : 'Limpar'} 
                         buttonStyle={{ width: '100%', marginVertical: 10 }}
                         onPress={() => {
                             this.clearContentImg();
                             this.setState({
-                                contentType: '',
-                                imgJogoUri: null,
-                                imgPath: '',
-                                titulo: '',
-                                data: new Date(),
-                                descricao: '',
-                                timeCasa: '',
-                                timeVisit: ''
+                                isTitValid: this.props.isTitValid ? this.props.isTitValid : false,
+                                contentType: this.props.contentType ? this.props.contentType : '',
+                                imgJogoUri: this.props.imgJogoUri ? this.props.imgJogoUri : null,
+                                imgPath: this.props.imgPath ? this.props.imgPath : '',
+                                titulo: this.props.titulo ? this.props.titulo : '',
+                                data: this.props.data ? 
+                                this.props.data : Moment().format('DD/MM/YYYY'),
+                                descricao: this.props.descricao ? this.props.descricao : '',
+                                timeCasa: this.props.timeCasa ? this.props.timeCasa : '',
+                                timeVisit: this.props.timeVisit ? this.props.timeVisit : '',
+                                loading: this.props.loading ? this.props.loading : false
                             });
                         }}
                     />

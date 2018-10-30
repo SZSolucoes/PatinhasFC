@@ -362,6 +362,7 @@ class UsuarioEdit extends React.Component {
                         containerStyle={styles.inputContainer}
                         returnKeyType={'next'}
                         inputStyle={[styles.text, styles.input]}
+                        autoCapitalize={'none'}
                         value={this.state.linkExt}
                         onChangeText={(value) => {
                             if (this.props.keyItem) {
@@ -385,19 +386,20 @@ class UsuarioEdit extends React.Component {
                     <Button 
                         small
                         loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
-                        title={'Limpar'} 
+                        title={this.props.keyItem ? 'Restaurar' : 'Limpar'} 
                         buttonStyle={{ width: '100%', marginVertical: 10 }}
                         onPress={() => {
                             this.clearContentImg();
                             this.setState({
-                            isTitValid: false,
-                            contentType: '',
-                            imgArticleUri: null,
-                            imgPath: '',
-                            titulo: '',
-                            descricao: '',
-                            linkExt: '',
-                            loading: false
+                            isTitValid: this.props.isTitValid ? this.props.isTitValid : false,
+                            contentType: this.props.contentType ? this.props.contentType : '',
+                            imgArticleUri: this.props.imgArticleUri ? 
+                            this.props.imgArticleUri : null,
+                            imgPath: this.props.imgPath ? this.props.imgPath : '',
+                            titulo: this.props.titulo ? this.props.titulo : '',
+                            descricao: this.props.descricao ? this.props.descricao : '',
+                            linkExt: this.props.linkExt ? this.props.linkExt : '',
+                            loading: this.props.loading ? this.props.loading : false,
                         });
                         }}
                     />

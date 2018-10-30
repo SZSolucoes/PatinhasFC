@@ -41,13 +41,14 @@ class UsuarioEdit extends React.Component {
             nome: props.nome ? props.nome : '',
             data: props.data ? props.data : Moment().format('DD/MM/YYYY'),
             tipoPerfil: props.tipoPerfil ? props.tipoPerfil : '',
+            tipoPerfilIos: this.getPerfilIOS(props.tipoPerfil ? props.tipoPerfil : ''),
             loading: props.loading ? props.loading : false,
             scrollView: props.scrollView ? props.scrollView : null,
-            secureOn: true,
-            tipoPerfilIos: 'Sócio'
+            secureOn: true
         };
 
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
+        this.getPerfilIOS = this.getPerfilIOS.bind(this);
     }
 
     onPressConfirmar() {
@@ -183,6 +184,19 @@ class UsuarioEdit extends React.Component {
         }
     }
 
+    getPerfilIOS(value) {
+        switch (value) {
+            case 'sociocontrib':
+                return 'Sócio Contribuinte';
+            case 'sociopatrim':
+                return 'Sócio Patrimonial';
+            case 'socio':
+                return 'Sócio';
+            default:
+                return 'Sócio';
+        }
+    }
+
     render() {
         return (
             <View>
@@ -194,6 +208,7 @@ class UsuarioEdit extends React.Component {
                         returnKeyType={'next'}
                         inputStyle={[styles.text, styles.input]}
                         value={this.state.email}
+                        autoCapitalize={'none'}
                         onChangeText={(value) => {
                             if (this.props.keyItem) {
                                 this.setState({ email: value });
@@ -286,6 +301,7 @@ class UsuarioEdit extends React.Component {
                             date={this.state.data}
                             mode='date'
                             format='DD/MM/YYYY'
+                            maxDate={Moment().format('DD/MM/YYYY')}
                             confirmBtnText='Ok'
                             cancelBtnText='Cancelar'
                             placeholder=' '
@@ -404,15 +420,20 @@ class UsuarioEdit extends React.Component {
                     <Button 
                         small
                         loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
-                        title={'Limpar'} 
+                        title={this.props.keyItem ? 'Restaurar' : 'Limpar'}
                         buttonStyle={{ width: '100%', marginVertical: 10 }}
                         onPress={() => this.setState({
-                            email: '',
-                            senha: '',
-                            nome: '',
-                            data: new Date(),
-                            tipoPerfil: '',
-                            tipoPerfilIos: 'Sócio'
+                            isEmailValid: this.props.isEmailValid ? this.props.isEmailValid : false,
+                            isSenhaValid: this.props.isSenhaValid ? this.props.isSenhaValid : false,
+                            email: this.props.email ? this.props.email : '',
+                            senha: this.props.senha ? this.props.senha : '',
+                            nome: this.props.nome ? this.props.nome : '',
+                            data: this.props.data ? this.props.data : Moment().format('DD/MM/YYYY'),
+                            tipoPerfil: this.props.tipoPerfil ? this.props.tipoPerfil : '',
+                            tipoPerfilIos: this.getPerfilIOS(
+                                this.props.tipoPerfil ? this.props.tipoPerfil : ''
+                            ),
+                            loading: this.props.loading ? this.props.loading : false,
                         })}
                     />
                 </Card>

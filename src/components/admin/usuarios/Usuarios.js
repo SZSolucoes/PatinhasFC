@@ -273,7 +273,7 @@ class Usuarios extends React.Component {
                         email={this.state.itemEdit.email}
                         senha={this.state.itemEdit.senha}
                         nome={this.state.itemEdit.nome}
-                        data={this.state.itemEdit.data}
+                        data={this.state.itemEdit.dtnasc}
                         tipoPerfil={this.state.itemEdit.tipoPerfil}
                         keyItem={b64.encode(this.state.itemEdit.email)}
                     />);

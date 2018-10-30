@@ -258,7 +258,7 @@ class Profile extends React.Component {
                             </View>
                             <View style={{ marginHorizontal: 10 }}>
                                 <Text style={{ fontSize: 16, color: 'black' }}>
-                                    1.0.0
+                                    1.0.1
                                 </Text>
                             </View>
                         </View>
