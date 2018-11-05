@@ -39,9 +39,9 @@
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		B093F09587FE44B2B55B0A48 /* MaterialCommunityIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D2AA689E9F19415D81863299 /* MaterialCommunityIcons.ttf */; };
 		B492583B852547E796E2C0A2 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7A199EB6A4B042A7A83A1755 /* Entypo.ttf */; };
-		C0423CED2169050D005176C1 /* libRNShare.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0423CE921690089005176C1 /* libRNShare.a */; };
 		C0423CEF21690537005176C1 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0423CEE21690537005176C1 /* Social.framework */; };
 		C0423CF121690548005176C1 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0423CF021690548005176C1 /* MessageUI.framework */; };
+		C05977822188932A00F232A2 /* libRNShare.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0982505217A28C900B90A9A /* libRNShare.a */; };
 		C06F8EAF2178C618002CAFCE /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C06F8E822178C5F2002CAFCE /* libART.a */; };
 		C09824DD217A281200B90A9A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C09824DC217A281200B90A9A /* GoogleService-Info.plist */; };
 		C0982510217A3B7D00B90A9A /* libRNFIRMessaging.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C098250F217A297700B90A9A /* libRNFIRMessaging.a */; };
@@ -522,11 +522,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C05977822188932A00F232A2 /* libRNShare.a in Frameworks */,
 				C0982510217A3B7D00B90A9A /* libRNFIRMessaging.a in Frameworks */,
 				C06F8EAF2178C618002CAFCE /* libART.a in Frameworks */,
 				C0423CF121690548005176C1 /* MessageUI.framework in Frameworks */,
 				C0423CEF21690537005176C1 /* Social.framework in Frameworks */,
-				C0423CED2169050D005176C1 /* libRNShare.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
 				11D1A2F320CAFA9E000508D9 /* libRCTAnimation.a in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,

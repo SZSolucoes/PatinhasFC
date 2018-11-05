@@ -55,7 +55,7 @@ class ShareModal extends React.Component {
         }
 
         const shareImageBase64 = {
-            title: 'Compartilhar mensagem',
+            title: 'Enviar como mensagem',
             message
         };
 
@@ -79,18 +79,9 @@ class ShareModal extends React.Component {
         this.setState({ enablePress: false });
 
         if (locateCachedImgUri !== item.imgArticle) {
-            let message = '';
-            
-            if (item.textArticle) {
-                message += `Texto do artigo:\n${item.textArticle}`;
-            }
-            if (item.linkArticle) {
-                message += `\n\nLink do artigo:\n${item.linkArticle}`;
-            }
             const shareImageBase64 = {
                 title: 'Compartilhar imagem',
-                message,
-                url: locateCachedImgUri,
+                url: locateCachedImgUri
             };
 
             Share.open(shareImageBase64)
@@ -113,18 +104,9 @@ class ShareModal extends React.Component {
                 return res.readFile('base64');
             })
             .then(base64Data => {
-                let message = '';
-    
-                if (item.textArticle) {
-                    message += `Texto do artigo:\n${item.textArticle}`;
-                }
-                if (item.linkArticle) {
-                    message += `\n\nLink do artigo:\n${item.linkArticle}`;
-                }
                 const shareImageBase64 = {
                     title: 'Compartilhar imagem',
-                    message,
-                    url: `data:${contentType};base64,${base64Data}`,
+                    url: `data:${contentType};base64,${base64Data}`
                 };
     
                 Share.open(shareImageBase64)
