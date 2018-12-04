@@ -9,8 +9,12 @@ export const checkPerfil = (perfil) => {
             return 'Sócio Patrimonial';
         case 'sociocontrib':
             return 'Sócio Contribuinte';
-        case 'admin':
+        case 'visitante':
+            return 'Visitante';
+        case '0':
             return 'Administrador';
+        case '255':
+            return 'Administrador Geral';
         default:
             return perfil;
     }

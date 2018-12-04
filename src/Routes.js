@@ -142,6 +142,10 @@ class Routes extends React.Component {
                 payload: false
             });
 
+            if (Actions.currentScene === 'mainTabBar') {
+                return true;
+            }
+
             if (!('_'.includes(Actions.currentScene[0]))) {
                 Actions.pop();
                 return true;
@@ -200,6 +204,10 @@ class Routes extends React.Component {
             type: 'modifica_showimageview_imagens',
             payload: false
         });
+
+        if (Actions.currentScene === 'mainTabBar') {
+            return true;
+        }
 
         if (!('_'.includes(Actions.currentScene[0]))) {
             Actions.pop();
@@ -397,7 +405,7 @@ class Routes extends React.Component {
 
     renderAdminTab() {
         const { userLevel } = this.props;
-        if (userLevel && userLevel === '0') {
+        if (userLevel && (userLevel === '0' || userLevel === '255')) {
             return (
                 <AnimatedScene 
                     key='mainTabBar' 

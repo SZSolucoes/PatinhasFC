@@ -20,7 +20,8 @@ import { Dialog } from 'react-native-simple-dialogs';
 import firebase from '../../../Firebase';
 import { colorAppF, colorAppP } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
-import Campo from '../../campo/Campo';
+//import Campo from '../../campo/Campo';
+import EscalacaoPadrao from '../../campo/EscalacaoPadrao';
 import PlayersModal from './PlayersModal';
 import { isPortrait } from '../../../utils/orientation';
 import { getPosIndex, checkConInfo } from '../../../utils/jogosUtils';
@@ -486,7 +487,7 @@ class EscalacaoG extends React.Component {
                             <View 
                                 onLayout={this.onLayoutCasa}
                             >
-                                <View style={{ height: this.state.heightDim }}>
+                                {/* <View style={{ height: this.state.heightDim }}>
                                     <Campo 
                                         enableTouch
                                         jogadores={jogadoresCasaFt} 
@@ -501,6 +502,10 @@ class EscalacaoG extends React.Component {
                                     />
                                 </View>
                                 <View style={{ marginVertical: 20 }} />
+                                { this.renderCasaJogadores(jogo) }
+                                <View style={{ marginVertical: 20 }} /> */}
+                                
+                                <EscalacaoPadrao side={'casa'} />
                                 { this.renderCasaJogadores(jogo) }
                                 <View style={{ marginVertical: 20 }} />
                             </View>
@@ -538,7 +543,7 @@ class EscalacaoG extends React.Component {
                                 </TouchableWithoutFeedback>
                             </View>
                             <View onLayout={this.onLayoutVisit}>
-                                <View style={{ height: this.state.heightDim }}>
+                                {/* <View style={{ height: this.state.heightDim }}>
                                     <Campo 
                                         jogadores={jogadoresVisitFt}
                                         side={'visit'}
@@ -553,6 +558,10 @@ class EscalacaoG extends React.Component {
                                     />
                                 </View>
                                 <View style={{ marginVertical: 20 }} />
+                                { this.renderVisitJogadores(jogo) }
+                                <View style={{ marginVertical: 20 }} /> */}
+
+                                <EscalacaoPadrao side={'visit'} />
                                 { this.renderVisitJogadores(jogo) }
                                 <View style={{ marginVertical: 20 }} />
                             </View>

@@ -20,7 +20,7 @@ import { showAlert, mappedKeyStorage } from '../../utils/store';
 import { colorAppP, colorAppS } from '../../utils/constantes';
 import { retrieveImgSource } from '../../utils/imageStorage';
 import { checkConInfo } from '../../utils/jogosUtils';
-import { updateUserImages } from '../../utils/userUtils';
+import { updateUserImages, checkPerfil } from '../../utils/userUtils';
 
 import firebase from '../../Firebase';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -164,7 +164,11 @@ class Profile extends React.Component {
         const imgBg = userLogged.imgBackground ? 
             { uri: userLogged.imgBackground } : perfilBgUserImg;
         const username = userLogged.nome ? userLogged.nome : 'Patinhas';
-        const posicao = userLogged.posicao ? userLogged.posicao : 'Técnico';
+        let posicao = userLogged.tipoPerfil ? checkPerfil(userLogged.tipoPerfil) : 'Visitante';
+
+        if ('0|255'.includes(userLogged.level)) {
+            posicao = checkPerfil(userLogged.level);
+        }
 
         return (
             <View style={styles.viewPrinc}>
@@ -213,7 +217,7 @@ class Profile extends React.Component {
                             key={'Histórico de Jogos'}
                             title={'Histórico de Jogos'}
                             leftIcon={{ name: 'history', type: 'material-community' }}
-                            onPress={() => Actions.profileHistorico()}
+                            onPress={() => Actions.historico()}
                         />
                         <ListItem
                             key={'Preferências'}

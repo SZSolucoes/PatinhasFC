@@ -25,7 +25,8 @@ const deParaPos = {
     at1: { name: 'Atacante', index: 17 }, 
     at2: { name: 'Atacante', index: 18 }, 
     at3: { name: 'Atacante', index: 19 }, 
-    at4: { name: 'Atacante', index: 20 } 
+    at4: { name: 'Atacante', index: 20 },
+    default: { name: '', index: 0 }
 };
 
 export const getPosName = (posvalue) => deParaPos[posvalue].name;

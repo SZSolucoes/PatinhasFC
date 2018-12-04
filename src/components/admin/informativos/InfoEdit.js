@@ -92,7 +92,7 @@ class UsuarioEdit extends React.Component {
         this.setState({ loading: true });
 
         const { titulo, descricao, linkExt, scrollView } = this.state;
-        const { keyItem, imgArticleUri, userLogged } = this.props;
+        const { keyItem, imgArticleUri, userLogged, userLevel } = this.props;
         const b64File = this.b64Str;
         const contentTp = this.contentType;
         const protocol = linkExt.substr(0, 4);
@@ -174,6 +174,7 @@ class UsuarioEdit extends React.Component {
                             emailUser: userLogged.email,
                             nomeUser: userLogged.nome,
                             perfilUser: checkPerfil(userLogged.tipoPerfil),
+                            userLevel,
                             imgAvatar: userLogged.imgAvatar,
                             listComents: [{ push: 'push' }],
                             listLikes: [{ push: 'push' }],
@@ -242,6 +243,7 @@ class UsuarioEdit extends React.Component {
                     emailUser: userLogged.email,
                     nomeUser: userLogged.nome,
                     perfilUser: checkPerfil(userLogged.tipoPerfil),
+                    userLevel,
                     imgAvatar: userLogged.imgAvatar,
                     listComents: [{ push: 'push' }],
                     listLikes: [{ push: 'push' }],
@@ -390,17 +392,32 @@ class UsuarioEdit extends React.Component {
                         buttonStyle={{ width: '100%', marginVertical: 10 }}
                         onPress={() => {
                             this.clearContentImg();
-                            this.setState({
-                            isTitValid: this.props.isTitValid ? this.props.isTitValid : false,
-                            contentType: this.props.contentType ? this.props.contentType : '',
-                            imgArticleUri: this.props.imgArticleUri ? 
-                            this.props.imgArticleUri : null,
-                            imgPath: this.props.imgPath ? this.props.imgPath : '',
-                            titulo: this.props.titulo ? this.props.titulo : '',
-                            descricao: this.props.descricao ? this.props.descricao : '',
-                            linkExt: this.props.linkExt ? this.props.linkExt : '',
-                            loading: this.props.loading ? this.props.loading : false,
-                        });
+                            if (this.props.keyItem) {
+                                this.setState({
+                                    isTitValid: this.props.isTitValid ? 
+                                    this.props.isTitValid : false,
+                                    contentType: this.props.contentType ? 
+                                    this.props.contentType : '',
+                                    imgArticleUri: this.props.imgArticleUri ? 
+                                    this.props.imgArticleUri : null,
+                                    imgPath: this.props.imgPath ? this.props.imgPath : '',
+                                    titulo: this.props.titulo ? this.props.titulo : '',
+                                    descricao: this.props.descricao ? this.props.descricao : '',
+                                    linkExt: this.props.linkExt ? this.props.linkExt : '',
+                                    loading: this.props.loading ? this.props.loading : false
+                                });
+                            } else {
+                                this.setState({
+                                    isTitValid: false,
+                                    contentType: '',
+                                    imgArticleUri: null,
+                                    imgPath: '',
+                                    titulo: '',
+                                    descricao: '',
+                                    linkExt: '',
+                                    loading: false
+                                });
+                            }
                         }}
                     />
                 </Card>
@@ -443,7 +460,8 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-    userLogged: state.LoginReducer.userLogged
+    userLogged: state.LoginReducer.userLogged,
+    userLevel: state.LoginReducer.userLevel
 });
 
 export default connect(mapStateToProps, {})(UsuarioEdit);

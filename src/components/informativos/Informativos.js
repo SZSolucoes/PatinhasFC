@@ -255,7 +255,11 @@ class Informativos extends React.Component {
     renderInfos({ item }) {
         const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
         const nomeUser = item.nomeUser ? item.nomeUser : 'Patinhas';
-        const perfilUser = item.perfilUser ? item.perfilUser : 'Administrador';
+        let perfilUser = item.perfilUser ? item.perfilUser : 'Administrador';
+
+        if (item.userLevel && '0|255'.includes(item.userLevel)) {
+            perfilUser = item.userLevel === '255' ? 'Administrador Geral' : 'Administrador';
+        }
 
         return (
             <View>

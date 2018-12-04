@@ -50,7 +50,8 @@ class Usuarios extends React.Component {
             senha: '',
             nome: '',
             data: '',
-            tipoPerfil: ''
+            tipoPerfil: '',
+            tipoUsuario: '1'
         };
 
         this.scrollView = null;
@@ -261,6 +262,7 @@ class Usuarios extends React.Component {
                         nome={this.state.nome}
                         data={this.state.data}
                         tipoPerfil={this.state.tipoPerfil}
+                        tipoUsuario={this.state.tipoUsuario}
                         onChangeSuperState={(value) => this.onChangeSuperState(value)}
                     />
                 );
@@ -275,6 +277,7 @@ class Usuarios extends React.Component {
                         nome={this.state.itemEdit.nome}
                         data={this.state.itemEdit.dtnasc}
                         tipoPerfil={this.state.itemEdit.tipoPerfil}
+                        tipoUsuario={this.state.itemEdit.level}
                         keyItem={b64.encode(this.state.itemEdit.email)}
                     />);
             default:
@@ -286,6 +289,7 @@ class Usuarios extends React.Component {
                         nome={this.state.nome}
                         data={this.state.data}
                         tipoPerfil={this.state.tipoPerfil}
+                        tipoUsuario={this.state.tipoUsuario}
                         onChangeSuperState={(value) => this.onChangeSuperState(value)}
                     />
                 );
