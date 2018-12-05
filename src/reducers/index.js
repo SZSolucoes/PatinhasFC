@@ -10,6 +10,7 @@ import JogoReducer from './JogoReducer';
 import GerenciarReducer from './GerenciarReducer';
 import HistoricoReducer from './HistoricoReducer';
 import ImagensReducer from './ImagensReducer';
+import PainelAdminReducer from './PainelAdminReducer';
 
 export default combineReducers({
     LoginReducer,
@@ -21,5 +22,6 @@ export default combineReducers({
     JogoReducer,
     GerenciarReducer,
     HistoricoReducer,
-    ImagensReducer
+    ImagensReducer,
+    PainelAdminReducer
 });

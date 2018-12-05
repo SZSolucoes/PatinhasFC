@@ -34,6 +34,7 @@ import Profile from './components/profile/Profile';
 import Notifications from './components/profile/Notifications';
 import EditPerfil from './components/profile/EditPerfil';
 import Preferencias from './components/profile/Preferencias';
+import PainelAdmin from './components/profile/PainelAdmin';
 import Admin from './components/admin/Admin';
 import CadastroJogos from './components/admin/cadastrojogos/CadastroJogos';
 import Usuarios from './components/admin/usuarios/Usuarios';
@@ -706,6 +707,15 @@ class Routes extends React.Component {
                         key={'profilePreferencias'}
                         title={'Preferências'}
                         component={Preferencias}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'profilePainelAdmin'}
+                        title={'Painel Administrativo'}
+                        component={PainelAdmin}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}

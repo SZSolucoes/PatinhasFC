@@ -4,9 +4,6 @@ import {
     View,
     Text
 } from 'react-native';
-import { 
-    FormLabel
-} from 'react-native-elements';
 import { connect } from 'react-redux';
 import { 
     modificaShowPlayersModal,
@@ -32,7 +29,7 @@ class EscalacaoPadrao extends React.Component {
             key: '',
             nome: '',
             posicao: '',
-            posvalue: '',
+            posvalue: 'default',
             imgAvatar: '',
             side,
             vitorias: '0',

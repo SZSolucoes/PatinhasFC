@@ -14,7 +14,7 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 import { colorAppF } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
-import Campo from '../../campo/Campo';
+//import Campo from '../../campo/Campo';
 import { isPortrait } from '../../../utils/orientation';
 import { getPosIndex } from '../../../utils/jogosUtils';
 
@@ -359,8 +359,8 @@ class EscalacaoH extends React.Component {
             return false;
         }
         
-        const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push);
-        const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push);
+        //const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push);
+        //const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push);
 
         return (
             <View style={{ flex: 1 }}>
@@ -404,7 +404,7 @@ class EscalacaoH extends React.Component {
                             <View 
                                 onLayout={this.onLayoutCasa}
                             >
-                                <View style={{ height: this.state.heightDim }}>
+                                {/* <View style={{ height: this.state.heightDim }}>
                                     <Campo 
                                         jogadores={jogadoresCasaFt} 
                                         side={'casa'}
@@ -412,7 +412,7 @@ class EscalacaoH extends React.Component {
                                         enableTouch={false}
                                     />
                                 </View>
-                                <View style={{ marginVertical: 20 }} />
+                                <View style={{ marginVertical: 20 }} /> */}
                                 { this.renderCasaJogadores(jogo) }
                                 <View style={{ marginVertical: 20 }} />
                             </View>
@@ -450,7 +450,7 @@ class EscalacaoH extends React.Component {
                                 </TouchableWithoutFeedback>
                             </View>
                             <View onLayout={this.onLayoutVisit}>
-                                <View style={{ height: this.state.heightDim }}>
+                                {/* <View style={{ height: this.state.heightDim }}>
                                     <Campo 
                                         jogadores={jogadoresVisitFt}
                                         side={'visit'}
@@ -458,7 +458,7 @@ class EscalacaoH extends React.Component {
                                         enableTouch={false}
                                     />
                                 </View>
-                                <View style={{ marginVertical: 20 }} />
+                                <View style={{ marginVertical: 20 }} /> */}
                                 { this.renderVisitJogadores(jogo) }
                                 <View style={{ marginVertical: 20 }} />
                             </View>

@@ -50,6 +50,7 @@ class UsuarioEdit extends React.Component {
         };
 
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
+        this.renderUserType = this.renderUserType.bind(this);
         this.getPerfilIOS = this.getPerfilIOS.bind(this);
         this.getTipoUsuarioIOS = this.getTipoUsuarioIOS.bind(this);
     }
@@ -212,6 +213,111 @@ class UsuarioEdit extends React.Component {
             default:
                 return 'Comum';
         }
+    }
+
+    renderUserType() {
+        let renderField = false;
+        
+        if (this.props.userLevel === '255') {
+            renderField = this.props.tipoUsuario !== '255';
+        } 
+        
+        if (renderField) {
+            return (
+                <View>
+                    <FormLabel labelStyle={styles.text}>TIPO DE USUÁRIO</FormLabel>
+                    <View
+                        style={[styles.inputContainer, { 
+                            flex: 1, 
+                            flexDirection: 'row',
+                            ...Platform.select({
+                            android: {
+                                marginHorizontal: 16
+                            },
+                            ios: {
+                                marginHorizontal: 20
+                            }
+                        }) }]}
+                    >
+                        {
+                            Platform.OS === 'android' ?
+                            (
+                            <Picker
+                                ref={(ref) => { this.inputTipoUsuario = ref; }}
+                                selectedValue={this.state.tipoUsuario}
+                                style={{ height: 50, width: '105%', marginLeft: -4 }}
+                                onValueChange={(value) => {
+                                    if (this.props.keyItem) {
+                                        this.setState({ tipoUsuario: value });
+                                    } else {
+                                        this.setState({ tipoUsuario: value });
+                                        this.props.onChangeSuperState({ 
+                                            tipoUsuario: value 
+                                        });
+                                    }
+                                }}
+                            >
+                                <Picker.Item label={'Comum'} value={'1'} />
+                                <Picker.Item label={'Administrador'} value={'0'} />
+                            </Picker>
+                            )
+                            :
+                            (
+                                <TouchableWithoutFeedback
+                                    onPress={() =>
+                                        ActionSheetIOS.showActionSheetWithOptions({
+                                            options: [
+                                                'Comum',
+                                                'Administrador'
+                                            ]
+                                        },
+                                        (buttonIndex) => {
+                                            let value = '';
+                                            let label = '';
+                                            switch (buttonIndex) {
+                                                case 0:
+                                                    value = '1';
+                                                    label = 'Comum';
+                                                    break;
+                                                case 1:
+                                                    value = '0';
+                                                    label = 'Administrador';
+                                                    break;
+                                                default:
+                                            }
+                                            if (this.props.keyItem) {
+                                                this.setState({ 
+                                                    tipoUsuario: value, 
+                                                    tipoUsuarioIos: label 
+                                                });
+                                            } else {
+                                                this.setState({ 
+                                                    tipoUsuario: value, 
+                                                    tipoUsuarioIos: label 
+                                                });
+                                                this.props.onChangeSuperState(
+                                                    { tipoUsuario: value }
+                                                );
+                                            }
+                                        })
+                                    }
+                                >
+                                    <View 
+                                        style={{ height: 50, width: '105%', marginTop: 9 }}
+                                    >
+                                        <Text style={styles.text}>
+                                            {this.state.tipoUsuarioIos}
+                                        </Text>
+                                    </View>
+                                </TouchableWithoutFeedback>
+                            )
+                        }
+                    </View>
+                </View>
+            );
+        }
+
+        return false;
     }
 
     render() {
@@ -431,100 +537,7 @@ class UsuarioEdit extends React.Component {
                             )
                         }
                     </View>
-                    {
-                        this.props.userLevel === '255' 
-                        &&
-                        (<View>
-                            <FormLabel labelStyle={styles.text}>TIPO DE USUÁRIO</FormLabel>
-                            <View
-                                style={[styles.inputContainer, { 
-                                    flex: 1, 
-                                    flexDirection: 'row',
-                                    ...Platform.select({
-                                    android: {
-                                        marginHorizontal: 16
-                                    },
-                                    ios: {
-                                        marginHorizontal: 20
-                                    }
-                                }) }]}
-                            >
-                                {
-                                    Platform.OS === 'android' ?
-                                    (
-                                    <Picker
-                                        ref={(ref) => { this.inputTipoUsuario = ref; }}
-                                        selectedValue={this.state.tipoUsuario}
-                                        style={{ height: 50, width: '105%', marginLeft: -4 }}
-                                        onValueChange={(value) => {
-                                            if (this.props.keyItem) {
-                                                this.setState({ tipoUsuario: value });
-                                            } else {
-                                                this.setState({ tipoUsuario: value });
-                                                this.props.onChangeSuperState({ 
-                                                    tipoUsuario: value 
-                                                });
-                                            }
-                                        }}
-                                    >
-                                        <Picker.Item label={'Comum'} value={'1'} />
-                                        <Picker.Item label={'Administrador'} value={'0'} />
-                                    </Picker>
-                                    )
-                                    :
-                                    (
-                                        <TouchableWithoutFeedback
-                                            onPress={() =>
-                                                ActionSheetIOS.showActionSheetWithOptions({
-                                                    options: [
-                                                        'Comum',
-                                                        'Administrador'
-                                                    ]
-                                                },
-                                                (buttonIndex) => {
-                                                    let value = '';
-                                                    let label = '';
-                                                    switch (buttonIndex) {
-                                                        case 0:
-                                                            value = '1';
-                                                            label = 'Comum';
-                                                            break;
-                                                        case 1:
-                                                            value = '0';
-                                                            label = 'Administrador';
-                                                            break;
-                                                        default:
-                                                    }
-                                                    if (this.props.keyItem) {
-                                                        this.setState({ 
-                                                            tipoUsuario: value, 
-                                                            tipoUsuarioIos: label 
-                                                        });
-                                                    } else {
-                                                        this.setState({ 
-                                                            tipoUsuario: value, 
-                                                            tipoUsuarioIos: label 
-                                                        });
-                                                        this.props.onChangeSuperState(
-                                                            { tipoUsuario: value }
-                                                        );
-                                                    }
-                                                })
-                                            }
-                                        >
-                                            <View 
-                                                style={{ height: 50, width: '105%', marginTop: 9 }}
-                                            >
-                                                <Text style={styles.text}>
-                                                    {this.state.tipoUsuarioIos}
-                                                </Text>
-                                            </View>
-                                        </TouchableWithoutFeedback>
-                                    )
-                                }
-                            </View>
-                        </View>)
-                    }
+                    {this.renderUserType()}
                     <Button 
                         small
                         loading={this.state.loading}

@@ -225,6 +225,18 @@ class Profile extends React.Component {
                             leftIcon={{ name: 'settings', type: 'material-community' }}
                             onPress={() => Actions.profilePreferencias()}
                         />
+                        {
+                            this.props.userLevel && this.props.userLevel === '255' &&
+                            (
+                                <ListItem
+                                    key={'Painel Administrativo'}
+                                    title={'Painel Administrativo'}
+                                    leftIcon={{ name: 'webpack', type: 'material-community' }}
+                                    onPress={() => Actions.profilePainelAdmin()}
+                                />
+                            )
+                        }
+                        
                         <ListItem
                             key={'Sobre'}
                             title={'Sobre'}
@@ -262,7 +274,7 @@ class Profile extends React.Component {
                             </View>
                             <View style={{ marginHorizontal: 10 }}>
                                 <Text style={{ fontSize: 16, color: 'black' }}>
-                                    1.0.2
+                                    1.0.3
                                 </Text>
                             </View>
                         </View>
@@ -292,6 +304,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     userLogged: state.LoginReducer.userLogged,
+    userLevel: state.LoginReducer.userLevel,
     username: state.LoginReducer.username
 });
 

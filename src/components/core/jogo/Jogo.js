@@ -1682,8 +1682,9 @@ class Jogo extends React.Component {
         );
     }
 
-    renderIcons(jogador, jogo) {
-        let i = 0;
+    renderIcons(/*jogador, jogo*/) {
+        return (<View />);
+        /* let i = 0;
         let yellow = 0;
         let red = 0;
         let disabled = false;
@@ -1746,7 +1747,7 @@ class Jogo extends React.Component {
                 }
             </View>
 
-        );
+        ); */
     }
 
     render() {

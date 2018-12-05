@@ -59,6 +59,7 @@ class Usuarios extends React.Component {
         this.renderEditar = this.renderEditar.bind(this);
         this.renderSwitchType = this.renderSwitchType.bind(this);
         this.onPressEditRemove = this.onPressEditRemove.bind(this);
+        this.onFilterPermissions = this.onFilterPermissions.bind(this);
         this.onChangeSuperState = this.onChangeSuperState.bind(this);
         this.renderListUsuariosEdit = this.renderListUsuariosEdit.bind(this);
         this.onFilterUsuariosEdit = this.onFilterUsuariosEdit.bind(this);
@@ -93,6 +94,14 @@ class Usuarios extends React.Component {
                 (usuario.tipoPerfil && usuario.tipoPerfil.toLowerCase().includes(lowerFilter)) ||
                 (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter))
         ));
+    }
+
+    onFilterPermissions(userLevel) {
+        if (this.props.userLogged.level === userLevel || userLevel === '255') {
+            return false;
+        }
+
+        return true;
     }
 
     renderIcons(item) {
@@ -169,7 +178,14 @@ class Usuarios extends React.Component {
         let usuariosView = null;
 
         if (usuarios.length) {
-            const newSortedUsers = _.orderBy(usuarios, ['nome', 'emai'], ['asc', 'asc']);
+            const filtredAdminG = _.filter(
+                usuarios, (usr) => {
+                    return usr.level === '1' || 
+                    this.onFilterPermissions(usr.level) || 
+                    usr.key === this.props.userLogged.level;
+                }
+            );
+            const newSortedUsers = _.orderBy(filtredAdminG, ['nome', 'emai'], ['asc', 'asc']);
             usuariosView = (
                 <List containerStyle={{ marginBottom: 20 }}>
                 {
@@ -461,7 +477,8 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => ({
     listUsuarios: state.UsuariosReducer.listUsuarios,
     filterStr: state.UsuariosReducer.filterStr,
-    filterLoad: state.UsuariosReducer.filterLoad
+    filterLoad: state.UsuariosReducer.filterLoad,
+    userLogged: state.LoginReducer.userLogged
 });
 
 export default connect(mapStateToProps, {
