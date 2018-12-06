@@ -269,7 +269,7 @@ class JogoP extends React.Component {
         );
     }
 
-    renderGolJogador(gols) {
+    renderGolJogador(gols/*, jogo*/) {
         const golsCasa = _.filter(gols, (item) => item.side && item.side === 'casa').sort(
             (a, b) => {
                 const aTime = parseInt(a.time, 10);
@@ -319,7 +319,7 @@ class JogoP extends React.Component {
                     let timeText = formatJogoSeconds(golsCasa[i].time);
                     if (timeText.length > 1) {
                         timeText = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 { timeText[0] }
                                 <Text style={styles.extraTime}>
                                     { timeText[1] }
@@ -331,7 +331,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeText = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 <Text>
                                     { timeText[0] }
                                 </Text>
@@ -362,14 +362,14 @@ class JogoP extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
-                                    { timeText }
+                                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                                        { timeText }
+                                    </View>
                                 </View>
                             </View>
                         </View>
@@ -379,7 +379,7 @@ class JogoP extends React.Component {
                     let timeTextVisit = formatJogoSeconds(golsVisit[i].time);
                     if (timeTextCasa.length > 1) {
                         timeTextCasa = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 { timeTextCasa[0] }
                                 <Text style={styles.extraTime}>
                                     { timeTextCasa[1] }
@@ -391,7 +391,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeTextCasa = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 <Text>
                                     { timeTextCasa[0] }
                                 </Text>
@@ -403,7 +403,7 @@ class JogoP extends React.Component {
                     }
                     if (timeTextVisit.length > 1) {
                         timeTextVisit = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 { timeTextVisit[0] }
                                 <Text style={styles.extraTime}>
                                     { timeTextVisit[1] }
@@ -415,7 +415,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeTextVisit = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 <Text>
                                     { timeTextVisit[0] }
                                 </Text>
@@ -446,14 +446,14 @@ class JogoP extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
-                                    { timeTextCasa }
+                                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                                        { timeTextCasa }
+                                    </View>
                                 </View>
                                 <View
                                     style={{
@@ -463,12 +463,18 @@ class JogoP extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    { timeTextVisit }
+                                    <View 
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end'
+                                        }}
+                                    >
+                                        { timeTextVisit }
+                                    </View>
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     </TouchableOpacity>
@@ -485,7 +491,7 @@ class JogoP extends React.Component {
                     let timeText = formatJogoSeconds(golsVisit[i].time);
                     if (timeText.length > 1) {
                         timeText = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 { timeText[0] }
                                 <Text style={styles.extraTime}>
                                     { timeText[1] }
@@ -497,7 +503,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeText = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 <Text>
                                     { timeText[0] }
                                 </Text>
@@ -527,12 +533,18 @@ class JogoP extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    { timeText }
+                                    <View 
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end'
+                                        }}
+                                    >
+                                        { timeText }
+                                    </View>
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     </TouchableOpacity>
@@ -545,7 +557,7 @@ class JogoP extends React.Component {
                     let timeTextCasa = formatJogoSeconds(golsCasa[i].time);
                     if (timeTextVisit.length > 1) {
                         timeTextVisit = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 { timeTextVisit[0] }
                                 <Text style={styles.extraTime}>
                                     { timeTextVisit[1] }
@@ -557,7 +569,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeTextVisit = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 <Text>
                                     { timeTextVisit[0] }
                                 </Text>
@@ -569,7 +581,7 @@ class JogoP extends React.Component {
                     }
                     if (timeTextCasa.length > 1) {
                         timeTextCasa = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 { timeTextCasa[0] }
                                 <Text style={styles.extraTime}>
                                     { timeTextCasa[1] }
@@ -581,7 +593,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeTextCasa = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 <Text>
                                     { timeTextCasa[0] }
                                 </Text>
@@ -612,14 +624,14 @@ class JogoP extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
-                                    { timeTextCasa }
+                                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                                        { timeTextCasa }
+                                    </View>
                                 </View>
                                 <View
                                     style={{
@@ -629,12 +641,18 @@ class JogoP extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    { timeTextVisit }
+                                    <View 
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end'
+                                        }}
+                                    >
+                                        { timeTextVisit }
+                                    </View>
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image source={imgBola} style={{ width: 25, height: 25 }} />
                                     </TouchableOpacity>
@@ -682,7 +700,7 @@ class JogoP extends React.Component {
         );
     }
 
-    renderCartaoJogador(cartoes) {
+    renderCartaoJogador(cartoes/*, jogo*/) {
         const cartoesCasa = _.filter(cartoes, (item) => item.side && item.side === 'casa').sort(
             (a, b) => {
                 const aTime = parseInt(a.time, 10);
@@ -732,7 +750,7 @@ class JogoP extends React.Component {
                     let timeText = formatJogoSeconds(cartoesCasa[i].time);
                     if (timeText.length > 1) {
                         timeText = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 { timeText[0] }
                                 <Text style={styles.extraTime}>
                                     { timeText[1] }
@@ -744,7 +762,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeText = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 <Text>
                                     { timeText[0] }
                                 </Text>
@@ -775,9 +793,7 @@ class JogoP extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={
@@ -790,7 +806,9 @@ class JogoP extends React.Component {
                                         />
                                     </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
-                                    { timeText }
+                                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                                        { timeText }
+                                    </View>
                                 </View>
                             </View>
                         </View>
@@ -800,7 +818,7 @@ class JogoP extends React.Component {
                     let timeTextVisit = formatJogoSeconds(cartoesVisit[i].time);
                     if (timeTextCasa.length > 1) {
                         timeTextCasa = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 { timeTextCasa[0] }
                                 <Text style={styles.extraTime}>
                                     { timeTextCasa[1] }
@@ -812,7 +830,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeTextCasa = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 <Text>
                                     { timeTextCasa[0] }
                                 </Text>
@@ -824,7 +842,7 @@ class JogoP extends React.Component {
                     }
                     if (timeTextVisit.length > 1) {
                         timeTextVisit = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 { timeTextVisit[0] }
                                 <Text style={styles.extraTime}>
                                     { timeTextVisit[1] }
@@ -836,7 +854,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeTextVisit = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 <Text>
                                     { timeTextVisit[0] }
                                 </Text>
@@ -867,9 +885,7 @@ class JogoP extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={
@@ -882,7 +898,9 @@ class JogoP extends React.Component {
                                         />
                                     </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
-                                    { timeTextCasa }
+                                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                                        { timeTextCasa }
+                                    </View>
                                 </View>
                                 <View
                                     style={{
@@ -892,12 +910,18 @@ class JogoP extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    { timeTextVisit }
+                                    <View 
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end'
+                                        }}
+                                    >
+                                        { timeTextVisit }
+                                    </View>
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={
@@ -922,7 +946,7 @@ class JogoP extends React.Component {
                     let timeText = formatJogoSeconds(cartoesVisit[i].time);
                     if (timeText.length > 1) {
                         timeText = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 { timeText[0] }
                                 <Text style={styles.extraTime}>
                                     { timeText[1] }
@@ -934,7 +958,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeText = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 <Text>
                                     { timeText[0] }
                                 </Text>
@@ -964,12 +988,18 @@ class JogoP extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    { timeText }
+                                    <View 
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end'
+                                        }}
+                                    >
+                                        { timeText }
+                                    </View>
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={
@@ -990,7 +1020,7 @@ class JogoP extends React.Component {
                     let timeTextCasa = formatJogoSeconds(cartoesCasa[i].time);
                     if (timeTextVisit.length > 1) {
                         timeTextVisit = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 { timeTextVisit[0] }
                                 <Text style={styles.extraTime}>
                                     { timeTextVisit[1] }
@@ -1002,7 +1032,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeTextVisit = (
-                            <Text>
+                            <Text style={{ textAlign: 'right' }}>
                                 <Text>
                                     { timeTextVisit[0] }
                                 </Text>
@@ -1014,7 +1044,7 @@ class JogoP extends React.Component {
                     }
                     if (timeTextCasa.length > 1) {
                         timeTextCasa = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 { timeTextCasa[0] }
                                 <Text style={styles.extraTime}>
                                     { timeTextCasa[1] }
@@ -1026,7 +1056,7 @@ class JogoP extends React.Component {
                         );
                     } else {
                         timeTextCasa = (
-                            <Text>
+                            <Text style={{ textAlign: 'left' }}>
                                 <Text>
                                     { timeTextCasa[0] }
                                 </Text>
@@ -1057,9 +1087,7 @@ class JogoP extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={
@@ -1072,7 +1100,9 @@ class JogoP extends React.Component {
                                         />
                                     </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
-                                    { timeTextCasa }
+                                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                                        { timeTextCasa }
+                                    </View>
                                 </View>
                                 <View
                                     style={{
@@ -1082,12 +1112,18 @@ class JogoP extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    { timeTextVisit }
+                                    <View 
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end'
+                                        }}
+                                    >
+                                        { timeTextVisit }
+                                    </View>
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={
@@ -1143,7 +1179,7 @@ class JogoP extends React.Component {
         );
     }
 
-    renderSubsJogador(subs) {
+    renderSubsJogador(subs/*, jogo*/) {
         const subsCasa = _.filter(subs, (item) => item.side && item.side === 'casa').sort(
             (a, b) => {
                 const aTime = parseInt(a.time, 10);
@@ -1230,9 +1266,7 @@ class JogoP extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={imgInOut}
@@ -1242,14 +1276,16 @@ class JogoP extends React.Component {
                                         />
                                     </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
-                                    { timeText }
-                                    <View>
-                                        <Text style={styles.textOut}>
-                                            { subsCasa[i].jogadorOut.nome }
-                                        </Text>
-                                        <Text style={styles.textIn}>
-                                            { subsCasa[i].jogadorIn.nome }
-                                        </Text>
+                                    <View style={{ flex: 1, flexDirection: 'row' }}>
+                                        { timeText }
+                                        <View>
+                                            <Text style={styles.textOut}>
+                                                { subsCasa[i].jogadorOut.nome }
+                                            </Text>
+                                            <Text style={styles.textIn}>
+                                                { subsCasa[i].jogadorIn.nome }
+                                            </Text>
+                                        </View>
                                     </View>
                                 </View>
                             </View>
@@ -1315,9 +1351,7 @@ class JogoP extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={imgInOut}
@@ -1327,14 +1361,22 @@ class JogoP extends React.Component {
                                         />
                                     </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
-                                    { timeTextCasa }
-                                    <View>
-                                        <Text style={styles.textOut}>
-                                            { subsCasa[i].jogadorOut.nome }
-                                        </Text>
-                                        <Text style={styles.textIn}>
-                                            { subsCasa[i].jogadorIn.nome }
-                                        </Text>
+                                    <View
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-start'
+                                        }}
+                                    >
+                                        { timeTextCasa }
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.textOut}>
+                                                { subsCasa[i].jogadorOut.nome }
+                                            </Text>
+                                            <Text style={styles.textIn}>
+                                                { subsCasa[i].jogadorIn.nome }
+                                            </Text>
+                                        </View>
                                     </View>
                                 </View>
                                 <View
@@ -1345,20 +1387,28 @@ class JogoP extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    { timeTextVisit }
-                                    <View>
-                                        <Text style={styles.textOut}>
-                                            { subsVisit[i].jogadorOut.nome }
-                                        </Text>
-                                        <Text style={styles.textIn}>
-                                            { subsVisit[i].jogadorIn.nome }
-                                        </Text>
+                                    <View 
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end'
+                                        }}
+                                    >
+                                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                                            <Text style={{ textAlign: 'right' }}>
+                                                { timeTextVisit }
+                                                <Text style={styles.textOut}>
+                                                    { subsVisit[i].jogadorOut.nome }
+                                                </Text>
+                                            </Text>
+                                            <Text style={styles.textIn}>
+                                                { subsVisit[i].jogadorIn.nome }
+                                            </Text>
+                                        </View>
                                     </View>
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={imgInOut}
@@ -1416,20 +1466,28 @@ class JogoP extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    { timeText }
-                                    <View>
-                                        <Text style={styles.textOut}>
-                                            { subsVisit[i].jogadorOut.nome }
-                                        </Text>
-                                        <Text style={styles.textIn}>
-                                            { subsVisit[i].jogadorIn.nome }
-                                        </Text>
+                                    <View
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end'
+                                        }}
+                                    >
+                                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                                            <Text style={{ textAlign: 'right' }}>
+                                                { timeText }
+                                                <Text style={styles.textOut}>
+                                                    { subsVisit[i].jogadorOut.nome }
+                                                </Text>
+                                            </Text>
+                                            <Text style={styles.textIn}>
+                                                { subsVisit[i].jogadorIn.nome }
+                                            </Text>
+                                        </View>
                                     </View>
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={imgInOut}
@@ -1502,9 +1560,7 @@ class JogoP extends React.Component {
                                     }}
                                 >
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={imgInOut}
@@ -1514,14 +1570,22 @@ class JogoP extends React.Component {
                                         />
                                     </TouchableOpacity>
                                     <View style={{ marginHorizontal: 3 }} />
-                                    { timeTextCasa }
-                                    <View>
-                                        <Text style={styles.textOut}>
-                                            { subsCasa[i].jogadorOut.nome }
-                                        </Text>
-                                        <Text style={styles.textIn}>
-                                            { subsCasa[i].jogadorIn.nome }
-                                        </Text>
+                                    <View
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-start'
+                                        }}
+                                    >
+                                        { timeTextCasa }
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={styles.textOut}>
+                                                { subsCasa[i].jogadorOut.nome }
+                                            </Text>
+                                            <Text style={styles.textIn}>
+                                                { subsCasa[i].jogadorIn.nome }
+                                            </Text>
+                                        </View>
                                     </View>
                                 </View>
                                 <View
@@ -1532,20 +1596,28 @@ class JogoP extends React.Component {
                                         justifyContent: 'flex-end' 
                                     }}
                                 >
-                                    { timeTextVisit }
-                                    <View>
-                                        <Text style={styles.textOut}>
-                                            { subsVisit[i].jogadorOut.nome }
-                                        </Text>
-                                        <Text style={styles.textIn}>
-                                            { subsVisit[i].jogadorIn.nome }
-                                        </Text>
+                                    <View
+                                        style={{ 
+                                            flex: 1, 
+                                            flexDirection: 'row',
+                                            justifyContent: 'flex-end'
+                                        }}
+                                    >
+                                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                                            <Text style={{ textAlign: 'right' }}>
+                                                { timeTextVisit }
+                                                <Text style={styles.textOut}>
+                                                    { subsVisit[i].jogadorOut.nome }
+                                                </Text>
+                                            </Text>
+                                            <Text style={styles.textIn}>
+                                                { subsVisit[i].jogadorIn.nome }
+                                            </Text>
+                                        </View>
                                     </View>
                                     <View style={{ marginHorizontal: 3 }} />
                                     <TouchableOpacity
-                                        onPress={
-                                            () => false
-                                        }
+                                        onPress={() => false}
                                     >
                                         <Image 
                                             source={imgInOut}

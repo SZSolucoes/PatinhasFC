@@ -41,7 +41,6 @@
 		B492583B852547E796E2C0A2 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7A199EB6A4B042A7A83A1755 /* Entypo.ttf */; };
 		C0423CEF21690537005176C1 /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0423CEE21690537005176C1 /* Social.framework */; };
 		C0423CF121690548005176C1 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0423CF021690548005176C1 /* MessageUI.framework */; };
-		C05977822188932A00F232A2 /* libRNShare.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0982505217A28C900B90A9A /* libRNShare.a */; };
 		C06F8EAF2178C618002CAFCE /* libART.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C06F8E822178C5F2002CAFCE /* libART.a */; };
 		C09824DD217A281200B90A9A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C09824DC217A281200B90A9A /* GoogleService-Info.plist */; };
 		C0982510217A3B7D00B90A9A /* libRNFIRMessaging.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C098250F217A297700B90A9A /* libRNFIRMessaging.a */; };
@@ -522,7 +521,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C05977822188932A00F232A2 /* libRNShare.a in Frameworks */,
 				C0982510217A3B7D00B90A9A /* libRNFIRMessaging.a in Frameworks */,
 				C06F8EAF2178C618002CAFCE /* libART.a in Frameworks */,
 				C0423CF121690548005176C1 /* MessageUI.framework in Frameworks */,
@@ -1645,7 +1643,7 @@
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_NO_COMMON_BLOCKS = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -1698,7 +1696,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_NO_COMMON_BLOCKS = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
