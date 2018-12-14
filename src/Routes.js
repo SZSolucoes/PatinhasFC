@@ -38,6 +38,9 @@ import PainelAdmin from './components/profile/PainelAdmin';
 import Admin from './components/admin/Admin';
 import CadastroJogos from './components/admin/cadastrojogos/CadastroJogos';
 import Usuarios from './components/admin/usuarios/Usuarios';
+import Analise from './components/admin/analise/Analise';
+import FinanceiroEditar from './components/admin/analise/financeiro/FinanceiroEditar';
+import FinanceiroCadastrar from './components/admin/analise/financeiro/FinanceiroCadastrar';
 import Info from './components/admin/informativos/Info';
 import Gerenciar from './components/admin/gerenciar/Gerenciar';
 import Historico from './components/admin/historico/Historico';
@@ -173,6 +176,11 @@ class Routes extends React.Component {
                     return true;
                 }
             }
+
+            if ('|_financeiroCadastrar|_financeiroEditar|'.includes(Actions.currentScene)) {
+                Actions.popTo('analise');
+                return true;
+            }
             
             return true;
         });
@@ -235,6 +243,11 @@ class Routes extends React.Component {
                 Actions.popTo('profileHistorico');
                 return true;
             }
+        }
+
+        if ('|_financeiroCadastrar|_financeiroEditar|'.includes(Actions.currentScene)) {
+            Actions.popTo('analise');
+            return true;
         }
 
         return true;
@@ -650,6 +663,15 @@ class Routes extends React.Component {
                         //initial
                     />
                     <Scene 
+                        key={'analise'}
+                        title={'Análise'} 
+                        component={Analise}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
                         key={'cadastroInfos'}
                         title={'Informativos'} 
                         component={Info}
@@ -852,6 +874,37 @@ class Routes extends React.Component {
                             hideNavBar 
                             component={EscalacaoP}
                             tabBarLabel={'Escalação'}
+                            activeTintColor={'white'}
+                        />
+                    </Scene>
+                    <Scene 
+                        key={'analiseFinanceiro'}
+                        tabs
+                        showLabel
+                        tabBarPosition={'top'}
+                        lazy={false}
+                        swipeEnabled
+                        title={'Financeiro'} 
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        tabBarStyle={{ backgroundColor: colorAppS }}
+                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        //renderRightButton={() => this.rightButtonGerenciarTab()}
+                    >
+                        <Scene 
+                            key={'financeiroCadastrar'}
+                            hideNavBar 
+                            component={FinanceiroCadastrar}
+                            initial
+                            tabBarLabel={'Cadastro'}
+                            activeTintColor={'white'}
+                        />
+                        <Scene 
+                            key={'financeiroEditar'}
+                            hideNavBar 
+                            component={FinanceiroEditar}
+                            tabBarLabel={'Lista'}
                             activeTintColor={'white'}
                         />
                     </Scene>

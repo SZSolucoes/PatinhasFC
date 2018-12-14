@@ -20,6 +20,7 @@ class AlertScl extends React.Component {
         this.onPressConfRemov = this.onPressConfRemov.bind(this);
         this.onPressDisableUser = this.onPressDisableUser.bind(this);
         this.onPressRemoveInfo = this.onPressRemoveInfo.bind(this);
+        this.onPressRemoveFina = this.onPressRemoveFina.bind(this);
     }
 
     onPressDisableUser() {
@@ -164,6 +165,46 @@ class AlertScl extends React.Component {
         }, 1000);
     }
 
+    onPressRemoveFina() {
+        const { itemFinaSelected } = this.props;
+
+        const dbItemRef = firebase.database().ref()
+        .child(`analise/financeiro/${itemFinaSelected.key}`);
+
+        dbItemRef.remove()
+        .then(() => {
+            setTimeout(
+                () => Toast.show('Remoção efetuada com sucesso.', Toast.LONG)
+            , 1000);
+        })
+        .catch(() => 
+            setTimeout(
+                () => Toast.show('Falha durante a remoção.', Toast.LONG)
+            , 1000)
+        );
+        
+        store.dispatch({
+            type: 'modifica_showalertscl_alertscl',
+            payload: false
+        });
+
+        store.dispatch({
+            type: 'modifica_itemselected_analisefina',
+            payload: {}
+        }); 
+
+        setTimeout(() => {
+            store.dispatch({
+                type: 'modifica_remove_alertscl',
+                payload: false
+            });
+            store.dispatch({
+                type: 'modifica_flagremoveanalisefina_analisefina',
+                payload: false
+            });
+        }, 1000);
+    }
+
     render() {
         return (
             <SCLAlert
@@ -211,6 +252,8 @@ class AlertScl extends React.Component {
                                     return this.onPressDisableUser();
                                 } else if (this.props.flagRemoveInfo) {
                                     return this.onPressRemoveInfo();
+                                } else if (this.props.flagRemoveAnaliseFina) {
+                                    return this.onPressRemoveFina();
                                 }
                                 return this.onPressConfRemov(); 
                             }}
@@ -252,6 +295,8 @@ const mapStateToProps = (state) => ({
     flagDisableUser: state.UsuariosReducer.flagDisableUser,
     flagRemoveInfo: state.InfoReducer.flagRemoveInfo,
     itemInfoSelected: state.InfoReducer.itemSelected,
+    flagRemoveAnaliseFina: state.FinanceiroReducer.flagRemoveAnaliseFina,
+    itemFinaSelected: state.FinanceiroReducer.itemSelected,
 });
 
 export default connect(mapStateToProps)(AlertScl);

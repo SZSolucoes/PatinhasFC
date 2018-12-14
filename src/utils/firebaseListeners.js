@@ -8,11 +8,13 @@ let jogosListener = null;
 let infosListener = null;
 let usuariosListener = null;
 let usuarioListener = null;
+let analiseFinaListener = null;
 
 let jogosListenerOn = false;
 let infosListenerOn = false;
 let usuariosListenerOn = false;
 let usuarioListenerOn = false;
+let analiseFinaListenerOn = false;
 
 export const startFbListener = (name, params) => {
     const databaseRef = firebase.database().ref();
@@ -78,6 +80,22 @@ export const startFbListener = (name, params) => {
                 usuarioListenerOn = true;
             }
             break;
+        case 'analise/financeiro':
+            // LISTENER FIREBASE ANÁLISE FINACEIRO
+            if (!analiseFinaListener || (analiseFinaListener && !analiseFinaListenerOn)) {
+                analiseFinaListener = databaseRef.child('analise/financeiro');
+                analiseFinaListener.on('value', (snapshot) => {
+                    store.dispatch({
+                        type: 'modifica_listfina_analisefina',
+                        payload: _.map(
+                            snapshot.val(), 
+                            (value, key) => ({ key, data: b64.decode(key), ...value })
+                        )
+                    });
+                });
+                analiseFinaListenerOn = true;
+            }
+            break;
         default:
     }
 };
@@ -106,6 +124,12 @@ export const stopFbListener = (name) => {
             if (usuarioListener) {
                 usuarioListener.off();
                 usuarioListenerOn = false;
+            }
+            break;
+        case 'analise/financeiro':
+            if (analiseFinaListener) {
+                analiseFinaListener.off();
+                analiseFinaListenerOn = false;
             }
             break;
         default:

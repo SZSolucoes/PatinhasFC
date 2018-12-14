@@ -87,7 +87,7 @@ class UsuarioEdit extends React.Component {
         const emailUser64 = b64.encode(email);
 
         if (data instanceof Moment) {
-            dataStr = Moment(dataStr).format('DD/MM/YYYY');
+            dataStr = Moment(data).format('DD/MM/YYYY');
         } else {
             dataStr = data;
         }

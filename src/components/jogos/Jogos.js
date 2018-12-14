@@ -280,11 +280,13 @@ class Jogos extends React.Component {
             startFbListener('infos');
             startFbListener('usuarios');
             startFbListener('usuario', { email: username });
+            startFbListener('analise/financeiro');
         } else {
             stopFbListener('jogos');
             stopFbListener('infos');
             stopFbListener('usuarios');
             stopFbListener('usuario');
+            stopFbListener('analise/financeiro');
         }
     }
 

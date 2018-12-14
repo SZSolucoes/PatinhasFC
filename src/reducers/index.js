@@ -6,6 +6,7 @@ import AlertSclReducer from './AlertSclReducer';
 import CadastroJogosReducer from './CadastroJogosReducer';
 import UsuariosReducer from './UsuariosReducer';
 import InfoReducer from './InfoReducer';
+import FinanceiroReducer from './FinanceiroReducer';
 import JogoReducer from './JogoReducer';
 import GerenciarReducer from './GerenciarReducer';
 import HistoricoReducer from './HistoricoReducer';
@@ -23,5 +24,6 @@ export default combineReducers({
     GerenciarReducer,
     HistoricoReducer,
     ImagensReducer,
-    PainelAdminReducer
+    PainelAdminReducer,
+    FinanceiroReducer
 });
