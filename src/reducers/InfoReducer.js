@@ -11,6 +11,7 @@ const INITIAL_STATE = {
     showShareModal: false,
     itemShareSelected: {},
     imagesForView: [],
+    imagesForViewIndex: 0,
     showImageView: false
 };
 
@@ -65,6 +66,11 @@ export default (state = INITIAL_STATE, action) => {
             return { 
                 ...state, 
                 imagesForView: [...action.payload]
+            };
+        case 'modifica_imagesforviewindex_info':
+            return { 
+                ...state, 
+                imagesForViewIndex: action.payload
             };
         case 'modifica_showimageview_info':
             return { 

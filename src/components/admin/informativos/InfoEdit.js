@@ -4,7 +4,9 @@ import {
     StyleSheet,
     Platform,
     TouchableOpacity,
-    Image
+    Image,
+    ScrollView,
+    TouchableWithoutFeedback
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -18,14 +20,19 @@ import {
 } from 'react-native-elements';
 import Moment from 'moment';
 import b64 from 'base-64';
+import _ from 'lodash';
 import RNFetchBlob from 'rn-fetch-blob';
 import ImagePicker from 'react-native-image-crop-picker';
+import ImageView from 'react-native-image-view';
+import { Dialog } from 'react-native-simple-dialogs';
+import * as Progress from 'react-native-progress';
 
 import firebase from '../../../Firebase';
 import { showAlert } from '../../../utils/store';
-import { colorAppF } from '../../../utils/constantes';
+import { colorAppF, colorAppS } from '../../../utils/constantes';
 import { checkPerfil } from '../../../utils/userUtils';
 import { checkConInfo } from '../../../utils/jogosUtils';
+import { doActiveRNFetchBlob } from '../../../utils/utilsTools';
 
 class UsuarioEdit extends React.Component {
 
@@ -35,22 +42,22 @@ class UsuarioEdit extends React.Component {
         this.state = {
             isTitValid: props.isTitValid ? props.isTitValid : false,
             contentType: props.contentType ? props.contentType : '',
-            imgArticleUri: props.imgArticleUri ? props.imgArticleUri : null,
-            imgPath: props.imgPath ? props.imgPath : '',
+            imgsArticleUri: props.imgsArticleUri ? props.imgsArticleUri : [],
             titulo: props.titulo ? props.titulo : '',
             descricao: props.descricao ? props.descricao : '',
             linkExt: props.linkExt ? props.linkExt : '',
             loading: props.loading ? props.loading : false,
-            scrollView: props.scrollView ? props.scrollView : null
+            scrollView: props.scrollView ? props.scrollView : null,
+            showImageView: false,
+            imgSelected: 0,
+            uploadModal: false,
+            uploadModalPerc: 0,
+            uploadModalText: 'Enviando imagem...'
         };
-
-        this.b64Str = props.b64Str ? props.b64Str : '';
-        this.contentType = props.contentType ? props.contentType : '';
 
         this.onPressSelectImg = this.onPressSelectImg.bind(this);
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
-        this.setImgProperties = this.setImgProperties.bind(this);
-        this.clearContentImg = this.clearContentImg.bind(this);
+        this.renderImages = this.renderImages.bind(this);
     }
 
     onPressSelectImg() {
@@ -60,41 +67,54 @@ class UsuarioEdit extends React.Component {
             cropping: true,
             includeBase64: true,
             cropperCircleOverlay: false,
+            multiple: true,
             mediaType: 'photo'
-          }).then(image => {
-            if (image) {
-                let contentType = '';
-                if (image.mime) {
-                    contentType = image.mime;
-                }
-               
-                if (this.props.keyItem) {
-                    this.setImgProperties(image.data, contentType);
-                    this.setState({ 
-                        imgArticleUri: `data:${image.mime};base64,${image.data}`
-                    });
-                } else {
-                    this.setImgProperties(image.data, contentType);
-                    this.setState({ 
-                        imgArticleUri: `data:${image.mime};base64,${image.data}`
-                    });
-                    this.props.onChangeSuperState({ 
-                        imgArticleUri: `data:${image.mime};base64,${image.data}`,
-                        b64Str: image.data,
-                        contentType
-                    });
+          }).then(images => {
+            for (let index = 0; index < images.length; index++) {
+                const image = images[index];
+                if (image) {
+                    let contentType = '';
+                    let imgB64 = '';
+
+                    if (image.mime) {
+                        contentType = image.mime;
+                    }
+
+                    if (image.data) {
+                        imgB64 = image.data;
+                    }
+    
+                    const imgData = `data:${image.mime};base64,${image.data}`;
+                    const isNotIn = _.findIndex(
+                        this.state.imgsArticleUri, (item) => item.data === imgData
+                    );
+    
+                    if (isNotIn === -1) {
+                        this.setState({ 
+                            imgsArticleUri: [
+                                ...this.state.imgsArticleUri, 
+                                { data: imgData, contentType, isUri: 'false', b64data: imgB64 }
+                            ]
+                        });
+                    }
+                   
+                    if (!this.props.keyItem) {
+                        this.props.onChangeSuperState({ 
+                            imgsArticleUri: this.state.imgsArticleUri
+                        });
+                    }
                 }
             }
           }).catch(() => false);
     }
 
-    onPressConfirmar() {
+    async onPressConfirmar() {
         this.setState({ loading: true });
 
-        const { titulo, descricao, linkExt, scrollView } = this.state;
-        const { keyItem, imgArticleUri, userLogged, userLevel } = this.props;
-        const b64File = this.b64Str;
-        const contentTp = this.contentType;
+        const { 
+            titulo, descricao, linkExt, scrollView, imgsArticleUri 
+        } = this.state;
+        const { keyItem, userLogged, userLevel, onCLickBack } = this.props;
         const protocol = linkExt.substr(0, 4);
         let linkArticle = linkExt;
         let dataStr = '';
@@ -122,95 +142,165 @@ class UsuarioEdit extends React.Component {
         dataStr = Moment().format('DD/MM/YYYY HH:mm:ss');
 
         // Upload de imagem e dados
-        if (b64File) {
-            const metadata = {
-                contentType: contentTp
-            };
-
+        if (imgsArticleUri && imgsArticleUri.length) {
             const storageRef = firebase.storage().ref();
             const databaseRef = firebase.database().ref();
+            const imgsUrl = _.filter(
+                imgsArticleUri, imgurl => imgurl.isUri === 'true' && !imgurl.isRem
+            );
+
+            const lenNumberUpload = _.sumBy(imgsArticleUri, (x) => {
+                const ret = x.isUri === 'false' ? 1 : 0;
+                return ret;
+            });
+
+            let indexUpload = 0;
+
+            if (lenNumberUpload) {
+                if (lenNumberUpload === 1) {
+                    this.setState({ 
+                        uploadModal: true,
+                        uploadModalPerc: 0,
+                        uploadModalText: 'Enviando imagem...'
+                    });
+                } else {
+                    this.setState({ 
+                        uploadModal: true,
+                        uploadModalPerc: 0,
+                        uploadModalText: 'Enviando imagens...'
+                    });
+                }
+            }
 
             const Blob = RNFetchBlob.polyfill.Blob;
-
-            const glbXMLHttpRequest = global.XMLHttpRequest;
-            const glbBlob = global.Blob;
-
-            let uploadBlob = null;
-
-            global.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
-            global.Blob = Blob;
-
-            const fileName = b64.encode(new Date().getTime().toString());
-            const imgExt = contentTp.slice(contentTp.indexOf('/') + 1);
-            const imgRef = storageRef.child(`informativos/${fileName}.${imgExt}`);
+            
+            doActiveRNFetchBlob(true);
+            
             const dbInfosRef = keyItem ? 
             databaseRef.child(`informativos/${keyItem}`) : databaseRef.child('informativos');
 
-            Blob.build(b64File, { type: `${contentTp};BASE64` })
-                .then((blob) => { 
-                    uploadBlob = blob;
-                    return imgRef.put(blob, metadata);
-                })
-                .then(() => {
-                    if (uploadBlob) {
-                        uploadBlob.close();
-                        uploadBlob = null;
-                    }
-                    return imgRef.getDownloadURL();
-                })
-                .then((url) => {
-                    if (keyItem) {
-                        return dbInfosRef.update({
-                            descPost: titulo, 
-                            imgArticle: url, 
-                            textArticle: descricao,
-                            linkArticle });
-                    }
-                    return dbInfosRef.push({
-                            descPost: titulo, 
-                            imgArticle: url, 
-                            textArticle: descricao,
-                            linkArticle,
-                            emailUser: userLogged.email,
-                            nomeUser: userLogged.nome,
-                            perfilUser: checkPerfil(userLogged.tipoPerfil),
-                            userLevel,
-                            imgAvatar: userLogged.imgAvatar,
-                            listComents: [{ push: 'push' }],
-                            listLikes: [{ push: 'push' }],
-                            dataPost: dataStr
-                        });
-                })
-                .then(() => {
-                    this.setState({ loading: false, isTitValid: false });
-                    if (keyItem && imgArticleUri) {
-                        firebase.storage().refFromURL(imgArticleUri).delete()
-                        .then(() => true)
-                        .catch(() => true);
-                    }
-                    if (keyItem) {
-                        showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');    
-                    } else {
-                        showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
-                    }
-                    global.XMLHttpRequest = glbXMLHttpRequest;
-                    global.Blob = glbBlob;
-                })
-                .catch(() => {
-                    global.XMLHttpRequest = glbXMLHttpRequest;
-                    global.Blob = glbBlob;
+            // TRATAMENTO DE UPLOAD DE IMAGENS
+            const asyncFun = async (element) => {
+                let blobFile = null;
 
-                    if (uploadBlob) {
-                        uploadBlob.close();
-                    }
-
-                    this.setState({ loading: false, isTitValid: false });
-                    showAlert(
-                        'danger', 
-                        'Ops!', 
-                        'Ocorreu um erro ao cadastrar o informativo.'
+                if (element.isUri === 'false' && element.b64data) {
+                    const fileName = b64.encode(new Date().getTime().toString());
+                    const imgExt = element.contentType.slice(
+                        element.contentType.indexOf('/') + 1
                     );
-                });  
+                    const imgRef = storageRef.child(`informativos/${fileName}.${imgExt}`);
+                    const metadata = {
+                        contentType: element.contentType
+                    };
+    
+                    blobFile = await Blob.build(
+                        element.b64data, { type: `${element.contentType};BASE64` }
+                    );
+                    
+                    const url = await imgRef.put(blobFile, metadata)
+                    .then(async (snapshot) => await snapshot.ref.getDownloadURL());
+
+                    await blobFile.close();
+                    
+                    blobFile = null;
+                    
+                    indexUpload++;
+
+                    this.setState({ uploadModalPerc: indexUpload / lenNumberUpload });
+
+                    return { 
+                        data: url, contentType: element.contentType, isUri: 'true' 
+                    };
+                } else if (keyItem && element.isUri === 'true' && element.isRem) {
+                    firebase.storage().refFromURL(element.data).delete()
+                    .then(() => true)
+                    .catch(() => true);
+                }
+
+                return null;
+            };
+            
+            try {
+                for (let index = 0; index < imgsArticleUri.length; index++) {
+                    const elem = imgsArticleUri[index];
+                    const imgToPush = await asyncFun(elem);
+                    if (imgToPush) {
+                        imgsUrl.push(imgToPush);
+                    }
+                }
+            } catch (e) {
+                console.log(e);
+
+                this.setState({ 
+                    loading: false, 
+                    isTitValid: false, 
+                    uploadModal: false, 
+                    uploadModalPerc: 0 
+                });
+
+                doActiveRNFetchBlob(false);
+
+                showAlert(
+                    'danger', 
+                    'Ops!', 
+                    'Ocorreu um erro ao editar o informativo.'
+                );
+
+                return;
+            }
+
+            if (imgsUrl.length === 0) {
+                imgsUrl.push({ push: 'push' });
+            }
+
+            // TRATAMENTO DATABASE
+            if (keyItem) {
+                await dbInfosRef.update({
+                    descPost: titulo, 
+                    imgsArticle: imgsUrl, 
+                    textArticle: descricao,
+                    linkArticle 
+                });
+            } else {
+                await dbInfosRef.push({
+                    descPost: titulo, 
+                    imgsArticle: imgsUrl, 
+                    textArticle: descricao,
+                    linkArticle,
+                    emailUser: userLogged.email,
+                    nomeUser: userLogged.nome,
+                    perfilUser: checkPerfil(userLogged.tipoPerfil),
+                    userLevel,
+                    imgAvatar: userLogged.imgAvatar,
+                    listComents: [{ push: 'push' }],
+                    listLikes: [{ push: 'push' }],
+                    dataPost: dataStr
+                });
+            }
+
+            doActiveRNFetchBlob(false);
+
+            setTimeout(() => {
+                this.setState({ 
+                    loading: false, 
+                    isTitValid: false, 
+                    uploadModal: false, 
+                    uploadModalPerc: 0 
+                });
+    
+                setTimeout(() => {
+                    if (keyItem) {
+                        showAlert(
+                            'success', 'Sucesso!', 'Edição realizada com sucesso.'
+                        );
+                        onCLickBack();
+                    } else {
+                        showAlert(
+                            'success', 'Sucesso!', 'Cadastro realizado com sucesso.'
+                        );
+                    }  
+                }, 500);
+            }, 2000);
         } else {
             const databaseRef = firebase.database().ref();
             const dbInfosRef = keyItem ? 
@@ -225,6 +315,7 @@ class UsuarioEdit extends React.Component {
                 .then(() => {
                     this.setState({ loading: false, isTitValid: false });
                     showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
+                    onCLickBack();
                 })
                 .catch(() => {
                     this.setState({ loading: false, isTitValid: false });
@@ -237,7 +328,7 @@ class UsuarioEdit extends React.Component {
             } else {
                 dbInfosRef.push({
                     descPost: titulo, 
-                    imgArticle: '', 
+                    imgsArticle: [{ push: 'push' }], 
                     textArticle: descricao,
                     linkArticle,
                     emailUser: userLogged.email,
@@ -265,17 +356,73 @@ class UsuarioEdit extends React.Component {
         }
     }
     
-    setImgProperties(b64Str, mime) {
-        this.b64Str = b64Str;
-        this.contentType = mime;
-    }
+    renderImages() {
+        const viewsImages = _.map(this.state.imgsArticleUri, (data, index) => {
+            if (!data.isRem) {
+                return (
+                    <Card key={index} >
+                        <View style={{ flexDirection: 'row', paddingBottom: 5 }}>
+                            <View style={{ flex: 1, alignItems: 'center' }}>
+                                <TouchableWithoutFeedback
+                                    onPress={() => this.setState({ 
+                                        showImageView: true,
+                                        imgSelected: index
+                                    })}
+                                >
+                                    <Image 
+                                        source={{ uri: data.data }}
+                                        style={{
+                                            width: 80,
+                                            height: 80
+                                        }}
+                                    />
+                                </TouchableWithoutFeedback>
+                            </View>
+                            <View 
+                                style={{ 
+                                    flex: 1, 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center' 
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        const newArray = [...this.state.imgsArticleUri];
+                                        
+                                        if (newArray[index].isUri === 'true') {
+                                            newArray[index].isRem = true;
+                                        } else {
+                                            newArray.splice(index, 1);
+                                        }
+    
+                                        this.setState({ 
+                                            imgsArticleUri: newArray,
+                                        });
+                                    }}
+                                >
+                                    <Icon
+                                        name='delete' 
+                                        type='material-community' 
+                                        size={34} color='red' 
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Card>
+                );
+            }
 
-    clearContentImg() {
-        this.b64Str = '';
-        this.contentType = '';
+            return null;
+        });
+
+        return viewsImages;
     }
 
     render() {
+        const imagesForView = this.state.imgsArticleUri.map(
+            (item) => ({ source: { uri: item.data, width: 600, height: 400 } })
+        );
+
         return (
             <View>
                 <Card containerStyle={styles.card}>
@@ -317,25 +464,42 @@ class UsuarioEdit extends React.Component {
                                 <FormLabel 
                                     labelStyle={[styles.text, { marginTop: 0, marginBottom: 0 }]}
                                 >
-                                    Selecionar imagem
+                                    Selecionar imagens
                                 </FormLabel> 
                             </View>
-                            <View style={[styles.viewImageSelect, { height: 200 }]}>
-                                { 
-                                    !!this.state.imgArticleUri && 
-                                    (<Image 
-                                        source={{ uri: this.state.imgArticleUri }}
-                                        style={{
-                                            flex: 1,
-                                            alignSelf: 'stretch',
-                                            resizeMode: 'stretch',
-                                            width: undefined,
-                                            height: undefined
-                                            }}
-                                    />)
-                                }
-                            </View>
                         </TouchableOpacity>
+                        <ScrollView
+                            style={{ 
+                                height: 200,
+                                borderWidth: 2, 
+                                borderColor: '#EEEEEE',
+                                borderRadius: 0.9,
+                                backgroundColor: colorAppF
+                            }}
+                            contentContainerStyle={{
+                                paddingHorizontal: 10,
+                                paddingBottom: 50
+                            }}
+                        >
+                            <TouchableWithoutFeedback
+                                onPressIn={
+                                    () => this.props.scrollView().setNativeProps({ 
+                                        scrollEnabled: false 
+                                    })
+                                }
+                                onPressOut={
+                                    () => this.props.scrollView().setNativeProps({ 
+                                        scrollEnabled: true 
+                                    })
+                                }
+                            >
+                                <View>
+                                    { 
+                                        this.renderImages()
+                                    }
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </ScrollView>
                     </View>
                     <FormLabel labelStyle={styles.text}>DESCRIÇÃO DO ARTIGO</FormLabel>
                     <FormInput
@@ -391,16 +555,14 @@ class UsuarioEdit extends React.Component {
                         title={this.props.keyItem ? 'Restaurar' : 'Limpar'} 
                         buttonStyle={{ width: '100%', marginVertical: 10 }}
                         onPress={() => {
-                            this.clearContentImg();
                             if (this.props.keyItem) {
                                 this.setState({
                                     isTitValid: this.props.isTitValid ? 
                                     this.props.isTitValid : false,
                                     contentType: this.props.contentType ? 
                                     this.props.contentType : '',
-                                    imgArticleUri: this.props.imgArticleUri ? 
-                                    this.props.imgArticleUri : null,
-                                    imgPath: this.props.imgPath ? this.props.imgPath : '',
+                                    imgsArticleUri: this.props.imgsArticleUri ? 
+                                    this.props.imgsArticleUri : [],
                                     titulo: this.props.titulo ? this.props.titulo : '',
                                     descricao: this.props.descricao ? this.props.descricao : '',
                                     linkExt: this.props.linkExt ? this.props.linkExt : '',
@@ -410,8 +572,7 @@ class UsuarioEdit extends React.Component {
                                 this.setState({
                                     isTitValid: false,
                                     contentType: '',
-                                    imgArticleUri: null,
-                                    imgPath: '',
+                                    imgsArticleUri: [],
                                     titulo: '',
                                     descricao: '',
                                     linkExt: '',
@@ -421,6 +582,33 @@ class UsuarioEdit extends React.Component {
                         }}
                     />
                 </Card>
+                <ImageView
+                    images={imagesForView}
+                    imageIndex={this.state.imgSelected}
+                    isVisible={this.state.showImageView}
+                    renderFooter={() => (<View />)}
+                    onClose={() => this.setState({ showImageView: false })}
+                />
+                <Dialog
+                    animationType={'fade'}
+                    visible={this.state.uploadModal}
+                    title={this.state.uploadModalText}
+                    onTouchOutside={() => true}
+                >
+                    <View 
+                        style={{ 
+                            alignItems: 'center',
+                            justifyContent: 'center' 
+                        }}
+                    >
+                        <Progress.Circle 
+                            progress={this.state.uploadModalPerc}
+                            size={100}
+                            showsText
+                            color={colorAppS}
+                        />
+                    </View>
+                </Dialog>
                 <View style={{ marginBottom: 30 }} />
             </View>
         );

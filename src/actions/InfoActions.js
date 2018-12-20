@@ -54,6 +54,11 @@ export const modificaImagesForView = (value) => ({
     payload: value
 });
 
+export const modificaImagesForViewIndex = (value) => ({
+    type: 'modifica_imagesforviewindex_info',
+    payload: value
+});
+
 export const modificaShowImageView = (value) => ({
     type: 'modifica_showimageview_info',
     payload: value

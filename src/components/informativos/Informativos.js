@@ -23,7 +23,8 @@ import {
     modificaAddNewRows,
     modificaLoadingFooter,
     modificaImagesForView,
-    modificaShowImageView
+    modificaShowImageView,
+    modificaImagesForViewIndex
 } from '../../actions/InfoActions';
 import {  
     modificaAnimatedHeigth,
@@ -62,6 +63,7 @@ class Informativos extends React.Component {
         this.addNewRows = this.addNewRows.bind(this);
         this.renderArticle = this.renderArticle.bind(this);
         this.renderActions = this.renderActions.bind(this);
+        this.renderImages = this.renderImages.bind(this);
         this.comentsUpOrDown = this.comentsUpOrDown.bind(this);
         this.onPressLikeBtn = this.onPressLikeBtn.bind(this);
         this.onScrollView = this.onScrollView.bind(this);
@@ -109,9 +111,11 @@ class Informativos extends React.Component {
         }
     }
 
-    onPressImage(imageUri) {
-        if (imageUri) {
-            this.props.modificaImagesForView([{ source: imageUri }]);
+    onPressImage(imagesUri, index) {
+        if (imagesUri && imagesUri.length) {
+            const imagesForView = _.map(imagesUri, imgU => ({ source: imgU }));
+            this.props.modificaImagesForViewIndex(index);
+            this.props.modificaImagesForView(imagesForView);
             this.props.modificaShowImageView(true);
         }
     }
@@ -173,10 +177,16 @@ class Informativos extends React.Component {
     }
 
     renderArticle(item) {
-        let imageUri = null;
-        if (item.imgArticle) {
-            imageUri = retrieveImgSource({ uri: item.imgArticle });
+        const imagesUri = [];
+        const filtredImgs = _.filter(item.imgsArticle, x => !x.push);
+        const hasImages = !!(filtredImgs && filtredImgs.length);
+
+        if (hasImages) {
+            filtredImgs.forEach(element => {
+                imagesUri.push(retrieveImgSource({ uri: element.data }));
+            });
         }
+
         return (
             <View 
                 style={{
@@ -184,21 +194,7 @@ class Informativos extends React.Component {
                 }}
             >
                 { 
-                    !!item.imgArticle &&
-                    <TouchableWithoutFeedback
-                        onPress={() => this.onPressImage(imageUri)}
-                    >
-                        <Image
-                            resizeMode="cover"
-                            style={{ 
-                                width: null, 
-                                height: 160,
-                                borderWidth: 1,
-                                borderRadius: 2
-                            }}
-                            source={imageUri}
-                        />
-                    </TouchableWithoutFeedback>
+                    hasImages && this.renderImages(imagesUri)
                 }
                 {
                     (!!item.textArticle || !!item.linkArticle) &&
@@ -233,6 +229,215 @@ class Informativos extends React.Component {
                         </TouchableWithoutFeedback>
                 }
                
+            </View>
+        );
+    }
+
+    renderImages(imgsUri) {
+        const lenImages = imgsUri.length;
+
+        if (lenImages === 1) {
+            return (
+                <TouchableWithoutFeedback
+                    onPress={() => this.onPressImage(imgsUri, 0)}
+                >
+                    <Image
+                        resizeMode="cover"
+                        style={{ 
+                            width: null, 
+                            height: 200,
+                            borderWidth: 1,
+                            borderRadius: 2
+                        }}
+                        source={imgsUri[0]}
+                    />
+                </TouchableWithoutFeedback>
+            );
+        } else if (lenImages === 2) {
+            return (
+                <View
+                    style={{ flexDirection: 'row' }}
+                >
+                    <View style={{ flex: 1 }}>
+                        <TouchableWithoutFeedback
+                            onPress={() => this.onPressImage(imgsUri, 0)}
+                        >
+                            <Image
+                                resizeMode="cover"
+                                style={{ 
+                                    width: null, 
+                                    height: 200,
+                                    borderWidth: 1,
+                                    borderRadius: 2,
+                                    marginRight: 5
+                                }}
+                                source={imgsUri[0]}
+                            />
+                        </TouchableWithoutFeedback>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <TouchableWithoutFeedback
+                            onPress={() => this.onPressImage(imgsUri, 1)}
+                        >
+                            <Image
+                                resizeMode="cover"
+                                style={{ 
+                                    width: null, 
+                                    height: 200,
+                                    borderWidth: 1,
+                                    borderRadius: 2
+                                }}
+                                source={imgsUri[1]}
+                            />
+                        </TouchableWithoutFeedback>
+                    </View>
+                </View>
+            );
+        } else if (lenImages === 555) {
+            return (
+                <View
+                    style={{ flexDirection: 'row' }}
+                >
+                    <View style={{ flex: 1.8 }}>
+                        <TouchableWithoutFeedback
+                            onPress={() => this.onPressImage(imgsUri, 0)}
+                        >
+                            <Image
+                                resizeMode="cover"
+                                style={{ 
+                                    width: null, 
+                                    height: 200,
+                                    borderWidth: 1,
+                                    borderRadius: 2
+                                }}
+                                source={imgsUri[0]}
+                            />
+                        </TouchableWithoutFeedback>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <View style={{ flex: 1 }}>
+                            <TouchableWithoutFeedback
+                                onPress={() => this.onPressImage(imgsUri, 1)}
+                            >
+                                <Image
+                                    resizeMode="cover"
+                                    style={{ 
+                                        width: null, 
+                                        height: 95,
+                                        borderWidth: 1,
+                                        borderRadius: 2,
+                                        marginLeft: 5
+                                    }}
+                                    source={imgsUri[1]}
+                                />
+                            </TouchableWithoutFeedback>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <TouchableWithoutFeedback
+                                onPress={() => this.onPressImage(imgsUri, 2)}
+                            >
+                                <Image
+                                    resizeMode="cover"
+                                    style={{ 
+                                        width: null, 
+                                        height: 95,
+                                        borderWidth: 1,
+                                        borderRadius: 2,
+                                        marginLeft: 5,
+                                        marginTop: 5
+                                    }}
+                                    source={imgsUri[2]}
+                                />
+                            </TouchableWithoutFeedback>
+                        </View>
+                    </View>
+                </View>
+            );
+        }
+
+        return (
+            <View
+                style={{ flexDirection: 'row' }}
+            >
+                <View style={{ flex: 1.8 }}>
+                    <TouchableWithoutFeedback
+                        onPress={() => this.onPressImage(imgsUri, 0)}
+                    >
+                        <Image
+                            resizeMode="cover"
+                            style={{ 
+                                width: null, 
+                                height: 200,
+                                borderWidth: 1,
+                                borderRadius: 2
+                            }}
+                            source={imgsUri[0]}
+                        />
+                    </TouchableWithoutFeedback>
+                </View>
+                <View style={{ flex: 1 }}>
+                    <View style={{ flex: 1 }}>
+                        <TouchableWithoutFeedback
+                            onPress={() => this.onPressImage(imgsUri, 1)}
+                        >
+                            <Image
+                                resizeMode="cover"
+                                style={{ 
+                                    width: null, 
+                                    height: 95,
+                                    borderWidth: 1,
+                                    borderRadius: 2,
+                                    marginLeft: 5
+                                }}
+                                source={imgsUri[1]}
+                            />
+                        </TouchableWithoutFeedback>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <TouchableWithoutFeedback
+                            onPress={() => this.onPressImage(imgsUri, 2)}
+                        >
+                            <View
+                                style={{
+                                    position: 'absolute',
+                                    left: 0,
+                                    top: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    zIndex: 10,
+                                    flex: 1,
+                                    marginLeft: 5,
+                                    marginTop: 5,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: 'rgba(0,0,0,0.4)'
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        fontWeight: '600',
+                                        fontSize: 24,
+                                        color: 'white'
+                                    }}
+                                >
+                                    {`+${lenImages - 2}`}
+                                </Text>
+                            </View>
+                        </TouchableWithoutFeedback>
+                        <Image
+                            resizeMode="cover"
+                            style={{ 
+                                width: null, 
+                                height: 95,
+                                borderWidth: 1,
+                                borderRadius: 2,
+                                marginLeft: 5,
+                                marginTop: 5
+                            }}
+                            source={imgsUri[2]}
+                        />
+                    </View>
+                </View>
             </View>
         );
     }
@@ -343,7 +548,7 @@ class Informativos extends React.Component {
                         )
                     }
                     ListHeaderComponent={
-                        (<View style={{ ...Platform.select({ ios: { marginTop: 10 } }) }} />)
+                        (<View style={{ ...Platform.select({ ios: { marginTop: 20 } }) }} />)
                     }
                     ListFooterComponent={(
                         <View style={{ marginBottom: 50, marginTop: 10 }} >
@@ -358,7 +563,7 @@ class Informativos extends React.Component {
                 <ShareModal />
                 <ImageView
                     images={this.props.imagesForView}
-                    imageIndex={0}
+                    imageIndex={this.props.imagesForViewIndex}
                     isVisible={this.props.showImageView}
                     renderFooter={() => (<View />)}
                     onClose={() => this.props.modificaShowImageView(false)}
@@ -396,6 +601,7 @@ const mapStateToProps = (state) => ({
     loadingFooter: state.InfoReducer.loadingFooter,
     maxRows: state.InfoReducer.maxRows,
     imagesForView: state.InfoReducer.imagesForView,
+    imagesForViewIndex: state.InfoReducer.imagesForViewIndex,
     showImageView: state.InfoReducer.showImageView,
     userLogged: state.LoginReducer.userLogged
 });
@@ -407,5 +613,6 @@ export default connect(mapStateToProps, {
     modificaLoadingFooter,
     modificaAnimatedHeigth,
     modificaImagesForView,
-    modificaShowImageView
+    modificaShowImageView,
+    modificaImagesForViewIndex
 })(Informativos);

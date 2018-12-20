@@ -128,10 +128,16 @@ class AlertScl extends React.Component {
 
         dbItemRef.remove()
         .then(() => {
-            if (itemInfoSelected.imgArticle) {
-                firebase.storage().refFromURL(itemInfoSelected.imgArticle).delete()
-                .then(() => true)
-                .catch(() => true);
+            if (itemInfoSelected.imgsArticle && itemInfoSelected.imgsArticle.length) {
+                for (let index = 0; index < itemInfoSelected.imgsArticle.length; index++) {
+                    const element = itemInfoSelected.imgsArticle[index];
+
+                    if (element && element.data) {
+                        firebase.storage().refFromURL(element.data).delete()
+                        .then(() => true)
+                        .catch(() => true);
+                    }
+                }
             }
             setTimeout(
                 () => Toast.show('Informativo removido com sucesso.', Toast.LONG)

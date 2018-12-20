@@ -45,11 +45,9 @@ class Info extends React.Component {
             itemEdit: {},
             idxMdl: 0,
             titulo: '',
-            imgArticleUri: '',
+            imgsArticleUri: [],
             descricao: '',
-            linkExt: '',
-            b64Str: '',
-            contentType: ''
+            linkExt: ''
         };
 
         this.scrollView = null;
@@ -58,6 +56,7 @@ class Info extends React.Component {
         this.renderSwitchType = this.renderSwitchType.bind(this);
         this.onPressEditRemove = this.onPressEditRemove.bind(this);
         this.onChangeSuperState = this.onChangeSuperState.bind(this);
+        this.onCLickBack = this.onCLickBack.bind(this);
         this.renderListInfosEdit = this.renderListInfosEdit.bind(this);
         this.onFilterInfosEdit = this.onFilterInfosEdit.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
@@ -88,6 +87,18 @@ class Info extends React.Component {
                 (usuario.textArticle && usuario.textArticle.toLowerCase().includes(lowerFilter)) ||
                 (usuario.dataPost && usuario.dataPost.toLowerCase().includes(lowerFilter))
         ));
+    }
+
+    onCLickBack() {    
+        this.scrollView.scrollTo({
+            y: 0,
+            duration: 0,
+            animated: false
+        });
+        this.setState({
+            modalOpt: 'Editar',
+            idxMdl: 1
+        });  
     }
 
     renderIcons(item) {
@@ -265,17 +276,17 @@ class Info extends React.Component {
     }
 
     renderSwitchType(modalOpt) {
+        const filtred = _.filter(this.state.itemEdit.imgsArticle, item => !item.push);
+        
         switch (modalOpt) {
             case 'Cadastrar':
                 return (
                     <InfoEdit 
                         scrollView={() => this.scrollView}
                         titulo={this.state.titulo}
-                        imgArticleUri={this.state.imgArticleUri}
+                        imgsArticleUri={this.state.imgsArticleUri}
                         descricao={this.state.descricao}
                         linkExt={this.state.linkExt}
-                        b64Str={this.state.b64Str}
-                        contentType={this.state.contentType}
                         onChangeSuperState={(value) => this.onChangeSuperState(value)}
                     />
                 );
@@ -286,21 +297,20 @@ class Info extends React.Component {
                     <InfoEdit 
                         scrollView={() => this.scrollView}
                         titulo={this.state.itemEdit.descPost}
-                        imgArticleUri={this.state.itemEdit.imgArticle}
+                        imgsArticleUri={filtred}
                         descricao={this.state.itemEdit.textArticle}
                         linkExt={this.state.itemEdit.linkArticle}
                         keyItem={this.state.itemEdit.key}
+                        onCLickBack={this.onCLickBack}
                     />);
             default:
                 return (
                     <InfoEdit 
                         scrollView={() => this.scrollView}
                         titulo={this.state.titulo}
-                        imgArticleUri={this.state.imgArticleUri}
+                        imgsArticleUri={this.state.imgsArticleUri}
                         descricao={this.state.descricao}
                         linkExt={this.state.linkExt}
-                        b64Str={this.state.b64Str}
-                        contentType={this.state.contentType}
                         onChangeSuperState={(value) => this.onChangeSuperState(value)}
                     />
                 );
@@ -375,17 +385,7 @@ class Info extends React.Component {
                         (
                             <TouchableOpacity
                                 style={styles.viewGroupBtnRed}
-                                onPress={() => {
-                                    this.scrollView.scrollTo({
-                                        y: 0,
-                                        duration: 0,
-                                        animated: false
-                                    });
-                                    this.setState({
-                                        modalOpt: 'Editar',
-                                        idxMdl: 1
-                                    }); 
-                                }}
+                                onPress={() => this.onCLickBack()}
                             >
                                 <View>
                                     <Text 
