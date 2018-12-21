@@ -4,6 +4,8 @@ const INITIAL_STATE = {
     startUpOrDownAnim: 'down',
     filterStr: '',
     filterLoad: false,
+    filterInfoStr: '',
+    filterInfoLoad: false,
     flagRemoveInfo: false,
     infoMsgSelected: {},
     loadingFooter: false,
@@ -36,6 +38,16 @@ export default (state = INITIAL_STATE, action) => {
             return { 
                 ...state, 
                 filterLoad: action.payload
+            };
+        case 'modifica_infofilterstr_info':
+            return { 
+                ...state, 
+                filterInfoStr: action.payload
+            };
+        case 'modifica_infofilterload_info':
+            return { 
+                ...state, 
+                filterInfoLoad: action.payload
             };
         case 'modifica_itemselected_info':
             return { 

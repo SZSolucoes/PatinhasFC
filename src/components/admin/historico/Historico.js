@@ -271,14 +271,6 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         justifyContent: 'center',
         padding: 0,
-    },
-    dropModalBtnText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginVertical: 8,
-        marginRight: 5
     }
 });
 

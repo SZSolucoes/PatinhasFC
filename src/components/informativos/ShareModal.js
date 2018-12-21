@@ -29,6 +29,7 @@ class ShareModal extends React.Component {
         super(props);
 
         this.onShareImage = this.onShareImage.bind(this);
+        this.onShareImagesFile = this.onShareImagesFile.bind(this);
         this.onShareMessage = this.onShareMessage.bind(this);
         this.closeModal = this.closeModal.bind(this);
 
@@ -70,44 +71,64 @@ class ShareModal extends React.Component {
         });
     }
 
-    onShareImage(item) {
+    async onShareImagesFile(cachedImg, articleImg) {
+        if (cachedImg !== articleImg) {
+            return cachedImg;
+        } 
+            
         const fs = RNFetchBlob.fs;
-        const locateCachedImgUri = retrieveImgSource({ uri: item.imgArticle }).uri;
         let imagePath = null;
         let contentType = '';
 
+        return await RNFetchBlob.config({
+            fileCache: true
+        })
+        .fetch('GET', articleImg)
+        .then(res => {
+            imagePath = res.path();
+            contentType = res.info().headers['content-type'];
+            return res.readFile('base64');
+        })
+        .then(base64Data => {
+            fs.unlink(imagePath);
+            return `data:${contentType};base64,${base64Data}`;
+        })
+        .catch(() => null);
+    }
+
+    async onShareImage(item) {
+        const { imgsArticle } = item;
+        const locateCachedImgsUri = [];
+
+        const shareImageBase64 = {
+            title: imgsArticle.length === 1 ? 'Compartilhar imagem' : 'Compartilhar imagens',
+            urls: []
+        };
+
         this.setState({ enablePress: false });
 
-        if (locateCachedImgUri !== item.imgArticle) {
-            const shareImageBase64 = {
-                title: 'Compartilhar imagem',
-                url: locateCachedImgUri
-            };
-
-            Share.open(shareImageBase64)
-            .then(() => {
-                this.setState({ enablePress: true });
-                this.closeModal();
-            })
-            .catch(() => {
-                this.setState({ enablePress: true });
-                this.closeModal();
-            });
-        } else {
-            RNFetchBlob.config({
-                fileCache: true
-            })
-            .fetch('GET', item.imgArticle)
-            .then(res => {
-                imagePath = res.path();
-                contentType = res.info().headers['content-type'];
-                return res.readFile('base64');
-            })
-            .then(base64Data => {
-                const shareImageBase64 = {
-                    title: 'Compartilhar imagem',
-                    url: `data:${contentType};base64,${base64Data}`
-                };
+        try {
+            for (let index = 0; index < imgsArticle.length; index++) {
+                const element = imgsArticle[index];
+                locateCachedImgsUri.push(retrieveImgSource({ uri: element.data }).uri);
+            }
+    
+            if (locateCachedImgsUri.length === imgsArticle.length) {
+                for (let index = 0; index < locateCachedImgsUri.length; index++) {
+                    const cachedB64OrUrl = locateCachedImgsUri[index];
+                    const articleB64OrUrl = imgsArticle[index];
+    
+                    const ret = await this.onShareImagesFile(cachedB64OrUrl, articleB64OrUrl);
+                    if (ret) {
+                        shareImageBase64.urls.push(ret);
+                    } else {
+                        this.setState({ enablePress: true });
+                        setTimeout(() => Toast.show(
+                            'Falha ao carregar imagem. Verifique a conexão.', Toast.SHORT
+                        ), 500);
+                        return;
+                    }
+                }
     
                 Share.open(shareImageBase64)
                 .then(() => {
@@ -118,15 +139,16 @@ class ShareModal extends React.Component {
                     this.setState({ enablePress: true });
                     this.closeModal();
                 });
-    
-                return fs.unlink(imagePath);
-            })
-            .catch(() => {
+            } else {
                 this.setState({ enablePress: true });
-                setTimeout(() => Toast.show(
-                    'Falha ao carregar imagem. Verifique a conexão.', Toast.SHORT
-                ), 500);
-            });
+                this.closeModal();
+            }
+        } catch (e) {
+            console.log(e);
+            this.setState({ enablePress: true });
+            setTimeout(() => Toast.show(
+                'Falha ao carregar imagem. Verifique a conexão.', Toast.SHORT
+            ), 500);
         }
     }
 
@@ -147,6 +169,11 @@ class ShareModal extends React.Component {
         const { userLogged, itemShareSelected } = this.props;
         const userImg = userLogged.imgAvatar ? { uri: userLogged.imgAvatar } : perfilUserImg;
         const userNome = userLogged.nome ? userLogged.nome : ' ';
+        const hasImgs = !!(
+            itemShareSelected && 
+            itemShareSelected.imgsArticle && 
+            itemShareSelected.imgsArticle.length
+        );
         return (
             <Modal
                 animationType="slide"
@@ -251,7 +278,7 @@ class ShareModal extends React.Component {
                                         </View>
                                     </TouchableHighlight>
                                     {
-                                        !!itemShareSelected.imgArticle &&
+                                        hasImgs &&
                                         <TouchableHighlight
                                             underlayColor={'#EEEEEE'}
                                             style={{ flex: 1 }}
@@ -276,7 +303,12 @@ class ShareModal extends React.Component {
                                                 />
                                                 <View style={{ marginHorizontal: 5 }} />
                                                 <Text style={styles.itemMenuText}>
-                                                    Compartilhar imagem
+                                                    {
+                                                        itemShareSelected.imgsArticle.length === 1 ?
+                                                        'Compartilhar imagem' 
+                                                        : 
+                                                        'Compartilhar imagens'
+                                                    }
                                                 </Text>
                                             </View>
                                         </TouchableHighlight>

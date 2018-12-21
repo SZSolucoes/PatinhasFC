@@ -12,6 +12,7 @@ import {
     Alert
 } from 'react-native';
 import { Card, Icon, List, ListItem } from 'react-native-elements';
+import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
 import _ from 'lodash';
@@ -60,6 +61,7 @@ class EscalacaoG extends React.Component {
 
         this.onChangeDimensions = this.onChangeDimensions.bind(this);
         this.doInOrOut = this.doInOrOut.bind(this);
+        this.onPressEscalConfirm = this.onPressEscalConfirm.bind(this);
         this.renderCasaJogadores = this.renderCasaJogadores.bind(this);
         this.renderVisitJogadores = this.renderVisitJogadores.bind(this);
         this.renderIcons = this.renderIcons.bind(this);
@@ -183,7 +185,48 @@ class EscalacaoG extends React.Component {
         ).start(); 
     }
 
-    doInOrOut(jogador, inOrOut, jogo) {
+    onPressEscalConfirm(side, jogador, jogo) {
+        const newJogador = _.find(this.props.listUsuarios, user => user.key === jogador.key);
+        const nJog = {
+            key: newJogador.key,
+            nome: newJogador.nome,
+            posicao: newJogador.posicao,
+            posvalue: 'default',
+            imgAvatar: newJogador.imgAvatar,
+            side,
+            vitorias: newJogador.vitorias,
+            derrotas: newJogador.derrotas,
+            empates: newJogador.empates,
+            jogosEscalados: newJogador.jogosEscalados
+        };
+
+        let alertMsg = '';
+
+        if (side === 'casa') {
+            alertMsg = 'Confirma a escalação do jogador:\n' +
+            `(${nJog.nome}) para o time:\n(${jogo.timeCasa ? jogo.timeCasa.trim() : 'Casa'}) ?`;
+        } else {
+            alertMsg = 'Confirma a escalação do jogador:\n' +
+            `(${nJog.nome}) para o time:\n(${
+            jogo.timeVisit ? jogo.timeVisit.trim() : 'Visitantes'}) ?`;
+        }
+
+        Alert.alert(
+            'Aviso', 
+            alertMsg,
+            [
+              { text: 'Cancelar', onPress: () => false },
+              { 
+                  text: 'OK', 
+                  onPress: () => checkConInfo(
+                  () => this.doInOrOut(nJog, true, jogo, 'true')) 
+            }
+            ],
+            { cancelable: false }
+        );
+    }
+
+    doInOrOut(jogador, inOrOut, jogo, showToast = false) {
         if (inOrOut) {
             const { side } = jogador;
             if (side === 'casa') {
@@ -191,15 +234,31 @@ class EscalacaoG extends React.Component {
                 firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
                     casa: newCasaList
                 })
-                .then(() => true)
-                .catch(() => true);
+                .then(() =>
+                    showToast &&
+                    showToast === 'true' &&
+                    Toast.show('Jogador escalado com sucesso.', Toast.SHORT)
+                )
+                .catch(() => 
+                    showToast &&
+                    showToast === 'true' &&
+                    Toast.show('Falha ao escalar jogador. Verifique a conexão.', Toast.SHORT)
+                );
             } else if (side === 'visit') {
                 const newVisitList = [...jogo.escalacao.visit, jogador];
                 firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
                     visit: newVisitList
                 })
-                .then(() => true)
-                .catch(() => true);
+                .then(() =>
+                    showToast &&
+                    showToast === 'true' &&
+                    Toast.show('Jogador escalado com sucesso.', Toast.SHORT)
+                )
+                .catch(() => 
+                    showToast &&
+                    showToast === 'true' &&
+                    Toast.show('Falha ao escalar jogador. Verifique a conexão.', Toast.SHORT)
+                );
             }
         } else {
             const { side } = jogador;
@@ -210,8 +269,16 @@ class EscalacaoG extends React.Component {
                 firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
                     casa: newCasaList
                 })
-                .then(() => true)
-                .catch(() => true);
+                .then(() =>
+                    showToast &&
+                    showToast === 'true' &&
+                    Toast.show('Jogador escalado com sucesso.', Toast.SHORT)
+                )
+                .catch(() => 
+                    showToast &&
+                    showToast === 'true' &&
+                    Toast.show('Falha ao escalar jogador. Verifique a conexão.', Toast.SHORT)
+                );
             } else if (side === 'visit') {
                 const newVisitList = _.filter(
                     jogo.escalacao.visit, (item) => (item.key !== jogador.key) || !!item.push
@@ -219,8 +286,16 @@ class EscalacaoG extends React.Component {
                 firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
                     visit: newVisitList
                 })
-                .then(() => true)
-                .catch(() => true);
+                .then(() =>
+                    showToast &&
+                    showToast === 'true' &&
+                    Toast.show('Jogador escalado com sucesso.', Toast.SHORT)
+                )
+                .catch(() => 
+                    showToast &&
+                    showToast === 'true' &&
+                    Toast.show('Falha ao escalar jogador. Verifique a conexão.', Toast.SHORT)
+                );
             }
         }
     }
@@ -411,6 +486,17 @@ class EscalacaoG extends React.Component {
                 >
                     {
                         jogadoresConfirmados.map((item, index) => {
+                            const escalacaoCasa = _.findIndex(
+                                jogo.escalacao.casa, 
+                                (jgCasa) => !jgCasa.push && jgCasa.key === item.key
+                            ) !== -1; 
+
+                            const escaladoVisit = _.findIndex(
+                                jogo.escalacao.visit, 
+                                (jgVisit) => !jgVisit.push && 
+                                jgVisit.key === item.key
+                            ) !== -1;
+
                             const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                             return (
                                 <ListItem
@@ -424,7 +510,64 @@ class EscalacaoG extends React.Component {
                                     avatar={retrieveImgSource(imgAvt)}
                                     key={index}
                                     title={item.nome}
-                                    rightIcon={(<View />)}
+                                    rightIcon={
+                                        escalacaoCasa || escaladoVisit
+                                        ?
+                                        (
+                                            <View 
+                                                style={{
+                                                    flexDirection: 'row',  
+                                                    alignItems: 'center',
+                                                    justifyContent: 'flex-end',
+                                                    margin: 5
+                                                }}
+                                            >
+                                                <Text style={{ color: 'red', fontWeight: '500' }}>
+                                                    Escalado
+                                                </Text>
+                                            </View>
+                                        )
+                                        :
+                                        (
+                                        <View style={{ flexDirection: 'row' }}>
+                                            <TouchableOpacity
+                                                onPress={
+                                                    () => 
+                                                    checkConInfo(() => this.onPressEscalConfirm(
+                                                        'casa', item, jogo
+                                                    ))
+                                                }
+                                            >
+                                                <View style={{ justifyContent: 'space-around' }}>
+                                                    <Image 
+                                                        style={{ 
+                                                            height: 40, width: 35, marginRight: 5 
+                                                        }}
+                                                        resizeMode={'stretch'}
+                                                        source={imgHomeShirt} 
+                                                    />
+                                                </View>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                onPress={
+                                                    () => 
+                                                    checkConInfo(() => this.onPressEscalConfirm(
+                                                        'visit', item, jogo
+                                                    ))
+                                                }
+                                            >
+                                                <View style={{ justifyContent: 'space-around' }}>
+                                                    <Image 
+                                                        style={{ 
+                                                            height: 40, width: 35, marginRight: 5 
+                                                        }}
+                                                        resizeMode={'stretch'}
+                                                        source={imgVisitShirt} 
+                                                    />
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    )}
                                 />
                             );
                         })
@@ -637,7 +780,8 @@ const mapStateToProps = (state) => ({
     endGameModal: state.GerenciarReducer.endGameModal,
     endGameModalPerc: state.GerenciarReducer.endGameModalPerc,
     itemSelected: state.GerenciarReducer.itemSelected,
-    listJogos: state.JogosReducer.listJogos
+    listJogos: state.JogosReducer.listJogos,
+    listUsuarios: state.UsuariosReducer.listUsuarios
 });
 
 export default connect(mapStateToProps, {

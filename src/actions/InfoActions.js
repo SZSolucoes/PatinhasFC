@@ -14,6 +14,16 @@ export const modificaFilterLoad = (value) => ({
     payload: value
 });
 
+export const modificaInfoFilterStr = (value) => ({
+    type: 'modifica_infofilterstr_info',
+    payload: value
+});
+
+export const modificaInfoFilterLoad = (value) => ({
+    type: 'modifica_infofilterload_info',
+    payload: value
+});
+
 export const modificaItemSelected = (value) => ({
     type: 'modifica_itemselected_info',
     payload: value

@@ -380,7 +380,13 @@ class Coment extends React.Component {
                     backgroundColor: 'black', 
                     width: '100%',
                     height: '100%',
-                    transform: [{ translateY: this.state.animScreenT }]
+                    transform: [{ translateY: this.state.animScreenT }],
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 10
                 }} 
             >
                 <View style={styles.containerPrincip}>
@@ -453,14 +459,6 @@ class Coment extends React.Component {
 }
 
 const styles = StyleSheet.create({
-    viewPrincip: {
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 0
-    },
     containerPrincip: {
         backgroundColor: 'white', 
         width: '100%', 

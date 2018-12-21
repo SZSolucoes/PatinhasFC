@@ -5,15 +5,21 @@ import {
     Image,
     Text,
     TouchableWithoutFeedback,
+    TouchableOpacity,
     Linking,
     Animated,
     FlatList,
     ActivityIndicator,
-    Platform
+    Platform,
+    Keyboard,
+    Dimensions
 } from 'react-native';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-import { Card, ListItem } from 'react-native-elements';
+import { Card, ListItem, Avatar, Icon } from 'react-native-elements';
+import ModalDropdown from 'react-native-modal-dropdown';
+import { Actions } from 'react-native-router-flux';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 import ImageView from 'react-native-image-view';
 import InfoActions from './InfoActions';
 import Coment from './Coment';
@@ -24,7 +30,9 @@ import {
     modificaLoadingFooter,
     modificaImagesForView,
     modificaShowImageView,
-    modificaImagesForViewIndex
+    modificaImagesForViewIndex,
+    modificaInfoFilterStr,
+    modificaInfoFilterLoad
 } from '../../actions/InfoActions';
 import {  
     modificaAnimatedHeigth,
@@ -32,9 +40,12 @@ import {
 
 import firebase from '../../Firebase';
 import imgAvatar from '../../imgs/patinhasfclogo.png';
-import { colorAppF } from '../../utils/constantes';
+import { colorAppF, colorAppT } from '../../utils/constantes';
 import ShareModal from './ShareModal';
 import { retrieveImgSource } from '../../utils/imageStorage';
+import perfilUserImg from '../../imgs/perfiluserimg.png';
+import { isPortrait } from '../../utils/orientation';
+import { normalize } from '../../utils/strComplex';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -53,10 +64,13 @@ class Informativos extends React.Component {
         this.state = {
             maxOffSetScrollView: 0,
             scrollY: new Animated.Value(0),
-            animTools: new Animated.Value(0)
+            animTools: new Animated.Value(0),
+            isPortraitMode: true,
+            dropWidth: 0
         };
 
         this.renderInfos = this.renderInfos.bind(this);
+        this.renderInfoList = this.renderInfoList.bind(this);
         this.dataSourceControl = this.dataSourceControl.bind(this);
         this.flatListKeyExtractor = this.flatListKeyExtractor.bind(this);
         this.renderDots = this.renderDots.bind(this);
@@ -64,10 +78,33 @@ class Informativos extends React.Component {
         this.renderArticle = this.renderArticle.bind(this);
         this.renderActions = this.renderActions.bind(this);
         this.renderImages = this.renderImages.bind(this);
+        this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.comentsUpOrDown = this.comentsUpOrDown.bind(this);
         this.onPressLikeBtn = this.onPressLikeBtn.bind(this);
         this.onScrollView = this.onScrollView.bind(this);
         this.onPressImage = this.onPressImage.bind(this);
+        this.onChangeDimensions = this.onChangeDimensions.bind(this);
+        this.onFilterInfos = this.onFilterInfos.bind(this);
+        this.onKeyboardShow = this.onKeyboardShow.bind(this);
+        this.onKeyboardHide = this.onKeyboardHide.bind(this);
+        this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this.onKeyboardShow);
+        this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this.onKeyboardHide);
+    }
+
+    componentDidMount() {
+        Dimensions.addEventListener('change', this.onChangeDimensions);
+    }
+
+    componentWillUnmount() {
+        Dimensions.removeEventListener('change', this.onChangeDimensions);
+    }
+
+    onKeyboardShow() {
+        this.KeyboardIsOpened = true;
+    }
+    
+    onKeyboardHide() {
+        this.KeyboardIsOpened = false;
     }
     
     onPressLikeBtn(likeOrDeslike, item) {
@@ -120,6 +157,14 @@ class Informativos extends React.Component {
         }
     }
 
+    onChangeDimensions() {
+        if (isPortrait()) {
+            this.setState({ isPortraitMode: true });
+        } else {
+            this.setState({ isPortraitMode: false });
+        }
+    }
+
     onScrollView(currentOffset, direction) {
         if (!this.KeyboardIsOpened) {
             if (currentOffset <= 0 || direction === 'up') {
@@ -131,6 +176,16 @@ class Informativos extends React.Component {
             }
         }
         //this.onScrollViewTools(currentOffset, direction);
+    }
+
+    onFilterInfos(infos, filterStr) {
+        const lowerFilter = filterStr.toLowerCase();
+        if (filterStr === 'Todo o Período') {
+            return infos;
+        }
+        return _.filter(infos, (info) => (
+                (info.dataPost && info.dataPost.toLowerCase().includes(lowerFilter))
+        ));
     }
 
     addNewRows(numberAdd) {
@@ -147,13 +202,12 @@ class Informativos extends React.Component {
         this.props.modificaStartUpOrDownAnim(upOrDown);
     }
 
-    dataSourceControl(infos) {
+    dataSourceControl(infos, filterStr) {
         let newInfos = infos;
         if (infos && infos.length > 0) {
             newInfos = _.reverse([...infos]);
             newInfos = newInfos.slice(0, this.props.maxRows);
-            this.lastIndexListInfos = newInfos.length - 1;
-            return newInfos;
+            return this.renderBasedFilterOrNot(newInfos, filterStr);
         }
 
         return newInfos;
@@ -161,6 +215,22 @@ class Informativos extends React.Component {
 
     flatListKeyExtractor(item, index) {
         return index.toString();
+    }
+
+    renderBasedFilterOrNot(infos, filterStr) {
+        let newInfos = infos;
+        
+        if (infos) {
+            if (filterStr) {
+                newInfos = this.onFilterInfos(infos, filterStr);
+                if (!newInfos || newInfos.length === 0) {
+                    setTimeout(() => this.props.modificaInfoFilterLoad(false), 1000);
+                }
+            }
+            this.lastIndexListInfos = newInfos.length - 1;
+        }
+
+        return newInfos;
     }
 
     renderActions(item) {
@@ -457,10 +527,14 @@ class Informativos extends React.Component {
         ); */
     }
 
-    renderInfos({ item }) {
+    renderInfos({ item, index }) {
         const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
         const nomeUser = item.nomeUser ? item.nomeUser : 'Patinhas';
         let perfilUser = item.perfilUser ? item.perfilUser : 'Administrador';
+
+        if (this.lastIndexListInfos === index) {
+            setTimeout(() => this.props.modificaInfoFilterLoad(false), 1000);
+        }
 
         if (item.userLevel && '0|255'.includes(item.userLevel)) {
             perfilUser = item.userLevel === '255' ? 'Administrador Geral' : 'Administrador';
@@ -494,12 +568,12 @@ class Informativos extends React.Component {
         );
     }
 
-    render() {
+    renderInfoList() {
         return (
             <View style={{ flex: 1 }}>
                 <AnimatedFlatList
                     ref={(ref) => { this.scrollViewRef = ref; }}
-                    data={this.dataSourceControl(this.props.listInfos)}
+                    data={this.dataSourceControl(this.props.listInfos, this.props.filterInfoStr)}
                     renderItem={this.renderInfos}
                     keyExtractor={this.flatListKeyExtractor}
                     style={styles.viewPrinc}
@@ -548,7 +622,15 @@ class Informativos extends React.Component {
                         )
                     }
                     ListHeaderComponent={
-                        (<View style={{ ...Platform.select({ ios: { marginTop: 20 } }) }} />)
+                        (
+                        <View 
+                            style={{ 
+                                ...Platform.select({ 
+                                    ios: { marginTop: 80 }, 
+                                    android: { marginTop: 60 } 
+                                }) }} 
+                        />
+                        )
                     }
                     ListFooterComponent={(
                         <View style={{ marginBottom: 50, marginTop: 10 }} >
@@ -568,6 +650,123 @@ class Informativos extends React.Component {
                     renderFooter={() => (<View />)}
                     onClose={() => this.props.modificaShowImageView(false)}
                 />
+            </View>
+        );
+    }
+
+    render() {
+        const { userLogged, listInfos } = this.props;
+        const userImg = userLogged.imgAvatar ? { uri: userLogged.imgAvatar } : perfilUserImg;
+        let dates = ['Todo o Período'];
+
+        if (this.props.listInfos.length) {
+            const newDates = [];
+            listInfos.forEach(inf => {
+                const newD = inf.dataPost.slice(3, 10);
+                if (_.findIndex(newDates, dt => dt === newD) === -1) {
+                    newDates.push(newD);
+                }
+            });
+            dates = ['Todo o Período', ..._.reverse(newDates)];
+        }
+
+        return (
+            <View style={{ flex: 1 }}>
+                <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                    <Animated.View 
+                        style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            right: 0,
+                            zIndex: 1,
+                            paddingHorizontal: 15,
+                            backgroundColor: colorAppT,
+                            borderBottomWidth: 0.5,
+                            borderBottomColor: 'white'
+                        }}
+                    >
+                        {
+                            Platform.OS === 'ios' && this.state.isPortraitMode &&
+                            <View 
+                                style={{ 
+                                    height: getStatusBarHeight(true), 
+                                    backgroundColor: colorAppT 
+                                }} 
+                            />
+                        }
+                        <View 
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center'
+                            }}
+                        >
+                            <View style={{ flex: 0.5 }}>
+                                <Avatar
+                                    small
+                                    rounded
+                                    title={'GO'}
+                                    source={retrieveImgSource(userImg)}
+                                    onPress={() => { 
+                                        Keyboard.dismiss();
+                                        Actions.replace('_perfil');
+                                    }}
+                                    activeOpacity={0.7}
+                                /> 
+                            </View>
+                            <View 
+                                style={{ 
+                                    flex: 2.5, 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    padding: 10
+                                }}
+                                onLayout={
+                                    (event) =>
+                                        this.setState({
+                                            dropWidth: event.nativeEvent.layout.width
+                                })}
+                            >
+                                <ModalDropdown
+                                    ref={(ref) => { this.modalDropRef = ref; }}
+                                    textStyle={styles.dropModalBtnText}
+                                    style={{
+                                        width: this.state.dropWidth / 1.5,
+                                        justifyContent: 'center',
+                                        height: 36
+                                    }}
+                                    dropdownTextStyle={{ 
+                                        fontSize: normalize(16), 
+                                        textAlign: 'center'
+                                    }}
+                                    dropdownStyle={{
+                                        width: this.state.dropWidth / 1.5
+                                    }}
+                                    options={dates}
+                                    onSelect={
+                                        (index, value) => this.props.modificaInfoFilterStr(value)
+                                    }
+                                    defaultIndex={0}
+                                    defaultValue={dates[0]}
+                                />
+                            </View>
+                            <View style={{ flex: 0.7, alignItems: 'flex-end' }}>
+                                <TouchableOpacity
+                                    onPress={() => this.modalDropRef.show()}
+                                >
+                                    <Icon
+                                        name='calendar-search' 
+                                        type='material-community' 
+                                        size={28} color='white' 
+                                    />   
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Animated.View>
+                </TouchableWithoutFeedback>
+                { 
+                    this.props.listInfos.length ? this.renderInfoList() : null
+                }
             </View>
         );
     }
@@ -593,6 +792,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'black',
         fontWeight: '400'
+    },
+    dropModalBtnText: {
+        color: 'white',
+        fontSize: normalize(16),
+        fontWeight: 'bold',
+        textAlign: 'center'
     }
 });
 
@@ -603,6 +808,8 @@ const mapStateToProps = (state) => ({
     imagesForView: state.InfoReducer.imagesForView,
     imagesForViewIndex: state.InfoReducer.imagesForViewIndex,
     showImageView: state.InfoReducer.showImageView,
+    filterInfoStr: state.InfoReducer.filterInfoStr,
+    filterInfoLoad: state.InfoReducer.filterInfoLoad,
     userLogged: state.LoginReducer.userLogged
 });
 
@@ -614,5 +821,7 @@ export default connect(mapStateToProps, {
     modificaAnimatedHeigth,
     modificaImagesForView,
     modificaShowImageView,
-    modificaImagesForViewIndex
+    modificaImagesForViewIndex,
+    modificaInfoFilterStr,
+    modificaInfoFilterLoad
 })(Informativos);
