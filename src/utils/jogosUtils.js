@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import Toast from 'react-native-simple-toast';
+import Moment from 'moment';
 import { Alert, NetInfo } from 'react-native';
 import { roundTo } from './numComplex';
+import { usuarioAttr } from './userUtils';
 import { store } from '../App';
 
 const deParaPos = {
@@ -32,7 +34,7 @@ const deParaPos = {
 export const getPosName = (posvalue) => deParaPos[posvalue].name;
 export const getPosIndex = (posvalue) => deParaPos[posvalue].index;
 
-export const doEndGame = (jogo, firebase, Actions) => {
+export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
     const dbFirebaseRef = firebase.database().ref();
     const placarCasa = parseInt(jogo.placarCasa, 10);
     const placarVisit = parseInt(jogo.placarVisit, 10);
@@ -41,10 +43,23 @@ export const doEndGame = (jogo, firebase, Actions) => {
         ...jogo.escalacao.visit,
         ...jogo.escalacao.banco,
     ], 'key');
+    /* const jogadoresConfirmados = _.filter(jogo.confirmados, (jConfs) => !jConfs.push);
+    const missedPlayers = _.filter(jogadoresConfirmados, jConf => {
+        for (let index = 0; index < jogadores.length; index++) {
+            const element = jogadores[index];
+            if (element.key === jConf.key) {
+                return false;
+            }
+        }
+
+        return true;
+    }); */
+
     let i = 0;
     let iFix = 0;
 
     _.remove(jogadores, (item) => !!item.push);
+
 
     if (jogadores.length === 0) {
         Alert.alert('Aviso', 'Não há jogadores escalados para finalizar o jogo.');
@@ -78,7 +93,9 @@ export const doEndGame = (jogo, firebase, Actions) => {
                 dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
                     dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
                         vitorias: (parseInt(snapshot.val().vitorias, 10) + 1).toString(),
-                        jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
+                        jogosEscalados: 
+                            (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString(),
+                        faltas: '0'
                     })
                     .then(() => {
                         i += iFix;
@@ -91,7 +108,7 @@ export const doEndGame = (jogo, firebase, Actions) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, firebase, Actions), 2000);
+                            changeStsEndGame(jogo, firebase, Actions, missedPlayers), 2000);
                         }
                     })
                     .catch(() => {
@@ -104,12 +121,14 @@ export const doEndGame = (jogo, firebase, Actions) => {
                 });
             });
     
-            // Jogadores vitoriosos atualizados primeiro
+            // Jogadores com derrota atualizados por ultimo
             jogadoresDer.forEach((jogador) => {
                 dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
                     dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
                         derrotas: (parseInt(snapshot.val().derrotas, 10) + 1).toString(),
-                        jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
+                        jogosEscalados: 
+                            (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString(),
+                        faltas: '0'
                     })
                     .then(() => {
                         i += iFix;
@@ -122,7 +141,7 @@ export const doEndGame = (jogo, firebase, Actions) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, firebase, Actions), 2000);
+                            changeStsEndGame(jogo, firebase, Actions, missedPlayers), 2000);
                         }
                     })
                     .catch(() => {
@@ -146,7 +165,9 @@ export const doEndGame = (jogo, firebase, Actions) => {
                 dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
                     dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
                         vitorias: (parseInt(snapshot.val().vitorias, 10) + 1).toString(),
-                        jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
+                        jogosEscalados: 
+                            (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString(),
+                        faltas: '0'
                     })
                     .then(() => {
                         i += iFix;
@@ -159,7 +180,7 @@ export const doEndGame = (jogo, firebase, Actions) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, firebase, Actions), 2000);
+                            changeStsEndGame(jogo, firebase, Actions, missedPlayers), 2000);
                         }
                     })
                     .catch(() => {
@@ -172,12 +193,14 @@ export const doEndGame = (jogo, firebase, Actions) => {
                 });
             });
     
-            // Jogadores vitoriosos atualizados primeiro
+            // Jogadores com derrota atualizados por ultimo
             jogadoresDer.forEach((jogador) => {
                 dbFirebaseRef.child(`usuarios/${jogador.key}`).once('value', (snapshot) => {
                     dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
                         derrotas: (parseInt(snapshot.val().derrotas, 10) + 1).toString(),
-                        jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
+                        jogosEscalados: 
+                            (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString(),
+                        faltas: '0'
                     })
                     .then(() => {
                         i += iFix;
@@ -190,7 +213,7 @@ export const doEndGame = (jogo, firebase, Actions) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, firebase, Actions), 2000);
+                            changeStsEndGame(jogo, firebase, Actions, missedPlayers), 2000);
                         }
                     })
                     .catch(() => {
@@ -211,7 +234,9 @@ export const doEndGame = (jogo, firebase, Actions) => {
                 .once('value', (snapshot) => {
                     dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
                         empates: (parseInt(snapshot.val().empates, 10) + 1).toString(),
-                        jogosEscalados: (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString()
+                        jogosEscalados: 
+                            (parseInt(snapshot.val().jogosEscalados, 10) + 1).toString(),
+                        faltas: '0'
                     })
                     .then(() => {
                         i += iFix;
@@ -224,7 +249,7 @@ export const doEndGame = (jogo, firebase, Actions) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, firebase, Actions), 2000);
+                            changeStsEndGame(jogo, firebase, Actions, missedPlayers), 2000);
                         }
                     })
                     .catch(() => {
@@ -251,7 +276,7 @@ const closeEndGameModal = () => {
     });
 };
 
-const changeStsEndGame = (jogo, firebase, Actions) => {
+const changeStsEndGame = (jogo, firebase, Actions, missedPlayers) => {
     const dbFirebaseRef = firebase.database().ref();
 
     dbFirebaseRef.child(`jogos/${jogo.key}`).update({
@@ -259,6 +284,7 @@ const changeStsEndGame = (jogo, firebase, Actions) => {
     })
     .then(() => {
         closeEndGameModal();
+        updateMissedPlayers(firebase, missedPlayers);
         Actions.popTo('gerenciar');
         Toast.show(
             'Jogo finalizado.',
@@ -272,6 +298,37 @@ const changeStsEndGame = (jogo, firebase, Actions) => {
                 Toast.SHORT
         );
     });
+};
+
+const updateMissedPlayers = (firebase, missedPlayers) => {
+    if (missedPlayers && missedPlayers.length) {
+        const dbFirebaseRef = firebase.database().ref();
+        const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
+
+        missedPlayers.forEach((jogadorKey) => {
+            dbFirebaseRef.child(`usuarios/${jogadorKey}`)
+            .once('value', (snapshot) => {
+                const faltasH = snapshot.val().faltasHistorico || usuarioAttr.faltasHistorico;
+                const newSnap = [...faltasH];
+                const indexFoundToDel = _.findIndex(newSnap, idx => !!idx.push);
+                if (indexFoundToDel !== -1) {
+                    newSnap.splice(indexFoundToDel, 1);
+                }
+                newSnap.push({ data: dataAtual });
+                dbFirebaseRef.child(`usuarios/${jogadorKey}`).update({
+                    faltas: (parseInt(snapshot.val().faltas, 10) + 1).toString(),
+                    faltasHistorico: newSnap
+                })
+                .then(() => true)
+                .catch(() => {
+                    Toast.show(
+                        'Falha ao gravar falta de jogadores. Verifique a conexão.',
+                            Toast.SHORT
+                    );
+                });
+            });  
+        });
+    }
 };
 
 export const checkConInfo = (funExec = () => true, params = [], delay = 0) => {

@@ -1,6 +1,36 @@
 import _ from 'lodash';
 import firebase from '../Firebase';
 
+export const usuarioAttr = {
+    userDisabled: 'false',
+    email: '',
+    senha: '',
+    nome: '',
+    dtnasc: '', 
+    tipoPerfil: 'socio',
+    imgAvatar: '',
+    imgBackground: '',
+    level: '1',
+    telefone: '',
+    endereco: '',
+    dataCadastro: '',
+    dataHoraUltimoLogin: '',
+    jogosParticipados: '0',
+    jogosEscalados: '0',
+    vitorias: '0',
+    derrotas: '0',
+    empates: '0',
+    gols: '0',
+    faltas: '0',
+    faltasHistorico: [{ push: 'push' }],
+    cartoesAmarelos: '0',
+    cartoesVermelhos: '0',
+    posicao: '',
+    userNotifToken: '',
+    infoImgUpdated: 'true', 
+    jogosImgUpdated: 'true'
+};
+
 export const checkPerfil = (perfil) => {
     switch (perfil) {
         case 'socio':

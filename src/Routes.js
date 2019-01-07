@@ -47,6 +47,7 @@ import Historico from './components/admin/historico/Historico';
 import HistoricoP from './components/profile/historico/HistoricoP';
 import JogoH from './components/admin/historico/JogoH';
 import EscalacaoH from './components/admin/historico/EscalacaoH';
+import AnaliseJogadores from './components/admin/analise/jogadores/AnaliseJogadores';
 import Imagens from './components/imagens/Imagens';
 import { colorAppS } from './utils/constantes';
 
@@ -346,7 +347,7 @@ class Routes extends React.Component {
                 <TouchableOpacity
                     onPress={() => checkConInfo(() => {
                         const { listJogos } = store.getState().JogosReducer;
-                        const { itemSelected } = store.getState().GerenciarReducer;
+                        const { itemSelected, missedPlayers } = store.getState().GerenciarReducer;
                         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
                         if (jogo.status === '1') {
                             Alert.alert(
@@ -368,7 +369,9 @@ class Routes extends React.Component {
                                 { 
                                     text: 'Ok', 
                                     onPress: () => checkConInfo(
-                                        () => doEndGame(jogo, firebase, Actions), [], 500
+                                        () => doEndGame(
+                                            jogo, firebase, Actions, missedPlayers
+                                        ), [], 500
                                     )
                                 }
                             ]
@@ -666,6 +669,15 @@ class Routes extends React.Component {
                         key={'analise'}
                         title={'Análise'} 
                         component={Analise}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'analisejogadores'}
+                        title={'Jogadores'} 
+                        component={AnaliseJogadores}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}

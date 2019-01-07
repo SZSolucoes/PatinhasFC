@@ -2,6 +2,7 @@ const INITIAL_STATE = {
     filterStr: '',
     filterLoad: false,
     itemSelected: '',
+    missedPlayers: [],
     showPlayersModal: false,
     showPlayersModalJ: false,
     isSubstitute: false,
@@ -28,6 +29,11 @@ export default (state = INITIAL_STATE, action) => {
             return { 
                 ...state, 
                 itemSelected: action.payload
+            };
+        case 'modifica_missedplayers_gerenciar':
+            return { 
+                ...state, 
+                missedPlayers: [...action.payload]
             };
         case 'modifica_showplayersmodal_gerenciar':
             return { 
@@ -75,6 +81,7 @@ export default (state = INITIAL_STATE, action) => {
                 filterStr: '',
                 filterLoad: false,
                 itemSelected: '',
+                missedPlayers: [],
                 showPlayersModal: false,
                 showPlayersModalJ: false,
                 isSubstitute: false,

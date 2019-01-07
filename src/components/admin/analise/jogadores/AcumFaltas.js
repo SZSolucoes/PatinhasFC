@@ -7,22 +7,24 @@ import {
     Animated,
     ScrollView,
     TouchableOpacity,
-    Keyboard
+    Keyboard,
+    Text
 } from 'react-native';
 import { SearchBar, Card, List, ListItem, Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import {
-    modificaShowUsersModal,
+    modificaShowModal,
     modificaFilterModalLoad,
     modificaFilterModalStr
-} from '../../actions/PainelAdminActions';
-import { retrieveImgSource } from '../../utils/imageStorage';
-import { checkConInfo } from '../../utils/jogosUtils';
+} from '../../../../actions/AnaliseJogadores';
+import { retrieveImgSource } from '../../../../utils/imageStorage';
+//import { checkConInfo } from '../../../../utils/jogosUtils';
 
-import perfilUserImg from '../../imgs/perfiluserimg.png';
+import perfilUserImg from '../../../../imgs/perfiluserimg.png';
+import { colorAppS } from '../../../../utils/constantes';
 
-class PlayersModal extends React.Component {
+class AcumFaltas extends React.Component {
 
     constructor(props) {
         super(props);
@@ -31,15 +33,10 @@ class PlayersModal extends React.Component {
         this.onFilterUsuarios = this.onFilterUsuarios.bind(this);
         this.renderListUsuarios = this.renderListUsuarios.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
-        this.onChoosePlayer = this.onChoosePlayer.bind(this);
 
         this.state = {
             fadeAnimValue: new Animated.Value(0)
         };
-    }
-
-    onChoosePlayer(item) {
-        this.props.onChooseUserTransfAdmin(item, () => this.closeModal());
     }
 
     onFilterUsuarios(usuarios, filterModalStr) {
@@ -48,7 +45,13 @@ class PlayersModal extends React.Component {
                 (usuario.email && usuario.email.toLowerCase().includes(lowerFilter)) ||
                 (usuario.dtnasc && usuario.dtnasc.toLowerCase().includes(lowerFilter)) ||
                 (usuario.tipoPerfil && usuario.tipoPerfil.toLowerCase().includes(lowerFilter)) ||
-                (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter))
+                (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter)) ||
+                (usuario.faltas && usuario.faltas.toLowerCase().includes(lowerFilter)) ||
+                (usuario.faltasHistorico &&
+                usuario.faltasHistorico[usuario.faltasHistorico.length - 1] && 
+                usuario.faltasHistorico[usuario.faltasHistorico.length - 1].data && 
+                usuario.faltasHistorico[usuario.faltasHistorico.length - 1].data
+                .toLowerCase().includes(lowerFilter))
         ));
     }
 
@@ -60,7 +63,7 @@ class PlayersModal extends React.Component {
                 duration: 200
             }
         ).start(() => {
-            setTimeout(() => this.props.modificaShowUsersModal(false), 100);
+            setTimeout(() => this.props.modificaShowModal(false), 100);
         });
     }
 
@@ -69,9 +72,9 @@ class PlayersModal extends React.Component {
 
         if (usuarios.length) {
             const filtredByUserLogged = _.filter(
-                usuarios, (usr) => usr.key !== this.props.userLogged.key
+                usuarios, (usr) => parseInt(usr.faltas, 10) > 0
             );
-            const newSortedUsers = _.orderBy(filtredByUserLogged, ['nome', 'emai'], ['asc', 'asc']);
+            const newSortedUsers = _.orderBy(filtredByUserLogged, ['faltas'], ['desc']);
             usuariosView = (
                 <List containerStyle={{ marginBottom: 20 }}>
                 {
@@ -81,18 +84,83 @@ class PlayersModal extends React.Component {
                         }
                         const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : perfilUserImg;
                         return (
-                            <ListItem
-                                roundAvatar
-                                avatar={retrieveImgSource(imgAvt)}
+                            <View
                                 key={index}
-                                title={item.nome}
-                                subtitle={item.email}
-                                rightIcon={(<View />)}
-                                onPress={() => {
-                                    Keyboard.dismiss();
-                                    checkConInfo(() => this.onChoosePlayer(item));
-                                }}
-                            />
+                            >
+                                <ListItem
+                                    roundAvatar
+                                    avatar={retrieveImgSource(imgAvt)}
+                                    title={item.nome}
+                                    subtitle={item.email}
+                                    rightIcon={(<View />)}
+                                    onPress={() => {
+                                        Keyboard.dismiss();
+                                    }}
+                                    containerStyle={{ borderBottomWidth: 0 }}
+                                />
+                                <View 
+                                    style={{ 
+                                        flexDirection: 'row', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'flex-start' 
+                                    }}
+                                >
+                                    <View 
+                                        style={{ 
+                                            flex: 0.5,
+                                            alignItems: 'center', 
+                                            justifyContent: 'space-around'
+                                        }}
+                                    >
+                                        <Text 
+                                            style={{ 
+                                                color: colorAppS, 
+                                                fontWeight: '500',
+                                                textAlign: 'center' 
+                                            }}
+                                        >
+                                            Faltas
+                                        </Text>
+                                        <Text 
+                                            style={{ 
+                                                fontWeight: '500',
+                                                textAlign: 'center' 
+                                            }}
+                                        >
+                                            {item.faltas}
+                                        </Text>
+                                    </View>
+                                    <View 
+                                        style={{ 
+                                            flex: 1,
+                                            alignItems: 'center', 
+                                            justifyContent: 'space-around'
+                                        }}
+                                    >
+                                        <Text 
+                                            style={{ 
+                                                color: colorAppS, 
+                                                fontWeight: '500',
+                                                textAlign: 'center' 
+                                            }}
+                                        >
+                                            Falta mais recente
+                                        </Text>
+                                        <Text 
+                                            style={{ 
+                                                fontWeight: '500',
+                                                textAlign: 'center' 
+                                            }}
+                                        >
+                                            {item.faltasHistorico[
+                                                item.faltasHistorico.length - 1
+                                            ].data}
+                                        </Text>
+                                    </View>
+                                </View>
+                                
+                                <View style={{ borderBottomWidth: 1, borderBottomColor: '#bbb' }} />
+                            </View>
                         );
                     })
                 }
@@ -124,7 +192,7 @@ class PlayersModal extends React.Component {
             <Modal
                 animationType="slide"
                 transparent
-                visible={this.props.showUsersModal}
+                visible={this.props.showModal}
                 supportedOrientations={['portrait']}
                 onRequestClose={() => this.closeModal()}
                 onShow={() =>
@@ -209,7 +277,7 @@ class PlayersModal extends React.Component {
                                                 this.props.modificaFilterModalLoad(true);
                                             }}
                                             onClear={() => this.props.modificaFilterModalStr('')}
-                                            placeholder='Buscar usuário...' 
+                                            placeholder='Buscar jogador...' 
                                         />
                                         <ScrollView
                                             style={{ height: '72%' }}
@@ -235,7 +303,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     card: {
-        width: '80%',
+        width: '90%',
         height: '70%',
         borderRadius: 5,
         overflow: 'hidden',
@@ -245,14 +313,14 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     listUsuarios: state.UsuariosReducer.listUsuarios,
-    filterModalStr: state.PainelAdminReducer.filterModalStr,
-    filterModalLoad: state.PainelAdminReducer.filterModalLoad,
+    filterModalStr: state.AnaliseJogadores.filterModalStr,
+    filterModalLoad: state.AnaliseJogadores.filterModalLoad,
     userLogged: state.LoginReducer.userLogged
 });
 
 export default connect(mapStateToProps, { 
-    modificaShowUsersModal,
+    modificaShowModal,
     modificaFilterModalLoad,
     modificaFilterModalStr 
-})(PlayersModal);
+})(AcumFaltas);
 

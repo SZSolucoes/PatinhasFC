@@ -4,6 +4,11 @@ export const modificaItemSelected = (value) => ({
     payload: value
 });
 
+export const modificaMissedPlayers = (value) => ({
+    type: 'modifica_missedplayers_gerenciar',
+    payload: value
+});
+
 export const modificaFilterStr = (value) => ({
     type: 'modifica_filterstr_gerenciar',
     payload: value

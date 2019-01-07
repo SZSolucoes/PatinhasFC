@@ -220,6 +220,14 @@ class Profile extends React.Component {
                             onPress={() => Actions.historico()}
                         />
                         <ListItem
+                            key={'Histórico de Faltas'}
+                            title={'Histórico de Faltas'}
+                            leftIcon={{ name: 'account-alert', type: 'material-community' }}
+                            onPress={
+                                () => Actions.analisejogadores({ title: 'Histórico de Faltas' })
+                            }
+                        />
+                        <ListItem
                             key={'Preferências'}
                             title={'Preferências'}
                             leftIcon={{ name: 'settings', type: 'material-community' }}
@@ -274,7 +282,7 @@ class Profile extends React.Component {
                             </View>
                             <View style={{ marginHorizontal: 10 }}>
                                 <Text style={{ fontSize: 16, color: 'black' }}>
-                                    1.0.4
+                                    1.0.5
                                 </Text>
                             </View>
                         </View>

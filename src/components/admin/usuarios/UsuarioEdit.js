@@ -27,6 +27,7 @@ import firebase from '../../../Firebase';
 import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
+import { usuarioAttr } from '../../../utils/userUtils';
 
 class UsuarioEdit extends React.Component {
 
@@ -122,32 +123,15 @@ class UsuarioEdit extends React.Component {
             auth.createUserWithEmailAndPassword(email, senha)
             .then(() => {
                 const newUser = {
+                    ...usuarioAttr,
                     userDisabled: 'false',
                     email,
                     senha,
                     nome,
                     dtnasc: dataStr, 
                     tipoPerfil,
-                    imgAvatar: '',
-                    imgBackground: '',
                     level: tipoUsuario,
-                    telefone: '',
-                    endereco: '',
-                    dataCadastro: dataAtual,
-                    dataHoraUltimoLogin: '',
-                    jogosParticipados: '0',
-                    jogosEscalados: '0',
-                    vitorias: '0',
-                    derrotas: '0',
-                    empates: '0',
-                    gols: '0',
-                    faltas: '0',
-                    cartoesAmarelos: '0',
-                    cartoesVermelhos: '0',
-                    posicao: '',
-                    userNotifToken: '',
-                    infoImgUpdated: 'true', 
-                    jogosImgUpdated: 'true'
+                    dataCadastro: dataAtual
                 };
                 dbUsuariosRef.set({ ...newUser })
                 .then(() => {

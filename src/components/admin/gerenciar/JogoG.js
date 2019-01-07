@@ -25,12 +25,13 @@ import { getPosIndex, checkConInfo } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
 import { 
     modificaClean, 
-    modificaCurrentTime, 
+    modificaCurrentTime,
     modificaShowTimerModal 
 } from '../../../actions/JogoActions';
 import { 
     modificaShowPlayersModalJ,
     modificaIsSubstitute,
+    modificaMissedPlayers,
     modificaJogador
 } from '../../../actions/GerenciarActions';
 
@@ -116,6 +117,8 @@ class JogoG extends React.Component {
                 btnResetEnabled: false
             });
         }
+
+        this.props.modificaMissedPlayers([]);
     }
 
     shouldComponentUpdate(nextProps, nextStates) {
@@ -209,6 +212,7 @@ class JogoG extends React.Component {
         }
         
         this.props.modificaClean();
+        this.props.modificaMissedPlayers([]);
     }
 
     onConfirmManualTimer(value) {
@@ -2836,6 +2840,7 @@ export default connect(mapStateToProps, {
     modificaClean,
     modificaCurrentTime,
     modificaShowTimerModal,
+    modificaMissedPlayers,
     modificaShowPlayersModalJ,
     modificaIsSubstitute,
     modificaJogador

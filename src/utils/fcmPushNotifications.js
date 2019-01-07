@@ -15,11 +15,12 @@ export const sendCadJogoPushNotifForAll = (jogo) => {
             jogo
         }
       },
-      {
-        headers: { 
-            'Content-Type': 'application/json',
-            Authorization: `key=${key}`
+        {
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: `key=${key}`
+            }
         }
-      });
+    );
 };
 

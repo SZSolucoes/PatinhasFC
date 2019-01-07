@@ -34,6 +34,26 @@ class Analise extends React.Component {
                         />
                     </Card>
                 </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={
+                        () => Actions.analisejogadores()
+                    }
+                >
+                    <Card>
+                        <ListItem
+                            title='Jogadores'
+                            chevronColor={colorAppS}
+                            leftIcon={{ 
+                                name: 'account-multiple', 
+                                type: 'material-community', 
+                                size: 35, 
+                                color: colorAppS 
+                            }}
+                            titleStyle={{ fontSize: 20, fontWeight: '400' }}
+                            containerStyle={{ borderBottomWidth: 0 }}
+                        />
+                    </Card>
+                </TouchableOpacity>
             </View>
         );
     }

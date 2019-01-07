@@ -3,8 +3,10 @@ import { AsyncStorage } from 'react-native';
 import Moment from 'moment';
 import b64 from 'base-64';
 import { Actions } from 'react-native-router-flux';
+import _ from 'lodash';
 import firebase from '../Firebase';
 import { showAlert, mappedKeyStorage } from '../utils/store';
+import { usuarioAttr } from '../utils/userUtils';
 
 export const modificaUsername = (value) => ({
     type: 'modifica_username_login',
@@ -66,32 +68,12 @@ const onLoginSuccess = (dispatch, params) => {
         const snapVal = snapshot.val();
         if (!snapVal) {
             usuarioLogged = {
+                ...usuarioAttr,
                 userDisabled: 'false',
                 email: params.email,
                 senha: params.password,
-                nome: '',
-                dtnasc: '', 
-                tipoPerfil: 'socio',
-                imgAvatar: '',
-                imgBackground: '',
-                level: '1',
-                telefone: '',
-                endereco: '',
                 dataCadastro: dataAtual,
-                dataHoraUltimoLogin: dataAtual,
-                jogosParticipados: '0',
-                jogosEscalados: '0',
-                vitorias: '0',
-                derrotas: '0',
-                empates: '0',
-                gols: '0',
-                faltas: '0',
-                cartoesAmarelos: '0',
-                cartoesVermelhos: '0',
-                posicao: '',
-                userNotifToken: '',
-                infoImgUpdated: 'true', 
-                jogosImgUpdated: 'true'
+                dataHoraUltimoLogin: dataAtual
             };
 
             dbUsuarioRef.set({ ...usuarioLogged })
@@ -108,6 +90,24 @@ const onLoginSuccess = (dispatch, params) => {
             });
             showAlert('warning', 'Aviso!', 'Usuário desativado.');
         } else {
+            const asyncFunKeys = async () => {
+                const filtredKeys = _.filter(Object.keys(usuarioAttr), itemAttr => {
+                    return !(_.findKey(Object.keys(snapVal), valueKey => valueKey === itemAttr));
+                });
+
+                if (filtredKeys && filtredKeys.length) {
+                    const newObjKeys = {};
+                    for (let index = 0; index < filtredKeys.length; index++) {
+                        const element = filtredKeys[index];
+                        newObjKeys[element] = usuarioAttr[element];
+                    }
+                    
+                    dbUsuarioRef.update({ ...newObjKeys });
+                }
+            };
+
+            asyncFunKeys();
+
             dispatch({
                 type: 'modifica_userlogged_login',
                 payload: snapVal || {}

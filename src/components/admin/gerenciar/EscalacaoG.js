@@ -19,7 +19,7 @@ import _ from 'lodash';
 import * as Progress from 'react-native-progress';
 import { Dialog } from 'react-native-simple-dialogs';
 import firebase from '../../../Firebase';
-import { colorAppF, colorAppP } from '../../../utils/constantes';
+import { colorAppF, colorAppP, colorAppS } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
 //import Campo from '../../campo/Campo';
 import EscalacaoPadrao from '../../campo/EscalacaoPadrao';
@@ -29,7 +29,8 @@ import { getPosIndex, checkConInfo } from '../../../utils/jogosUtils';
 import { 
     modificaShowPlayersModal,
     modificaIsSubstitute,
-    modificaJogador
+    modificaJogador,
+    modificaMissedPlayers
 } from '../../../actions/GerenciarActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
@@ -321,7 +322,7 @@ class EscalacaoG extends React.Component {
                         onPress={() => checkConInfo(() => {
                             Alert.alert(
                                 'Aviso',
-                                `Confirma a remoção do jogador:\n${item.nome} ?`,
+                                `Confirma a remoção da escalação do jogador:\n${item.nome} ?`,
                                 [
                                     { text: 'Cancelar', 
                                         onPress: () => true, 
@@ -486,16 +487,183 @@ class EscalacaoG extends React.Component {
                 >
                     {
                         jogadoresConfirmados.map((item, index) => {
+                            let viewIcons = null;
+                            let validIndex = -1;
+                            let validItem = {};
                             const escalacaoCasa = _.findIndex(
                                 jogo.escalacao.casa, 
                                 (jgCasa) => !jgCasa.push && jgCasa.key === item.key
-                            ) !== -1; 
+                            ); 
 
                             const escaladoVisit = _.findIndex(
                                 jogo.escalacao.visit, 
                                 (jgVisit) => !jgVisit.push && 
                                 jgVisit.key === item.key
+                            );
+
+                            if (escalacaoCasa !== -1) {
+                                validIndex = escalacaoCasa;
+                                validItem = jogo.escalacao.casa[escalacaoCasa];
+                            } else if (escaladoVisit !== -1) {
+                                validIndex = escaladoVisit;
+                                validItem = jogo.escalacao.visit[escaladoVisit];
+                            }
+
+                            const isMissed = _.findIndex(
+                                this.props.missedPlayers, ms => ms === item.key
                             ) !== -1;
+
+                            if (escalacaoCasa !== -1 || escaladoVisit !== -1) {
+                                viewIcons = (
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <View 
+                                            style={{
+                                                flexDirection: 'row',  
+                                                alignItems: 'center',
+                                                justifyContent: 'flex-end',
+                                                margin: 5
+                                            }}
+                                        >
+                                            <Text style={{ color: colorAppS, fontWeight: '500' }}>
+                                                Escalado
+                                            </Text>
+                                        </View>
+                                        <TouchableOpacity
+                                            onPress={
+                                                () => checkConInfo(() => {
+                                                if (validIndex !== -1) {
+                                                    Alert.alert(
+                                                        'Aviso',
+                                                        'Confirma a remoção da escalação do ' +
+                                                        `jogador:\n${validItem.nome} ?`,
+                                                        [
+                                                            { text: 'Cancelar', 
+                                                                onPress: () => true, 
+                                                                style: 'cancel' 
+                                                            },
+                                                            { 
+                                                                text: 'Ok', 
+                                                                onPress: () => checkConInfo(
+                                                                    () => 
+                                                                    this.doInOrOut(
+                                                                        validItem, false, jogo
+                                                                    )
+                                                                )
+                                                            },
+                                                        ]
+                                                    ); 
+                                                }
+                                            })}
+                                        >
+                                            <View style={{ justifyContent: 'space-around' }}>
+                                                <Icon
+                                                    color={'black'}
+                                                    name={'undo-variant'}
+                                                    type='material-community'
+                                                    size={32}
+                                                />
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                );
+                            } else if (isMissed) {
+                                viewIcons = (
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <View 
+                                            style={{
+                                                flexDirection: 'row',  
+                                                alignItems: 'center',
+                                                justifyContent: 'flex-end',
+                                                margin: 5
+                                            }}
+                                        >
+                                            <Text style={{ color: 'red', fontWeight: '500' }}>
+                                                Faltou
+                                            </Text>
+                                        </View>
+                                        <TouchableOpacity
+                                            onPress={
+                                                () => {
+                                                    const newMisseds = _.filter(
+                                                        this.props.missedPlayers, 
+                                                        mPlayerKey => mPlayerKey !== item.key
+                                                    );
+
+                                                    this.props.modificaMissedPlayers(newMisseds);
+                                                }
+                                            }
+                                        >
+                                            <View style={{ justifyContent: 'space-around' }}>
+                                                <Icon
+                                                    color={'black'}
+                                                    name={'undo-variant'}
+                                                    type='material-community'
+                                                    size={32}
+                                                />
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                );
+                            } else {
+                                viewIcons = (
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <TouchableOpacity
+                                            onPress={
+                                                () => 
+                                                checkConInfo(() => this.onPressEscalConfirm(
+                                                    'casa', item, jogo
+                                                ))
+                                            }
+                                        >
+                                            <View style={{ justifyContent: 'space-around' }}>
+                                                <Image 
+                                                    style={{ 
+                                                        height: 35, width: 30, marginRight: 5 
+                                                    }}
+                                                    resizeMode={'stretch'}
+                                                    source={imgHomeShirt} 
+                                                />
+                                            </View>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={
+                                                () => 
+                                                checkConInfo(() => this.onPressEscalConfirm(
+                                                    'visit', item, jogo
+                                                ))
+                                            }
+                                        >
+                                            <View style={{ justifyContent: 'space-around' }}>
+                                                <Image 
+                                                    style={{ 
+                                                        height: 35, width: 30, marginRight: 5 
+                                                    }}
+                                                    resizeMode={'stretch'}
+                                                    source={imgVisitShirt} 
+                                                />
+                                            </View>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={
+                                                () => {
+                                                    this.props.modificaMissedPlayers([
+                                                        ...this.props.missedPlayers,
+                                                        item.key
+                                                    ]);
+                                                }}
+                                        >
+                                            <View style={{ justifyContent: 'space-around' }}>
+                                                <Icon
+                                                    color={'black'}
+                                                    name={'account-off'}
+                                                    type='material-community'
+                                                    size={32}
+                                                />
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                );
+                            }
 
                             const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                             return (
@@ -510,64 +678,7 @@ class EscalacaoG extends React.Component {
                                     avatar={retrieveImgSource(imgAvt)}
                                     key={index}
                                     title={item.nome}
-                                    rightIcon={
-                                        escalacaoCasa || escaladoVisit
-                                        ?
-                                        (
-                                            <View 
-                                                style={{
-                                                    flexDirection: 'row',  
-                                                    alignItems: 'center',
-                                                    justifyContent: 'flex-end',
-                                                    margin: 5
-                                                }}
-                                            >
-                                                <Text style={{ color: 'red', fontWeight: '500' }}>
-                                                    Escalado
-                                                </Text>
-                                            </View>
-                                        )
-                                        :
-                                        (
-                                        <View style={{ flexDirection: 'row' }}>
-                                            <TouchableOpacity
-                                                onPress={
-                                                    () => 
-                                                    checkConInfo(() => this.onPressEscalConfirm(
-                                                        'casa', item, jogo
-                                                    ))
-                                                }
-                                            >
-                                                <View style={{ justifyContent: 'space-around' }}>
-                                                    <Image 
-                                                        style={{ 
-                                                            height: 40, width: 35, marginRight: 5 
-                                                        }}
-                                                        resizeMode={'stretch'}
-                                                        source={imgHomeShirt} 
-                                                    />
-                                                </View>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity
-                                                onPress={
-                                                    () => 
-                                                    checkConInfo(() => this.onPressEscalConfirm(
-                                                        'visit', item, jogo
-                                                    ))
-                                                }
-                                            >
-                                                <View style={{ justifyContent: 'space-around' }}>
-                                                    <Image 
-                                                        style={{ 
-                                                            height: 40, width: 35, marginRight: 5 
-                                                        }}
-                                                        resizeMode={'stretch'}
-                                                        source={imgVisitShirt} 
-                                                    />
-                                                </View>
-                                            </TouchableOpacity>
-                                        </View>
-                                    )}
+                                    rightIcon={viewIcons}
                                 />
                             );
                         })
@@ -778,6 +889,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => ({
     showPlayersModal: state.GerenciarReducer.showPlayersModal,
     endGameModal: state.GerenciarReducer.endGameModal,
+    missedPlayers: state.GerenciarReducer.missedPlayers,
     endGameModalPerc: state.GerenciarReducer.endGameModalPerc,
     itemSelected: state.GerenciarReducer.itemSelected,
     listJogos: state.JogosReducer.listJogos,
@@ -786,6 +898,7 @@ const mapStateToProps = (state) => ({
 
 export default connect(mapStateToProps, {
     modificaShowPlayersModal,
+    modificaMissedPlayers,
     modificaIsSubstitute,
     modificaJogador
 })(EscalacaoG);
