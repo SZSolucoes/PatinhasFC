@@ -5,7 +5,8 @@ const INITIAL_STATE = {
     filterStr: '',
     filterLoad: false,
     loadingFooter: false,
-    maxRows: 30
+    maxRows: 30,
+    jumpScene: ''
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -44,6 +45,11 @@ export default (state = INITIAL_STATE, action) => {
             return { 
                 ...state, 
                 maxRows: action.payload
+            };
+        case 'modifica_jumpscene_jogos':
+            return { 
+                ...state, 
+                jumpScene: action.payload
             };
         case 'modifica_clean_jogos':
             return {

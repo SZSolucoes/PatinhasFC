@@ -19,7 +19,8 @@ class Notifications extends React.Component {
         this.onPressCheck = this.onPressCheck.bind(this);
 
         this.state = {
-            notifAllTopicEnabled: false
+            notifAllTopicEnabled: false,
+            notifEnquetesEnabled: false,
         };
     }
 
@@ -27,6 +28,11 @@ class Notifications extends React.Component {
         AsyncStorage.getItem(mappedKeyStorage('notifAllTopicEnabled')).then((value) => {
             if (value && value === 'yes') {
                 this.setState({ notifAllTopicEnabled: true });
+            }
+        });
+        AsyncStorage.getItem(mappedKeyStorage('notifEnquetesEnabled')).then((value) => {
+            if (value && value === 'yes') {
+                this.setState({ notifEnquetesEnabled: true });
             }
         });
     }
@@ -42,6 +48,18 @@ class Notifications extends React.Component {
                 AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'yes').then(() => {
                     FCM.subscribeToTopic('all');
                     this.setState({ notifAllTopicEnabled: true });
+                });
+            }
+        } else if (checkName === 'notifEnquetesEnabled') {
+            if (this.state.notifEnquetesEnabled) {
+                AsyncStorage.setItem(mappedKeyStorage('notifEnquetesEnabled'), 'no').then(() => {
+                    FCM.unsubscribeFromTopic('enquetes');
+                    this.setState({ notifEnquetesEnabled: false });
+                });
+            } else {
+                AsyncStorage.setItem(mappedKeyStorage('notifEnquetesEnabled'), 'yes').then(() => {
+                    FCM.subscribeToTopic('enquetes');
+                    this.setState({ notifEnquetesEnabled: true });
                 });
             }
         }
@@ -61,6 +79,22 @@ class Notifications extends React.Component {
                                 checked={this.state.notifAllTopicEnabled}
                                 onPress={() => 
                                     checkConInfo(this.onPressCheck, ['notifAllTopicEnabled'])
+                                }
+                            />
+                        )}
+                    />
+                </List>
+                <List>
+                    <ListItem
+                        title='Criação de enquetes'
+                        subtitle={'Receber notificações quando uma enquete for criada.'}
+                        subtitleNumberOfLines={5}
+                        rightIcon={(
+                            <CheckBox
+                                title={this.state.notifEnquetesEnabled ? 'Ativo  ' : 'Inativo'}
+                                checked={this.state.notifEnquetesEnabled}
+                                onPress={() => 
+                                    checkConInfo(this.onPressCheck, ['notifEnquetesEnabled'])
                                 }
                             />
                         )}

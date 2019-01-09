@@ -21,6 +21,8 @@ class AlertScl extends React.Component {
         this.onPressDisableUser = this.onPressDisableUser.bind(this);
         this.onPressRemoveInfo = this.onPressRemoveInfo.bind(this);
         this.onPressRemoveFina = this.onPressRemoveFina.bind(this);
+        this.onPressRemoveEnquete = this.onPressRemoveEnquete.bind(this);
+        this.onPressEndEnquete = this.onPressEndEnquete.bind(this);
     }
 
     onPressDisableUser() {
@@ -211,6 +213,88 @@ class AlertScl extends React.Component {
         }, 1000);
     }
 
+    onPressRemoveEnquete() {
+        const { itemEnqueteSelected } = this.props;
+
+        const dbItemRef = firebase.database().ref()
+        .child(`enquetes/${itemEnqueteSelected.key}`);
+
+        dbItemRef.remove()
+        .then(() => {
+            setTimeout(
+                () => Toast.show('Remoção efetuada com sucesso.', Toast.LONG)
+            , 1000);
+        })
+        .catch(() => 
+            setTimeout(
+                () => Toast.show('Falha durante a remoção.', Toast.LONG)
+            , 1000)
+        );
+        
+        store.dispatch({
+            type: 'modifica_showalertscl_alertscl',
+            payload: false
+        });
+
+        store.dispatch({
+            type: 'modifica_itemselected_enquetes',
+            payload: {}
+        }); 
+
+        setTimeout(() => {
+            store.dispatch({
+                type: 'modifica_remove_alertscl',
+                payload: false
+            });
+            store.dispatch({
+                type: 'modifica_flagremoveenquetes_enquetes',
+                payload: false
+            });
+        }, 1000);
+    }
+
+    onPressEndEnquete() {
+        const { itemEnqueteSelected } = this.props;
+
+        const dbItemRef = firebase.database().ref()
+        .child(`enquetes/${itemEnqueteSelected.key}`);
+
+        dbItemRef.update({
+            status: '2'
+        })
+        .then(() => {
+            setTimeout(
+                () => Toast.show('Enquete encerrada com sucesso.', Toast.LONG)
+            , 1000);
+        })
+        .catch(() => 
+            setTimeout(
+                () => Toast.show('Falha durante o encerramento.', Toast.LONG)
+            , 1000)
+        );
+        
+        store.dispatch({
+            type: 'modifica_showalertscl_alertscl',
+            payload: false
+        });
+
+        store.dispatch({
+            type: 'modifica_itemselected_enquetes',
+            payload: {}
+        }); 
+
+        setTimeout(() => {
+            store.dispatch({
+                type: 'modifica_remove_alertscl',
+                payload: false
+            });
+            store.dispatch({
+                type: 'modifica_flagendenquetes_enquetes',
+                payload: false
+            });
+        }, 1000);
+    }
+
     render() {
         return (
             <SCLAlert
@@ -260,6 +344,10 @@ class AlertScl extends React.Component {
                                     return this.onPressRemoveInfo();
                                 } else if (this.props.flagRemoveAnaliseFina) {
                                     return this.onPressRemoveFina();
+                                } else if (this.props.flagRemoveEnquetes) {
+                                    return this.onPressRemoveEnquete();
+                                } else if (this.props.flagEndEnquetes) {
+                                    return this.onPressEndEnquete();
                                 }
                                 return this.onPressConfRemov(); 
                             }}
@@ -303,6 +391,9 @@ const mapStateToProps = (state) => ({
     itemInfoSelected: state.InfoReducer.itemSelected,
     flagRemoveAnaliseFina: state.FinanceiroReducer.flagRemoveAnaliseFina,
     itemFinaSelected: state.FinanceiroReducer.itemSelected,
+    flagRemoveEnquetes: state.EnquetesReducer.flagRemoveEnquetes,
+    flagEndEnquetes: state.EnquetesReducer.flagEndEnquetes,
+    itemEnqueteSelected: state.EnquetesReducer.itemSelected
 });
 
 export default connect(mapStateToProps)(AlertScl);

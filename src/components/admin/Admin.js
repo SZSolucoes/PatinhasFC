@@ -121,6 +121,33 @@ class Admin extends React.Component {
                         </Card>
                     </TouchableOpacity>
                 </View>
+                <View style={styles.viewLinha}>
+                    <TouchableOpacity 
+                        style={{ flex: 1 }} 
+                        onPress={
+                            () => Actions.adminEnquetes(
+                                { onBack: () => Actions.popTo('_admin') }
+                            )
+                        }
+                    >
+                        <Card 
+                            containerStyle={{ flex: 1 }}
+                            wrapperStyle={{ flex: 1 }}
+                        >
+                            <View style={styles.viewIconText}>
+                                <Icon name='poll' type='material-community' size={34} />
+                                <View style={{ marginTop: 10 }} />
+                                <Text style={styles.text}>Enquetes</Text>
+                            </View>
+                        </Card>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={{ flex: 1 }} 
+                        onPress={() => false}
+                    >
+                        <View />
+                    </TouchableOpacity>
+                </View>
                 <View style={{ marginBottom: 100 }} />
             </ScrollView>
         );

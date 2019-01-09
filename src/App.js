@@ -12,6 +12,7 @@ import Routes from './Routes';
 import reducers from './reducers';
 import { startFbListener } from './utils/firebaseListeners';
 import { mappedKeyStorage } from './utils/store';
+import { Actions } from 'react-native-router-flux';
 
 if (!global.btoa) {
     global.btoa = encode;
@@ -99,7 +100,29 @@ class App extends React.Component {
             console.error(e);
         }
 
+        FCM.getInitialNotification().then(notif => {
+            if (notif && notif.opened_from_tray) {
+                if ((notif.targetScreen && notif.targetScreen === 'enquetes') ||
+                (notif.local_notification && notif.title && notif.title.includes('enquete'))) {
+                    store.dispatch({
+                        type: 'modifica_jumpscene_jogos',
+                        payload: 'enquetes'
+                    });
+                }
+            }
+        });
+
         FCM.on(FCMEvent.Notification, notif => {
+                if (notif && notif.opened_from_tray) {
+                    if ((notif.targetScreen && notif.targetScreen === 'enquetes') ||
+                    (
+                        notif.local_notification && 
+                        notif.title && 
+                        notif.title.includes('enquete')
+                    )) {
+                        setTimeout(() => Actions.profileEnquetes(), 500);
+                    }
+                }
                 if (AppState.currentState === 'active') {
                     if (Platform.OS === 'ios' && 
                     notif._notificationType === NotificationType.WillPresent && 
@@ -126,7 +149,8 @@ class App extends React.Component {
                             large_icon: 'ic_launcher',
                             show_in_foreground: true,
                             vibrate: 300, 
-                            lights: true
+                            lights: true,
+                            targetScreen: notif.fcm.targetScreen
                         });
                     }
                 }
@@ -162,6 +186,9 @@ class App extends React.Component {
             const notifAllTopicEnabled = await AsyncStorage.getItem(
                 mappedKeyStorage('notifAllTopicEnabled')
             );
+            const notifEnquetesEnabled = await AsyncStorage.getItem(
+                mappedKeyStorage('notifEnquetesEnabled')
+            );
 
             if (notifAllTopicEnabled && notifAllTopicEnabled === 'yes') {
                 FCM.subscribeToTopic('all');
@@ -171,10 +198,21 @@ class App extends React.Component {
                 FCM.subscribeToTopic('all'); 
                 AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'yes');
             }
+
+            if (notifEnquetesEnabled && notifEnquetesEnabled === 'yes') {
+                FCM.subscribeToTopic('enquetes');
+            } else if (notifEnquetesEnabled && notifEnquetesEnabled === 'no') {
+                FCM.unsubscribeFromTopic('enquetes');
+            } else {
+                FCM.subscribeToTopic('enquetes'); 
+                AsyncStorage.setItem(mappedKeyStorage('notifEnquetesEnabled'), 'yes');
+            }
         } catch (e) {
             console.error(e);
             FCM.subscribeToTopic('all'); 
+            FCM.subscribeToTopic('enquetes'); 
             AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'yes');
+            AsyncStorage.setItem(mappedKeyStorage('notifEnquetesEnabled'), 'yes');
         } 
     }
 

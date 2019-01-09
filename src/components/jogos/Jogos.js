@@ -128,6 +128,10 @@ class Jogos extends React.Component {
         });
         
         Dimensions.addEventListener('change', this.onChangeDimensions);
+
+        if (this.props.jumpScene === 'enquetes') {
+            setTimeout(() => Actions.profileEnquetes(), 2000);
+        }
     }
 
     componentWillUnmount() {
@@ -281,12 +285,14 @@ class Jogos extends React.Component {
             startFbListener('usuarios');
             startFbListener('usuario', { email: username });
             startFbListener('analise/financeiro');
+            startFbListener('enquetes');
         } else {
             stopFbListener('jogos');
             stopFbListener('infos');
             stopFbListener('usuarios');
             stopFbListener('usuario');
             stopFbListener('analise/financeiro');
+            stopFbListener('enquetes');
         }
     }
 
@@ -655,6 +661,7 @@ const mapStateToProps = (state) => ({
     loadingFooter: state.JogosReducer.loadingFooter,
     maxRows: state.JogosReducer.maxRows,
     filterLoad: state.JogosReducer.filterLoad,
+    jumpScene: state.JogosReducer.jumpScene,
     userLogged: state.LoginReducer.userLogged,
     conInfo: state.LoginReducer.conInfo
 });

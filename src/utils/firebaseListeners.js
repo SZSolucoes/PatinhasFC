@@ -9,12 +9,14 @@ let infosListener = null;
 let usuariosListener = null;
 let usuarioListener = null;
 let analiseFinaListener = null;
+let enquetesListener = null;
 
 let jogosListenerOn = false;
 let infosListenerOn = false;
 let usuariosListenerOn = false;
 let usuarioListenerOn = false;
 let analiseFinaListenerOn = false;
+let enquetesListenerOn = false;
 
 export const startFbListener = (name, params) => {
     const databaseRef = firebase.database().ref();
@@ -96,6 +98,57 @@ export const startFbListener = (name, params) => {
                 analiseFinaListenerOn = true;
             }
             break;
+        case 'enquetes':
+            // LISTENER FIREBASE ENQUETES
+            if (!enquetesListener || (enquetesListener && !enquetesListenerOn)) {
+                enquetesListener = databaseRef.child('enquetes');
+                enquetesListener.on('value', (snapshot) => {
+                    const loginReducer = store.getState().LoginReducer;
+                    const enquetesList = _.map(snapshot.val(), (value, key) => ({ key, ...value }));
+                    const openEnqts = _.filter(enquetesList, en => en.status === '1');
+
+                    // CONTADOR DE ENQUETES NÃO VOTADAS
+                    if (loginReducer.userLogged && loginReducer.userLogged.key) {
+                        if (openEnqts && openEnqts.length) {
+                            const numEnquetes = _.reduce(openEnqts, (sum, item) => {
+                                const votos = _.filter(item.votos, vl => !vl.push);
+
+                                if (votos && votos.length) {
+                                    const hasVote = _.findIndex(
+                                        votos, vot => vot.key === loginReducer.userLogged.key
+                                    ) !== -1;
+
+                                    if (!hasVote) {
+                                        return sum + 1;
+                                    }
+
+                                    return sum;
+                                }
+
+                                return sum + 1;
+                            }, 0);
+                            
+                            store.dispatch({
+                                type: 'modifica_enqueteprops_profile',
+                                payload: { badge: { value: numEnquetes } }
+                            });
+                        } else {
+                            store.dispatch({
+                                type: 'modifica_enqueteprops_profile',
+                                payload: { badge: { value: 0 } }
+                            });
+                        }
+                    }
+
+                    // LISTA DE TODAS AS ENQUETES
+                    store.dispatch({
+                        type: 'modifica_enquetes_enquetes',
+                        payload: enquetesList
+                    });
+                });
+                enquetesListenerOn = true;
+            }
+            break;
         default:
     }
 };
@@ -130,6 +183,12 @@ export const stopFbListener = (name) => {
             if (analiseFinaListener) {
                 analiseFinaListener.off();
                 analiseFinaListenerOn = false;
+            }
+            break;
+        case 'enquetes':
+            if (enquetesListener) {
+                enquetesListener.off();
+                enquetesListenerOn = false;
             }
             break;
         default:

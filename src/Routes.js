@@ -45,9 +45,12 @@ import Info from './components/admin/informativos/Info';
 import Gerenciar from './components/admin/gerenciar/Gerenciar';
 import Historico from './components/admin/historico/Historico';
 import HistoricoP from './components/profile/historico/HistoricoP';
+import ProfileEnquetes from './components/profile/enquetes/ProfileEnquetes';
 import JogoH from './components/admin/historico/JogoH';
 import EscalacaoH from './components/admin/historico/EscalacaoH';
 import AnaliseJogadores from './components/admin/analise/jogadores/AnaliseJogadores';
+import EnqueteCadastrar from './components/admin/enquetes/EnqueteCadastrar';
+import EnqueteEditar from './components/admin/enquetes/EnqueteEditar';
 import Imagens from './components/imagens/Imagens';
 import { colorAppS } from './utils/constantes';
 
@@ -182,6 +185,13 @@ class Routes extends React.Component {
                 Actions.popTo('analise');
                 return true;
             }
+
+            if ('|_enqueteCadastrar|_enqueteEditar|'.includes(
+                Actions.currentScene)
+                ) {
+                Actions.popTo('_admin');
+                return true;
+            }
             
             return true;
         });
@@ -248,6 +258,13 @@ class Routes extends React.Component {
 
         if ('|_financeiroCadastrar|_financeiroEditar|'.includes(Actions.currentScene)) {
             Actions.popTo('analise');
+            return true;
+        }
+
+        if ('|_enqueteCadastrar|_enqueteEditar|'.includes(
+            Actions.currentScene)
+            ) {
+            Actions.popTo('_admin');
             return true;
         }
 
@@ -756,6 +773,15 @@ class Routes extends React.Component {
                         //initial
                     />
                     <Scene 
+                        key={'profileEnquetes'}
+                        title={'Enquetes'}
+                        component={ProfileEnquetes}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
                         key={'imagens'}
                         title={'Imagens'}
                         component={Imagens}
@@ -917,6 +943,37 @@ class Routes extends React.Component {
                             hideNavBar 
                             component={FinanceiroEditar}
                             tabBarLabel={'Lista'}
+                            activeTintColor={'white'}
+                        />
+                    </Scene>
+                    <Scene 
+                        key={'adminEnquetes'}
+                        tabs
+                        showLabel
+                        tabBarPosition={'top'}
+                        lazy={false}
+                        swipeEnabled
+                        title={'Enquetes'} 
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        tabBarStyle={{ backgroundColor: colorAppS }}
+                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        //renderRightButton={() => this.rightButtonGerenciarTab()}
+                    >
+                        <Scene 
+                            key={'enqueteCadastrar'}
+                            hideNavBar 
+                            component={EnqueteCadastrar}
+                            initial
+                            tabBarLabel={'Cadastrar'}
+                            activeTintColor={'white'}
+                        />
+                        <Scene 
+                            key={'enqueteEditar'}
+                            hideNavBar 
+                            component={EnqueteEditar}
+                            tabBarLabel={'Editar'}
                             activeTintColor={'white'}
                         />
                     </Scene>

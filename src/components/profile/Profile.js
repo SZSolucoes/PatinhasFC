@@ -12,7 +12,7 @@ import { Actions } from 'react-native-router-flux';
 import * as Progress from 'react-native-progress';
 import RNFetchBlob from 'rn-fetch-blob';
 import b64 from 'base-64';
-import { Button, List, ListItem } from 'react-native-elements';
+import { Button, List, ListItem, Icon } from 'react-native-elements';
 import ParallaxScrollView from 'react-native-parallax-scrollview';
 import ImagePicker from 'react-native-image-crop-picker';
 import { Dialog } from 'react-native-simple-dialogs';
@@ -164,10 +164,17 @@ class Profile extends React.Component {
         const imgBg = userLogged.imgBackground ? 
             { uri: userLogged.imgBackground } : perfilBgUserImg;
         const username = userLogged.nome ? userLogged.nome : 'Patinhas';
+        let enqueteProps = {};
         let posicao = userLogged.tipoPerfil ? checkPerfil(userLogged.tipoPerfil) : 'Visitante';
 
         if ('0|255'.includes(userLogged.level)) {
             posicao = checkPerfil(userLogged.level);
+        }
+        
+        if (this.props.enqueteProps && 
+            this.props.enqueteProps.badge &&
+            this.props.enqueteProps.badge.value) {
+            enqueteProps = this.props.enqueteProps;
         }
 
         return (
@@ -201,6 +208,13 @@ class Profile extends React.Component {
                         </View>
                     }
                     <List>
+                        <ListItem
+                            key={'Enquetes'}
+                            title={'Enquetes'}
+                            leftIcon={{ name: 'poll', type: 'material-community' }}
+                            onPress={() => Actions.profileEnquetes()}
+                            {...enqueteProps}
+                        />
                         <ListItem
                             key={'Notificações'}
                             title={'Notificações'}
@@ -313,7 +327,8 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => ({
     userLogged: state.LoginReducer.userLogged,
     userLevel: state.LoginReducer.userLevel,
-    username: state.LoginReducer.username
+    username: state.LoginReducer.username,
+    enqueteProps: state.ProfileReducer.enqueteProps
 });
 
 export default connect(mapStateToProps, {})(Profile);
