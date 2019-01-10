@@ -171,11 +171,11 @@ class EditPerfil extends React.Component {
         switch (field) {
             case 'nome':
                 newValue = value.length <= 40 ? value : this.state.userLogged.nome;
-                newValue = newValue.replace(/[^a-zA-Z0-9 ]/g, '');
+                newValue = newValue.replace(/[^a-zA-Z0-9À-ÿ ]/g, '');
                 break;
             case 'endereco':
                 newValue = value.length <= 100 ? value : this.state.userLogged.endereco;
-                newValue = newValue.replace(/[^a-zA-Z0-9 ]/g, '');
+                newValue = newValue.replace(/[^a-zA-Z0-9À-ÿ ]/g, '');
                 break;
             case 'novasenha':
                 newValue = value.length <= 20 ? value : this.state.novaSenha;

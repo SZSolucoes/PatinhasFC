@@ -641,7 +641,6 @@ class Informativos extends React.Component {
                         </View> 
                 )}
                 />
-                <Coment />
                 <ShareModal />
                 <ImageView
                     images={this.props.imagesForView}
@@ -767,6 +766,7 @@ class Informativos extends React.Component {
                 { 
                     this.props.listInfos.length ? this.renderInfoList() : null
                 }
+                <Coment />
             </View>
         );
     }

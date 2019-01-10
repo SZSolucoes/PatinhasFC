@@ -5,7 +5,8 @@ import {
     Platform,
     ScrollView,
     Alert,
-    TouchableOpacity
+    TouchableOpacity,
+    Keyboard
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -49,6 +50,8 @@ class EnqueteEditModal extends React.Component {
             const { opts, titulo, itemEditModal } = this.props;
             const newOpts = _.filter(opts, op => op.trim() !== '');
             const newTitulo = titulo.trim();
+
+            Keyboard.dismiss();
     
             this.setState({ isTituloNotValid: false });
     
@@ -132,6 +135,7 @@ class EnqueteEditModal extends React.Component {
                         <TouchableOpacity 
                             style={styles.add}
                             onPress={() => {
+                                Keyboard.dismiss();
                                 const newOpts = [...this.props.opts];
                                 newOpts.splice(index, 1);
                                 this.props.modificaOptsEditModal(newOpts);
@@ -167,6 +171,7 @@ class EnqueteEditModal extends React.Component {
                     <TouchableOpacity 
                         style={styles.add}
                         onPress={() => {
+                            Keyboard.dismiss();
                             const newOpts = [...this.props.opts];
                             newOpts.push('');
                             this.props.modificaOptsEditModal(newOpts);
@@ -230,6 +235,7 @@ class EnqueteEditModal extends React.Component {
                             title={'Restaurar'}
                             buttonStyle={{ width: '100%', marginVertical: 10 }}
                             onPress={() => {
+                                Keyboard.dismiss();
                                 this.props.modificaTituloEditModal(
                                     this.props.itemEditModal.titulo
                                 ); 
@@ -243,7 +249,7 @@ class EnqueteEditModal extends React.Component {
                             }}
                         />
                     </Card>
-                    <View style={{ marginBottom: 30 }} />
+                    <View style={{ marginBottom: 50 }} />
                 </View>
             </ScrollView>
         );
@@ -262,6 +268,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#9E9E9E',
         height: Platform.OS === 'android' ? 105 : 100,
+        padding: Platform.OS === 'ios' ? 5 : 0
     },
     inputMargem: {
         paddingBottom: 0, 

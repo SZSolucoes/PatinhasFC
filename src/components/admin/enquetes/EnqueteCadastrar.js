@@ -5,7 +5,8 @@ import {
     Platform,
     ScrollView,
     Alert,
-    TouchableOpacity
+    TouchableOpacity,
+    Keyboard
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -46,6 +47,8 @@ class EnqueteCadastrar extends React.Component {
         const { opts, titulo } = this.state;
         const newOpts = _.filter(opts, op => op.trim() !== '');
         const newTitulo = titulo.trim();
+
+        Keyboard.dismiss();
 
         this.setState({ isTituloNotValid: false });
 
@@ -121,6 +124,7 @@ class EnqueteCadastrar extends React.Component {
                         <TouchableOpacity 
                             style={styles.add}
                             onPress={() => {
+                                Keyboard.dismiss();
                                 const newOpts = [...this.state.opts];
                                 newOpts.splice(index, 1);
                                 this.setState({ opts: newOpts });
@@ -156,6 +160,7 @@ class EnqueteCadastrar extends React.Component {
                     <TouchableOpacity 
                         style={styles.add}
                         onPress={() => {
+                            Keyboard.dismiss();
                             const newOpts = [...this.state.opts];
                             newOpts.push('');
                             this.setState({ opts: newOpts });
@@ -218,16 +223,18 @@ class EnqueteCadastrar extends React.Component {
                             loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                             title={this.props.keyItem ? 'Restaurar' : 'Limpar'}
                             buttonStyle={{ width: '100%', marginVertical: 10 }}
-                            onPress={() => 
+                            onPress={() => {
+                                Keyboard.dismiss();
                                 this.setState({
                                     loading: false,
                                     titulo: '',
                                     isTituloNotValid: false,
                                     opts: ['']
-                            })}
+                                });
+                            }}
                         />
                     </Card>
-                    <View style={{ marginBottom: 30 }} />
+                    <View style={{ marginBottom: 100 }} />
                 </View>
             </ScrollView>
         );
@@ -246,6 +253,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#9E9E9E',
         height: Platform.OS === 'android' ? 105 : 100,
+        padding: Platform.OS === 'ios' ? 5 : 0
     },
     inputMargem: {
         paddingBottom: 0, 

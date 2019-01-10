@@ -2,8 +2,10 @@ import React from 'react';
 import { 
     View, 
     StyleSheet,
-    AsyncStorage
+    AsyncStorage,
+    Dimensions
 } from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 
 import { connect } from 'react-redux';
 import { CheckBox, List, ListItem } from 'react-native-elements';
@@ -68,6 +70,40 @@ class ProfileEnquetes extends React.Component {
                         )}
                     />
                 </List>
+                <View>
+                    <LineChart
+                        data={{
+                        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                        datasets: [{
+                            data: [
+                            Math.random() * 100,
+                            Math.random() * 100,
+                            Math.random() * 100,
+                            Math.random() * 100,
+                            Math.random() * 100,
+                            Math.random() * 100
+                            ]
+                        }]
+                        }}
+                        width={Dimensions.get('window').width} // from react-native
+                        height={220}
+                        chartConfig={{
+                        backgroundColor: '#e26a00',
+                        backgroundGradientFrom: '#fb8c00',
+                        backgroundGradientTo: '#ffa726',
+                        decimalPlaces: 2, // optional, defaults to 2dp
+                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        style: {
+                            borderRadius: 16
+                        }
+                        }}
+                        bezier
+                        style={{
+                        marginVertical: 8,
+                        borderRadius: 16
+                        }}
+                    />
+                    </View>
             </View>
         );
     }

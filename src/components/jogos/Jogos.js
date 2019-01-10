@@ -46,6 +46,7 @@ import { colorAppT } from '../../utils/constantes';
 import { retrieveImgSource } from '../../utils/imageStorage';
 import { mappedKeyStorage } from '../../utils/store';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
+import { store } from '../../App';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -130,7 +131,15 @@ class Jogos extends React.Component {
         Dimensions.addEventListener('change', this.onChangeDimensions);
 
         if (this.props.jumpScene === 'enquetes') {
-            setTimeout(() => Actions.profileEnquetes(), 2000);
+            store.dispatch({
+                type: 'modifica_jumpscene_jogos',
+                payload: ''
+            });
+            setTimeout(() => {
+                if (Actions.currentScene !== 'profileEnquetes') {
+                    Actions.profileEnquetes();
+                }
+            }, 1000);
         }
     }
 

@@ -386,7 +386,7 @@ class Coment extends React.Component {
                     top: 0,
                     right: 0,
                     bottom: 0,
-                    zIndex: 10
+                    zIndex: 100
                 }} 
             >
                 <View style={styles.containerPrincip}>
@@ -463,6 +463,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white', 
         width: '100%', 
         height: '100%',
+        zIndex: 100,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
         ...Platform.select({
@@ -477,7 +478,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: 50
+        zIndex: 150
     },
     viewTextInput: {
         backgroundColor: '#EEEEEE',

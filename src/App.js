@@ -6,13 +6,13 @@ import { createStore, applyMiddleware } from 'redux';
 import ReduxThunk from 'redux-thunk';
 import Axios from 'axios';
 import FCM, { FCMEvent, NotificationType, WillPresentNotificationResult } from 'react-native-fcm';
+import { Actions } from 'react-native-router-flux';
 import { decode, encode } from 'base-64';
 
 import Routes from './Routes';
 import reducers from './reducers';
 import { startFbListener } from './utils/firebaseListeners';
 import { mappedKeyStorage } from './utils/store';
-import { Actions } from 'react-native-router-flux';
 
 if (!global.btoa) {
     global.btoa = encode;
@@ -100,17 +100,24 @@ class App extends React.Component {
             console.error(e);
         }
 
-        FCM.getInitialNotification().then(notif => {
-            if (notif && notif.opened_from_tray) {
-                if ((notif.targetScreen && notif.targetScreen === 'enquetes') ||
-                (notif.local_notification && notif.title && notif.title.includes('enquete'))) {
+        try {
+            const firstNotif = await FCM.getInitialNotification();
+
+            if (firstNotif && firstNotif.opened_from_tray) {
+                if ((firstNotif.targetScreen && firstNotif.targetScreen === 'enquetes') ||
+                (
+                    firstNotif.local_notification && 
+                    firstNotif.title && 
+                    firstNotif.title.includes('enquete'))) {
                     store.dispatch({
                         type: 'modifica_jumpscene_jogos',
                         payload: 'enquetes'
                     });
                 }
             }
-        });
+        } catch (e) {
+            console.error(e);
+        }
 
         FCM.on(FCMEvent.Notification, notif => {
                 if (notif && notif.opened_from_tray) {
@@ -120,7 +127,13 @@ class App extends React.Component {
                         notif.title && 
                         notif.title.includes('enquete')
                     )) {
-                        setTimeout(() => Actions.profileEnquetes(), 500);
+                        if (!store.getState().JogosReducer.jumpScene) {
+                            setTimeout(() => {
+                                if (Actions.currentScene !== 'profileEnquetes') {
+                                    Actions.profileEnquetes();
+                                }
+                            }, 500);
+                        }
                     }
                 }
                 if (AppState.currentState === 'active') {
