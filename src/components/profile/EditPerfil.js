@@ -299,7 +299,6 @@ class EditPerfil extends React.Component {
                     />
                     <Button 
                         small
-                        loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                         title={'Restaurar'} 
                         buttonStyle={{ width: '100%', marginVertical: 10 }}
                         onPress={() => this.setState({
@@ -387,7 +386,6 @@ class EditPerfil extends React.Component {
                     />
                     <Button 
                         small
-                        loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                         title={'Limpar'} 
                         buttonStyle={{ width: '100%', marginVertical: 10 }}
                         onPress={() => this.setState({

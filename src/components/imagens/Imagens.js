@@ -128,7 +128,7 @@ class Imagens extends React.Component {
                 const newJogo = { ...this.state.jogo, imagens: newImages };
                 this.setState({ [loadingState]: false, jogo: newJogo });
                 this.updateProps();
-                Toast.show('Imagem removida.', Toast.SHORT);
+                Toast.show('Imagem removida', Toast.SHORT);
             })
             .catch(() => { 
                 this.setState({ [loadingState]: false });

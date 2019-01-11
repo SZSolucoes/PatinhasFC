@@ -256,7 +256,7 @@ class JogoG extends React.Component {
                 });  
             })
             .catch(() => 
-                Toast.show('Falha ao iniciar a partida, verifique a conexão.', Toast.SHORT)
+                Toast.show('Falha ao iniciar a partida, verifique a conexão', Toast.SHORT)
             );
         } 
     }
@@ -275,7 +275,7 @@ class JogoG extends React.Component {
                 });
             })
             .catch(() => 
-                Toast.show('Falha ao pausar a partida, verifique a conexão.', Toast.SHORT)
+                Toast.show('Falha ao pausar a partida, verifique a conexão', Toast.SHORT)
             );
         }  
     }
@@ -306,7 +306,7 @@ class JogoG extends React.Component {
                             })
                             .catch(() => 
                                 Toast.show(
-                                    'Falha ao reiniciar a partida, verifique a conexão.', 
+                                    'Falha ao reiniciar a partida, verifique a conexão', 
                                     Toast.SHORT
                                 )
                             );
@@ -352,7 +352,7 @@ class JogoG extends React.Component {
                             ...payload
                         })
                         .then(() => {
-                            Toast.show('Gol marcado.', Toast.SHORT);
+                            Toast.show('Gol marcado', Toast.SHORT);
                             this.fbDatabaseRef
                             .child(`usuarios/${jogador.key}/gols`).once('value', (snapshot) => {
                                 const golsPlus = parseInt(snapshot.val(), 10) + 1;
@@ -365,7 +365,7 @@ class JogoG extends React.Component {
                             });
                         })
                         .catch(() => 
-                            Toast.show('Falha ao marcar o gol. Verifique a conexão.', Toast.SHORT)
+                            Toast.show('Falha ao marcar o gol. Verifique a conexão', Toast.SHORT)
                         );
                     })
                 }
@@ -415,7 +415,7 @@ class JogoG extends React.Component {
                             ...payload
                         })
                         .then(() => {
-                            Toast.show('Gol removido.', Toast.SHORT);
+                            Toast.show('Gol removido', Toast.SHORT);
                             this.fbDatabaseRef
                             .child(`usuarios/${jogador.key}/gols`).once('value', (snapshot) => {
                                 const golsLess = parseInt(snapshot.val(), 10) - 1;
@@ -428,7 +428,7 @@ class JogoG extends React.Component {
                             });
                         })
                         .catch(() => 
-                            Toast.show('Falha ao remover o gol. Verifique a conexão.', Toast.SHORT)
+                            Toast.show('Falha ao remover o gol. Verifique a conexão', Toast.SHORT)
                         );
                     })
                 }
@@ -466,7 +466,7 @@ class JogoG extends React.Component {
                         .then(() => {
                             const keyCard = color === 'amarelo' ? 
                             'cartoesAmarelos' : 'cartoesVermelhos';
-                            Toast.show(`Cartão ${color} aplicado.`, Toast.SHORT);
+                            Toast.show(`Cartão ${color} aplicado`, Toast.SHORT);
                             this.fbDatabaseRef
                             .child(`usuarios/${jogador.key}/${keyCard}`)
                             .once('value', (snapshot) => {
@@ -484,7 +484,7 @@ class JogoG extends React.Component {
                             });
                         })
                         .catch(() => 
-                            Toast.show('Falha ao aplicar cartão. Verifique a conexão.', Toast.SHORT)
+                            Toast.show('Falha ao aplicar cartão. Verifique a conexão', Toast.SHORT)
                         );
                     })
                 }
@@ -527,7 +527,7 @@ class JogoG extends React.Component {
                         .then(() => {
                             const keyCard = jogador.color === 'amarelo' ? 
                             'cartoesAmarelos' : 'cartoesVermelhos';
-                            Toast.show(`Cartão ${jogador.color} removido.`, Toast.SHORT);
+                            Toast.show(`Cartão ${jogador.color} removido`, Toast.SHORT);
                             this.fbDatabaseRef
                             .child(`usuarios/${jogador.key}/${keyCard}`)
                             .once('value', (snapshot) => {
@@ -545,7 +545,7 @@ class JogoG extends React.Component {
                             });
                         })
                         .catch(() => 
-                            Toast.show('Falha ao remover cartão. Verifique a conexão.', Toast.SHORT)
+                            Toast.show('Falha ao remover cartão. Verifique a conexão', Toast.SHORT)
                         );
                     })
                 }
@@ -590,7 +590,7 @@ class JogoG extends React.Component {
                         )
                         .catch(() => 
                             Toast.show(
-                                'Falha ao remover substituição. Verifique a conexão.', Toast.SHORT
+                                'Falha ao remover substituição. Verifique a conexão', Toast.SHORT
                             )
                         );
                     })
@@ -678,29 +678,29 @@ class JogoG extends React.Component {
                 })
                 .then(() => {
                     if (isRemove) {
-                        Toast.show('Substituição removida.', Toast.SHORT);
+                        Toast.show('Substituição removida', Toast.SHORT);
                         return true;
                     }
                     firebase.database().ref().child(`jogos/${jogo.key}`).update({
                         subs
                     })
                     .then(() =>
-                        Toast.show('Substituição efetuada.', Toast.SHORT)
+                        Toast.show('Substituição efetuada', Toast.SHORT)
                     )
                     .catch(() =>
                         Toast.show(
-                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
+                            'Falha ao substituir jogador. Verifique a conexão', Toast.SHORT
                         )
                     );
                 })
                 .catch(() => {
                     if (isRemove) {
                         Toast.show(
-                            'Falha ao remover substituição. Verifique a conexão.', Toast.SHORT
+                            'Falha ao remover substituição. Verifique a conexão', Toast.SHORT
                         );
                     } else {
                         Toast.show(
-                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
+                            'Falha ao substituir jogador. Verifique a conexão', Toast.SHORT
                         );
                     }
                 });
@@ -719,29 +719,29 @@ class JogoG extends React.Component {
                 })
                 .then(() => {
                     if (isRemove) {
-                        Toast.show('Substituição removida.', Toast.SHORT);
+                        Toast.show('Substituição removida', Toast.SHORT);
                         return true;
                     }
                     firebase.database().ref().child(`jogos/${jogo.key}`).update({
                         subs
                     })
                     .then(() =>
-                        Toast.show('Substituição efetuada.', Toast.SHORT)
+                        Toast.show('Substituição efetuada', Toast.SHORT)
                     )
                     .catch(() =>
                         Toast.show(
-                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
+                            'Falha ao substituir jogador. Verifique a conexão', Toast.SHORT
                         )
                     );
                 })
                 .catch(() => {
                     if (isRemove) {
                         Toast.show(
-                            'Falha ao remover substituição. Verifique a conexão.', Toast.SHORT
+                            'Falha ao remover substituição. Verifique a conexão', Toast.SHORT
                         );
                     } else {
                         Toast.show(
-                            'Falha ao substituir jogador. Verifique a conexão.', Toast.SHORT
+                            'Falha ao substituir jogador. Verifique a conexão', Toast.SHORT
                         );
                     }
                 });

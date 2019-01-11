@@ -40,11 +40,11 @@ class AlertScl extends React.Component {
             this.setState({ loading: false });
             if (userDisabled === 'true') {
                 setTimeout(
-                    () => Toast.show('Usuário desabilitado com sucesso.', Toast.LONG)
+                    () => Toast.show('Usuário desabilitado com sucesso', Toast.LONG)
                 , 1000);
             } else {
                 setTimeout(
-                    () => Toast.show('Usuário habilitado com sucesso.', Toast.LONG)
+                    () => Toast.show('Usuário habilitado com sucesso', Toast.LONG)
                 , 1000);
             }
         })
@@ -52,11 +52,11 @@ class AlertScl extends React.Component {
             this.setState({ loading: false });
             if (userDisabled === 'true') {
                 setTimeout(
-                    () => Toast.show('Falha ao desabilitar usuário.', Toast.LONG)
+                    () => Toast.show('Falha ao desabilitar usuário', Toast.LONG)
                 , 1000);
             } else {
                 setTimeout(
-                    () => Toast.show('Falha ao habilitar usuário.', Toast.LONG)
+                    () => Toast.show('Falha ao habilitar usuário', Toast.LONG)
                 , 1000);
             }
         });  
@@ -96,12 +96,12 @@ class AlertScl extends React.Component {
                 .catch(() => true);
             }
             setTimeout(
-                () => Toast.show('Jogo removido com sucesso.', Toast.LONG)
+                () => Toast.show('Jogo removido com sucesso', Toast.LONG)
             , 1000);
         })
         .catch(() => 
             setTimeout(
-                () => Toast.show('Falha ao remover jogo.', Toast.LONG)
+                () => Toast.show('Falha ao remover jogo', Toast.LONG)
             , 1000)
         );
         
@@ -142,12 +142,12 @@ class AlertScl extends React.Component {
                 }
             }
             setTimeout(
-                () => Toast.show('Informativo removido com sucesso.', Toast.LONG)
+                () => Toast.show('Informativo removido com sucesso', Toast.LONG)
             , 1000);
         })
         .catch(() => 
             setTimeout(
-                () => Toast.show('Falha ao remover informativo.', Toast.LONG)
+                () => Toast.show('Falha ao remover informativo', Toast.LONG)
             , 1000)
         );
         
@@ -182,12 +182,12 @@ class AlertScl extends React.Component {
         dbItemRef.remove()
         .then(() => {
             setTimeout(
-                () => Toast.show('Remoção efetuada com sucesso.', Toast.LONG)
+                () => Toast.show('Remoção efetuada com sucesso', Toast.LONG)
             , 1000);
         })
         .catch(() => 
             setTimeout(
-                () => Toast.show('Falha durante a remoção.', Toast.LONG)
+                () => Toast.show('Falha durante a remoção', Toast.LONG)
             , 1000)
         );
         
@@ -222,12 +222,12 @@ class AlertScl extends React.Component {
         dbItemRef.remove()
         .then(() => {
             setTimeout(
-                () => Toast.show('Remoção efetuada com sucesso.', Toast.LONG)
+                () => Toast.show('Remoção efetuada com sucesso', Toast.LONG)
             , 1000);
         })
         .catch(() => 
             setTimeout(
-                () => Toast.show('Falha durante a remoção.', Toast.LONG)
+                () => Toast.show('Falha durante a remoção', Toast.LONG)
             , 1000)
         );
         
@@ -264,12 +264,12 @@ class AlertScl extends React.Component {
         })
         .then(() => {
             setTimeout(
-                () => Toast.show('Enquete encerrada com sucesso.', Toast.LONG)
+                () => Toast.show('Enquete encerrada com sucesso', Toast.LONG)
             , 1000);
         })
         .catch(() => 
             setTimeout(
-                () => Toast.show('Falha durante o encerramento.', Toast.LONG)
+                () => Toast.show('Falha durante o encerramento', Toast.LONG)
             , 1000)
         );
         

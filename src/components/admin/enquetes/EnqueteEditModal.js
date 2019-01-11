@@ -120,7 +120,7 @@ class EnqueteEditModal extends React.Component {
                         <FormInput
                             selectTextOnFocus
                             autoCorrect={false}
-                            containerStyle={styles.inputContainer}
+                            containerStyle={styles.inputContainerWithBtn}
                             returnKeyType={'next'}
                             inputStyle={[styles.text, styles.input]}
                             value={opt}
@@ -231,7 +231,6 @@ class EnqueteEditModal extends React.Component {
                         />
                         <Button 
                             small
-                            loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                             title={'Restaurar'}
                             buttonStyle={{ width: '100%', marginVertical: 10 }}
                             onPress={() => {

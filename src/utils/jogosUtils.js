@@ -113,7 +113,7 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
                     })
                     .catch(() => {
                         Toast.show(
-                            'Falha ao contabilizar dados. Verifique a conexão.',
+                            'Falha ao contabilizar dados. Verifique a conexão',
                                 Toast.SHORT
                         );
                         closeEndGameModal();
@@ -146,7 +146,7 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
                     })
                     .catch(() => {
                         Toast.show(
-                            'Falha ao contabilizar dados. Verifique a conexão.',
+                            'Falha ao contabilizar dados. Verifique a conexão',
                                 Toast.SHORT
                         );
                         closeEndGameModal();
@@ -185,7 +185,7 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
                     })
                     .catch(() => {
                         Toast.show(
-                            'Falha ao contabilizar dados. Verifique a conexão.',
+                            'Falha ao contabilizar dados. Verifique a conexão',
                                 Toast.SHORT
                         );
                         closeEndGameModal();
@@ -218,7 +218,7 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
                     })
                     .catch(() => {
                         Toast.show(
-                            'Falha ao contabilizar dados. Verifique a conexão.',
+                            'Falha ao contabilizar dados. Verifique a conexão',
                                 Toast.SHORT
                         );
                         closeEndGameModal();
@@ -254,7 +254,7 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
                     })
                     .catch(() => {
                         Toast.show(
-                            'Falha ao contabilizar dados. Verifique a conexão.',
+                            'Falha ao contabilizar dados. Verifique a conexão',
                                 Toast.SHORT
                         );
                         closeEndGameModal();
@@ -287,14 +287,14 @@ const changeStsEndGame = (jogo, firebase, Actions, missedPlayers) => {
         updateMissedPlayers(firebase, missedPlayers);
         Actions.popTo('gerenciar');
         Toast.show(
-            'Jogo finalizado.',
+            'Jogo finalizado',
             Toast.SHORT
         );
     })
     .catch(() => {
         closeEndGameModal();
         Toast.show(
-            'Falha ao finalizar jogo. Verifique a conexão.',
+            'Falha ao finalizar jogo. Verifique a conexão',
                 Toast.SHORT
         );
     });
@@ -322,7 +322,7 @@ const updateMissedPlayers = (firebase, missedPlayers) => {
                 .then(() => true)
                 .catch(() => {
                     Toast.show(
-                        'Falha ao gravar falta de jogadores. Verifique a conexão.',
+                        'Falha ao gravar falta de jogadores. Verifique a conexão',
                             Toast.SHORT
                     );
                 });
@@ -338,13 +338,13 @@ export const checkConInfo = (funExec = () => true, params = [], delay = 0) => {
             .then((conInfo) => {
                 if (conInfo.type === 'none' || conInfo.type === 'unknown'
                 ) {
-                    Toast.show('Sem conexão.', Toast.SHORT);
+                    Toast.show('Sem conexão', Toast.SHORT);
                     return false;
                 }
                 return funExec(...params);
             })
             .catch(() => {
-                Toast.show('Sem conexão.', Toast.SHORT);
+                Toast.show('Sem conexão', Toast.SHORT);
                 return false;
             });
         }, delay); 
@@ -353,13 +353,13 @@ export const checkConInfo = (funExec = () => true, params = [], delay = 0) => {
         .then((conInfo) => {
             if (conInfo.type === 'none' || conInfo.type === 'unknown'
             ) {
-                Toast.show('Sem conexão.', Toast.SHORT);
+                Toast.show('Sem conexão', Toast.SHORT);
                 return false;
             }
             return funExec(...params);
         })
         .catch(() => {
-            Toast.show('Sem conexão.', Toast.SHORT);
+            Toast.show('Sem conexão', Toast.SHORT);
             return false;
         });
     }

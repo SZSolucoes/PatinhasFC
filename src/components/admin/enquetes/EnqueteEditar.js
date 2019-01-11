@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
         backgroundColor: colorAppF
     },
     card: {
-        paddingHorizontal: 10,
+        paddingHorizontal: 10
     }
 });
 

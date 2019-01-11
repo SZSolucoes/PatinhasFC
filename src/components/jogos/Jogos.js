@@ -343,7 +343,7 @@ class Jogos extends React.Component {
                                         if (this.props.conInfo.type === 'none' ||
                                             this.props.conInfo.type === 'unknown'
                                         ) {
-                                            Toast.show('Sem conexão.', Toast.SHORT);
+                                            Toast.show('Sem conexão', Toast.SHORT);
                                             return false;
                                         }
                                         
@@ -380,7 +380,7 @@ class Jogos extends React.Component {
                                         if (this.props.conInfo.type === 'none' ||
                                             this.props.conInfo.type === 'unknown'
                                         ) {
-                                            Toast.show('Sem conexão.', Toast.SHORT);
+                                            Toast.show('Sem conexão', Toast.SHORT);
                                             return false;
                                         }
                                         

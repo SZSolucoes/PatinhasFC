@@ -63,12 +63,12 @@ class PainelAdmin extends React.Component {
         if (lRet) {
             funCloseModal();
             Toast.show(
-                'Transferência realizada com sucesso.', 
+                'Transferência realizada com sucesso', 
                 Toast.SHORT
             );
         } else {
             Toast.show(
-                'Falha ao transferir administração, verifique a conexão.', 
+                'Falha ao transferir administração, verifique a conexão', 
                 Toast.SHORT
             );
 

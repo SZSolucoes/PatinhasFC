@@ -238,12 +238,12 @@ class EscalacaoG extends React.Component {
                 .then(() =>
                     showToast &&
                     showToast === 'true' &&
-                    Toast.show('Jogador escalado com sucesso.', Toast.SHORT)
+                    Toast.show('Jogador escalado com sucesso', Toast.SHORT)
                 )
                 .catch(() => 
                     showToast &&
                     showToast === 'true' &&
-                    Toast.show('Falha ao escalar jogador. Verifique a conexão.', Toast.SHORT)
+                    Toast.show('Falha ao escalar jogador. Verifique a conexão', Toast.SHORT)
                 );
             } else if (side === 'visit') {
                 const newVisitList = [...jogo.escalacao.visit, jogador];
@@ -253,12 +253,12 @@ class EscalacaoG extends React.Component {
                 .then(() =>
                     showToast &&
                     showToast === 'true' &&
-                    Toast.show('Jogador escalado com sucesso.', Toast.SHORT)
+                    Toast.show('Jogador escalado com sucesso', Toast.SHORT)
                 )
                 .catch(() => 
                     showToast &&
                     showToast === 'true' &&
-                    Toast.show('Falha ao escalar jogador. Verifique a conexão.', Toast.SHORT)
+                    Toast.show('Falha ao escalar jogador. Verifique a conexão', Toast.SHORT)
                 );
             }
         } else {
@@ -273,12 +273,12 @@ class EscalacaoG extends React.Component {
                 .then(() =>
                     showToast &&
                     showToast === 'true' &&
-                    Toast.show('Jogador escalado com sucesso.', Toast.SHORT)
+                    Toast.show('Jogador escalado com sucesso', Toast.SHORT)
                 )
                 .catch(() => 
                     showToast &&
                     showToast === 'true' &&
-                    Toast.show('Falha ao escalar jogador. Verifique a conexão.', Toast.SHORT)
+                    Toast.show('Falha ao escalar jogador. Verifique a conexão', Toast.SHORT)
                 );
             } else if (side === 'visit') {
                 const newVisitList = _.filter(
@@ -290,12 +290,12 @@ class EscalacaoG extends React.Component {
                 .then(() =>
                     showToast &&
                     showToast === 'true' &&
-                    Toast.show('Jogador escalado com sucesso.', Toast.SHORT)
+                    Toast.show('Jogador escalado com sucesso', Toast.SHORT)
                 )
                 .catch(() => 
                     showToast &&
                     showToast === 'true' &&
-                    Toast.show('Falha ao escalar jogador. Verifique a conexão.', Toast.SHORT)
+                    Toast.show('Falha ao escalar jogador. Verifique a conexão', Toast.SHORT)
                 );
             }
         }

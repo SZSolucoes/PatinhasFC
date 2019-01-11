@@ -109,7 +109,7 @@ class EnqueteCadastrar extends React.Component {
                         <FormInput
                             selectTextOnFocus
                             autoCorrect={false}
-                            containerStyle={styles.inputContainer}
+                            containerStyle={styles.inputContainerWithBtn}
                             returnKeyType={'next'}
                             inputStyle={[styles.text, styles.input]}
                             value={opt}
@@ -220,7 +220,6 @@ class EnqueteCadastrar extends React.Component {
                         />
                         <Button 
                             small
-                            loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                             title={this.props.keyItem ? 'Restaurar' : 'Limpar'}
                             buttonStyle={{ width: '100%', marginVertical: 10 }}
                             onPress={() => {
@@ -279,7 +278,7 @@ const styles = StyleSheet.create({
         height: 35
     },
     card: {
-        paddingHorizontal: 10,
+        paddingHorizontal: 10
     },
     viewImageSelect: {
         flexDirection: 'row', 

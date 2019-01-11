@@ -551,7 +551,6 @@ class UsuarioEdit extends React.Component {
                     />
                     <Button 
                         small
-                        loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                         title={this.props.keyItem ? 'Restaurar' : 'Limpar'} 
                         buttonStyle={{ width: '100%', marginVertical: 10 }}
                         onPress={() => {

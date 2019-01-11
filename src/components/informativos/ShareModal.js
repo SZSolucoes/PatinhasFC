@@ -124,7 +124,7 @@ class ShareModal extends React.Component {
                     } else {
                         this.setState({ enablePress: true });
                         setTimeout(() => Toast.show(
-                            'Falha ao carregar imagem. Verifique a conexão.', Toast.SHORT
+                            'Falha ao carregar imagem. Verifique a conexão', Toast.SHORT
                         ), 500);
                         return;
                     }
@@ -147,7 +147,7 @@ class ShareModal extends React.Component {
             console.log(e);
             this.setState({ enablePress: true });
             setTimeout(() => Toast.show(
-                'Falha ao carregar imagem. Verifique a conexão.', Toast.SHORT
+                'Falha ao carregar imagem. Verifique a conexão', Toast.SHORT
             ), 500);
         }
     }
@@ -326,7 +326,7 @@ class ShareModal extends React.Component {
                                                     this.closeModal();
                                                     setTimeout(
                                                         () => Toast.show(
-                                                            'Link copiado.', Toast.SHORT
+                                                            'Link copiado', Toast.SHORT
                                                             )
                                                     , 500);
                                                 }
