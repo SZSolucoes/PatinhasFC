@@ -70,7 +70,7 @@ class Notifications extends React.Component {
             <View style={styles.viewPrinc}>
                 <List>
                     <ListItem
-                        title='Criação de jogos'
+                        title='Jogos'
                         subtitle={'Receber notificações quando um jogo for criado.'}
                         subtitleNumberOfLines={5}
                         rightIcon={(
@@ -86,7 +86,7 @@ class Notifications extends React.Component {
                 </List>
                 <List>
                     <ListItem
-                        title='Criação de enquetes'
+                        title='Enquetes'
                         subtitle={'Receber notificações quando uma enquete for criada.'}
                         subtitleNumberOfLines={5}
                         rightIcon={(

@@ -124,7 +124,9 @@ class MonthPicker extends React.Component {
                     onLayout={
                         (event) =>
                             this.setState({
-                                dropWidth: event.nativeEvent.layout.width
+                                dropWidth: orientHV ? 
+                                event.nativeEvent.layout.width : 
+                                event.nativeEvent.layout.height
                     })}
                 >
                     <ModalDropdown

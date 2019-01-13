@@ -50,7 +50,7 @@ class EnqueteEditar extends React.Component {
         this.onPressRemove = this.onPressRemove.bind(this);
         this.onPressEnd = this.onPressEnd.bind(this);
         this.renderEnquetes = this.renderEnquetes.bind(this);
-        this.onFilterFinaEdit = this.onFilterFinaEdit.bind(this);
+        this.onFilterEnqueteEdit = this.onFilterEnqueteEdit.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
     }
 
@@ -72,7 +72,7 @@ class EnqueteEditar extends React.Component {
         showAlert('danger', 'Encerrar!', 'Confirma o encerramento da enquete ?');
     }
 
-    onFilterFinaEdit(enquetes, filterStr) {
+    onFilterEnqueteEdit(enquetes, filterStr) {
         const lowerFilter = filterStr.toLowerCase();
         return _.filter(enquetes, (item) => (
                 (item.titulo && item.titulo.toLowerCase().includes(lowerFilter))
@@ -81,10 +81,10 @@ class EnqueteEditar extends React.Component {
 
     renderEnquetes(enquetes) {
         const reverseEnquetes = _.reverse([...enquetes]);
-        let finasView = null;
+        let enquetesView = null;
 
         if (enquetes.length) {
-            finasView = (
+            enquetesView = (
                 reverseEnquetes.map((item, index) => {
                     if ((index + 1) > 30) {
                         return false;
@@ -179,24 +179,24 @@ class EnqueteEditar extends React.Component {
         }
 
         setTimeout(() => this.props.modificaFilterLoad(false), 1000);
-        return finasView;
+        return enquetesView;
     }
 
     renderBasedFilterOrNot() {
         const { enquetes, filterStr } = this.props;
         const opEnq = _.filter(enquetes, enqt => enqt.status === '1');
 
-        let finasView = null;
+        let enquetesView = null;
         if (opEnq) {
             if (filterStr) {
-                finasView = this.renderEnquetes(
-                    this.onFilterFinaEdit(opEnq, filterStr)
+                enquetesView = this.renderEnquetes(
+                    this.onFilterEnqueteEdit(opEnq, filterStr)
                 );
             } else {
-                finasView = this.renderEnquetes(opEnq);
+                enquetesView = this.renderEnquetes(opEnq);
             }
         }
-        return finasView;
+        return enquetesView;
     }
 
     render() {

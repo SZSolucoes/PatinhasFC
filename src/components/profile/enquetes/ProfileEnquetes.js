@@ -8,7 +8,7 @@ import {
 import { connect } from 'react-redux';
 import _ from 'lodash';
 
-import ProfileEnqueteCard from './ProfileEnquetesCard';
+import ProfileEnquetesCard from './ProfileEnquetesCard';
 
 class ProfileEnquetes extends React.Component {
 
@@ -22,7 +22,7 @@ class ProfileEnquetes extends React.Component {
             ) !== -1;
 
             return (
-                <ProfileEnqueteCard
+                <ProfileEnquetesCard
                     key={index}
                     enquete={enqt}
                     isResult={isResult}

@@ -57,7 +57,7 @@ class ProfileEnquetesCard extends React.Component {
                     easing: Easing.linear
                 }
             ).start();
-        }, 1000);
+        }, 500);
     }
 
     onPressVotar(enquete, userKey) {
@@ -113,7 +113,7 @@ class ProfileEnquetesCard extends React.Component {
             <Card 
                 containerStyle={styles.card}
                 title={titulo}
-                titleStyle={{ color: 'black', fontSize: 14 }}
+                titleStyle={{ color: 'black', fontSize: 15 }}
             >
                 <View style={{ padding: 5 }}>
                     { viewOpts }
@@ -153,6 +153,18 @@ class ProfileEnquetesCard extends React.Component {
         const newOpcs = [];
         const numTotalVts = _.reduce(votos, (sum, item) => sum + item.length, 0);
         const userVote = _.find(enquete.votos, vtU => vtU.key && vtU.key === userKey);
+        const innerRadius = this.props.isHistory ? 10 : 20;
+        const outerRadius = this.props.isHistory ? 25 : 55;
+        const labelRadius = this.props.isHistory ? 40 : 80;
+        const startAngle = this.props.isHistory ? 40 : 80;
+        const vHeight = this.props.isHistory ? 110 : 220;
+        const rCircles = this.props.isHistory ? 9 : 19;
+        const rCirclesFontText = this.props.isHistory ? 9 : 18;
+        const rOptsCircles = this.props.isHistory ? 5 : 10;
+        const rOptsText = this.props.isHistory ? 10 : 14;
+        const rOptsTextVt = this.props.isHistory ? 10 : 14;
+
+        const multiplier = this.props.isHistory ? 1.3 : 1;
 
         let newViewOpcs = null;
 
@@ -214,7 +226,7 @@ class ProfileEnquetesCard extends React.Component {
                     <Circle
                         cx={labelCentroid[0]}
                         cy={labelCentroid[1]}
-                        r={19}
+                        r={rCircles * multiplier}
                         fill={data.svg.fill}
                     />
                     <Text
@@ -224,7 +236,7 @@ class ProfileEnquetesCard extends React.Component {
                         fill={'white'}
                         textAnchor={'middle'}
                         alignmentBaseline={'middle'}
-                        fontSize={18}
+                        fontSize={rCirclesFontText * multiplier}
                         fontWeight={'bold'}
                         stroke={'black'}
                         strokeWidth={0.2}
@@ -235,126 +247,141 @@ class ProfileEnquetesCard extends React.Component {
             );
         });
 
-        newViewOpcs = _.map(newOpcs, (opcItem, index) => (
-            <View
-                style={{
-                    marginBottom: 10 
-                }}
-                key={index}
-            >
-                <View 
-                    style={{ 
-                        flexDirection: 'row', 
-                        alignItems: 'center',
-                        marginBottom: 5 
+        newViewOpcs = _.map(newOpcs, (opcItem, index) => {
+            const vtText = `${opcItem.vtCount} ${opcItem.vtCount === 1 ? 'Voto' : 'Votos'}`;
+            const vtTextPerc = opcItem.vtCount ?
+                ` ( ${Math.floor((opcItem.vtCount / numTotalVts) * 100)} % )`
+                :
+                '';
+
+            return (
+                <View
+                    style={{
+                        marginBottom: 10 
                     }}
+                    key={index}
                 >
-                    <Svg
-                        height="20"
-                        width="20"
-                    >
-                        <G>
-                            <Circle
-                                cx={10}
-                                cy={10}
-                                r={10}
-                                fill={opcItem.color}
-                            />
-                        </G>
-                    </Svg>
                     <View 
                         style={{ 
                             flexDirection: 'row', 
                             alignItems: 'center',
-                            paddingHorizontal: 10 
+                            marginBottom: 5,
+                            flex: 1 
                         }}
+                    >
+                        <Svg
+                            height={`${(rOptsCircles * 2) * multiplier}`}
+                            width={`${(rOptsCircles * 2) * multiplier}`}
+                        >
+                            <G>
+                                <Circle
+                                    cx={rOptsCircles * multiplier}
+                                    cy={rOptsCircles * multiplier}
+                                    r={rOptsCircles * multiplier}
+                                    fill={opcItem.color}
+                                />
+                            </G>
+                        </Svg>
+                        <View 
+                            style={{ 
+                                flexDirection: 'row', 
+                                alignItems: 'center',
+                                paddingHorizontal: 10 
+                            }}
+                        >
+                            <RNEText
+                                style={{
+                                    textAlign: 'left',
+                                    fontWeight: '400',
+                                    fontSize: rOptsText * multiplier
+                                }}
+                            >
+                                {
+                                    vtText + vtTextPerc
+                                }
+                            </RNEText>
+                            {
+                                userVote && userVote.optVal === `${index}` &&
+                                (   
+                                    <View
+                                        style={{
+                                            padding: 5
+                                        }}
+                                    >
+                                        <View
+                                            style={{
+                                                backgroundColor: colorAppP,
+                                                borderRadius: 10,
+                                                paddingHorizontal: 9,
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <RNEText
+                                                style={{ 
+                                                    color: 'white', 
+                                                    fontWeight: '500',
+                                                    fontSize: rOptsTextVt * multiplier
+                                                }}
+                                            >
+                                                Seu voto
+                                            </RNEText>
+                                        </View>
+                                    </View>
+                                )
+                            }
+                        </View>
+                    </View>
+                    <View
+                        style={{ paddingHorizontal: 9 }}
                     >
                         <RNEText
                             style={{
                                 textAlign: 'left',
+                                fontWeight: '600',
                                 color: 'black',
-                                fontWeight: 'bold'
+                                fontSize: rOptsText * multiplier
                             }}
                         >
-                            {
-                                `${opcItem.vtCount} ${opcItem.vtCount === 1 ? 'Voto' : 'Votos'}` +
-                                ` ( ${(opcItem.vtCount / numTotalVts) * 100} % )`
-                            }
+                            {opcItem.text}
                         </RNEText>
-                        {
-                            userVote && userVote.optVal === `${index}` &&
-                            (   
-                                <View
-                                    style={{
-                                        padding: 5
-                                    }}
-                                >
-                                    <View
-                                        style={{
-                                            backgroundColor: colorAppP,
-                                            borderRadius: 10,
-                                            paddingHorizontal: 9,
-                                            alignItems: 'center'
-                                        }}
-                                    >
-                                        <RNEText
-                                            style={{ 
-                                                color: 'white', 
-                                                fontWeight: '500' 
-                                            }}
-                                        >
-                                            Seu voto
-                                        </RNEText>
-                                    </View>
-                                </View>
-                            )
-                        }
                     </View>
                 </View>
-                <View
-                    style={{ paddingHorizontal: 9 }}
-                >
-                    <RNEText
-                        style={{
-                            textAlign: 'left',
-                            fontWeight: '600'
-                        }}
-                    >
-                        {opcItem.text}
-                    </RNEText>
-                </View>
-            </View>
-        ));
-
+            );
+        });
+                        
         return (
             <Card 
                 containerStyle={styles.card}
                 title={titulo}
-                titleStyle={{ color: 'black', fontSize: 14 }}
+                titleStyle={{ color: 'black', fontSize: 15 }}
             >
-                <Animated.View
-                    style={{
-                        opacity: this.opacityValue
-                    }}
-                >
-                    <View 
-                        style={{ 
-                            padding: 5,
-                            height: 200,
-                        }}
-                    >
-                        <PieChart
-                            style={{ height: 200, flex: 1 }}
-                            data={pieData}
-                            innerRadius={20}
-                            outerRadius={50}
-                            labelRadius={80}
-                            startAngle={90}
+                { 
+                    !!numTotalVts &&
+                    (
+                        <Animated.View
+                            style={{
+                                opacity: this.opacityValue
+                            }}
                         >
-                            <Labels />
-                        </PieChart>
-                    </View>
-                </Animated.View>
+                            <View 
+                                style={{
+                                    height: vHeight * multiplier
+                                }}
+                            >
+                                <PieChart
+                                    style={{ height: vHeight * multiplier, flex: 1 }}
+                                    data={pieData}
+                                    innerRadius={innerRadius * multiplier}
+                                    outerRadius={outerRadius * multiplier}
+                                    labelRadius={labelRadius * multiplier}
+                                    startAngle={startAngle * multiplier}
+                                >
+                                    <Labels />
+                                </PieChart>
+                            </View>
+                        </Animated.View>
+                    )
+                }
                 {newViewOpcs}
             </Card>
         );
@@ -363,7 +390,11 @@ class ProfileEnquetesCard extends React.Component {
     render() {
         return (
             this.props.isResult ? 
-            this.renderEnqueteWithResult(this.props.enquete, this.props.userKey) 
+            this.renderEnqueteWithResult(
+                this.props.enquete, 
+                this.props.userKey, 
+                this.props.isHistory
+            ) 
             : 
             this.renderEnqueteWithOpts(this.props.enquete, this.props.userKey)
         );

@@ -216,22 +216,16 @@ class Profile extends React.Component {
                             {...enqueteProps}
                         />
                         <ListItem
-                            key={'Notificações'}
-                            title={'Notificações'}
-                            leftIcon={{ name: 'bell', type: 'material-community' }}
-                            onPress={() => Actions.profileNotifiations()}
-                        />
-                        <ListItem
                             key={'Editar Perfil'}
                             title={'Editar Perfil'}
                             leftIcon={{ name: 'account', type: 'material-community' }}
                             onPress={() => Actions.profileEditPerfil()}
                         />
                         <ListItem
-                            key={'Histórico de Jogos'}
-                            title={'Histórico de Jogos'}
-                            leftIcon={{ name: 'history', type: 'material-community' }}
-                            onPress={() => Actions.historico()}
+                            key={'Histórico de Enquetes'}
+                            title={'Histórico de Enquetes'}
+                            leftIcon={{ name: 'chart-pie', type: 'material-community' }}
+                            onPress={() => Actions.profileEnquetesHistorico()}
                         />
                         <ListItem
                             key={'Histórico de Faltas'}
@@ -242,10 +236,16 @@ class Profile extends React.Component {
                             }
                         />
                         <ListItem
-                            key={'Preferências'}
-                            title={'Preferências'}
-                            leftIcon={{ name: 'settings', type: 'material-community' }}
-                            onPress={() => Actions.profilePreferencias()}
+                            key={'Histórico de Jogos'}
+                            title={'Histórico de Jogos'}
+                            leftIcon={{ name: 'history', type: 'material-community' }}
+                            onPress={() => Actions.historico()}
+                        />
+                        <ListItem
+                            key={'Notificações'}
+                            title={'Notificações'}
+                            leftIcon={{ name: 'bell', type: 'material-community' }}
+                            onPress={() => Actions.profileNotifiations()}
                         />
                         {
                             this.props.userLevel && this.props.userLevel === '255' &&
@@ -258,7 +258,12 @@ class Profile extends React.Component {
                                 />
                             )
                         }
-                        
+                        <ListItem
+                            key={'Preferências'}
+                            title={'Preferências'}
+                            leftIcon={{ name: 'settings', type: 'material-community' }}
+                            onPress={() => Actions.profilePreferencias()}
+                        />
                         <ListItem
                             key={'Sobre'}
                             title={'Sobre'}
