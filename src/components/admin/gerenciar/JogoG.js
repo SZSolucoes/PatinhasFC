@@ -119,6 +119,7 @@ class JogoG extends React.Component {
         }
 
         this.props.modificaMissedPlayers([]);
+        this.props.onItemRender();
     }
 
     shouldComponentUpdate(nextProps, nextStates) {
@@ -2832,6 +2833,7 @@ const mapStateToProps = (state) => ({
     endGameModal: state.GerenciarReducer.endGameModal,
     endGameModalPerc: state.GerenciarReducer.endGameModalPerc,
     itemSelected: state.GerenciarReducer.itemSelected,
+    onItemRender: state.GerenciarReducer.onItemRender,
     listJogos: state.JogosReducer.listJogos,
     showTimerModal: state.JogoReducer.showTimerModal
 });

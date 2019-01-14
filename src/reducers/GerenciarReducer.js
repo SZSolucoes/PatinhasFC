@@ -10,7 +10,8 @@ const INITIAL_STATE = {
     filterModalLoad: false,
     jogador: {},
     endGameModal: false,
-    endGameModalPerc: 0
+    endGameModalPerc: 0,
+    onItemRender: () => false
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -70,6 +71,11 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 endGameModalPerc: action.payload
             };
+        case 'modifica_onitemrender_gerenciar':
+            return { 
+                ...state, 
+                onItemRender: action.payload
+            };
         case 'modifica_jogador_gerenciar':
             return { 
                 ...state, 
@@ -89,7 +95,8 @@ export default (state = INITIAL_STATE, action) => {
                 filterModalLoad: false,
                 jogador: {},
                 endGameModal: false,
-                endGameModalPerc: 0
+                endGameModalPerc: 0,
+                onItemRender: () => false
             };
         default:
             return state;

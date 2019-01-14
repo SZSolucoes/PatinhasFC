@@ -372,33 +372,46 @@ class EscalacaoP extends React.Component {
                             style={{ height: this.state.animCasaValue }}
                         >
                             <View 
-                                style={styles.titleContainer} 
                                 onLayout={this.onLayoutTitleCasa}
                             >
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Image 
-                                        style={{ height: 40, width: 35, marginRight: 5 }}
-                                        resizeMode={'stretch'}
-                                        source={imgHomeShirt} 
-                                    /> 
-                                    <Text 
-                                        onPress={() => this.onToggleCasa()}
-                                        style={{ fontSize: 16, color: 'black' }}
-                                    >
-                                        { jogo.timeCasa ? jogo.timeCasa.trim() : 'Casa' }
-                                    </Text>
-                                </View>
                                 <TouchableWithoutFeedback
                                     onPress={() => this.onToggleCasa()}
                                 >
-                                    <Icon
-                                        color={'black'}
-                                        name={
-                                            this.state.isCasaExpanded ? 'menu-up' : 'menu-down'
-                                        }
-                                        type='material-community'
-                                        size={30}
-                                    />
+                                    <View
+                                        style={styles.titleContainer}
+                                    >
+                                        <View 
+                                            style={{ 
+                                                flexDirection: 'row', 
+                                                alignItems: 'center' 
+                                            }}
+                                        >
+                                            <Image 
+                                                style={{ height: 40, width: 35, marginRight: 5 }}
+                                                resizeMode={'stretch'}
+                                                source={imgHomeShirt} 
+                                            /> 
+                                            <Text 
+                                                onPress={() => this.onToggleCasa()}
+                                                style={{ fontSize: 16, color: 'black' }}
+                                            >
+                                                { jogo.timeCasa ? jogo.timeCasa.trim() : 'Casa' }
+                                            </Text>
+                                        </View>
+                                        <TouchableWithoutFeedback
+                                            onPress={() => this.onToggleCasa()}
+                                        >
+                                            <Icon
+                                                color={'black'}
+                                                name={
+                                                    this.state.isCasaExpanded ? 
+                                                    'menu-up' : 'menu-down'
+                                                }
+                                                type='material-community'
+                                                size={30}
+                                            />
+                                        </TouchableWithoutFeedback>
+                                    </View>
                                 </TouchableWithoutFeedback>
                             </View>
                             <View 
@@ -424,29 +437,50 @@ class EscalacaoP extends React.Component {
                         <Animated.View
                             style={{ height: this.state.animVisitValue }}
                         >
-                            <View style={styles.titleContainer} onLayout={this.onLayoutTitleVisit}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Image 
-                                        style={{ height: 40, width: 35, marginRight: 5 }}
-                                        resizeMode={'stretch'}
-                                        source={imgVisitShirt} 
-                                    />
-                                    <Text 
-                                        onPress={() => this.onToggleVisit()}
-                                        style={{ fontSize: 16, color: 'black' }}
-                                    >
-                                        { jogo.timeVisit ? jogo.timeVisit.trim() : 'Visitantes' }
-                                    </Text>
-                                </View>
+                            <View onLayout={this.onLayoutTitleVisit}>
                                 <TouchableWithoutFeedback
                                     onPress={() => this.onToggleVisit()}
                                 >
-                                    <Icon
-                                        color={'black'}
-                                        name={this.state.isVisitExpanded ? 'menu-up' : 'menu-down'}
-                                        type='material-community'
-                                        size={30}
-                                    />
+                                    <View
+                                        style={styles.titleContainer}
+                                    >
+                                        <View 
+                                            style={{ 
+                                                flexDirection: 'row', 
+                                                alignItems: 'center' 
+                                            }}
+                                        >
+                                            <Image 
+                                                style={{ height: 40, width: 35, marginRight: 5 }}
+                                                resizeMode={'stretch'}
+                                                source={imgVisitShirt} 
+                                            />
+                                            <Text 
+                                                onPress={() => this.onToggleVisit()}
+                                                style={{ fontSize: 16, color: 'black' }}
+                                            >
+                                                { 
+                                                    jogo.timeVisit ? 
+                                                    jogo.timeVisit.trim() 
+                                                    : 
+                                                    'Visitantes'
+                                                 }
+                                            </Text>
+                                        </View>
+                                        <TouchableWithoutFeedback
+                                            onPress={() => this.onToggleVisit()}
+                                        >
+                                            <Icon
+                                                color={'black'}
+                                                name={
+                                                    this.state.isVisitExpanded ? 
+                                                    'menu-up' : 'menu-down'
+                                                }
+                                                type='material-community'
+                                                size={30}
+                                            />
+                                        </TouchableWithoutFeedback>
+                                    </View>
                                 </TouchableWithoutFeedback>
                             </View>
                             <View onLayout={this.onLayoutVisit}>

@@ -7,9 +7,12 @@ import {
     Animated,
     ScrollView,
     TouchableOpacity,
-    Keyboard
+    Keyboard,
+    Text,
+    ActivityIndicator,
+    Alert
 } from 'react-native';
-import { SearchBar, Card, List, ListItem, Icon } from 'react-native-elements';
+import { SearchBar, Card, List, ListItem, Icon, CheckBox } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import {
@@ -23,6 +26,7 @@ import { retrieveImgSource } from '../../../utils/imageStorage';
 import { checkConInfo } from '../../../utils/jogosUtils';
 
 import perfilUserImg from '../../../imgs/perfiluserimg.png';
+import { colorAppS } from '../../../utils/constantes';
 
 class PlayersModal extends React.Component {
 
@@ -35,9 +39,12 @@ class PlayersModal extends React.Component {
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.onChoosePlayer = this.onChoosePlayer.bind(this);
+        this.onChoosePlayersLote = this.onChoosePlayersLote.bind(this);
 
         this.state = {
-            fadeAnimValue: new Animated.Value(0)
+            fadeAnimValue: new Animated.Value(0),
+            checkeds: [],
+            loading: false
         };
     }
 
@@ -58,6 +65,40 @@ class PlayersModal extends React.Component {
             this.props.doInOrOut(newJogador, true);
         }
 
+        this.closeModal();
+    }
+
+    async onChoosePlayersLote() {
+        const { jogador } = this.props;
+        const { checkeds } = this.state;
+        const newJogadores = [];
+
+        if (!checkeds.length) {
+            Alert.alert(
+                'Aviso', 
+                'Para confirmar a escalação é necessário selecionar ao menos um usuário.'
+            );
+            return;
+        }
+
+        this.setState({ loading: true });
+
+        for (let index = 0; index < checkeds.length; index++) {
+            const element = checkeds[index].item;
+            const newJogador = { ...jogador };
+
+            newJogador.key = element.key;
+            newJogador.nome = element.nome;
+            newJogador.imgAvatar = element.imgAvatar;
+            newJogador.vitorias = element.vitorias;
+            newJogador.derrotas = element.derrotas;
+            newJogador.empates = element.empates;
+            newJogador.jogosEscalados = element.jogosEscalados;
+                
+            newJogadores.push(newJogador);
+        }
+        
+        await this.props.doInOrOut(newJogadores, true, true);
         this.closeModal();
     }
 
@@ -82,10 +123,12 @@ class PlayersModal extends React.Component {
             setTimeout(() => this.props.modificaShowPlayersModal(false), 100);
             setTimeout(() => this.props.modificaShowPlayersModalJ(false), 100);
             setTimeout(() => this.props.modificaIsSubstitute(false), 100);
+            setTimeout(() => this.setState({ checkeds: [], loading: false }), 100);
         });
     }
 
     renderListUsuarios(usuarios, jogadoresCasaFt, jogadoresVisitFt) {
+        const { isSubstitute } = this.props;
         let usuariosView = null;
 
         if (usuarios.length) {
@@ -108,17 +151,82 @@ class PlayersModal extends React.Component {
                             return false;
                         }
                         const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : perfilUserImg;
+                        const checkedIdx = _.findIndex(
+                            this.state.checkeds, itc => itc.key === item.key
+                        );
+
+                        let leftIcon = (<View />);
+
+                        if (!isSubstitute) {
+                            leftIcon = (
+                                <View
+                                    style={{
+                                        width: 50,
+                                        height: 50
+                                    }}
+                                >
+                                    <CheckBox
+                                        center
+                                        containerStyle={{
+                                            marginLeft: 0,
+                                            marginRight: 0,
+                                            position: 'absolute'
+                                        }}
+                                        title={(<View />)}
+                                        checked={checkedIdx !== -1}
+                                        onPress={() => {
+                                            Keyboard.dismiss();
+                                            if (checkedIdx !== -1) {
+                                                const newCheckeds = [...this.state.checkeds];
+                                                newCheckeds.splice(checkedIdx, 1);
+                                                this.setState({ 
+                                                    checkeds: newCheckeds
+                                                });
+                                            } else {
+                                                this.setState({ 
+                                                    checkeds: [
+                                                        ...this.state.checkeds, 
+                                                        { key: item.key, item }
+                                                    ]
+                                                });
+                                            }
+                                        }}
+                                    />
+                                </View>
+                            );
+                        }
+                        
                         return (
                             <ListItem
                                 roundAvatar
                                 avatar={retrieveImgSource(imgAvt)}
+                                avatarContainerStyle={{ marginRight: 5 }}
                                 key={index}
                                 title={item.nome}
                                 subtitle={item.email}
+                                leftIcon={leftIcon}
                                 rightIcon={(<View />)}
                                 onPress={() => {
                                     Keyboard.dismiss();
-                                    checkConInfo(() => this.onChoosePlayer(item));
+                                    if (isSubstitute) {
+                                        checkConInfo(() => this.onChoosePlayer(item));
+                                        return;
+                                    }
+
+                                    if (checkedIdx !== -1) {
+                                        const newCheckeds = [...this.state.checkeds];
+                                        newCheckeds.splice(checkedIdx, 1);
+                                        this.setState({ 
+                                            checkeds: newCheckeds
+                                        });
+                                    } else {
+                                        this.setState({ 
+                                            checkeds: [
+                                                ...this.state.checkeds, 
+                                                { key: item.key, item }
+                                            ]
+                                        });
+                                    }
                                 }}
                             />
                         );
@@ -152,6 +260,52 @@ class PlayersModal extends React.Component {
     }
 
     render() {
+        let confirmBtn = null;
+
+        if (!this.props.isSubstitute) {
+            if (this.state.loading) {
+                confirmBtn = (
+                    <View
+                        style={{ 
+                            justifyContent: 'center', 
+                            paddingLeft: 15,
+                            paddingVertical: 5
+                        }}
+                    >
+                        <ActivityIndicator size={'large'} color={colorAppS} />
+                    </View>
+                );
+            } else {
+                confirmBtn = (
+                    <View
+                        style={{ 
+                            justifyContent: 'center', 
+                            paddingLeft: 15,
+                            paddingVertical: 5
+                        }}
+                    >
+                        <TouchableOpacity
+                            onPress={() => {
+                                Keyboard.dismiss();
+                                checkConInfo(
+                                    () => this.onChoosePlayersLote()
+                                );
+                            }}
+                        >
+                            <Text 
+                                style={{ 
+                                    color: colorAppS,
+                                    fontWeight: '500',
+                                    fontSize: 18 
+                                }}
+                            >
+                                Confirmar
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                );
+            }
+        }
         return (
             <Modal
                 animationType="slide"
@@ -195,9 +349,10 @@ class PlayersModal extends React.Component {
                                         <View 
                                             style={{ 
                                                 flexDirection: 'row', 
-                                                justifyContent: 'flex-end' 
+                                                justifyContent: 'space-between' 
                                             }}
                                         >
+                                            {confirmBtn}
                                             <TouchableOpacity
                                                 onPress={() => {
                                                     Keyboard.dismiss();
@@ -267,7 +422,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     card: {
-        width: '80%',
+        width: '90%',
         height: '70%',
         borderRadius: 5,
         overflow: 'hidden',

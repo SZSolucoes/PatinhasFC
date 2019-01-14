@@ -12,7 +12,7 @@ import { Actions } from 'react-native-router-flux';
 import * as Progress from 'react-native-progress';
 import RNFetchBlob from 'rn-fetch-blob';
 import b64 from 'base-64';
-import { Button, List, ListItem, Icon } from 'react-native-elements';
+import { Button, List, ListItem } from 'react-native-elements';
 import ParallaxScrollView from 'react-native-parallax-scrollview';
 import ImagePicker from 'react-native-image-crop-picker';
 import { Dialog } from 'react-native-simple-dialogs';
@@ -174,7 +174,7 @@ class Profile extends React.Component {
         if (this.props.enqueteProps && 
             this.props.enqueteProps.badge &&
             this.props.enqueteProps.badge.value) {
-            enqueteProps = this.props.enqueteProps;
+            enqueteProps = { ...this.props.enqueteProps };
         }
 
         return (
@@ -220,6 +220,12 @@ class Profile extends React.Component {
                             title={'Editar Perfil'}
                             leftIcon={{ name: 'account', type: 'material-community' }}
                             onPress={() => Actions.profileEditPerfil()}
+                        />
+                        <ListItem
+                            key={'Financeiro'}
+                            title={'Financeiro'}
+                            leftIcon={{ name: 'cash-multiple', type: 'material-community' }}
+                            onPress={() => Actions.profileFinanceiro()}
                         />
                         <ListItem
                             key={'Histórico de Enquetes'}

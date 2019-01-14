@@ -47,6 +47,7 @@ import Historico from './components/admin/historico/Historico';
 import HistoricoP from './components/profile/historico/HistoricoP';
 import ProfileEnquetes from './components/profile/enquetes/ProfileEnquetes';
 import ProfileEnquetesHistorico from './components/profile/enquetes/ProfileEnquetesHistorico';
+import ProfileFinanceiro from './components/profile/ProfileFinanceiro';
 import JogoH from './components/admin/historico/JogoH';
 import EscalacaoH from './components/admin/historico/EscalacaoH';
 import AnaliseJogadores from './components/admin/analise/jogadores/AnaliseJogadores';
@@ -786,6 +787,15 @@ class Routes extends React.Component {
                         key={'profileEnquetesHistorico'}
                         title={'Histórico de Enquetes'}
                         component={ProfileEnquetesHistorico}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'profileFinanceiro'}
+                        title={'Financeiro'}
+                        component={ProfileFinanceiro}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}

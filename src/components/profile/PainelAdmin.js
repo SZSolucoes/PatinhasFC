@@ -26,6 +26,12 @@ class PainelAdmin extends React.Component {
 
         this.onChooseUserTransfAdmin = this.onChooseUserTransfAdmin.bind(this);
         this.onConfirmTransfer = this.onConfirmTransfer.bind(this);
+        this.onConfirmDel = this.onConfirmDel.bind(this);
+        this.onChooseUserExcluir = this.onChooseUserExcluir.bind(this);
+
+        this.state = {
+            modalChoosed: ''
+        };
     }
 
     componentDidMount() {
@@ -91,6 +97,25 @@ class PainelAdmin extends React.Component {
         }
     }
 
+    onConfirmDel(usuario, funCloseModal) {
+        this.fbDatabaseRef.child(`usuarios/${usuario.key}`)
+        .remove()
+        .then(() => {
+            funCloseModal();
+            Toast.show(
+                'Usuário removido com sucesso', 
+                Toast.SHORT
+            );
+        }) 
+        .catch(() => {
+            funCloseModal();
+            Toast.show(
+                'Falha ao remover usuário, verifique a conexão', 
+                Toast.SHORT
+            );
+        });
+    }
+
     onChooseUserTransfAdmin(usuario, funCloseModal) {
         Alert.alert(
             'Aviso',
@@ -108,11 +133,45 @@ class PainelAdmin extends React.Component {
                 }
             ]
         ); 
-        
-        //funCloseModal();
+    }
+
+    onChooseUserExcluir(usuario, funCloseModal) {
+        Alert.alert(
+            'Aviso',
+            `Confirma a exclusão do usuário ${usuario.nome} ?`,
+            [
+                { text: 'Cancelar', 
+                    onPress: () => true, 
+                    style: 'cancel' 
+                },
+                { 
+                    text: 'Ok', 
+                    onPress: () => 
+                        checkConInfo(() => this.onConfirmDel(usuario, funCloseModal))
+                }
+            ]
+        ); 
     }
 
     render() {
+        let onChooseUser = () => false;
+        let title = '';
+
+        switch (this.state.modalChoosed) {
+            case 'transferir':
+                title = 'Transferir Admin';
+                onChooseUser = (usuario, funCloseModal) => 
+                checkConInfo(() => this.onChooseUserTransfAdmin(usuario, funCloseModal));
+                break;
+            case 'excluir':
+                title = 'Excluir Usuário';
+                onChooseUser = (usuario, funCloseModal) => 
+                checkConInfo(() => this.onChooseUserExcluir(usuario, funCloseModal));
+                break;
+            default:
+                break;
+        }
+
         return (
             <View style={styles.viewPrinc}>
                 <List>
@@ -125,17 +184,36 @@ class PainelAdmin extends React.Component {
                         rightIcon={(
                             <Button 
                                 title='Listar usuários' 
-                                onPress={() => this.props.modificaShowUsersModal(true)} 
+                                onPress={() => {
+                                    this.setState({ modalChoosed: 'transferir' });
+                                    this.props.modificaShowUsersModal(true);
+                                }}
+                            />
+                        )}
+                    />
+                </List>
+                <List>
+                    <ListItem
+                        title='Excluir Usuários'
+                        subtitle={
+                            'Excluir usuários do aplicativo apagando todos os dados.'
+                        }
+                        subtitleNumberOfLines={5}
+                        rightIcon={(
+                            <Button 
+                                title='Listar usuários' 
+                                onPress={() => {
+                                    this.setState({ modalChoosed: 'excluir' });
+                                    this.props.modificaShowUsersModal(true);
+                                }} 
                             />
                         )}
                     />
                 </List>
                 <PlayersModal
                     showUsersModal={this.props.showUsersModal}  
-                    onChooseUserTransfAdmin={
-                        (usuario, funCloseModal) => 
-                        checkConInfo(() => this.onChooseUserTransfAdmin(usuario, funCloseModal))
-                    }
+                    onChooseUser={onChooseUser}
+                    title={title}
                 />
             </View>
         );

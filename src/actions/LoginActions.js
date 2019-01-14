@@ -62,11 +62,13 @@ export const doLogin = (params) => dispatch => {
 
 const onLoginSuccess = (dispatch, params) => {
     const dbUsuarioRef = firebase.database().ref().child(`usuarios/${b64.encode(params.email)}`);
-    const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
-    let usuarioLogged = {};
+    //const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
+    //let usuarioLogged = {};
+
     dbUsuarioRef.once('value', (snapshot) => {
-        const snapVal = snapshot.val();
-        if (!snapVal) {
+        const snapVal = snapshot ? snapshot.val() : {};
+
+        /* if (!snapVal) {
             usuarioLogged = {
                 ...usuarioAttr,
                 userDisabled: 'false',
@@ -79,7 +81,7 @@ const onLoginSuccess = (dispatch, params) => {
             dbUsuarioRef.set({ ...usuarioLogged })
             .then(() => true)
             .catch(() => true);
-        }
+        } */
 
         if (snapVal && 
             snapVal.userDisabled && 
@@ -89,11 +91,16 @@ const onLoginSuccess = (dispatch, params) => {
                 payload: false
             });
             showAlert('warning', 'Aviso!', 'Usuário desativado.');
-        } else {
+        } else if (
+            snapVal && 
+            snapVal.userDisabled && 
+            snapVal.userDisabled === 'false'
+        ) {
             const asyncFunKeys = async () => {
-                const filtredKeys = _.filter(Object.keys(usuarioAttr), itemAttr => {
-                    return !(_.findKey(Object.keys(snapVal), valueKey => valueKey === itemAttr));
-                });
+                const filtredKeys = _.filter(Object.keys(usuarioAttr), 
+                    itemAttr => 
+                    !(_.findKey(Object.keys(snapVal), valueKey => valueKey === itemAttr))
+                );
 
                 if (filtredKeys && filtredKeys.length) {
                     const newObjKeys = {};
@@ -107,14 +114,14 @@ const onLoginSuccess = (dispatch, params) => {
             };
 
             asyncFunKeys();
-
+            
             dispatch({
                 type: 'modifica_userlogged_login',
-                payload: snapVal || {}
+                payload: { key: snapshot.key, ...snapVal }
             });
             dispatch({
                 type: 'modifica_userlevel_login',
-                payload: snapVal && snapVal.level ? snapVal.level : '1'
+                payload: snapVal.level ? snapVal.level : '1'
             });
             dispatch({
                 type: 'modifica_indicator_login',
@@ -125,6 +132,12 @@ const onLoginSuccess = (dispatch, params) => {
             AsyncStorage.setItem(mappedKeyStorage('password'), params.password);
         
             Actions.mainTabBar();
+        } else {
+            dispatch({
+                type: 'modifica_indicator_login',
+                payload: false
+            });
+            showAlert('warning', 'Aviso!', 'Email não cadastradoo.');
         }
     });
 };

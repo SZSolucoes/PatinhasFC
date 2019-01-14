@@ -3,7 +3,8 @@ import {
     View,
     ScrollView, 
     StyleSheet,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -23,6 +24,7 @@ import {
     modificaFilterStr, 
     modificaFilterLoad, 
     modificaItemSelected,
+    modificaOnItemRender,
     modificaClean
 } from '../../../actions/GerenciarActions';
 
@@ -38,6 +40,11 @@ class Gerenciar extends React.Component {
         this.onFilterJogos = this.onFilterJogos.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
         this.onPressCardGame = this.onPressCardGame.bind(this);
+        this.onItemRender = this.onItemRender.bind(this);
+
+        this.state = {
+            loading: false
+        };
     }
 
     componentWillUnmount() {
@@ -56,7 +63,18 @@ class Gerenciar extends React.Component {
 
     onPressCardGame(item) {
         this.props.modificaItemSelected(item.key);
-        Actions.gerenciarJogoTab({ onBack: () => Actions.popTo('gerenciar') });
+        this.props.modificaOnItemRender(this.onItemRender);
+        this.setState({ loading: true });
+        setTimeout(() => 
+            Actions.gerenciarJogoTab({ 
+                onBack: () => Actions.popTo('gerenciar') 
+            })
+        , 1000);
+        
+    }
+
+    onItemRender() {
+        this.setState({ loading: false });
     }
 
     renderListJogos(jogos) {
@@ -116,6 +134,24 @@ class Gerenciar extends React.Component {
                                     </FormLabel> 
                                 </View>
                             </TouchableOpacity>
+                            {
+                                this.state.loading &&
+                                (
+                                    <TouchableOpacity
+                                        style={{ 
+                                            flex: 1,
+                                            width: '100%',
+                                            height: '100%',
+                                            position: 'absolute', 
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                                        }}
+                                    >
+                                        <ActivityIndicator size={'large'} color={colorAppS} />
+                                    </TouchableOpacity>
+                                )
+                            }
                         </Card>
                     </TouchableOpacity>
                     <View style={{ marginBottom: 10 }} />
@@ -241,5 +277,6 @@ export default connect(mapStateToProps, {
     modificaFilterStr, 
     modificaFilterLoad, 
     modificaItemSelected,
+    modificaOnItemRender,
     modificaClean 
 })(Gerenciar);

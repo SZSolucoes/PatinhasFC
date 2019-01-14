@@ -7,7 +7,8 @@ import {
     Animated,
     ScrollView,
     TouchableOpacity,
-    Keyboard
+    Keyboard,
+    Text
 } from 'react-native';
 import { SearchBar, Card, List, ListItem, Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
@@ -39,7 +40,7 @@ class PlayersModal extends React.Component {
     }
 
     onChoosePlayer(item) {
-        this.props.onChooseUserTransfAdmin(item, () => this.closeModal());
+        this.props.onChooseUser(item, () => this.closeModal());
     }
 
     onFilterUsuarios(usuarios, filterModalStr) {
@@ -120,6 +121,8 @@ class PlayersModal extends React.Component {
     }
 
     render() {
+        const { title } = this.props;
+
         return (
             <Modal
                 animationType="slide"
@@ -163,9 +166,26 @@ class PlayersModal extends React.Component {
                                         <View 
                                             style={{ 
                                                 flexDirection: 'row', 
-                                                justifyContent: 'flex-end' 
+                                                justifyContent: 'space-between' 
                                             }}
                                         >
+                                            <View
+                                                style={{ 
+                                                    justifyContent: 'center', 
+                                                    paddingLeft: 15,
+                                                    paddingVertical: 5
+                                                }}
+                                            >
+                                                <Text 
+                                                    style={{ 
+                                                        color: 'grey',
+                                                        fontWeight: '500',
+                                                        fontSize: 18 
+                                                    }}
+                                                >
+                                                    {title || ''}
+                                                </Text>
+                                            </View>
                                             <TouchableOpacity
                                                 onPress={() => {
                                                     Keyboard.dismiss();

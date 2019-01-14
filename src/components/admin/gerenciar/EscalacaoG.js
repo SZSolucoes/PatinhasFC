@@ -227,47 +227,49 @@ class EscalacaoG extends React.Component {
         );
     }
 
-    doInOrOut(jogador, inOrOut, jogo, showToast = false) {
+    async doInOrOut(jogador, inOrOut, jogo, showToast = false, lastToast = false) {
+        const jogadores = jogador instanceof Array ? jogador : [jogador];
+        const successT = `${jogadores.length > 1 ? 
+            'Jogadores escalados' : 'Jogador escalado'} com sucesso`;
+        const errorT = 'Falha ao escalar ' +
+        `${jogadores.length > 1 ? 'jogadores' : 'jogador'}. Verifique a conexão`;
+
         if (inOrOut) {
-            const { side } = jogador;
+            const { side } = jogadores[0];
             if (side === 'casa') {
-                const newCasaList = [...jogo.escalacao.casa, jogador];
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
+                const newCasaList = [...jogo.escalacao.casa, ...jogadores];
+                await firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
                     casa: newCasaList
                 })
                 .then(() =>
-                    showToast &&
-                    showToast === 'true' &&
-                    Toast.show('Jogador escalado com sucesso', Toast.SHORT)
+                    ((showToast && showToast === 'true') || lastToast) &&
+                    Toast.show(successT, Toast.SHORT)
                 )
                 .catch(() => 
-                    showToast &&
-                    showToast === 'true' &&
-                    Toast.show('Falha ao escalar jogador. Verifique a conexão', Toast.SHORT)
+                    ((showToast && showToast === 'true') || lastToast) &&
+                    Toast.show(errorT, Toast.SHORT)
                 );
             } else if (side === 'visit') {
-                const newVisitList = [...jogo.escalacao.visit, jogador];
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
+                const newVisitList = [...jogo.escalacao.visit, ...jogadores];
+                await firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
                     visit: newVisitList
                 })
                 .then(() =>
-                    showToast &&
-                    showToast === 'true' &&
-                    Toast.show('Jogador escalado com sucesso', Toast.SHORT)
+                    ((showToast && showToast === 'true') || lastToast) &&
+                    Toast.show(successT, Toast.SHORT)
                 )
                 .catch(() => 
-                    showToast &&
-                    showToast === 'true' &&
-                    Toast.show('Falha ao escalar jogador. Verifique a conexão', Toast.SHORT)
+                    ((showToast && showToast === 'true') || lastToast) &&
+                    Toast.show(errorT, Toast.SHORT)
                 );
             }
         } else {
-            const { side } = jogador;
+            const { side } = jogadores[0];
             if (side === 'casa') {
                 const newCasaList = _.filter(
-                    jogo.escalacao.casa, (item) => (item.key !== jogador.key) || !!item.push
+                    jogo.escalacao.casa, (item) => (item.key !== jogadores[0].key) || !!item.push
                 );
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
+                await firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
                     casa: newCasaList
                 })
                 .then(() =>
@@ -282,9 +284,9 @@ class EscalacaoG extends React.Component {
                 );
             } else if (side === 'visit') {
                 const newVisitList = _.filter(
-                    jogo.escalacao.visit, (item) => (item.key !== jogador.key) || !!item.push
+                    jogo.escalacao.visit, (item) => (item.key !== jogadores[0].key) || !!item.push
                 );
-                firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
+                await firebase.database().ref().child(`jogos/${jogo.key}/escalacao`).update({
                     visit: newVisitList
                 })
                 .then(() =>
@@ -709,33 +711,46 @@ class EscalacaoG extends React.Component {
                             style={{ height: this.state.animCasaValue }}
                         >
                             <View 
-                                style={styles.titleContainer} 
                                 onLayout={this.onLayoutTitleCasa}
                             >
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Image 
-                                        style={{ height: 40, width: 35, marginRight: 5 }}
-                                        resizeMode={'stretch'}
-                                        source={imgHomeShirt} 
-                                    /> 
-                                    <Text 
-                                        onPress={() => this.onToggleCasa()}
-                                        style={{ fontSize: 16, color: 'black' }}
-                                    >
-                                        { jogo.timeCasa ? jogo.timeCasa.trim() : 'Casa' }
-                                    </Text>
-                                </View>
                                 <TouchableWithoutFeedback
                                     onPress={() => this.onToggleCasa()}
                                 >
-                                    <Icon
-                                        color={'black'}
-                                        name={
-                                            this.state.isCasaExpanded ? 'menu-up' : 'menu-down'
-                                        }
-                                        type='material-community'
-                                        size={30}
-                                    />
+                                    <View
+                                        style={styles.titleContainer} 
+                                    >
+                                        <View 
+                                            style={{ 
+                                                flexDirection: 'row', 
+                                                alignItems: 'center' 
+                                            }}
+                                        >
+                                            <Image 
+                                                style={{ height: 40, width: 35, marginRight: 5 }}
+                                                resizeMode={'stretch'}
+                                                source={imgHomeShirt} 
+                                            /> 
+                                            <Text 
+                                                onPress={() => this.onToggleCasa()}
+                                                style={{ fontSize: 16, color: 'black' }}
+                                            >
+                                                { jogo.timeCasa ? jogo.timeCasa.trim() : 'Casa' }
+                                            </Text>
+                                        </View>
+                                        <TouchableWithoutFeedback
+                                            onPress={() => this.onToggleCasa()}
+                                        >
+                                            <Icon
+                                                color={'black'}
+                                                name={
+                                                    this.state.isCasaExpanded ? 
+                                                    'menu-up' : 'menu-down'
+                                                }
+                                                type='material-community'
+                                                size={30}
+                                            />
+                                        </TouchableWithoutFeedback>
+                                    </View>
                                 </TouchableWithoutFeedback>
                             </View>
                             <View 
@@ -771,29 +786,50 @@ class EscalacaoG extends React.Component {
                         <Animated.View
                             style={{ height: this.state.animVisitValue }}
                         >
-                            <View style={styles.titleContainer} onLayout={this.onLayoutTitleVisit}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Image 
-                                        style={{ height: 40, width: 35, marginRight: 5 }}
-                                        resizeMode={'stretch'}
-                                        source={imgVisitShirt} 
-                                    />
-                                    <Text 
-                                        onPress={() => this.onToggleVisit()}
-                                        style={{ fontSize: 16, color: 'black' }}
-                                    >
-                                        { jogo.timeVisit ? jogo.timeVisit.trim() : 'Visitantes' }
-                                    </Text>
-                                </View>
+                            <View onLayout={this.onLayoutTitleVisit}>
                                 <TouchableWithoutFeedback
                                     onPress={() => this.onToggleVisit()}
                                 >
-                                    <Icon
-                                        color={'black'}
-                                        name={this.state.isVisitExpanded ? 'menu-up' : 'menu-down'}
-                                        type='material-community'
-                                        size={30}
-                                    />
+                                    <View
+                                        style={styles.titleContainer}
+                                    >
+                                        <View 
+                                            style={{ 
+                                                flexDirection: 'row', 
+                                                alignItems: 'center' 
+                                            }}
+                                        >
+                                            <Image 
+                                                style={{ height: 40, width: 35, marginRight: 5 }}
+                                                resizeMode={'stretch'}
+                                                source={imgVisitShirt} 
+                                            />
+                                            <Text 
+                                                onPress={() => this.onToggleVisit()}
+                                                style={{ fontSize: 16, color: 'black' }}
+                                            >
+                                                { 
+                                                    jogo.timeVisit ? 
+                                                    jogo.timeVisit.trim() 
+                                                    : 
+                                                    'Visitantes' 
+                                                }
+                                            </Text>
+                                        </View>
+                                        <TouchableWithoutFeedback
+                                            onPress={() => this.onToggleVisit()}
+                                        >
+                                            <Icon
+                                                color={'black'}
+                                                name={
+                                                    this.state.isVisitExpanded ? 
+                                                    'menu-up' : 'menu-down'
+                                                }
+                                                type='material-community'
+                                                size={30}
+                                            />
+                                        </TouchableWithoutFeedback>
+                                    </View>
                                 </TouchableWithoutFeedback>
                             </View>
                             <View onLayout={this.onLayoutVisit}>
@@ -827,8 +863,8 @@ class EscalacaoG extends React.Component {
                 <PlayersModal
                     showPlayersModal={this.props.showPlayersModal} 
                     doInOrOut={
-                        (jogador, inOrOut) => 
-                        checkConInfo(() => this.doInOrOut(jogador, inOrOut, jogo))
+                        (jogador, inOrOut, lastToast) => 
+                        checkConInfo(() => this.doInOrOut(jogador, inOrOut, jogo, false, lastToast))
                     }
                     jogadoresCasaFt={jogadoresCasaFt}
                     jogadoresVisitFt={jogadoresVisitFt}

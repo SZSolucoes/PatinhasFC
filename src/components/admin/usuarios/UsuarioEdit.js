@@ -152,7 +152,40 @@ class UsuarioEdit extends React.Component {
                 
                 switch (error.code) {
                     case 'auth/email-already-in-use':
-                        showAlert('danger', 'Erro!', 'Email já cadastrado.');
+                        dbUsuariosRef.once('value')
+                        .then(snap => {
+                            if (snap && snap.val()) {
+                                showAlert('danger', 'Erro!', 'Email já cadastrado.');
+                            } else {
+                                const newUser = {
+                                    ...usuarioAttr,
+                                    userDisabled: 'false',
+                                    email,
+                                    senha,
+                                    nome,
+                                    dtnasc: dataStr, 
+                                    tipoPerfil,
+                                    level: tipoUsuario,
+                                    dataCadastro: dataAtual
+                                };
+                                dbUsuariosRef.set({ ...newUser })
+                                .then(() => {
+                                    showAlert(
+                                        'success', 
+                                        'Sucesso!', 
+                                        'Cadastro realizado com sucesso.'
+                                    );
+                                })
+                                .catch(() => {
+                                    showAlert(
+                                        'danger', 
+                                        'Ops!', 
+                                        'Ocorreu um erro ao cadastrar o usuário.'
+                                    );
+                                });
+                            }
+                        })
+                        .catch(() => showAlert('danger', 'Erro!', 'Email já cadastrado.'));
                         break;
                     case 'auth/invalid-email':
                         showAlert('danger', 'Erro!', 'Email informado não é válido..');

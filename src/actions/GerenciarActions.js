@@ -4,6 +4,11 @@ export const modificaItemSelected = (value) => ({
     payload: value
 });
 
+export const modificaOnItemRender = (value) => ({
+    type: 'modifica_onitemrender_gerenciar',
+    payload: value
+});
+
 export const modificaMissedPlayers = (value) => ({
     type: 'modifica_missedplayers_gerenciar',
     payload: value
