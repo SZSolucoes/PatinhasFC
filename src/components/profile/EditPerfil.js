@@ -24,6 +24,7 @@ import { connect } from 'react-redux';
 import firebase from '../../Firebase';
 import { checkConInfo } from '../../utils/jogosUtils';
 import { showAlert, mappedKeyStorage } from '../../utils/store';
+import { updateUserDB } from '../../utils/userUtils';
 
 class EditPerfil extends React.Component {
 
@@ -67,6 +68,16 @@ class EditPerfil extends React.Component {
 
     onPressConfirmarEdit() {
         const telefone = this.inputTelefone.getRawValue();
+        const {
+            key,
+            nome,
+            nomeForm,
+            dtnasc,
+            endereco
+        } = this.state.userLogged;
+        const updatesName = {};
+        const newName = nome;
+        const oldName = this.props.userLogged.nome;
 
         if (telefone && !this.inputTelefone.isValid()) {
             this.setState({ isTelefoneValid: false });
@@ -75,22 +86,32 @@ class EditPerfil extends React.Component {
 
         this.setState({ loadingEditP: true });
 
-        const {
-            key,
-            nome,
-            dtnasc,
-            endereco
-        } = this.state.userLogged;
+        if (newName !== oldName) {
+            updatesName.infoImgUpdated = 'false';
+            updatesName.jogosImgUpdated = 'false';
+        }
 
         const dbUsuariosRef = firebase.database().ref().child(`usuarios/${key}`);
 
         dbUsuariosRef.update({
             nome,
+            nomeForm,
             endereco,
             dtnasc,
-            telefone
+            telefone,
+            ...updatesName
         })
         .then(() => {
+            if (newName !== oldName) {
+                setTimeout(() => updateUserDB(
+                    'false',
+                    'false',
+                    this.props.userLogged.email, 
+                    this.props.userLogged.key, 
+                    this.props.userLogged.imgAvatar,
+                    newName
+                ), 2000);
+            }
             this.setState({ loadingEditP: false, isTelefoneValid: true });
             showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
         })
@@ -173,6 +194,10 @@ class EditPerfil extends React.Component {
                 newValue = value.length <= 40 ? value : this.state.userLogged.nome;
                 newValue = newValue.replace(/[^a-zA-Z0-9À-ÿ ]/g, '');
                 break;
+            case 'nomeForm':
+                newValue = value.length <= 40 ? value : this.state.userLogged.nomeForm;
+                newValue = newValue.replace(/[^a-zA-Z0-9À-ÿ ]/g, '');
+                break;
             case 'endereco':
                 newValue = value.length <= 100 ? value : this.state.userLogged.endereco;
                 newValue = newValue.replace(/[^a-zA-Z0-9À-ÿ ]/g, '');
@@ -197,7 +222,7 @@ class EditPerfil extends React.Component {
                     title={'Dados do Perfil'}
                     titleStyle={{ fontSize: 18 }}
                 >
-                    <FormLabel labelStyle={styles.text}>NOME</FormLabel>
+                    <FormLabel labelStyle={styles.text}>APELIDO</FormLabel>
                     <FormInput
                         selectTextOnFocus
                         autoCapitalize={'none'}
@@ -211,6 +236,27 @@ class EditPerfil extends React.Component {
                                 userLogged: { 
                                     ...this.state.userLogged, 
                                     nome: this.onValidField(value, 'nome') 
+                                } 
+                            }
+                        )}
+                        underlineColorAndroid={'transparent'}
+                        onSubmitEditing={() => this.inputNomeForm.focus()}
+                    />
+                    <FormLabel labelStyle={styles.text}>NOME</FormLabel>
+                    <FormInput
+                        ref={ref => (this.inputNomeForm = ref)}
+                        selectTextOnFocus
+                        autoCapitalize={'none'}
+                        autoCorrect={false}
+                        containerStyle={styles.inputContainer}
+                        returnKeyType={'next'}
+                        inputStyle={[styles.text, styles.input]}
+                        value={this.state.userLogged.nomeForm}
+                        onChangeText={(value) => this.setState(
+                            { 
+                                userLogged: { 
+                                    ...this.state.userLogged, 
+                                    nomeForm: this.onValidField(value, 'nomeForm') 
                                 } 
                             }
                         )}
@@ -305,6 +351,7 @@ class EditPerfil extends React.Component {
                             userLogged: { 
                                 ...this.state.userLogged,
                                 nome: this.props.userLogged.nome, 
+                                nomeForm: this.props.userLogged.nomeForm, 
                                 dtnasc: this.props.userLogged.dtnasc, 
                                 endereco: this.props.userLogged.endereco, 
                                 telefone: this.props.userLogged.telefone,

@@ -3,6 +3,7 @@ import _ from 'lodash';
 import b64 from 'base-64';
 import { store } from '../App';
 import firebase from '../Firebase';
+import { usuarioAttr } from './userUtils';
 
 let jogosListener = null;
 let infosListener = null;
@@ -27,10 +28,18 @@ export const startFbListener = (name, params) => {
             if (!jogosListener || (jogosListener && !jogosListenerOn)) {
                 jogosListener = databaseRef.child('jogos').orderByChild('endStatus').equalTo('0');
                 jogosListener.on('value', (snapshot) => {
-                    store.dispatch({
-                        type: 'modifica_listjogos_jogos',
-                        payload: _.map(snapshot.val(), (value, key) => ({ key, ...value }))
-                    });      
+                    let snapVal = null;
+
+                    if (snapshot) {
+                        snapVal = snapshot.val();
+                    }
+
+                    if (snapVal) {
+                        store.dispatch({
+                            type: 'modifica_listjogos_jogos',
+                            payload: _.map(snapVal, (value, key) => ({ key, ...value }))
+                        });      
+                    }
                 });
                 jogosListenerOn = true;
             }
@@ -40,10 +49,18 @@ export const startFbListener = (name, params) => {
             if (!infosListener || (infosListener && !infosListenerOn)) {
                 infosListener = databaseRef.child('informativos');
                 infosListener.on('value', (snapshot) => {
-                    store.dispatch({
-                        type: 'modifica_listinfos_info',
-                        payload: _.map(snapshot.val(), (value, key) => ({ key, ...value }))
-                    });      
+                    let snapVal = null;
+
+                    if (snapshot) {
+                        snapVal = snapshot.val();
+                    }
+
+                    if (snapVal) {
+                        store.dispatch({
+                            type: 'modifica_listinfos_info',
+                            payload: _.map(snapVal, (value, key) => ({ key, ...value }))
+                        });      
+                    }
                 });
                 infosListenerOn = true;
             }
@@ -53,10 +70,18 @@ export const startFbListener = (name, params) => {
             if (!usuariosListener || (usuariosListener && !usuariosListenerOn)) {
                 usuariosListener = databaseRef.child('usuarios');
                 usuariosListener.on('value', (snapshot) => {
-                    store.dispatch({
-                        type: 'modifica_listusuarios_usuarios',
-                        payload: _.map(snapshot.val(), (value, key) => ({ key, ...value }))
-                    });
+                    let snapVal = null;
+                    
+                    if (snapshot) {
+                        snapVal = snapshot.val();
+                    }
+
+                    if (snapVal) {
+                        store.dispatch({
+                            type: 'modifica_listusuarios_usuarios',
+                            payload: _.map(snapVal, (value, key) => ({ key, ...value }))
+                        });
+                    }
                 });
                 usuariosListenerOn = true;
             }
@@ -66,16 +91,44 @@ export const startFbListener = (name, params) => {
             if (!usuarioListener || (usuarioListener && !usuarioListenerOn)) {
                 usuarioListener = databaseRef.child(`usuarios/${b64.encode(params.email)}`);
                 usuarioListener.on('value', (snapshot) => {
-                    if (snapshot.val()) {
-                        if (snapshot.val().level !== store.getState().LoginReducer.userLevel) {
+                    let snapVal = null;
+                    
+                    if (snapshot) {
+                        snapVal = snapshot.val();
+                    }
+
+                    if (snapVal) {
+                        if (snapVal.level !== store.getState().LoginReducer.userLevel) {
                             store.dispatch({
                                 type: 'modifica_userlevel_login',
-                                payload: snapshot.val().level
+                                payload: snapVal.level
                             });
                         }
+
+                        const asyncFunKeys = async () => {
+                            const filtredKeys = _.filter(Object.keys(usuarioAttr), 
+                                itemAttr => 
+                                !(_.findKey(
+                                    Object.keys(snapVal), valueKey => valueKey === itemAttr)
+                                )
+                            );
+            
+                            if (filtredKeys && filtredKeys.length) {
+                                const newObjKeys = {};
+                                for (let index = 0; index < filtredKeys.length; index++) {
+                                    const element = filtredKeys[index];
+                                    newObjKeys[element] = usuarioAttr[element];
+                                }
+                                
+                                usuarioListener.update({ ...newObjKeys });
+                            }
+                        };
+
+                        asyncFunKeys();
+
                         store.dispatch({
                             type: 'modifica_userlogged_login',
-                            payload: { key: snapshot.key, ...snapshot.val() }
+                            payload: { key: snapshot.key, ...snapVal }
                         }); 
                     }
                 });
@@ -87,13 +140,21 @@ export const startFbListener = (name, params) => {
             if (!analiseFinaListener || (analiseFinaListener && !analiseFinaListenerOn)) {
                 analiseFinaListener = databaseRef.child('analise/financeiro');
                 analiseFinaListener.on('value', (snapshot) => {
-                    store.dispatch({
-                        type: 'modifica_listfina_analisefina',
-                        payload: _.map(
-                            snapshot.val(), 
-                            (value, key) => ({ key, data: b64.decode(key), ...value })
-                        )
-                    });
+                    let snapVal = null;
+                    
+                    if (snapshot) {
+                        snapVal = snapshot.val();
+                    }
+
+                    if (snapVal) {
+                        store.dispatch({
+                            type: 'modifica_listfina_analisefina',
+                            payload: _.map(
+                                snapVal, 
+                                (value, key) => ({ key, data: b64.decode(key), ...value })
+                            )
+                        });
+                    }
                 });
                 analiseFinaListenerOn = true;
             }
@@ -103,48 +164,58 @@ export const startFbListener = (name, params) => {
             if (!enquetesListener || (enquetesListener && !enquetesListenerOn)) {
                 enquetesListener = databaseRef.child('enquetes');
                 enquetesListener.on('value', (snapshot) => {
-                    const loginReducer = store.getState().LoginReducer;
-                    const enquetesList = _.map(snapshot.val(), (value, key) => ({ key, ...value }));
-                    const openEnqts = _.filter(enquetesList, en => en.status === '1');
-
-                    // CONTADOR DE ENQUETES NÃO VOTADAS
-                    if (loginReducer.userLogged && loginReducer.userLogged.key) {
-                        if (openEnqts && openEnqts.length) {
-                            const numEnquetes = _.reduce(openEnqts, (sum, item) => {
-                                const votos = _.filter(item.votos, vl => !vl.push);
-
-                                if (votos && votos.length) {
-                                    const hasVote = _.findIndex(
-                                        votos, vot => vot.key === loginReducer.userLogged.key
-                                    ) !== -1;
-
-                                    if (!hasVote) {
-                                        return sum + 1;
-                                    }
-
-                                    return sum;
-                                }
-
-                                return sum + 1;
-                            }, 0);
-                            
-                            store.dispatch({
-                                type: 'modifica_enqueteprops_profile',
-                                payload: { badge: { value: numEnquetes } }
-                            });
-                        } else {
-                            store.dispatch({
-                                type: 'modifica_enqueteprops_profile',
-                                payload: { badge: { value: 0 } }
-                            });
-                        }
+                    let snapVal = null;
+                    
+                    if (snapshot) {
+                        snapVal = snapshot.val();
                     }
 
-                    // LISTA DE TODAS AS ENQUETES
-                    store.dispatch({
-                        type: 'modifica_enquetes_enquetes',
-                        payload: enquetesList
-                    });
+                    if (snapVal) {
+                        const loginReducer = store.getState().LoginReducer;
+                        const enquetesList = _.map(
+                            snapshot.val(), (value, key) => ({ key, ...value })
+                        );
+                        const openEnqts = _.filter(enquetesList, en => en.status === '1');
+    
+                        // CONTADOR DE ENQUETES NÃO VOTADAS
+                        if (loginReducer.userLogged && loginReducer.userLogged.key) {
+                            if (openEnqts && openEnqts.length) {
+                                const numEnquetes = _.reduce(openEnqts, (sum, item) => {
+                                    const votos = _.filter(item.votos, vl => !vl.push);
+    
+                                    if (votos && votos.length) {
+                                        const hasVote = _.findIndex(
+                                            votos, vot => vot.key === loginReducer.userLogged.key
+                                        ) !== -1;
+    
+                                        if (!hasVote) {
+                                            return sum + 1;
+                                        }
+    
+                                        return sum;
+                                    }
+    
+                                    return sum + 1;
+                                }, 0);
+                                
+                                store.dispatch({
+                                    type: 'modifica_enqueteprops_profile',
+                                    payload: { badge: { value: numEnquetes } }
+                                });
+                            } else {
+                                store.dispatch({
+                                    type: 'modifica_enqueteprops_profile',
+                                    payload: { badge: { value: 0 } }
+                                });
+                            }
+                        }
+    
+                        // LISTA DE TODAS AS ENQUETES
+                        store.dispatch({
+                            type: 'modifica_enquetes_enquetes',
+                            payload: enquetesList
+                        });
+                    }
                 });
                 enquetesListenerOn = true;
             }

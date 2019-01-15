@@ -27,7 +27,7 @@ import firebase from '../../../Firebase';
 import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
-import { usuarioAttr } from '../../../utils/userUtils';
+import { usuarioAttr, updateUserDB } from '../../../utils/userUtils';
 
 class UsuarioEdit extends React.Component {
 
@@ -40,6 +40,7 @@ class UsuarioEdit extends React.Component {
             email: props.email ? props.email : '',
             senha: props.senha ? props.senha : '',
             nome: props.nome ? props.nome : '',
+            nomeForm: props.nomeForm ? props.nomeForm : '',
             data: props.data ? props.data : Moment().format('DD/MM/YYYY'),
             tipoPerfil: props.tipoPerfil ? props.tipoPerfil : '',
             tipoPerfilIos: this.getPerfilIOS(props.tipoPerfil ? props.tipoPerfil : ''),
@@ -59,7 +60,26 @@ class UsuarioEdit extends React.Component {
     onPressConfirmar() {
         this.setState({ loading: true });
 
-        const { email, senha, nome, data, tipoPerfil, tipoUsuario, scrollView } = this.state;
+        const { 
+            email, 
+            senha, 
+            nome,
+            nomeForm, 
+            data, 
+            tipoPerfil, 
+            tipoUsuario, 
+            scrollView 
+        } = this.state;
+
+        const updatesName = {};
+        const newName = nome;
+        const oldName = this.props.nome;
+
+        if (newName !== oldName) {
+            updatesName.infoImgUpdated = 'false';
+            updatesName.jogosImgUpdated = 'false';
+        }
+
         const { keyItem } = this.props;
         let dataAtual = '';
         let dataStr = '';
@@ -103,11 +123,23 @@ class UsuarioEdit extends React.Component {
                 email,
                 senha,
                 nome,
+                nomeForm,
                 dtnasc: dataStr, 
                 tipoPerfil,
-                level: tipoUsuario
+                level: tipoUsuario,
+                ...updatesName
             })
             .then(() => {
+                if (newName !== oldName) {
+                    setTimeout(() => updateUserDB(
+                        'false',
+                        'false',
+                        this.props.email, 
+                        keyItem, 
+                        this.props.imgAvatar,
+                        newName
+                    ), 2000);
+                }
                 this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
                 showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
             })
@@ -128,6 +160,7 @@ class UsuarioEdit extends React.Component {
                     email,
                     senha,
                     nome,
+                    nomeForm,
                     dtnasc: dataStr, 
                     tipoPerfil,
                     level: tipoUsuario,
@@ -163,6 +196,7 @@ class UsuarioEdit extends React.Component {
                                     email,
                                     senha,
                                     nome,
+                                    nomeForm,
                                     dtnasc: dataStr, 
                                     tipoPerfil,
                                     level: tipoUsuario,
@@ -402,7 +436,7 @@ class UsuarioEdit extends React.Component {
                         this.state.isSenhaValid &&
                         <FormValidationMessage>Campo obrigatório</FormValidationMessage> 
                     }
-                    <FormLabel labelStyle={styles.text}>NOME</FormLabel>
+                    <FormLabel labelStyle={styles.text}>APELIDO</FormLabel>
                     <FormInput
                         selectTextOnFocus
                         ref={(ref) => { this.inputNome = ref; }}
@@ -416,6 +450,25 @@ class UsuarioEdit extends React.Component {
                             } else {
                                 this.setState({ nome: value });
                                 this.props.onChangeSuperState({ nome: value });
+                            }
+                        }}
+                        underlineColorAndroid={'transparent'}
+                        onSubmitEditing={() => this.inputNomeForm.focus()}
+                    />
+                    <FormLabel labelStyle={styles.text}>NOME</FormLabel>
+                    <FormInput
+                        selectTextOnFocus
+                        ref={(ref) => { this.inputNomeForm = ref; }}
+                        containerStyle={styles.inputContainer}
+                        returnKeyType={'next'}
+                        inputStyle={[styles.text, styles.input]}
+                        value={this.state.nomeForm}
+                        onChangeText={(value) => {
+                            if (this.props.keyItem) {
+                                this.setState({ nomeForm: value });
+                            } else {
+                                this.setState({ nomeForm: value });
+                                this.props.onChangeSuperState({ nomeForm: value });
                             }
                         }}
                         underlineColorAndroid={'transparent'}
@@ -578,6 +631,7 @@ class UsuarioEdit extends React.Component {
                                     email: this.props.email ? this.props.email : '',
                                     senha: this.props.senha ? this.props.senha : '',
                                     nome: this.props.nome ? this.props.nome : '',
+                                    nomeForm: this.props.nomeForm ? this.props.nomeForm : '',
                                     data: this.props.data ? 
                                     this.props.data : Moment().format('DD/MM/YYYY'),
                                     tipoPerfil: this.props.tipoPerfil ? this.props.tipoPerfil : '',
@@ -598,6 +652,7 @@ class UsuarioEdit extends React.Component {
                                     email: '',
                                     senha: '',
                                     nome: '',
+                                    nomeForm: '',
                                     data: Moment().format('DD/MM/YYYY'),
                                     tipoPerfil: '',
                                     tipoPerfilIos: this.getPerfilIOS(''),

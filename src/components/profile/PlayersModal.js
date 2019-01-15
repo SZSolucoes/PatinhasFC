@@ -49,7 +49,8 @@ class PlayersModal extends React.Component {
                 (usuario.email && usuario.email.toLowerCase().includes(lowerFilter)) ||
                 (usuario.dtnasc && usuario.dtnasc.toLowerCase().includes(lowerFilter)) ||
                 (usuario.tipoPerfil && usuario.tipoPerfil.toLowerCase().includes(lowerFilter)) ||
-                (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter))
+                (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter)) || 
+                (usuario.nomeForm && usuario.nomeForm.toLowerCase().includes(lowerFilter)) 
         ));
     }
 
@@ -62,6 +63,7 @@ class PlayersModal extends React.Component {
             }
         ).start(() => {
             setTimeout(() => this.props.modificaShowUsersModal(false), 100);
+            setTimeout(() => this.props.modificaFilterModalStr(''), 100);
         });
     }
 

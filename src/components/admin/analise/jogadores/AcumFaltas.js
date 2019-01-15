@@ -46,6 +46,7 @@ class AcumFaltas extends React.Component {
                 (usuario.dtnasc && usuario.dtnasc.toLowerCase().includes(lowerFilter)) ||
                 (usuario.tipoPerfil && usuario.tipoPerfil.toLowerCase().includes(lowerFilter)) ||
                 (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter)) ||
+                (usuario.nomeForm && usuario.nomeForm.toLowerCase().includes(lowerFilter)) ||
                 (usuario.faltas && usuario.faltas.toLowerCase().includes(lowerFilter)) ||
                 (usuario.faltasHistorico &&
                 usuario.faltasHistorico[usuario.faltasHistorico.length - 1] && 

@@ -99,6 +99,7 @@ class PlayersModal extends React.Component {
         }
         
         await this.props.doInOrOut(newJogadores, true, true);
+
         this.closeModal();
     }
 
@@ -108,7 +109,8 @@ class PlayersModal extends React.Component {
                 (usuario.email && usuario.email.toLowerCase().includes(lowerFilter)) ||
                 (usuario.dtnasc && usuario.dtnasc.toLowerCase().includes(lowerFilter)) ||
                 (usuario.tipoPerfil && usuario.tipoPerfil.toLowerCase().includes(lowerFilter)) ||
-                (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter))
+                (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter)) ||
+                (usuario.nomeForm && usuario.nomeForm.toLowerCase().includes(lowerFilter))
         ));
     }
 
@@ -123,6 +125,7 @@ class PlayersModal extends React.Component {
             setTimeout(() => this.props.modificaShowPlayersModal(false), 100);
             setTimeout(() => this.props.modificaShowPlayersModalJ(false), 100);
             setTimeout(() => this.props.modificaIsSubstitute(false), 100);
+            setTimeout(() => this.props.modificaFilterModalStr(''), 100);
             setTimeout(() => this.setState({ checkeds: [], loading: false }), 100);
         });
     }
@@ -260,7 +263,7 @@ class PlayersModal extends React.Component {
     }
 
     render() {
-        let confirmBtn = null;
+        let confirmBtn = (<View />);
 
         if (!this.props.isSubstitute) {
             if (this.state.loading) {
@@ -272,7 +275,7 @@ class PlayersModal extends React.Component {
                             paddingVertical: 5
                         }}
                     >
-                        <ActivityIndicator size={'large'} color={colorAppS} />
+                        <ActivityIndicator size={'small'} color={colorAppS} />
                     </View>
                 );
             } else {

@@ -12,7 +12,7 @@ import {
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { Card, List, ListItem } from 'react-native-elements';
+import { Card, List, ListItem, CheckBox, Divider } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
 import * as Progress from 'react-native-progress';
 import { Dialog } from 'react-native-simple-dialogs';
@@ -72,9 +72,11 @@ class JogoG extends React.Component {
         this.onPressSubs = this.onPressSubs.bind(this);
         this.onAddPressRemoveSubs = this.onAddPressRemoveSubs.bind(this);
         this.onPressRemoveSubs = this.onPressRemoveSubs.bind(this);
+        this.onPressLock = this.onPressLock.bind(this);
         this.renderGolJogador = this.renderGolJogador.bind(this);
         this.renderCartaoJogador = this.renderCartaoJogador.bind(this);
         this.renderEscalados = this.renderEscalados.bind(this);
+        this.renderCardFooter = this.renderCardFooter.bind(this);
         this.renderIcons = this.renderIcons.bind(this);
         this.onStartTimer = this.onStartTimer.bind(this);
         this.onPauseTimer = this.onPauseTimer.bind(this);
@@ -84,7 +86,8 @@ class JogoG extends React.Component {
             seconds: 0,
             btnStartEnabled: true,
             btnPauseEnabled: false,
-            btnResetEnabled: false
+            btnResetEnabled: false,
+            lockBtnEnabled: '0'
         };
     }
 
@@ -92,7 +95,9 @@ class JogoG extends React.Component {
         const { listJogos, itemSelected } = this.props;
         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
         const currentTime = parseInt(jogo.currentTime, 10);
-        this.setState({ seconds: currentTime });
+        const lockedEnabled = !jogo.lockLevel ? '0' : jogo.lockLevel;
+
+        this.setState({ seconds: currentTime, lockBtnEnabled: lockedEnabled });
         if (jogo.status === '0') {
             this.setState({
                 btnStartEnabled: true,
@@ -600,6 +605,43 @@ class JogoG extends React.Component {
         );
     }
 
+    onPressLock(jogo, lockedEnabled) {
+        const dbJogoRef = this.fbDatabaseRef.child(`jogos/${jogo.key}`);
+        const lockLevel = lockedEnabled ? '1' : '0';
+        const oldLockLevel = this.state.lockBtnEnabled;
+        const textConfirm = lockedEnabled ?
+        'Deseja realmente desabilitar a confirmação de presença dos jogadores ?'
+        :
+        'Deseja realmente habilitar a confirmação de presença dos jogadores ?';
+
+        const funExec = () => {
+            this.setState({ lockBtnEnabled: lockLevel });
+    
+            dbJogoRef.update({
+                lockLevel
+            })
+            .then(() => true)
+            .catch(() => this.setState({ lockBtnEnabled: oldLockLevel }));
+        };
+        
+        Alert.alert(
+            'Aviso',
+            textConfirm,
+            [
+                { text: 'Cancelar', 
+                    onPress: () => true, 
+                    style: 'cancel' 
+                },
+                { 
+                    text: 'Ok', 
+                    onPress: () => checkConInfo(() => {
+                        funExec();
+                    })
+                }
+            ]
+        );
+    }
+
     doInOrOut(jogador, inOrOut, jogo, newJogador = false, isRemove = false) {
         if (newJogador) {
             const { side } = jogador;
@@ -959,6 +1001,7 @@ class JogoG extends React.Component {
                         </TouchableOpacity>
                     </View>
                 </View>
+                {this.renderCardFooter(jogo)}
                 <View style={{ marginBottom: 20 }} />
             </Card>
         );
@@ -2650,6 +2693,75 @@ class JogoG extends React.Component {
                 }
             </View>
 
+        );
+    }
+
+    renderCardFooter(jogo) {
+        const lockedEnabled = this.state.lockBtnEnabled === '0';
+        const textLock = lockedEnabled ? 
+        'Presença - Habilitada' : 'Presença - Desabilitada';
+        const colorPr = lockedEnabled ? 'green' : 'red';
+
+        return (
+            <View
+                style={{
+                    marginTop: 20, 
+                    paddingHorizontal: 15 
+                }}
+            >
+                <Divider
+                    style={{
+                        marginTop: 5,
+                        marginBottom: 5,
+                        height: 2
+                    }}
+                />
+                <TouchableOpacity
+                    onPress={
+                        () => checkConInfo(() => this.onPressLock(jogo, lockedEnabled))
+                    }
+                >
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderRadius: 5,
+                            backgroundColor: colorPr,
+                            marginTop: 5,
+                            paddingVertical: 2,
+                            opacity: 0.8
+                        }}
+                    >
+                        <CheckBox
+                            center
+                            containerStyle={{
+                                marginLeft: 0,
+                                marginRight: 10,
+                                backgroundColor: 'transparent',
+                                borderWidth: 0,
+                                padding: 0
+                            }}
+                            title={(<View />)}
+                            size={22}
+                            checked={lockedEnabled}
+                            checkedColor={'white'}
+                            onPress={
+                                () => checkConInfo(() => this.onPressLock(jogo, lockedEnabled))
+                            }
+                        />
+                        <Text
+                            style={{ 
+                                color: 'white',
+                                fontSize: 14, 
+                                fontWeight: '500' 
+                            }}
+                        >
+                            {textLock}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            </View>
         );
     }
 

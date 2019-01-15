@@ -20,7 +20,7 @@ import { showAlert, mappedKeyStorage } from '../../utils/store';
 import { colorAppP, colorAppS } from '../../utils/constantes';
 import { retrieveImgSource } from '../../utils/imageStorage';
 import { checkConInfo } from '../../utils/jogosUtils';
-import { updateUserImages, checkPerfil } from '../../utils/userUtils';
+import { updateUserDB, checkPerfil } from '../../utils/userUtils';
 
 import firebase from '../../Firebase';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -118,12 +118,13 @@ class Profile extends React.Component {
                 { imgAvatar: url, infoImgUpdated: 'false', jogosImgUpdated: 'false' } : 
                 { imgBackground: url };
                 if (type === 'userImg') {
-                    setTimeout(() => updateUserImages(
+                    setTimeout(() => updateUserDB(
                         'false',
                         'false',
                         userLogged.email, 
                         userLogged.key, 
-                        url
+                        url,
+                        userLogged.nome
                     ), 2000);
                 }
                 databaseRef.child(`usuarios/${usuariob64}`).update(imgUpd);

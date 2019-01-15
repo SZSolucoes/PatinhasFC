@@ -190,6 +190,7 @@ class JogoEdit extends React.Component {
                             status: '0',
                             currentTime: '0',
                             endStatus: '0',
+                            lockLevel: '0',
                             imagens: [{ push: 'push' }]
                         });
                 })
@@ -271,6 +272,7 @@ class JogoEdit extends React.Component {
                     status: '0',
                     currentTime: '0',
                     endStatus: '0',
+                    lockLevel: '0',
                     imagens: [{ push: 'push' }]
                 })
                 .then(() => {

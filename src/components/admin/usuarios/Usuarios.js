@@ -49,6 +49,7 @@ class Usuarios extends React.Component {
             email: '',
             senha: '',
             nome: '',
+            nomeForm: '',
             data: '',
             tipoPerfil: '',
             tipoUsuario: '1'
@@ -92,7 +93,8 @@ class Usuarios extends React.Component {
                 (usuario.email && usuario.email.toLowerCase().includes(lowerFilter)) ||
                 (usuario.dtnasc && usuario.dtnasc.toLowerCase().includes(lowerFilter)) ||
                 (usuario.tipoPerfil && usuario.tipoPerfil.toLowerCase().includes(lowerFilter)) ||
-                (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter))
+                (usuario.nome && usuario.nome.toLowerCase().includes(lowerFilter)) ||
+                (usuario.nomeForm && usuario.nomeForm.toLowerCase().includes(lowerFilter))
         ));
     }
 
@@ -179,11 +181,9 @@ class Usuarios extends React.Component {
 
         if (usuarios.length) {
             const filtredAdminG = _.filter(
-                usuarios, (usr) => {
-                    return usr.level === '1' || 
+                usuarios, (usr) => usr.level === '1' || 
                     this.onFilterPermissions(usr.level) || 
-                    usr.key === this.props.userLogged.level;
-                }
+                    usr.key === this.props.userLogged.level
             );
             const newSortedUsers = _.orderBy(filtredAdminG, ['nome', 'emai'], ['asc', 'asc']);
             usuariosView = (
@@ -276,6 +276,7 @@ class Usuarios extends React.Component {
                         email={this.state.email}
                         senha={this.state.senha}
                         nome={this.state.nome}
+                        nomeForm={this.state.nomeForm}
                         data={this.state.data}
                         tipoPerfil={this.state.tipoPerfil}
                         tipoUsuario={this.state.tipoUsuario}
@@ -291,6 +292,8 @@ class Usuarios extends React.Component {
                         email={this.state.itemEdit.email}
                         senha={this.state.itemEdit.senha}
                         nome={this.state.itemEdit.nome}
+                        nomeForm={this.state.itemEdit.nomeForm}
+                        imgAvatar={this.state.itemEdit.imgAvatar}
                         data={this.state.itemEdit.dtnasc}
                         tipoPerfil={this.state.itemEdit.tipoPerfil}
                         tipoUsuario={this.state.itemEdit.level}
@@ -303,6 +306,7 @@ class Usuarios extends React.Component {
                         email={this.state.email}
                         senha={this.state.senha}
                         nome={this.state.nome}
+                        nomeForm={this.state.nomeForm}
                         data={this.state.data}
                         tipoPerfil={this.state.tipoPerfil}
                         tipoUsuario={this.state.tipoUsuario}

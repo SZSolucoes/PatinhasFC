@@ -9,7 +9,8 @@ import {
     TouchableWithoutFeedback,
     Image,
     TouchableOpacity,
-    Alert
+    Alert,
+    ActivityIndicator
 } from 'react-native';
 import { Card, Icon, List, ListItem } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
@@ -55,6 +56,9 @@ class EscalacaoG extends React.Component {
         this.onLayoutTitleCasa = this.onLayoutTitleCasa.bind(this);
         this.onLayoutCasa = this.onLayoutCasa.bind(this);
         this.onToggleCasa = this.onToggleCasa.bind(this);
+        this.onRemoveGols = this.onRemoveGols.bind(this);
+        this.onRemoveCards = this.onRemoveCards.bind(this);
+        this.onRemoveSubs = this.onRemoveSubs.bind(this);
 
         this.onLayoutTitleVisit = this.onLayoutTitleVisit.bind(this);
         this.onLayoutVisit = this.onLayoutVisit.bind(this);
@@ -73,7 +77,10 @@ class EscalacaoG extends React.Component {
             animCasaValue: new Animated.Value(),
             animVisitValue: new Animated.Value(),
             isCasaExpanded: true,
-            isVisitExpanded: true
+            isVisitExpanded: true,
+            loadingEscal: -1,
+            loadingEscalSide: '',
+            loadingEscalConfirmIdx: -1
         };
     }
 
@@ -191,7 +198,7 @@ class EscalacaoG extends React.Component {
         const nJog = {
             key: newJogador.key,
             nome: newJogador.nome,
-            posicao: newJogador.posicao,
+            posicao: '',
             posvalue: 'default',
             imgAvatar: newJogador.imgAvatar,
             side,
@@ -225,6 +232,165 @@ class EscalacaoG extends React.Component {
             ],
             { cancelable: false }
         );
+    }
+
+    async onRemoveGols(jogador, jogo) {
+        const dbFirebaseRef = firebase.database().ref();
+        const jogadorGols = [];
+        const gols = _.filter(
+            jogo.gols, jgG => {
+                const noPlayer = !jgG.push && jgG.key !== jogador.key;
+                if (!noPlayer) {
+                    jogadorGols.push({ ...jgG });
+                }
+
+                return noPlayer;
+            }
+        );
+
+        let placarCasa = parseInt(jogo.placarCasa, 10);
+        let placarVisit = parseInt(jogo.placarVisit, 10);
+        
+        for (let indexOne = 0; indexOne < jogadorGols.length; indexOne++) {
+            const jogGol = jogadorGols[indexOne];
+
+            if (jogGol.side === 'casa') {
+                placarCasa--;
+            } else {
+                placarVisit--;
+            }
+        }
+
+        for (let i = 0; i < gols.length; i++) {
+            if (!gols[i].push) {
+                gols[i].indexKey = i.toString();
+            }
+        }
+
+        const payload = { 
+            gols, 
+            placarCasa: `${placarCasa}`, 
+            placarVisit: `${placarVisit}`
+        };
+
+        await dbFirebaseRef.child(`jogos/${jogo.key}`).update({
+            ...payload
+        })
+        .then(async () => {
+            await dbFirebaseRef
+            .child(`usuarios/${jogador.key}/gols`).once('value', async (snapshot) => {
+                const golsLess = parseInt(snapshot.val(), 10) - jogadorGols.length;
+                await dbFirebaseRef
+                .child(`usuarios/${jogador.key}`).update({
+                    gols: golsLess.toString()
+                })
+                .then(() => true)
+                .catch(() => true);
+            });
+        })
+        .catch(() => false);
+    }
+
+    async onRemoveCards(jogador, jogo) {
+        const dbFirebaseRef = firebase.database().ref();
+        const jogadorCartoes = [];
+        const cartoes = _.filter(
+            jogo.cartoes, jgC => {
+                const noPlayer = !jgC.push && jgC.key !== jogador.key;
+                if (!noPlayer) {
+                    jogadorCartoes.push({ ...jgC });
+                }
+
+                return noPlayer;
+            }
+        );
+
+        const cartAmar = _.filter(jogadorCartoes, jogCart => jogCart.color === 'amarelo').length;
+        const cartVerm = _.filter(jogadorCartoes, jogCart => jogCart.color === 'vermelho').length;
+        
+        for (let i = 0; i < cartoes.length; i++) {
+            if (!cartoes[i].push) {
+                cartoes[i].indexKey = i.toString();
+            }
+        }
+
+        await dbFirebaseRef.child(`jogos/${jogo.key}`).update({
+            cartoes
+        })
+        .then(async () => {
+            await dbFirebaseRef.child(`usuarios/${jogador.key}`)
+            .once('value', async (snapshot) => {
+                const snapVal = snapshot.val();
+
+                await dbFirebaseRef.child(`usuarios/${jogador.key}`).update({
+                    cartoesAmarelos: `${parseInt(snapVal.cartoesAmarelos, 10) - cartAmar}`,
+                    cartoesVermelhos: `${parseInt(snapVal.cartoesVermelhos, 10) - cartVerm}`
+                })
+                .then(() => true)
+                .catch(() => true);
+            });
+        })
+        .catch(() => false);
+    }
+
+    async onRemoveSubs(jogador, jogo) {
+        const dbFirebaseRef = firebase.database().ref();
+        const subs = _.filter(jogo.subs, subJog => {
+            if (subJog.push) {
+                return true;
+            }
+
+            const foundIn = subJog.jogadorIn.key === jogador.key;
+            const foundOut = subJog.jogadorOut.key === jogador.key;
+
+            if (foundIn || foundOut) {
+                return false;
+            }
+
+            return true;
+        });
+        
+        for (let i = 0; i < subs.length; i++) {
+            if (!subs[i].push) {
+                subs[i].indexKey = i.toString();
+            }
+        }
+
+        await dbFirebaseRef.child(`jogos/${jogo.key}`).update({
+            subs
+        })
+        .then(async () => {
+            const { side } = jogador;
+
+            if (side === 'casa') {
+                const newCasaList = _.filter(
+                    jogo.escalacao.casa, (item) => (item.key !== jogador.key) || !!item.push
+                );
+                const newBancoList = _.filter(
+                    jogo.escalacao.banco, (item) => (item.key !== jogador.key) || !!item.push
+                );
+                await dbFirebaseRef.child(`jogos/${jogo.key}/escalacao`).update({
+                    casa: newCasaList,
+                    banco: newBancoList
+                })
+                .then(() => true)
+                .catch(() => false);
+            } else if (side === 'visit') {
+                const newVisitList = _.filter(
+                    jogo.escalacao.visit, (item) => (item.key !== jogador.key) || !!item.push
+                );
+                const newBancoList = _.filter(
+                    jogo.escalacao.banco, (item) => (item.key !== jogador.key) || !!item.push
+                );
+                await dbFirebaseRef.child(`jogos/${jogo.key}/escalacao`).update({
+                    visit: newVisitList,
+                    banco: newBancoList
+                })
+                .then(() => true)
+                .catch(() => false);
+            }
+        })
+        .catch(() => false);
     }
 
     async doInOrOut(jogador, inOrOut, jogo, showToast = false, lastToast = false) {
@@ -265,6 +431,45 @@ class EscalacaoG extends React.Component {
             }
         } else {
             const { side } = jogadores[0];
+
+            for (let index = 0; index < jogadores.length; index++) {
+                const element = jogadores[index];
+                const playerRemoveGols = _.findIndex(
+                    jogo.gols, jgG => !jgG.push && jgG.key === element.key
+                ) !== -1;
+                const playerRemoveCards = _.findIndex(
+                    jogo.cartoes, jgC => !jgC.push && jgC.key === element.key
+                ) !== -1;
+                const playerRemoveSubs = _.findIndex(
+                    jogo.subs, jgS => {
+                        if (jgS.push) {
+                            return false;
+                        }
+            
+                        const foundIn = jgS.jogadorIn.key === jogador.key;
+                        const foundOut = jgS.jogadorOut.key === jogador.key;
+            
+                        if (foundIn || foundOut) {
+                            return true;
+                        }
+            
+                        return false;
+                    }
+                ) !== -1;
+
+                if (playerRemoveGols) {
+                    await this.onRemoveGols(element, jogo);
+                }
+
+                if (playerRemoveCards) {
+                    await this.onRemoveCards(element, jogo);
+                }
+
+                if (playerRemoveSubs) {
+                    await this.onRemoveSubs(element, jogo);
+                }
+            }
+            
             if (side === 'casa') {
                 const newCasaList = _.filter(
                     jogo.escalacao.casa, (item) => (item.key !== jogadores[0].key) || !!item.push
@@ -300,10 +505,12 @@ class EscalacaoG extends React.Component {
                     Toast.show('Falha ao escalar jogador. Verifique a conexão', Toast.SHORT)
                 );
             }
+
+            this.setState({ loadingEscal: -1, loadingEscalConfirmIdx: -1, loadingEscalSide: '' });
         }
     }
 
-    renderIcons(item, jogo) {
+    renderIcons(item, jogo, index, side) {
         return (
             <View 
                 style={{ 
@@ -333,18 +540,34 @@ class EscalacaoG extends React.Component {
                                     { 
                                         text: 'Ok', 
                                         onPress: () => checkConInfo(
-                                            () => this.doInOrOut(item, false, jogo)
+                                            () => {
+                                                this.setState({ 
+                                                    loadingEscal: index, 
+                                                    loadingEscalSide: side
+                                                });
+                                                this.doInOrOut(item, false, jogo);
+                                            }
                                         )
                                     },
                                 ]
                             );
                         })}
                     >
-                        <Icon
-                            name='delete' 
-                            type='material-community' 
-                            size={30} color='red' 
-                        />   
+                        {
+                            this.state.loadingEscal === index && 
+                            this.state.loadingEscalSide === side ?
+                            (
+                                <ActivityIndicator size={'large'} color={colorAppS} />
+                            )
+                            :
+                            (
+                                <Icon
+                                    name='delete' 
+                                    type='material-community' 
+                                    size={30} color='red' 
+                                />   
+                            )
+                        }  
                     </TouchableOpacity>
                 </View>
             </View>
@@ -391,7 +614,7 @@ class EscalacaoG extends React.Component {
                                 title={item.nome}
                                 subtitle={item.posicao}
                                 rightIcon={(
-                                    this.renderIcons(item, jogo)
+                                    this.renderIcons(item, jogo, index, 'casa')
                                 )}
                             />
                         );
@@ -441,7 +664,7 @@ class EscalacaoG extends React.Component {
                                 title={item.nome}
                                 subtitle={item.posicao}
                                 rightIcon={(
-                                    this.renderIcons(item, jogo)
+                                    this.renderIcons(item, jogo, index, 'visit')
                                 )}
                             />
                         );
@@ -514,8 +737,21 @@ class EscalacaoG extends React.Component {
                             const isMissed = _.findIndex(
                                 this.props.missedPlayers, ms => ms === item.key
                             ) !== -1;
-
-                            if (escalacaoCasa !== -1 || escaladoVisit !== -1) {
+                            
+                            if (this.state.loadingEscalConfirmIdx === index) {
+                                viewIcons = (
+                                    <View 
+                                        style={{
+                                            flexDirection: 'row',  
+                                            alignItems: 'center',
+                                            justifyContent: 'flex-end',
+                                            margin: 5
+                                        }}
+                                    >
+                                        <ActivityIndicator size={'small'} color={colorAppS} />
+                                    </View>
+                                );
+                            } else if (escalacaoCasa !== -1 || escaladoVisit !== -1) {
                                 viewIcons = (
                                     <View style={{ flexDirection: 'row' }}>
                                         <View 
@@ -546,10 +782,15 @@ class EscalacaoG extends React.Component {
                                                             { 
                                                                 text: 'Ok', 
                                                                 onPress: () => checkConInfo(
-                                                                    () => 
-                                                                    this.doInOrOut(
-                                                                        validItem, false, jogo
-                                                                    )
+                                                                    () => {
+                                                                        this.setState({ 
+                                                                            loadingEscalConfirmIdx: 
+                                                                            index 
+                                                                        });
+                                                                        this.doInOrOut(
+                                                                            validItem, false, jogo
+                                                                        );
+                                                                    }
                                                                 )
                                                             },
                                                         ]

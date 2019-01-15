@@ -22,10 +22,10 @@ import Moment from 'moment';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { Card, Divider, SearchBar, Avatar } from 'react-native-elements';
+import { Card, Divider, SearchBar, Avatar, CheckBox } from 'react-native-elements';
 import { isPortrait } from '../../utils/orientation';
 import { startFbListener, stopFbListener } from '../../utils/firebaseListeners';
-import { updateUserImages } from '../../utils/userUtils';
+import { updateUserDB } from '../../utils/userUtils';
 import LoadingBallAnim from '../animations/LoadingBallAnim';
 import Versus from './Versus';
 import imgCampoJogos from '../../imgs/campojogos.png';
@@ -117,12 +117,13 @@ class Jogos extends React.Component {
             if (snapshot.val()) {
                 if (snapshot.val().infoImgUpdated === 'false' || 
                 snapshot.val().jogosImgUpdated === 'false') {
-                    setTimeout(() => updateUserImages(
+                    setTimeout(() => updateUserDB(
                         snapshot.val().infoImgUpdated,
                         snapshot.val().jogosImgUpdated,
                         snapshot.val().email, 
                         snapshot.key, 
-                        snapshot.val().imgAvatar
+                        snapshot.val().imgAvatar,
+                        snapshot.val().nome
                     ), 2000);
                 }
             }
@@ -322,8 +323,15 @@ class Jogos extends React.Component {
     }
 
     renderCardFooter(item) {
-        if (item.endStatus && item.endStatus === '0') {
+        if (item.endStatus && item.endStatus === '0' && 
+        (!item.lockLevel || item.lockLevel === '0')) {
             const b64UserKey = this.props.userLogged.key;
+            const userConfirmed = _.findIndex(
+                item.confirmados, 
+                (usuario) => usuario.key && usuario.key === b64UserKey) !== -1;
+            const textP = userConfirmed ? 'Presença confirmada' : 'Presença não confirmada';
+            const color = userConfirmed ? 'green' : 'red';
+
             return (
                 <View>
                     <Divider
@@ -333,84 +341,65 @@ class Jogos extends React.Component {
                             height: 2
                         }}
                     />
-                    {
-                        _.findIndex(
-                            item.confirmados, 
-                            (usuario) => usuario.key && usuario.key === b64UserKey) !== -1 ?
-                            (
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        if (this.props.conInfo.type === 'none' ||
-                                            this.props.conInfo.type === 'unknown'
-                                        ) {
-                                            Toast.show('Sem conexão', Toast.SHORT);
-                                            return false;
-                                        }
-                                        
-                                        return this.onPressRemoveP(item, b64UserKey);
-                                    }}
-                                >
-                                    <View
-                                        style={{
-                                            flexDirection: 'row',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            borderRadius: 5,
-                                            backgroundColor: 'red',
-                                            padding: 5,
-                                            marginTop: 5
-                                        }}
-                                    >
-                                        <Text
-                                            style={{ 
-                                                color: 'white',
-                                                fontSize: 18, 
-                                                fontWeight: '500' 
-                                            }}
-                                        >
-                                            Retirar presença !
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            )
-                            :
-                            (
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        if (this.props.conInfo.type === 'none' ||
-                                            this.props.conInfo.type === 'unknown'
-                                        ) {
-                                            Toast.show('Sem conexão', Toast.SHORT);
-                                            return false;
-                                        }
-                                        
-                                        return this.onPressConfirmP(item, b64UserKey);
-                                    }}
-                                >
-                                    <View
-                                        style={{
-                                            flexDirection: 'row',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            borderRadius: 5,
-                                            backgroundColor: 'green',
-                                            padding: 5,
-                                            marginTop: 5
-                                        }}
-                                    >
-                                        <Text
-                                            style={{ 
-                                                color: 'white', 
-                                                fontSize: 18, 
-                                                fontWeight: '500' 
-                                            }}
-                                        >
-                                            Confirmar presença !
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            )
-                    }
+                    <TouchableOpacity
+                        onPress={() => {
+                            if (this.props.conInfo.type === 'none' ||
+                                this.props.conInfo.type === 'unknown'
+                            ) {
+                                Toast.show('Sem conexão', Toast.SHORT);
+                                return false;
+                            }
+                            
+                            if (userConfirmed) {
+                                this.onPressRemoveP(item, b64UserKey);
+                            } else {
+                                this.onPressConfirmP(item, b64UserKey);
+                            }
+                        }}
+                    >
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderRadius: 5,
+                                backgroundColor: color,
+                                marginTop: 5,
+                                paddingVertical: 2
+                            }}
+                        >
+                            <CheckBox
+                                center
+                                containerStyle={{
+                                    marginLeft: 0,
+                                    marginRight: 10,
+                                    backgroundColor: 'transparent',
+                                    borderWidth: 0,
+                                    padding: 0
+                                }}
+                                title={(<View />)}
+                                size={22}
+                                checked={userConfirmed}
+                                checkedColor={'white'}
+                                onPress={() => {
+                                    if (userConfirmed) {
+                                        this.onPressRemoveP(item, b64UserKey);
+                                    } else {
+                                        this.onPressConfirmP(item, b64UserKey);
+                                    }
+                                }}
+                            />
+                            <Text
+                                style={{ 
+                                    color: 'white',
+                                    fontSize: 16, 
+                                    fontWeight: '500' 
+                                }}
+                            >
+                                {textP}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
                 </View>
             );
         }

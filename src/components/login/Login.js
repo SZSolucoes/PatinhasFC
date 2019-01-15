@@ -155,7 +155,7 @@ class Login extends React.Component {
                                         ref={(input) => { this.txtPassword = input; }}
                                         placeholder={'Senha'}
                                         placeholderTextColor={'#f16636'}
-                                        returnKeyType={'next'}
+                                        returnKeyType={'go'}
                                         autoCapitalize={'none'}
                                         autoCorrect={false}
                                         style={[styles.input, { marginLeft: 33 }]}

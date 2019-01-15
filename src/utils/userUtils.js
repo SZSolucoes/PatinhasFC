@@ -6,6 +6,7 @@ export const usuarioAttr = {
     email: '',
     senha: '',
     nome: '',
+    nomeForm: '',
     dtnasc: '', 
     tipoPerfil: 'socio',
     imgAvatar: '',
@@ -50,18 +51,19 @@ export const checkPerfil = (perfil) => {
     }
 };
 
-export const updateUserImages = (
+export const updateUserDB = (
     informativos = 'true', 
     jogos = 'true', 
     emailUser, 
     keyUser, 
-    newImg
+    newImg,
+    newNome
 ) => {
     const dbFbRef = firebase.database().ref();
     const dbUserRef = dbFbRef.child(`usuarios/${keyUser}`);
 
     const mainUpdate = async () => {
-        // UPDATE DE IMAGEM PARA OS INFORMATIVOS
+        // UPDATE DE IMAGEM E NOME DO USUARIO PARA OS INFORMATIVOS
         if (informativos === 'false') {
             const dbInfoRef = dbFbRef.child('informativos');
             await dbInfoRef.once('value', async (snapshot) => {
@@ -72,28 +74,48 @@ export const updateUserImages = (
         
                     await snapshot.forEach((child) => {
                         const funExec = async () => {
-                            let updatedImgUser = {};
+                            const childVal = child.val();
+
                             let hasUpdated = false;
-                            let hasUpdatedImgUser = false;
                             let hasUpdatedListComents = false;
                             
+                            let updatedImgUser = {};
+                            let hasUpdatedImgUser = false;
+
+                            let updatedNomeUser = {};
+                            let hasUpdatedNomeUser = false;
+                            
                             if (
-                                child.val().emailUser === emailUser && 
-                                child.val().imgAvatar !== newImg
+                                childVal.emailUser === emailUser && 
+                                childVal.imgAvatar !== newImg
                                 ) {
                                     hasUpdated = true;
                                     hasUpdatedImgUser = true;
                                     updatedImgUser = { imgAvatar: newImg };
                             }
+
+                            if (
+                                childVal.emailUser === emailUser && 
+                                childVal.nomeUser !== newNome
+                                ) {
+                                    hasUpdated = true;
+                                    hasUpdatedNomeUser = true;
+                                    updatedNomeUser = { nomeUser: newNome };
+                            }
             
-                            const comentsUpdated = _.map(child.val().listComents, (comentUser) => {
+                            const comentsUpdated = _.map(childVal.listComents, (comentUser) => {
                                 if (!comentUser.push && 
                                     comentUser.key === keyUser && 
-                                    comentUser.imgAvatar !== newImg
+                                    (comentUser.imgAvatar !== newImg || 
+                                    childVal.nome !== newNome)
                                     ) {
                                         hasUpdated = true;
                                         hasUpdatedListComents = true;
-                                        return { ...comentUser, imgAvatar: newImg };
+                                        return { 
+                                            ...comentUser, 
+                                            imgAvatar: newImg, 
+                                            nome: newNome 
+                                        };
                                 }
                                 
                                 return comentUser;
@@ -102,8 +124,8 @@ export const updateUserImages = (
                             if (hasUpdated) {
                                 let updates = {};
             
-                                if (hasUpdatedImgUser) {
-                                    updates = { ...updatedImgUser };
+                                if (hasUpdatedImgUser || hasUpdatedNomeUser) {
+                                    updates = { ...updatedImgUser, ...updatedNomeUser };
                                 }
     
                                 if (hasUpdatedListComents) {
@@ -143,7 +165,7 @@ export const updateUserImages = (
         // FIM DO UPDATE INFORMATIVOS
 
         if (jogos === 'false') {
-            // UPDATE DE IMAGEM PARA OS JOGOS
+            // UPDATE DE IMAGEM E NOME DO USUARIO PARA OS JOGOS
             const dbJogosRef = dbFbRef.child('jogos');
             await dbJogosRef.once('value', async (snapshot) => {
                 if (snapshot) {
@@ -154,19 +176,51 @@ export const updateUserImages = (
                     await snapshot.forEach((child) => {
                         const funExec = async () => {
                             let hasUpdated = false;
+                            let hasUpdatedGols = false;
+                            let hasUpdatedCartoes = false;
                             let hasUpdatedConfirmados = false;
                             let hasUpdatedEscalacao = false;
                             let hasUpdatedSubs = false;
                             
+                            const golsUpdated = _.map(
+                                child.val().gols, (gol) => {
+                                if (!gol.push && 
+                                    gol.key === keyUser && 
+                                    gol.nome !== newNome
+                                    ) {
+                                        hasUpdated = true;
+                                        hasUpdatedGols = true;
+                                        return { ...gol, nome: newNome };
+                                }
+
+                                return gol;
+                            });
+
+                            const cartoesUpdated = _.map(
+                                child.val().cartoes, (cartao) => {
+                                if (!cartao.push && 
+                                    cartao.key === keyUser && 
+                                    (cartao.imgAvatar !== newImg ||
+                                    cartao.nome !== newNome)
+                                    ) {
+                                        hasUpdated = true;
+                                        hasUpdatedCartoes = true;
+                                        return { ...cartao, nome: newNome };
+                                }
+
+                                return cartao;
+                            });
+
                             const confirmadosUpdated = _.map(
                                 child.val().confirmados, (confirmado) => {
                                 if (!confirmado.push && 
                                     confirmado.key === keyUser && 
-                                    confirmado.imgAvatar !== newImg
+                                    (confirmado.imgAvatar !== newImg ||
+                                    confirmado.nome !== newNome)
                                     ) {
                                         hasUpdated = true;
                                         hasUpdatedConfirmados = true;
-                                        return { ...confirmado, imgAvatar: newImg };
+                                        return { ...confirmado, imgAvatar: newImg, nome: newNome };
                                 }
 
                                 return confirmado;
@@ -177,12 +231,12 @@ export const updateUserImages = (
                                 const newSides = _.map(sides, (side) => {
                                     if (!side.push && 
                                         side.key === keyUser && 
-                                        side.imgAvatar !== newImg
+                                        (side.imgAvatar !== newImg || side.nome !== newNome)
                                         ) {
                                             hasUpdated = true;
                                             hasUpdatedEscalacao = true;
                                             hasChangedSide = true;
-                                            return { ...side, imgAvatar: newImg };
+                                            return { ...side, imgAvatar: newImg, nome: newNome };
                                     }
 
                                     return side;
@@ -207,7 +261,8 @@ export const updateUserImages = (
 
                                     if (!subs.jogadorIn.push && 
                                         subs.jogadorIn.key === keyUser && 
-                                        subs.jogadorIn.imgAvatar !== newImg
+                                        (subs.jogadorIn.imgAvatar !== newImg || 
+                                            subs.jogadorIn.nome !== newNome)
                                         ) {
                                             hasUpdated = true;
                                             hasUpdatedSubs = true;
@@ -216,7 +271,8 @@ export const updateUserImages = (
                                                 ...subs, 
                                                 jogadorIn: { 
                                                     ...subs.jogadorIn, 
-                                                    imgAvatar: newImg 
+                                                    imgAvatar: newImg,
+                                                    nome: newNome
                                                 } 
                                             };
                                     }
@@ -227,7 +283,8 @@ export const updateUserImages = (
 
                                     if (!subs.jogadorOut.push && 
                                         subs.jogadorOut.key === keyUser && 
-                                        subs.jogadorOut.imgAvatar !== newImg
+                                        (subs.jogadorOut.imgAvatar !== newImg || 
+                                        subs.jogadorOut.nome !== newNome)
                                         ) {
                                             hasUpdated = true;
                                             hasUpdatedSubs = true;
@@ -236,7 +293,8 @@ export const updateUserImages = (
                                                 ...newSub, 
                                                 jogadorOut: { 
                                                     ...subs.jogadorOut, 
-                                                    imgAvatar: newImg 
+                                                    imgAvatar: newImg,
+                                                    nome: newNome 
                                                 } 
                                             };
                                     }
@@ -251,9 +309,17 @@ export const updateUserImages = (
             
                             if (hasUpdated) {
                                 let updates = {};
-            
+                            
+                                if (hasUpdatedGols) {
+                                    updates = { ...updates, gols: golsUpdated };
+                                }
+
+                                if (hasUpdatedCartoes) {
+                                    updates = { ...updates, cartoes: cartoesUpdated };
+                                }
+
                                 if (hasUpdatedConfirmados) {
-                                    updates = { confirmados: confirmadosUpdated };
+                                    updates = { ...updates, confirmados: confirmadosUpdated };
                                 }
 
                                 if (hasUpdatedEscalacao) {
@@ -301,4 +367,3 @@ export const updateUserImages = (
 
     return true;
 };
-
