@@ -76,82 +76,87 @@ export const updateUserDB = (
                         const funExec = async () => {
                             const childVal = child.val();
 
-                            let hasUpdated = false;
-                            let hasUpdatedListComents = false;
-                            
-                            let updatedImgUser = {};
                             let hasUpdatedImgUser = false;
-
-                            let updatedNomeUser = {};
                             let hasUpdatedNomeUser = false;
+                            let hasUpdatedListComents = false;
                             
                             if (
                                 childVal.emailUser === emailUser && 
                                 childVal.imgAvatar !== newImg
                                 ) {
-                                    hasUpdated = true;
                                     hasUpdatedImgUser = true;
-                                    updatedImgUser = { imgAvatar: newImg };
                             }
 
                             if (
                                 childVal.emailUser === emailUser && 
                                 childVal.nomeUser !== newNome
                                 ) {
-                                    hasUpdated = true;
                                     hasUpdatedNomeUser = true;
-                                    updatedNomeUser = { nomeUser: newNome };
                             }
             
-                            const comentsUpdated = _.map(childVal.listComents, (comentUser) => {
-                                if (!comentUser.push && 
+                            hasUpdatedListComents = _.findIndex(
+                                childVal.listComents, (comentUser) => (
+                                    !comentUser.push && 
                                     comentUser.key === keyUser && 
                                     (comentUser.imgAvatar !== newImg || 
                                     childVal.nome !== newNome)
-                                    ) {
-                                        hasUpdated = true;
-                                        hasUpdatedListComents = true;
-                                        return { 
-                                            ...comentUser, 
-                                            imgAvatar: newImg, 
-                                            nome: newNome 
-                                        };
-                                }
-                                
-                                return comentUser;
-                            });
+                                )) !== -1;
             
-                            if (hasUpdated) {
-                                let updates = {};
-            
-                                if (hasUpdatedImgUser || hasUpdatedNomeUser) {
-                                    updates = { ...updatedImgUser, ...updatedNomeUser };
-                                }
-    
-                                if (hasUpdatedListComents) {
-                                    updates = { ...updates, listComents: comentsUpdated };
-                                }
-                
-                                await child.ref.update({
-                                    ...updates
-                                })
-                                .then(async () => { 
-                                    lastIndex++;
-                                    
-                                    /* Caso o update não falhou em nenhum caso entao 
-                                    atualiza o status do usuarios de update */
-                                    if (numChilds === lastIndex && !childFailed) {
-                                        dbUserRef.update({
-                                            infoImgUpdated: 'true'
-                                        })
-                                        .then(() => true)
-                                        .catch(() => true);
-                                    } 
-                                    await true; 
-                                })
-                                .catch(async () => {
-                                     childFailed = true;
-                                     await true; 
+                            if (hasUpdatedImgUser || hasUpdatedNomeUser || hasUpdatedListComents) {
+                                await child.ref.once('value', async snapNew => {
+                                    const snapNewVal = snapNew.val();
+                                    let updates = {};
+
+                                    if (hasUpdatedImgUser) {
+                                        updates = { ...updates, imgAvatar: newImg };
+                                    }
+
+                                    if (hasUpdatedNomeUser) {
+                                        updates = { ...updates, nomeUser: newNome };
+                                    }
+
+                                    if (hasUpdatedListComents) {
+                                        const comentsUpdated = _.map(
+                                            snapNewVal.listComents, (comentUser) => {
+                                                if (!comentUser.push && 
+                                                    comentUser.key === keyUser && 
+                                                    (comentUser.imgAvatar !== newImg || 
+                                                    snapNewVal.nome !== newNome)
+                                                    ) {
+                                                        return { 
+                                                            ...comentUser, 
+                                                            imgAvatar: newImg, 
+                                                            nome: newNome 
+                                                        };
+                                                }
+                                                
+                                                return comentUser;
+                                        });
+                                        
+                                        updates = { ...updates, listComents: comentsUpdated };
+                                    }
+
+                                    await child.ref.update({
+                                        ...updates
+                                    })
+                                    .then(async () => { 
+                                        lastIndex++;
+                                        
+                                        /* Caso o update não falhou em nenhum caso entao 
+                                        atualiza o status do usuarios de update */
+                                        if (numChilds === lastIndex && !childFailed) {
+                                            dbUserRef.update({
+                                                infoImgUpdated: 'true'
+                                            })
+                                            .then(() => true)
+                                            .catch(() => true);
+                                        } 
+                                        await true; 
+                                    })
+                                    .catch(async () => {
+                                         childFailed = true;
+                                         await true; 
+                                    });
                                 });
                             }
                         };
@@ -175,110 +180,61 @@ export const updateUserDB = (
         
                     await snapshot.forEach((child) => {
                         const funExec = async () => {
-                            let hasUpdated = false;
+                            const childVal = child.val();
+
                             let hasUpdatedGols = false;
                             let hasUpdatedCartoes = false;
                             let hasUpdatedConfirmados = false;
                             let hasUpdatedEscalacao = false;
                             let hasUpdatedSubs = false;
-                            
-                            const golsUpdated = _.map(
-                                child.val().gols, (gol) => {
-                                if (!gol.push && 
+
+                            hasUpdatedGols = _.findIndex(childVal.gols, (gol) => 
+                                (
+                                    !gol.push && 
                                     gol.key === keyUser && 
                                     gol.nome !== newNome
-                                    ) {
-                                        hasUpdated = true;
-                                        hasUpdatedGols = true;
-                                        return { ...gol, nome: newNome };
-                                }
-
-                                return gol;
-                            });
-
-                            const cartoesUpdated = _.map(
-                                child.val().cartoes, (cartao) => {
-                                if (!cartao.push && 
-                                    cartao.key === keyUser && 
-                                    (cartao.imgAvatar !== newImg ||
-                                    cartao.nome !== newNome)
-                                    ) {
-                                        hasUpdated = true;
-                                        hasUpdatedCartoes = true;
-                                        return { ...cartao, nome: newNome };
-                                }
-
-                                return cartao;
-                            });
-
-                            const confirmadosUpdated = _.map(
-                                child.val().confirmados, (confirmado) => {
-                                if (!confirmado.push && 
-                                    confirmado.key === keyUser && 
-                                    (confirmado.imgAvatar !== newImg ||
-                                    confirmado.nome !== newNome)
-                                    ) {
-                                        hasUpdated = true;
-                                        hasUpdatedConfirmados = true;
-                                        return { ...confirmado, imgAvatar: newImg, nome: newNome };
-                                }
-
-                                return confirmado;
-                            });
-            
-                            const escalacaoUpdated = _.map(child.val().escalacao, (sides, key) => {
-                                let hasChangedSide = false;
-                                const newSides = _.map(sides, (side) => {
-                                    if (!side.push && 
-                                        side.key === keyUser && 
-                                        (side.imgAvatar !== newImg || side.nome !== newNome)
-                                        ) {
-                                            hasUpdated = true;
-                                            hasUpdatedEscalacao = true;
-                                            hasChangedSide = true;
-                                            return { ...side, imgAvatar: newImg, nome: newNome };
-                                    }
-
-                                    return side;
-                                });
-
-                                if (hasChangedSide) {
-                                    return { [key]: newSides };
-                                }
-
-                                return { [key]: sides };
-                            });
-
-                            let copyEscalacao = {};
-                            for (const side of escalacaoUpdated) {
-                                copyEscalacao = { ...copyEscalacao, ...side };
-                            }
+                                )
+                            ) !== -1;
                             
-                            const subsUpdated = _.map(child.val().subs, (subs) => {
-                                if (!subs.push) {
-                                    let hasChangedSub = false;
-                                    let newSub = {};
+                            hasUpdatedCartoes = _.findIndex(
+                                childVal.cartoes, (cartao) => 
+                                    (
+                                        !cartao.push && 
+                                        cartao.key === keyUser && 
+                                        (cartao.imgAvatar !== newImg ||
+                                        cartao.nome !== newNome)
+                                    )
+                            ) !== -1;
 
+                            hasUpdatedConfirmados = _.findIndex(
+                                childVal.confirmados, (confirmado) => 
+                                    (
+                                        !confirmado.push && 
+                                        confirmado.key === keyUser && 
+                                        (confirmado.imgAvatar !== newImg ||
+                                        confirmado.nome !== newNome)
+                                    )
+                            ) !== -1;
+
+                            hasUpdatedEscalacao = _.findIndex(_.values(childVal.escalacao), 
+                                (sidesE) => {
+                                    const founded = _.findIndex(sidesE, (sideE) => 
+                                            !sideE.push && 
+                                            sideE.key === keyUser && 
+                                            (sideE.imgAvatar !== newImg || sideE.nome !== newNome)
+                                    ) !== -1;
+
+                                    return founded;
+                            }) !== -1;
+
+                            hasUpdatedSubs = _.findIndex(childVal.subs, (subs) => {
+                                if (!subs.push) {
                                     if (!subs.jogadorIn.push && 
                                         subs.jogadorIn.key === keyUser && 
                                         (subs.jogadorIn.imgAvatar !== newImg || 
                                             subs.jogadorIn.nome !== newNome)
                                         ) {
-                                            hasUpdated = true;
-                                            hasUpdatedSubs = true;
-                                            hasChangedSub = true;
-                                            newSub = { 
-                                                ...subs, 
-                                                jogadorIn: { 
-                                                    ...subs.jogadorIn, 
-                                                    imgAvatar: newImg,
-                                                    nome: newNome
-                                                } 
-                                            };
-                                    }
-
-                                    if (hasChangedSub) {
-                                        return newSub;
+                                            return true;
                                     }
 
                                     if (!subs.jogadorOut.push && 
@@ -286,70 +242,185 @@ export const updateUserDB = (
                                         (subs.jogadorOut.imgAvatar !== newImg || 
                                         subs.jogadorOut.nome !== newNome)
                                         ) {
-                                            hasUpdated = true;
-                                            hasUpdatedSubs = true;
-                                            hasChangedSub = true;
-                                            newSub = { 
-                                                ...newSub, 
-                                                jogadorOut: { 
-                                                    ...subs.jogadorOut, 
-                                                    imgAvatar: newImg,
-                                                    nome: newNome 
-                                                } 
-                                            };
+                                            return true;
                                     }
 
-                                    if (hasChangedSub) {
-                                        return newSub;
-                                    }
+                                    return false;
                                 }
 
-                                return subs;
-                            });
-            
-                            if (hasUpdated) {
-                                let updates = {};
+                                return false;
+                            }) !== -1;
                             
-                                if (hasUpdatedGols) {
-                                    updates = { ...updates, gols: golsUpdated };
-                                }
+                            if (hasUpdatedGols || hasUpdatedCartoes || hasUpdatedConfirmados || 
+                                hasUpdatedEscalacao || hasUpdatedSubs) {
+                                await child.ref.once('value', async snapNew => {
+                                    const snapNewVal = snapNew.val();
+                                    let updates = {};
 
-                                if (hasUpdatedCartoes) {
-                                    updates = { ...updates, cartoes: cartoesUpdated };
-                                }
+                                    if (hasUpdatedGols) {
+                                        const golsUpdated = _.map(
+                                            snapNewVal.gols, (gol) => {
+                                            if (!gol.push && 
+                                                gol.key === keyUser && 
+                                                gol.nome !== newNome
+                                                ) {
+                                                    return { ...gol, nome: newNome };
+                                            }
+            
+                                            return gol;
+                                        });
 
-                                if (hasUpdatedConfirmados) {
-                                    updates = { ...updates, confirmados: confirmadosUpdated };
-                                }
+                                        updates = { ...updates, gols: golsUpdated };
+                                    }
 
-                                if (hasUpdatedEscalacao) {
-                                    updates = { ...updates, escalacao: copyEscalacao };
-                                }
+                                    if (hasUpdatedCartoes) {
+                                        const cartoesUpdated = _.map(
+                                            childVal.cartoes, (cartao) => {
+                                            if (!cartao.push && 
+                                                cartao.key === keyUser && 
+                                                (cartao.imgAvatar !== newImg ||
+                                                cartao.nome !== newNome)
+                                                ) {
+                                                    return { ...cartao, nome: newNome };
+                                            }
+            
+                                            return cartao;
+                                        });
 
-                                if (hasUpdatedSubs) {
-                                    updates = { ...updates, subs: subsUpdated };
-                                }
-                
-                                await child.ref.update({
-                                    ...updates
-                                })
-                                .then(async () => { 
-                                    lastIndex++;
+                                        updates = { ...updates, cartoes: cartoesUpdated };
+                                    }
+    
+                                    if (hasUpdatedConfirmados) {
+                                        const confirmadosUpdated = _.map(
+                                            childVal.confirmados, (confirmado) => {
+                                            if (!confirmado.push && 
+                                                confirmado.key === keyUser && 
+                                                (confirmado.imgAvatar !== newImg ||
+                                                confirmado.nome !== newNome)
+                                                ) {
+                                                    return { 
+                                                        ...confirmado, 
+                                                        imgAvatar: newImg, 
+                                                        nome: newNome 
+                                                    };
+                                            }
+            
+                                            return confirmado;
+                                        });
+
+                                        updates = { ...updates, confirmados: confirmadosUpdated };
+                                    }
                                     
-                                    /* Caso o update não falhou em nenhum caso entao 
-                                    atualiza o status do usuarios de update */
-                                    if (numChilds === lastIndex && !childFailed) {
-                                        dbUserRef.update({
-                                            jogosImgUpdated: 'true'
-                                        })
-                                        .then(() => true)
-                                        .catch(() => true);
-                                    } 
-                                    await true; 
-                                })
-                                .catch(async () => {
-                                    childFailed = true;
-                                    await true; 
+                                    if (hasUpdatedEscalacao) {
+                                        const escalacaoUpdated = _.map(
+                                            childVal.escalacao, (sides, key) => {
+                                            let hasChangedSide = false;
+                                            const newSides = _.map(sides, (side) => {
+                                                if (!side.push && 
+                                                    side.key === keyUser && 
+                                                    (side.imgAvatar !== newImg || 
+                                                    side.nome !== newNome)
+                                                    ) {
+                                                        hasChangedSide = true;
+                                                        return { 
+                                                            ...side, 
+                                                            imgAvatar: newImg, 
+                                                            nome: newNome 
+                                                        };
+                                                }
+            
+                                                return side;
+                                            });
+            
+                                            if (hasChangedSide) {
+                                                return { [key]: newSides };
+                                            }
+            
+                                            return { [key]: sides };
+                                        });
+            
+                                        let copyEscalacao = {};
+                                        for (const side of escalacaoUpdated) {
+                                            copyEscalacao = { ...copyEscalacao, ...side };
+                                        }
+
+                                        updates = { ...updates, escalacao: copyEscalacao };
+                                    }
+    
+                                    if (hasUpdatedSubs) {
+                                        const subsUpdated = _.map(childVal.subs, (subs) => {
+                                            if (!subs.push) {
+                                                let hasChangedSub = false;
+                                                let newSub = {};
+            
+                                                if (!subs.jogadorIn.push && 
+                                                    subs.jogadorIn.key === keyUser && 
+                                                    (subs.jogadorIn.imgAvatar !== newImg || 
+                                                        subs.jogadorIn.nome !== newNome)
+                                                    ) {
+                                                        hasChangedSub = true;
+                                                        newSub = { 
+                                                            ...subs, 
+                                                            jogadorIn: { 
+                                                                ...subs.jogadorIn, 
+                                                                imgAvatar: newImg,
+                                                                nome: newNome
+                                                            } 
+                                                        };
+                                                }
+            
+                                                if (hasChangedSub) {
+                                                    return newSub;
+                                                }
+            
+                                                if (!subs.jogadorOut.push && 
+                                                    subs.jogadorOut.key === keyUser && 
+                                                    (subs.jogadorOut.imgAvatar !== newImg || 
+                                                    subs.jogadorOut.nome !== newNome)
+                                                    ) {
+                                                        hasChangedSub = true;
+                                                        newSub = { 
+                                                            ...newSub, 
+                                                            jogadorOut: { 
+                                                                ...subs.jogadorOut, 
+                                                                imgAvatar: newImg,
+                                                                nome: newNome 
+                                                            } 
+                                                        };
+                                                }
+            
+                                                if (hasChangedSub) {
+                                                    return newSub;
+                                                }
+                                            }
+            
+                                            return subs;
+                                        });
+
+                                        updates = { ...updates, subs: subsUpdated };
+                                    }
+
+                                    await child.ref.update({
+                                        ...updates
+                                    })
+                                    .then(async () => { 
+                                        lastIndex++;
+                                        
+                                        /* Caso o update não falhou em nenhum caso entao 
+                                        atualiza o status do usuarios de update */
+                                        if (numChilds === lastIndex && !childFailed) {
+                                            dbUserRef.update({
+                                                jogosImgUpdated: 'true'
+                                            })
+                                            .then(() => true)
+                                            .catch(() => true);
+                                        } 
+                                        await true; 
+                                    })
+                                    .catch(async () => {
+                                        childFailed = true;
+                                        await true; 
+                                    });
                                 });
                             }
                         };

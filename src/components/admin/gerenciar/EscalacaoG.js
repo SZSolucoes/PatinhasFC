@@ -557,7 +557,7 @@ class EscalacaoG extends React.Component {
                             this.state.loadingEscal === index && 
                             this.state.loadingEscalSide === side ?
                             (
-                                <ActivityIndicator size={'large'} color={colorAppS} />
+                                <ActivityIndicator size={'small'} color={colorAppS} />
                             )
                             :
                             (

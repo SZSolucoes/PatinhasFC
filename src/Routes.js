@@ -152,7 +152,28 @@ class Routes extends React.Component {
                 payload: false
             });
 
-            if (Actions.currentScene === 'mainTabBar') {
+            const asyncFunExec = async () => {
+                store.dispatch({
+                    type: 'modifica_startupordownanim_info',
+                    payload: 'down'
+                });
+                store.dispatch({
+                    type: 'modifica_showsharemodal_info',
+                    payload: false
+                });
+                store.dispatch({
+                    type: 'modifica_showimageview_info',
+                    payload: false
+                });
+                store.dispatch({
+                    type: 'modifica_showimageview_imagens',
+                    payload: false
+                });
+            };
+
+            asyncFunExec();
+
+            if ('|mainTabBar|_jogos|_informativos|_perfil|_admin|'.includes(Actions.currentScene)) {
                 return true;
             }
 
@@ -227,7 +248,28 @@ class Routes extends React.Component {
             payload: false
         });
 
-        if (Actions.currentScene === 'mainTabBar') {
+        const asyncFunExec = async () => {
+            store.dispatch({
+                type: 'modifica_startupordownanim_info',
+                payload: 'down'
+            });
+            store.dispatch({
+                type: 'modifica_showsharemodal_info',
+                payload: false
+            });
+            store.dispatch({
+                type: 'modifica_showimageview_info',
+                payload: false
+            });
+            store.dispatch({
+                type: 'modifica_showimageview_imagens',
+                payload: false
+            });
+        };
+
+        asyncFunExec();
+
+        if ('|mainTabBar|_jogos|_informativos|_perfil|_admin|'.includes(Actions.currentScene)) {
             return true;
         }
 
