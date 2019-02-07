@@ -9,7 +9,7 @@ import {
     TouchableWithoutFeedback,
     Image
 } from 'react-native';
-import { Card, Icon, List, ListItem } from 'react-native-elements';
+import { Card, Icon, List, ListItem, Badge } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import { colorAppF } from '../../../utils/constantes';
@@ -317,6 +317,9 @@ class EscalacaoH extends React.Component {
                         >
                             Confirmados
                         </Text>
+                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                            <Badge value={numjogadoresConfirmados} />
+                        </View>
                     </View>
                 </View>
                 <List 

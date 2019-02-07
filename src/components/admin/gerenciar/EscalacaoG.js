@@ -12,7 +12,7 @@ import {
     Alert,
     ActivityIndicator
 } from 'react-native';
-import { Card, Icon, List, ListItem } from 'react-native-elements';
+import { Card, Icon, List, ListItem, Badge } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
@@ -701,6 +701,9 @@ class EscalacaoG extends React.Component {
                         >
                             Confirmados
                         </Text>
+                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                            <Badge value={numjogadoresConfirmados} />
+                        </View>
                     </View>
                 </View>
                 <List 

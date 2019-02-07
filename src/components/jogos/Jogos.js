@@ -92,42 +92,44 @@ class Jogos extends React.Component {
 
     componentDidMount() {
         this.startOrStopFBJogosListener(true);
-        const dbFbRef = firebase.database().ref();
-        const userNode = dbFbRef.child(`usuarios/${b64.encode(this.props.username)}`);
-        
-        AsyncStorage.getItem(mappedKeyStorage('userNotifToken')).then((userNotifToken) => {
-            const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
-            if (userNotifToken) {
-                userNode.update({
-                    dataHoraUltimoLogin: dataAtual,
-                    userNotifToken
-                })
-                .then(() => true)
-                .catch(() => true);
-            } else {
-                userNode.update({
-                    dataHoraUltimoLogin: dataAtual
-                })
-                .then(() => true)
-                .catch(() => true);
-            }
-        });
-
-        userNode.once('value', (snapshot) => {
-            if (snapshot.val()) {
-                if (snapshot.val().infoImgUpdated === 'false' || 
-                snapshot.val().jogosImgUpdated === 'false') {
-                    setTimeout(() => updateUserDB(
-                        snapshot.val().infoImgUpdated,
-                        snapshot.val().jogosImgUpdated,
-                        snapshot.val().email, 
-                        snapshot.key, 
-                        snapshot.val().imgAvatar,
-                        snapshot.val().nome
-                    ), 2000);
+        if (this.props.username) {
+            const dbFbRef = firebase.database().ref();
+            const userNode = dbFbRef.child(`usuarios/${b64.encode(this.props.username)}`);
+            
+            AsyncStorage.getItem(mappedKeyStorage('userNotifToken')).then((userNotifToken) => {
+                const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
+                if (userNotifToken) {
+                    userNode.update({
+                        dataHoraUltimoLogin: dataAtual,
+                        userNotifToken
+                    })
+                    .then(() => true)
+                    .catch(() => true);
+                } else {
+                    userNode.update({
+                        dataHoraUltimoLogin: dataAtual
+                    })
+                    .then(() => true)
+                    .catch(() => true);
                 }
-            }
-        });
+            });
+    
+            userNode.once('value', (snapshot) => {
+                if (snapshot.val()) {
+                    if (snapshot.val().infoImgUpdated === 'false' || 
+                    snapshot.val().jogosImgUpdated === 'false') {
+                        setTimeout(() => updateUserDB(
+                            snapshot.val().infoImgUpdated,
+                            snapshot.val().jogosImgUpdated,
+                            snapshot.val().email, 
+                            snapshot.key, 
+                            snapshot.val().imgAvatar,
+                            snapshot.val().nome
+                        ), 2000);
+                    }
+                }
+            });
+        }
         
         Dimensions.addEventListener('change', this.onChangeDimensions);
 

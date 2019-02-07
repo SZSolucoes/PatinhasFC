@@ -137,7 +137,7 @@ const onLoginSuccess = (dispatch, params) => {
                 type: 'modifica_indicator_login',
                 payload: false
             });
-            showAlert('warning', 'Aviso!', 'Email não cadastradoo.');
+            showAlert('warning', 'Aviso!', 'Email não cadastrado.');
         }
     });
 };

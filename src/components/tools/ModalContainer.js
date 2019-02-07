@@ -11,7 +11,7 @@ import {
     Text
 } from 'react-native';
 import { Card, Icon, Divider } from 'react-native-elements';
-import { colorAppF, colorAppS } from '../../utils/constantes';
+import { colorAppF } from '../../utils/constantes';
 
 export class ModalContainer extends React.Component {
 

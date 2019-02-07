@@ -33,7 +33,7 @@ export default (state = INITIAL_STATE, action) => {
                 ...state, 
                 remove: action.payload 
             };
-        case 'modifica_clean_login':
+        case 'modifica_clean_alertscl':
             return {
                 ...state,
                 showAlertScl: false,

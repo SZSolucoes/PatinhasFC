@@ -4,7 +4,9 @@ import {
     StyleSheet,
     AsyncStorage,
     Dimensions,
-    Text
+    Text,
+    TouchableWithoutFeedback,
+    Linking
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -25,6 +27,7 @@ import { updateUserDB, checkPerfil } from '../../utils/userUtils';
 import firebase from '../../Firebase';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 import perfilBgUserImg from '../../imgs/backgrounduserimg.jpg';
+import { store } from '../../App';
 
 class Profile extends React.Component {
 
@@ -45,7 +48,12 @@ class Profile extends React.Component {
         AsyncStorage.removeItem(mappedKeyStorage('username'));
         AsyncStorage.removeItem(mappedKeyStorage('password'));
 
-        Actions.replace('login');
+        store.dispatch({
+            type: 'modifica_safeclean_login',
+            payload: ''
+        });
+
+        Actions.reset('login');
     }
 
     onPressUserImg(type) {
@@ -161,15 +169,16 @@ class Profile extends React.Component {
 
     render() {
         const { userLogged } = this.props;
-        const userImg = userLogged.imgAvatar ? { uri: userLogged.imgAvatar } : perfilUserImg;
-        const imgBg = userLogged.imgBackground ? 
-            { uri: userLogged.imgBackground } : perfilBgUserImg;
-        const username = userLogged.nome ? userLogged.nome : 'Patinhas';
+        const currentUser = userLogged || {};
+        const userImg = currentUser.imgAvatar ? { uri: currentUser.imgAvatar } : perfilUserImg;
+        const imgBg = currentUser.imgBackground ? 
+            { uri: currentUser.imgBackground } : perfilBgUserImg;
+        const username = currentUser.nome ? currentUser.nome : 'Patinhas';
         let enqueteProps = {};
-        let posicao = userLogged.tipoPerfil ? checkPerfil(userLogged.tipoPerfil) : 'Visitante';
+        let posicao = currentUser.tipoPerfil ? checkPerfil(currentUser.tipoPerfil) : 'Visitante';
 
-        if ('0|255'.includes(userLogged.level)) {
-            posicao = checkPerfil(userLogged.level);
+        if ('0|255'.includes(currentUser.level)) {
+            posicao = checkPerfil(currentUser.level);
         }
         
         if (this.props.enqueteProps && 
@@ -300,7 +309,7 @@ class Profile extends React.Component {
                             width: '100%' 
                         }}
                     >
-                        <View style={{ marginVertical: 20, flexDirection: 'row' }}>
+                        <View style={{ marginVertical: 25, flexDirection: 'row' }}>
                             <View style={{ marginHorizontal: 10 }}>
                                 <Text style={{ fontSize: 16, color: 'black' }}>
                                     Versão:
@@ -308,8 +317,21 @@ class Profile extends React.Component {
                             </View>
                             <View style={{ marginHorizontal: 10 }}>
                                 <Text style={{ fontSize: 16, color: 'black' }}>
-                                    1.0.6
+                                    1.0.7
                                 </Text>
+                            </View>
+                        </View>
+                        <View style={{ marginBottom: 20, flexDirection: 'row' }}>
+                            <View style={{ marginHorizontal: 5, marginVertical: 5 }}>
+                                <TouchableWithoutFeedback
+                                    onPress={
+                                        () => Linking.openURL('mailto:suporte@szsolucoes.com.br')
+                                    }
+                                >
+                                    <Text style={{ fontSize: 14, color: 'blue' }}>
+                                        suporte@szsolucoes.com.br
+                                    </Text>
+                                </TouchableWithoutFeedback>
                             </View>
                         </View>
                         <View style={{ marginTop: 5 }}>

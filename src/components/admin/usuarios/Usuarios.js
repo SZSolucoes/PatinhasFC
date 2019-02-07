@@ -6,7 +6,8 @@ import {
     TouchableOpacity,
     Text,
     Switch,
-    Platform
+    Platform,
+    ActivityIndicator
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -26,6 +27,7 @@ import { colorAppS, colorAppF } from '../../../utils/constantes';
 import { retrieveImgSource } from '../../../utils/imageStorage';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { showAlert } from '../../../utils/store';
+import firebase from '../../../Firebase';
 import UsuarioEdit from './UsuarioEdit';
 import {
     modificaFilterStr,
@@ -36,6 +38,7 @@ import {
 } from '../../../actions/UsuariosActions';
 import { modificaRemocao } from '../../../actions/AlertSclActions';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
+import { store } from '../../../App';
 
 class Usuarios extends React.Component {
 
@@ -52,13 +55,15 @@ class Usuarios extends React.Component {
             nomeForm: '',
             data: '',
             tipoPerfil: '',
-            tipoUsuario: '1'
+            tipoUsuario: '1',
+            refresh: false
         };
 
         this.scrollView = null;
 
         this.renderEditar = this.renderEditar.bind(this);
         this.renderSwitchType = this.renderSwitchType.bind(this);
+        this.onPressBack = this.onPressBack.bind(this);
         this.onPressEditRemove = this.onPressEditRemove.bind(this);
         this.onFilterPermissions = this.onFilterPermissions.bind(this);
         this.onChangeSuperState = this.onChangeSuperState.bind(this);
@@ -70,6 +75,44 @@ class Usuarios extends React.Component {
 
     componentWillUnmount() {
         this.props.modificaClean();
+    }
+
+    onPressBack(refresh = false) {
+        this.scrollView.scrollTo({
+            y: 0,
+            duration: 0,
+            animated: false
+        });
+
+        if (refresh) {
+            this.setState({
+                modalOpt: 'Editar',
+                idxMdl: 1,
+                refresh: true
+            });
+            firebase.database().ref().child('usuarios').once('value', snap => {
+                let snapVal = null;
+                if (snap) {
+                    snapVal = snap.val();
+                }
+
+                if (snapVal) {
+                    store.dispatch({
+                        type: 'modifica_listusuarios_usuarios',
+                        payload: _.map(snapVal, (value, key) => ({ key, ...value }))
+                    });
+                }
+                this.setState({
+                    refresh: false
+                });
+            });
+        } else {
+            this.setState({
+                modalOpt: 'Editar',
+                idxMdl: 1,
+                refresh: false
+            });
+        }
     }
 
     onPressEditRemove(item) {
@@ -212,6 +255,7 @@ class Usuarios extends React.Component {
             );
         }
 
+        setTimeout(() => this.setState({ refresh: false }), 1000);
         setTimeout(() => this.props.modificaFilterLoad(false), 1000);
         return usuariosView;
     }
@@ -271,7 +315,8 @@ class Usuarios extends React.Component {
         switch (modalOpt) {
             case 'Cadastrar':
                 return (
-                    <UsuarioEdit 
+                    <UsuarioEdit
+                        onPressBack={this.onPressBack}
                         scrollView={() => this.scrollView}
                         email={this.state.email}
                         senha={this.state.senha}
@@ -287,7 +332,8 @@ class Usuarios extends React.Component {
                 return this.renderEditar();
             case 'Em Edição':
                 return (
-                    <UsuarioEdit 
+                    <UsuarioEdit
+                        onPressBack={this.onPressBack}
                         scrollView={() => this.scrollView}
                         email={this.state.itemEdit.email}
                         senha={this.state.itemEdit.senha}
@@ -301,7 +347,8 @@ class Usuarios extends React.Component {
                     />);
             default:
                 return (
-                    <UsuarioEdit 
+                    <UsuarioEdit
+                        onPressBack={this.onPressBack}
                         scrollView={() => this.scrollView}
                         email={this.state.email}
                         senha={this.state.senha}
@@ -338,6 +385,23 @@ class Usuarios extends React.Component {
                                             duration: 0,
                                             animated: false
                                         });
+
+                                        if (index === 1) {
+                                            this.setState({
+                                                refresh: true,
+                                                idxMdl: index
+                                            });
+
+                                            setTimeout(() => {
+                                                this.setState({
+                                                    modalOpt: buttonsGroup[index],
+                                                    refresh: false
+                                                });
+                                            }, 1000);
+
+                                            return;
+                                        }
+
                                         this.setState({
                                             modalOpt: buttonsGroup[index],
                                             idxMdl: index
@@ -384,17 +448,7 @@ class Usuarios extends React.Component {
                         (
                             <TouchableOpacity
                                 style={styles.viewGroupBtnRed}
-                                onPress={() => {
-                                    this.scrollView.scrollTo({
-                                        y: 0,
-                                        duration: 0,
-                                        animated: false
-                                    });
-                                    this.setState({
-                                        modalOpt: 'Editar',
-                                        idxMdl: 1
-                                    }); 
-                                }}
+                                onPress={() => this.onPressBack()}
                             >
                                 <View>
                                     <Text 
@@ -432,11 +486,23 @@ class Usuarios extends React.Component {
                     }}
                 />
                 <ScrollView 
-                    style={{ flex: 1 }} 
+                    style={{ flex: 1 }}
+                    contentContainerStyle={{ flexGrow: 1 }}
                     ref={(ref) => { this.scrollView = ref; }}
                     keyboardShouldPersistTaps={'handled'}
                 >
-                    { this.renderSwitchType(this.state.modalOpt) }
+                    {
+                        this.state.refresh ?
+                        (
+                            <View
+                                style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                <ActivityIndicator size='large' color={colorAppS} />
+                            </View>
+                        )
+                        :
+                        this.renderSwitchType(this.state.modalOpt)
+                    }
                 </ScrollView>
             </View>
         );

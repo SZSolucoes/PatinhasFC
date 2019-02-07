@@ -4,7 +4,8 @@ import {
     ScrollView, 
     StyleSheet,
     TouchableOpacity,
-    Text
+    Text,
+    ActivityIndicator
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -24,6 +25,7 @@ import { retrieveImgSource } from '../../../utils/imageStorage';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { showAlert } from '../../../utils/store';
 import { limitDotText } from '../../../utils/strComplex';
+import firebase from '../../../Firebase';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
 import {
     modificaFilterLoad,
@@ -33,6 +35,7 @@ import {
     modificaClean
 } from '../../../actions/InfoActions';
 import { modificaRemocao } from '../../../actions/AlertSclActions';
+import { store } from '../../../App';
 
 class Info extends React.Component {
 
@@ -47,16 +50,17 @@ class Info extends React.Component {
             titulo: '',
             imgsArticleUri: [],
             descricao: '',
-            linkExt: ''
+            linkExt: '',
+            refresh: false
         };
 
         this.scrollView = null;
 
         this.renderEditar = this.renderEditar.bind(this);
         this.renderSwitchType = this.renderSwitchType.bind(this);
+        this.onPressBack = this.onPressBack.bind(this);
         this.onPressEditRemove = this.onPressEditRemove.bind(this);
         this.onChangeSuperState = this.onChangeSuperState.bind(this);
-        this.onCLickBack = this.onCLickBack.bind(this);
         this.renderListInfosEdit = this.renderListInfosEdit.bind(this);
         this.onFilterInfosEdit = this.onFilterInfosEdit.bind(this);
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
@@ -65,6 +69,44 @@ class Info extends React.Component {
 
     componentWillUnmount() {
         this.props.modificaClean();
+    }
+
+    onPressBack(refresh = false) {
+        this.scrollView.scrollTo({
+            y: 0,
+            duration: 0,
+            animated: false
+        });
+
+        if (refresh) {
+            this.setState({
+                modalOpt: 'Editar',
+                idxMdl: 1,
+                refresh: true
+            });
+            firebase.database().ref().child('informativos').once('value', snap => {
+                let snapVal = null;
+                if (snap) {
+                    snapVal = snap.val();
+                }
+
+                if (snapVal) {
+                    store.dispatch({
+                        type: 'modifica_listinfos_info',
+                        payload: _.map(snapVal, (value, key) => ({ key, ...value }))
+                    });
+                }
+                this.setState({
+                    refresh: false
+                });
+            });
+        } else {
+            this.setState({
+                modalOpt: 'Editar',
+                idxMdl: 1,
+                refresh: false
+            });
+        }
     }
 
     onPressEditRemove(item) {
@@ -87,18 +129,6 @@ class Info extends React.Component {
                 (usuario.textArticle && usuario.textArticle.toLowerCase().includes(lowerFilter)) ||
                 (usuario.dataPost && usuario.dataPost.toLowerCase().includes(lowerFilter))
         ));
-    }
-
-    onCLickBack() {    
-        this.scrollView.scrollTo({
-            y: 0,
-            duration: 0,
-            animated: false
-        });
-        this.setState({
-            modalOpt: 'Editar',
-            idxMdl: 1
-        });  
     }
 
     renderIcons(item) {
@@ -168,9 +198,6 @@ class Info extends React.Component {
         if (infos.length) {
             infosView = (
                 reverseInfos.map((item, index) => {
-                    if ((index + 1) > 30) {
-                        return false;
-                    }
                     const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                     const nomeUser = item.nomeUser ? item.nomeUser : 'Patinhas';
                     const perfilUser = item.perfilUser ? item.perfilUser : 'Administrador';
@@ -220,6 +247,7 @@ class Info extends React.Component {
             );
         }
 
+        setTimeout(() => this.setState({ refresh: false }), 1000);
         setTimeout(() => this.props.modificaFilterLoad(false), 1000);
         return infosView;
     }
@@ -301,7 +329,7 @@ class Info extends React.Component {
                         descricao={this.state.itemEdit.textArticle}
                         linkExt={this.state.itemEdit.linkArticle}
                         keyItem={this.state.itemEdit.key}
-                        onCLickBack={this.onCLickBack}
+                        onPressBack={this.onPressBack}
                     />);
             default:
                 return (
@@ -339,6 +367,23 @@ class Info extends React.Component {
                                             duration: 0,
                                             animated: false
                                         });
+
+                                        if (index === 1) {
+                                            this.setState({
+                                                refresh: true,
+                                                idxMdl: index
+                                            });
+
+                                            setTimeout(() => {
+                                                this.setState({
+                                                    modalOpt: buttonsGroup[index],
+                                                    refresh: false
+                                                });
+                                            }, 1000);
+
+                                            return;
+                                        }
+
                                         this.setState({
                                             modalOpt: buttonsGroup[index],
                                             idxMdl: index
@@ -385,7 +430,7 @@ class Info extends React.Component {
                         (
                             <TouchableOpacity
                                 style={styles.viewGroupBtnRed}
-                                onPress={() => this.onCLickBack()}
+                                onPress={() => this.onPressBack()}
                             >
                                 <View>
                                     <Text 
@@ -423,11 +468,23 @@ class Info extends React.Component {
                     }}
                 />
                 <ScrollView 
-                    style={{ flex: 1 }} 
+                    style={{ flex: 1 }}
+                    contentContainerStyle={{ flexGrow: 1 }}
                     ref={(ref) => { this.scrollView = ref; }}
                     keyboardShouldPersistTaps={'handled'}
                 >
-                    { this.renderSwitchType(this.state.modalOpt) }
+                    {
+                        this.state.refresh ?
+                        (
+                            <View
+                                style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+                            >
+                                <ActivityIndicator size='large' color={colorAppS} />
+                            </View>
+                        )
+                        :
+                        this.renderSwitchType(this.state.modalOpt)
+                    }
                 </ScrollView>
             </View>
         );

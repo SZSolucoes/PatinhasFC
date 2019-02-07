@@ -1,9 +1,11 @@
 
 import _ from 'lodash';
+import { AsyncStorage } from 'react-native';
 import b64 from 'base-64';
 import { store } from '../App';
 import firebase from '../Firebase';
 import { usuarioAttr } from './userUtils';
+import { mappedKeyStorage } from './store';
 
 let jogosListener = null;
 let infosListener = null;
@@ -125,6 +127,20 @@ export const startFbListener = (name, params) => {
                         };
 
                         asyncFunKeys();
+
+                        AsyncStorage.getItem(mappedKeyStorage('username'))
+                        .then(value => {
+                            if (value && value !== snapVal.email) {
+                                AsyncStorage.setItem(mappedKeyStorage('username'), snapVal.email);
+                            }
+                        }).catch(() => false);
+
+                        AsyncStorage.getItem(mappedKeyStorage('password'))
+                        .then(value => {
+                            if (value && value !== snapVal.senha) {
+                                AsyncStorage.setItem(mappedKeyStorage('password'), snapVal.senha);
+                            }
+                        }).catch(() => false);
 
                         store.dispatch({
                             type: 'modifica_userlogged_login',

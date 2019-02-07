@@ -145,35 +145,48 @@ class EditPerfil extends React.Component {
 
         firebase.auth().signInWithEmailAndPassword(user.email, userLogged.senha)
         .then(() => {
-            dbUsuariosRef.update({
-                senha: novaSenha
-            })
-            .then(() => {
-                user.updatePassword(novaSenha).then(() => {
-                    this.setState({ loadingSenha: false });
+            user.updatePassword(novaSenha).then(() => {
+                dbUsuariosRef.update({
+                    senha: novaSenha
+                })
+                .then(() => {
                     AsyncStorage.setItem(mappedKeyStorage('password'), novaSenha);
-                    showAlert('success', 'Sucesso!', 'Senha alterada com sucesso.');
-                }).catch((error) => {
-                    this.setState({ loadingSenha: false });
+                    firebase.auth().signInWithEmailAndPassword(user.email, novaSenha)
+                    .then(() => {
+                        this.setState({ loadingSenha: false });
+                        showAlert('success', 'Sucesso!', 'Senha alterada com sucesso.');
+                    })
+                    .catch(() => {
+                        this.setState({ loadingSenha: false });
 
-                    if (error && error.code && error.code === 'auth/weak-password') {
-                        showAlert('danger', 'Erro!', 'A senha informada é insegura.');
-                    } else {
                         showAlert(
                             'danger', 
                             'Ops!', 
-                            'Ocorreu um erro ao alterar a senha.'
+                            'Ocorreu um erro ao alterar a senha. ERRO:0021'
                         );
-                    }
+                    });
+                })
+                .catch(() => {
+                    this.setState({ loadingSenha: false });
+
+                    showAlert(
+                        'danger', 
+                        'Ops!', 
+                        'Ocorreu um erro ao alterar a senha. ERRO:0022'
+                    );
                 });
-            })
-            .catch(() => {
+            }).catch((error) => {
                 this.setState({ loadingSenha: false });
-                showAlert(
-                    'danger', 
-                    'Ops!', 
-                    'Ocorreu um erro ao alterar a senha.'
-                );
+
+                if (error && error.code && error.code === 'auth/weak-password') {
+                    showAlert('danger', 'Erro!', 'A senha informada é insegura.');
+                } else {
+                    showAlert(
+                        'danger', 
+                        'Ops!', 
+                        'Ocorreu um erro ao alterar a senha. ERRO:0023'
+                    );
+                }
             });
         })
         .catch(() => {
@@ -181,7 +194,7 @@ class EditPerfil extends React.Component {
             showAlert(
                 'danger', 
                 'Ops!', 
-                'Ocorreu um erro ao alterar a senha.'
+                'Ocorreu um erro ao alterar a senha. ERRO:0024'
             );
         });
     }

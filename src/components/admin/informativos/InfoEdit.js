@@ -114,7 +114,7 @@ class UsuarioEdit extends React.Component {
         const { 
             titulo, descricao, linkExt, scrollView, imgsArticleUri 
         } = this.state;
-        const { keyItem, userLogged, userLevel, onCLickBack } = this.props;
+        const { keyItem, userLogged, userLevel, onPressBack } = this.props;
         const protocol = linkExt.substr(0, 4);
         let linkArticle = linkExt;
         let dataStr = '';
@@ -293,7 +293,7 @@ class UsuarioEdit extends React.Component {
                         showAlert(
                             'success', 'Sucesso!', 'Edição realizada com sucesso.'
                         );
-                        onCLickBack();
+                        onPressBack(true);
                     } else {
                         showAlert(
                             'success', 'Sucesso!', 'Cadastro realizado com sucesso.'
@@ -315,7 +315,7 @@ class UsuarioEdit extends React.Component {
                 .then(() => {
                     this.setState({ loading: false, isTitValid: false });
                     showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
-                    onCLickBack();
+                    onPressBack(true);
                 })
                 .catch(() => {
                     this.setState({ loading: false, isTitValid: false });

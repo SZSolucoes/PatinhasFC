@@ -28,6 +28,7 @@ import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { usuarioAttr, updateUserDB } from '../../../utils/userUtils';
+import { store } from '../../../App';
 
 class UsuarioEdit extends React.Component {
 
@@ -74,6 +75,10 @@ class UsuarioEdit extends React.Component {
         const updatesName = {};
         const newName = nome;
         const oldName = this.props.nome;
+        const odlEmail = this.props.email;
+        const odlPw = this.props.senha;
+
+        const { userLogged } = this.props;
 
         if (newName !== oldName) {
             updatesName.infoImgUpdated = 'false';
@@ -119,38 +124,66 @@ class UsuarioEdit extends React.Component {
         databaseRef.child(`usuarios/${emailUser64}`);
 
         if (keyItem) {
-            dbUsuariosRef.update({
-                email,
-                senha,
-                nome,
-                nomeForm,
-                dtnasc: dataStr, 
-                tipoPerfil,
-                level: tipoUsuario,
-                ...updatesName
-            })
-            .then(() => {
-                if (newName !== oldName) {
-                    setTimeout(() => updateUserDB(
-                        'false',
-                        'false',
-                        this.props.email, 
-                        keyItem, 
-                        this.props.imgAvatar,
-                        newName
-                    ), 2000);
-                }
-                this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
-                showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
-            })
-            .catch(() => {
-                this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
-                showAlert(
-                    'danger', 
-                    'Ops!', 
-                    'Ocorreu um erro ao editar o usuário.'
+            if (odlEmail !== email || odlPw !== senha) {
+                this.onUpdateEmailOrPw(
+                    odlEmail !== email, 
+                    odlPw !== senha,
+                    odlEmail,
+                    odlPw,
+                    email, 
+                    senha, 
+                    {
+                        nome,
+                        nomeForm,
+                        dtnasc: dataStr, 
+                        tipoPerfil,
+                        level: tipoUsuario,
+                        ...updatesName
+                    },
+                    keyItem, 
+                    userLogged
                 );
-            });  
+            } else {
+                dbUsuariosRef.update({
+                    nome,
+                    nomeForm,
+                    dtnasc: dataStr, 
+                    tipoPerfil,
+                    level: tipoUsuario,
+                    ...updatesName
+                })
+                .then(() => {
+                    if (newName !== oldName) {
+                        setTimeout(() => updateUserDB(
+                            'false',
+                            'false',
+                            this.props.email, 
+                            keyItem, 
+                            this.props.imgAvatar,
+                            newName
+                        ), 2000);
+                    }
+                    
+                    dbUsuariosRef.once('value', snapvl => {
+                        const snapVal = snapvl.val();
+                        store.dispatch({
+                            type: '',
+                            payload: [...this.props.listUsuarios, { key: snapvl.key, ...snapVal }]
+                        });
+                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
+                        showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
+                        this.props.onPressBack(true);
+                    });
+                })
+                .catch(() => {
+                    this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
+                    showAlert(
+                        'danger', 
+                        'Ops!', 
+                        'Ocorreu um erro ao editar o usuário.'
+                    );
+                });  
+            }
         } else {
             auth.createUserWithEmailAndPassword(email, senha)
             .then(() => {
@@ -238,6 +271,158 @@ class UsuarioEdit extends React.Component {
                 }
             }); 
         }
+    }
+
+    async onUpdateEmailOrPw(
+        isUpdateEmail, 
+        isUpdateSenha, 
+        oldEmail,
+        oldPw, 
+        newEmail, 
+        newPw,
+        params, 
+        keyItem, 
+        userLogged) {
+        const dbNewUserRef = firebase.database().ref().child(`usuarios/${b64.encode(newEmail)}`);
+        const dbUsuariosRef = firebase.database().ref().child(`usuarios/${keyItem}`);
+
+        await firebase.auth().signInWithEmailAndPassword(oldEmail, oldPw)
+        .then(async (userFb) => {
+            let emailUp = oldEmail;
+            let pwUp = oldPw;
+            
+            if (isUpdateEmail) {
+                const updatedEmail = await userFb.user.updateEmail(newEmail)
+                .then(() => true)
+                .catch((error) => {
+                    firebase.auth().signInWithEmailAndPassword(userLogged.email, userLogged.senha)
+                    .then(() => true).catch(() => false);
+                    const valided = error && error.code;
+                    if (valided && error.code === 'auth/invalid-email') {
+                        showAlert('danger', 'Erro!', 'E-mail inválido.');
+                    } else if (valided && error.code === 'auth/email-already-in-use') {
+                        showAlert('danger', 'Erro!', 'E-mail já em uso.');
+                    } else {
+                        showAlert(
+                            'danger', 
+                            'Ops!', 
+                            'Ocorreu um erro ao alterar a senha.'
+                        );
+                    }
+
+                    return false;
+                });
+
+                if (updatedEmail) {
+                    emailUp = newEmail;
+                } else {
+                    this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
+                    return;
+                }
+            }
+
+            if (isUpdateSenha) {
+                const updatedSenha = await userFb.user.updatePassword(newPw)
+                .then(() => true)
+                .catch(async (error) => {
+                    if (isUpdateEmail) {
+                        await userFb.user.updateEmail(oldEmail)
+                        .then(() => true).catch(() => false);
+                    }
+                    firebase.auth().signInWithEmailAndPassword(userLogged.email, userLogged.senha)
+                    .then(() => true).catch(() => false);
+                    if (error && error.code && error.code === 'auth/weak-password') {
+                        showAlert('danger', 'Erro!', 'A senha informada é insegura.');
+                    } else {
+                        showAlert(
+                            'danger', 
+                            'Ops!', 
+                            'Ocorreu um erro ao alterar a senha.'
+                        );
+                    }
+
+                    return false;
+                });
+
+                if (updatedSenha) {
+                    pwUp = newPw;
+                } else {
+                    this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
+                    return;
+                }
+            }
+
+            if (isUpdateEmail) {
+                dbUsuariosRef.once('value', snapv => {
+                    const snapValN = snapv.val();
+                    dbNewUserRef.set({
+                        ...snapValN,
+                        email: emailUp,
+                        senha: pwUp,
+                        ...params
+                    })
+                    .then(() => {
+                        dbUsuariosRef.remove().then(() => true).catch(() => false);
+                        firebase.auth()
+                        .signInWithEmailAndPassword(userLogged.email, userLogged.senha)
+                        .then(() => true).catch(() => false);
+        
+                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
+                        showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
+                        this.props.onPressBack(true);
+                    })
+                    .catch(() => {
+                        firebase
+                        .auth().signInWithEmailAndPassword(userLogged.email, userLogged.senha)
+                        .then(() => true).catch(() => false);
+        
+                        this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
+        
+                        showAlert(
+                            'danger', 
+                            'Ops!', 
+                            'Ocorreu um erro durante a edição. 002'
+                        );
+                    });
+                });
+            } else {
+                dbUsuariosRef.update({
+                    email: emailUp,
+                    senha: pwUp,
+                    ...params
+                })
+                .then(() => {
+                    firebase.auth().signInWithEmailAndPassword(userLogged.email, userLogged.senha)
+                    .then(() => true).catch(() => false);
+    
+                    this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
+                    showAlert('success', 'Sucesso!', 'Edição realizada com sucesso.');
+                    this.props.onPressBack(true);
+                })
+                .catch(() => {
+                    firebase.auth().signInWithEmailAndPassword(userLogged.email, userLogged.senha)
+                    .then(() => true).catch(() => false);
+    
+                    this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
+    
+                    showAlert(
+                        'danger', 
+                        'Ops!', 
+                        'Ocorreu um erro durante a edição. 002'
+                    );
+                });
+            }
+        })
+        .catch(() => {
+            this.setState({ loading: false, isEmailValid: false, isSenhaValid: false });
+            firebase.auth().signInWithEmailAndPassword(userLogged.email, userLogged.senha)
+            .then(() => true).catch(() => false);
+            showAlert(
+                'danger', 
+                'Ops!', 
+                'Ocorreu um erro durante a edição. 003'
+            );
+        });
     }
 
     getPerfilIOS(value) {
@@ -725,7 +910,9 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state) => ({
-    userLevel: state.LoginReducer.userLevel
+    userLevel: state.LoginReducer.userLevel,
+    userLogged: state.LoginReducer.userLogged,
+    listUsuarios: state.UsuariosReducer.listUsuarios
 });
 
 export default connect(mapStateToProps, {})(UsuarioEdit);

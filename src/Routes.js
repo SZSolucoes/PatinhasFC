@@ -108,11 +108,17 @@ class Routes extends React.Component {
                                     type: 'modifica_password_login',
                                     payload: password
                                 });
-        
-                                this.setState({
+
+                                const authRef = firebase.auth();
+    
+                                authRef.signInWithEmailAndPassword(userName, password)
+                                .then(() => this.setState({
                                     logged: true,
                                     loading: false,
-                                });
+                                }))
+                                .catch(() => this.setState({
+                                    loading: false,
+                                }));
                             } else {
                                 this.setState({
                                     loading: false,

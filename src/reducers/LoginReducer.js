@@ -80,7 +80,9 @@ export default (state = INITIAL_STATE, action) => {
                 ...state,
                 username: '',
                 password: '',
+                userToken: '',
                 modalVisible: false,
+                urlServer: '',
                 hidePw: true,
                 showLogoLogin: true,
                 indicator: false,
@@ -89,6 +91,21 @@ export default (state = INITIAL_STATE, action) => {
                 conInfo: '',
                 hideTabBar: false
             };
+        case 'modifica_safeclean_login':
+            return {
+                ...state,
+                username: '',
+                password: '',
+                userToken: '',
+                modalVisible: false,
+                urlServer: '',
+                hidePw: true,
+                showLogoLogin: true,
+                indicator: false,
+                conInfo: '',
+                hideTabBar: false
+            };
+        
         default:
             return state;
     }
