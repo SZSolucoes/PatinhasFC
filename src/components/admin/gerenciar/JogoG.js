@@ -12,7 +12,7 @@ import {
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { Card, List, ListItem, CheckBox, Divider } from 'react-native-elements';
+import { Card, List, ListItem, CheckBox, Divider, Icon } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
 import * as Progress from 'react-native-progress';
 import { Dialog } from 'react-native-simple-dialogs';
@@ -44,6 +44,7 @@ import imgCartoes from '../../../imgs/cards.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
 import imgInOut from '../../../imgs/inout.png';
 import Jogos from '../../jogos/Jogos';
+import { sendReminderJogoPushNotifForAll } from '../../../utils/fcmPushNotifications';
 
 class JogoG extends React.Component {
 
@@ -73,6 +74,7 @@ class JogoG extends React.Component {
         this.onAddPressRemoveSubs = this.onAddPressRemoveSubs.bind(this);
         this.onPressRemoveSubs = this.onPressRemoveSubs.bind(this);
         this.onPressLock = this.onPressLock.bind(this);
+        this.onSendNotif = this.onSendNotif.bind(this);
         this.renderGolJogador = this.renderGolJogador.bind(this);
         this.renderCartaoJogador = this.renderCartaoJogador.bind(this);
         this.renderEscalados = this.renderEscalados.bind(this);
@@ -634,6 +636,30 @@ class JogoG extends React.Component {
                 },
                 { 
                     text: 'Ok', 
+                    onPress: () => checkConInfo(() => {
+                        funExec();
+                    })
+                }
+            ]
+        );
+    }
+
+    onSendNotif(jogo) {
+        const funExec = () => {
+            sendReminderJogoPushNotifForAll(jogo.titulo);
+            Toast.show('Notificação enviada', Toast.SHORT);
+        };
+        
+        Alert.alert(
+            'Aviso',
+            'Deseja enviar um lembrete da confirmação de presença ?',
+            [
+                { text: 'Cancelar', 
+                    onPress: () => true, 
+                    style: 'cancel' 
+                },
+                { 
+                    text: 'Enviar', 
                     onPress: () => checkConInfo(() => {
                         funExec();
                     })
@@ -2758,6 +2784,57 @@ class JogoG extends React.Component {
                             }}
                         >
                             {textLock}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+                <Divider
+                    style={{
+                        marginTop: 5,
+                        marginBottom: 5,
+                        height: 2
+                    }}
+                />
+                <TouchableOpacity
+                    onPress={
+                        () => checkConInfo(() => this.onSendNotif(jogo))
+                    }
+                >
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderRadius: 5,
+                            backgroundColor: '#3E51B4',
+                            marginTop: 5,
+                            paddingVertical: 2,
+                            opacity: 0.8
+                        }}
+                    >
+                        <Icon
+                            name={'send'}
+                            type={'material-community'}
+                            color={'white'}
+                            containerStyle={{
+                                marginLeft: 0,
+                                marginRight: 9,
+                                backgroundColor: 'transparent',
+                                borderWidth: 0,
+                                paddingVertical: 3.8
+                            }}
+                            size={22}
+                            onPress={
+                                () => checkConInfo(() => this.onSendNotif(jogo))
+                            }
+                        />
+                        <Text
+                            style={{ 
+                                color: 'white',
+                                fontSize: 14, 
+                                fontWeight: '500' 
+                            }}
+                        >
+                            Enviar notificação
                         </Text>
                     </View>
                 </TouchableOpacity>

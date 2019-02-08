@@ -154,6 +154,7 @@ class App extends React.Component {
                         FCM.presentLocalNotification({
                             channel: 'default',
                             body: notif.fcm.body,
+                            big_text: notif.fcm.body,
                             id: new Date().valueOf().toString(),
                             priority: 'high',
                             sound: 'default',
@@ -223,10 +224,10 @@ class App extends React.Component {
         } catch (e) {
             console.error(e);
             FCM.subscribeToTopic('all'); 
-            FCM.subscribeToTopic('enquetes'); 
+            FCM.subscribeToTopic('enquetes');
             AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'yes');
             AsyncStorage.setItem(mappedKeyStorage('notifEnquetesEnabled'), 'yes');
-        } 
+        }
     }
 
     onNetInfoChanged(conInfo) {

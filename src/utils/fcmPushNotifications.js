@@ -9,7 +9,30 @@ export const sendCadJogoPushNotifForAll = (jogo) => {
         notification: {
             title: `Jogo (${jogo}) foi criado`,
             body: 'Aproveite e já confirme a sua presença',
-            show_in_foreground: 'true'
+            show_in_foreground: true
+        }, 
+        data: {
+            targetScreen: 'main'
+        }
+      },
+        {
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: `key=${key}`
+            }
+        }
+    );
+};
+
+export const sendReminderJogoPushNotifForAll = (jogo) => {
+    Axios.post('https://fcm.googleapis.com/fcm/send',
+      {
+        to: '/topics/all',
+        notification: {
+            title: 'Lembrete',
+            body: 
+            `Jogo (${jogo}) está chegando. Aproveite e confirme sua presença o quanto antes`,
+            show_in_foreground: true
         }, 
         data: {
             targetScreen: 'main'
@@ -31,7 +54,7 @@ export const sendEnquetePushNotifForTopic = () => {
         notification: {
             title: 'Nova enquete disponível',
             body: 'Aproveite e já confirme o seu voto',
-            show_in_foreground: 'true',
+            show_in_foreground: true,
             targetScreen: 'enquetes'
         }, 
         data: {

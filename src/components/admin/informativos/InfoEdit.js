@@ -608,7 +608,7 @@ class UsuarioEdit extends React.Component {
                         />
                     </View>
                 </Dialog>
-                <View style={{ marginBottom: 30 }} />
+                <View style={{ marginVertical: 60 }} />
             </View>
         );
     }

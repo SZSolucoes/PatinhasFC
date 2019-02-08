@@ -524,7 +524,7 @@ class JogoEdit extends React.Component {
                         }}
                     />
                 </Card>
-                <View style={{ marginBottom: 30 }} />
+                <View style={{ marginVertical: 60 }} />
             </View>
         );
     }
