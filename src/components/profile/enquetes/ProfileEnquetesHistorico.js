@@ -67,21 +67,15 @@ class ProfileEnquetesHistoricoMain extends React.Component {
 
         if (enquetes.length) {
             enquetesView = (
-                reverseEnquetes.map((item, index) => {
-                    if ((index + 1) > 30) {
-                        return false;
-                    }
-
-                    return (
-                        <ProfileEnquetesCard
-                            key={index}
-                            enquete={item}
-                            isResult
-                            isHistory
-                            userKey={this.props.userLogged.key}
-                        />
-                    );
-                })
+                reverseEnquetes.map((item, index) => (
+                    <ProfileEnquetesCard
+                        key={index}
+                        enquete={item}
+                        isResult
+                        isHistory
+                        userKey={this.props.userLogged.key}
+                    />
+                ))
             );
         }
 

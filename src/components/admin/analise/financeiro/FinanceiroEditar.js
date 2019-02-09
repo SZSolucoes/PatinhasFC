@@ -127,10 +127,6 @@ class FinanceiroEditar extends React.Component {
         if (listFina.length) {
             finasView = (
                 reverseListFina.map((item, index) => {
-                    if ((index + 1) > 30) {
-                        return false;
-                    }
-
                     let valorReceita = 0;
                     let valorDespesa = 0;
                     let resultado = 0;

@@ -120,9 +120,6 @@ class HistoricoP extends React.Component {
     renderListJogos(jogos) {
         const reverseJogos = _.reverse([...jogos]);
         const jogosView = reverseJogos.map((item, index) => {
-            if ((index + 1) > 30) {
-                return false;
-            }
             const titulo = item.titulo ? item.titulo : ' ';
             const data = item.data ? item.data : ' ';
             const placarCasa = item.placarCasa ? item.placarCasa : '0'; 

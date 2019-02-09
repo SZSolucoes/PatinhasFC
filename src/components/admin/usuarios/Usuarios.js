@@ -233,9 +233,6 @@ class Usuarios extends React.Component {
                 <List containerStyle={{ marginBottom: 20 }}>
                 {
                     newSortedUsers.map((item, index) => {
-                        if ((index + 1) > 30) {
-                            return false;
-                        }
                         const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
                         return (
                             <ListItem

@@ -86,10 +86,6 @@ class EnqueteEditar extends React.Component {
         if (enquetes.length) {
             enquetesView = (
                 reverseEnquetes.map((item, index) => {
-                    if ((index + 1) > 30) {
-                        return false;
-                    }
-
                     return (
                         <View key={index}>
                             <Card
