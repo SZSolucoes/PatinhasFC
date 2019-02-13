@@ -12,7 +12,8 @@ import {
     FlatList,
     ActivityIndicator,
     Dimensions,
-    AsyncStorage
+    AsyncStorage,
+    Alert
 } from 'react-native';
 import _ from 'lodash';
 import b64 from 'base-64';
@@ -47,6 +48,7 @@ import { retrieveImgSource } from '../../utils/imageStorage';
 import { mappedKeyStorage } from '../../utils/store';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 import { store } from '../../App';
+import { checkConInfo } from '../../utils/jogosUtils';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -59,7 +61,9 @@ class Jogos extends React.Component {
         this.renderListItens = this.renderListItens.bind(this);
         this.renderCardFooter = this.renderCardFooter.bind(this);
         this.onPressConfirmP = this.onPressConfirmP.bind(this);
+        this.onPressConfirmAusencia = this.onPressConfirmAusencia.bind(this);
         this.onPressRemoveP = this.onPressRemoveP.bind(this);
+        this.onPressRemoveAusencia = this.onPressRemoveAusencia.bind(this);
         this.addNewRows = this.addNewRows.bind(this);
         this.flatListKeyExtractor = this.flatListKeyExtractor.bind(this);
         this.dataSourceControl = this.dataSourceControl.bind(this);
@@ -171,27 +175,113 @@ class Jogos extends React.Component {
 
     onPressCardGame(item) {
         this.props.modificaJogoSelected(item.key);
+        store.dispatch({
+            type: 'modifica_itemselectedausente_jogos',
+            payload: item.key
+        });
         Actions.jogoTabBar({ onBack: () => Actions.popTo('_jogos') });
     }
 
     onPressConfirmP(item, b64UserKey) {
         const { userLogged } = this.props;
-        const newConfirmadosList = item.confirmados ? 
-        [...item.confirmados] : [];
-        const dataAtual = Moment().format('YYYY-MM-DD HH:mm:ss');
 
-        newConfirmadosList.push({
-            key: b64UserKey,
-            imgAvatar: userLogged.imgAvatar,
-            nome: userLogged.nome,
-            horaConfirm: dataAtual
-        });
+        const userAusenteIndex = _.findIndex(
+            item.ausentes, 
+            (usuario) => usuario.key && usuario.key === b64UserKey);
 
-        firebase.database().ref().child(`jogos/${item.key}`).update({
-            confirmados: newConfirmadosList
-        })
-        .then(() => true)
-        .catch(() => true);
+        const funExec = (newAusentesList = false) => {
+            const newConfirmadosList = item.confirmados ? 
+            [...item.confirmados] : [];
+            const dataAtual = Moment().format('YYYY-MM-DD HH:mm:ss');
+            const ausentes = newAusentesList ? { ausentes: newAusentesList } : {};
+    
+            newConfirmadosList.push({
+                key: b64UserKey,
+                imgAvatar: userLogged.imgAvatar,
+                nome: userLogged.nome,
+                horaConfirm: dataAtual
+            });
+    
+            firebase.database().ref().child(`jogos/${item.key}`).update({
+                confirmados: newConfirmadosList,
+                ...ausentes
+            })
+            .then(() => true)
+            .catch(() => true);
+        };
+
+        if (userAusenteIndex !== -1) {
+            let newAusentesList = [];
+            newAusentesList = [...item.ausentes];
+            newAusentesList.splice(userAusenteIndex, 1);
+
+            Alert.alert(
+                'Aviso', 
+                'A ausência confirmada será removida.\nDeseja continuar ?',
+                [
+                    { text: 'Cancelar', onPress: () => false },
+                    { 
+                        text: 'OK', 
+                        onPress: () => checkConInfo(
+                        () => funExec(newAusentesList)) 
+                    }
+                ],
+                { cancelable: false }
+            );
+        } else {
+            funExec();
+        }
+    }
+
+    onPressConfirmAusencia(item, b64UserKey) {
+        const { userLogged } = this.props;
+
+        const userConfirmedIndex = _.findIndex(
+            item.confirmados, 
+            (usuario) => usuario.key && usuario.key === b64UserKey);
+        
+        const funExec = (newConfirmadosList = false) => {
+            const newAusentesList = item.ausentes ? 
+            [...item.ausentes] : [];
+            const dataAtual = Moment().format('YYYY-MM-DD HH:mm:ss');
+            const confirmados = newConfirmadosList ? { confirmados: newConfirmadosList } : {};
+    
+            newAusentesList.push({
+                key: b64UserKey,
+                imgAvatar: userLogged.imgAvatar,
+                nome: userLogged.nome,
+                horaConfirm: dataAtual
+            });
+    
+            firebase.database().ref().child(`jogos/${item.key}`).update({
+                ausentes: newAusentesList,
+                ...confirmados
+            })
+            .then(() => true)
+            .catch(() => true);
+        };
+
+        if (userConfirmedIndex !== -1) {
+            let newConfirmadosList = [];
+            newConfirmadosList = [...item.confirmados];
+            newConfirmadosList.splice(userConfirmedIndex, 1);
+
+            Alert.alert(
+                'Aviso', 
+                'A presença confirmada será removida.\nDeseja continuar ?',
+                [
+                    { text: 'Cancelar', onPress: () => false },
+                    { 
+                        text: 'OK', 
+                        onPress: () => checkConInfo(
+                        () => funExec(newConfirmadosList)) 
+                    }
+                ],
+                { cancelable: false }
+            );
+        } else {
+            funExec();
+        }
     }
 
     onPressRemoveP(item, b64UserKey) {
@@ -205,6 +295,23 @@ class Jogos extends React.Component {
             newConfirmadosList.splice(indexFound, 1);
             firebase.database().ref().child(`jogos/${item.key}`).update({
                 confirmados: newConfirmadosList
+            })
+            .then(() => true)
+            .catch(() => true);
+        }
+    }
+    
+    onPressRemoveAusencia(item, b64UserKey) {
+        const indexFound = _.findIndex(
+            item.ausentes, (usuario) => usuario.key === b64UserKey
+        );
+        let newAusentesList = [];
+
+        if (newAusentesList !== -1) {
+            newAusentesList = [...item.ausentes];
+            newAusentesList.splice(indexFound, 1);
+            firebase.database().ref().child(`jogos/${item.key}`).update({
+                ausentes: newAusentesList
             })
             .then(() => true)
             .catch(() => true);
@@ -331,8 +438,13 @@ class Jogos extends React.Component {
             const userConfirmed = _.findIndex(
                 item.confirmados, 
                 (usuario) => usuario.key && usuario.key === b64UserKey) !== -1;
-            const textP = userConfirmed ? 'Presença confirmada' : 'Presença não confirmada';
+            const userAusente = _.findIndex(
+                item.ausentes, 
+                (usuario) => usuario.key && usuario.key === b64UserKey) !== -1;
+            const textP = userConfirmed ? 'Presença confirmada' : 'Confirmar - Presença';
             const color = userConfirmed ? 'green' : 'red';
+            const textA = userAusente ? 'Ausência confirmada' : 'Confirmar - Ausência';
+            const colorA = userAusente ? 'green' : '#343A40';
 
             return (
                 <View>
@@ -399,6 +511,72 @@ class Jogos extends React.Component {
                                 }}
                             >
                                 {textP}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                    <Divider
+                        style={{
+                            marginTop: 5,
+                            marginBottom: 5,
+                            height: 2
+                        }}
+                    />
+                    <TouchableOpacity
+                        onPress={() => {
+                            if (this.props.conInfo.type === 'none' ||
+                                this.props.conInfo.type === 'unknown'
+                            ) {
+                                Toast.show('Sem conexão', Toast.SHORT);
+                                return false;
+                            }
+                            
+                            if (userAusente) {
+                                this.onPressRemoveAusencia(item, b64UserKey);
+                            } else {
+                                this.onPressConfirmAusencia(item, b64UserKey);
+                            }
+                        }}
+                    >
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderRadius: 5,
+                                backgroundColor: colorA,
+                                marginTop: 5,
+                                paddingVertical: 2
+                            }}
+                        >
+                            <CheckBox
+                                center
+                                containerStyle={{
+                                    marginLeft: 0,
+                                    marginRight: 10,
+                                    backgroundColor: 'transparent',
+                                    borderWidth: 0,
+                                    padding: 0
+                                }}
+                                title={(<View />)}
+                                size={22}
+                                checked={userAusente}
+                                checkedColor={'white'}
+                                onPress={() => {
+                                    if (userAusente) {
+                                        this.onPressRemoveAusencia(item, b64UserKey);
+                                    } else {
+                                        this.onPressConfirmAusencia(item, b64UserKey);
+                                    }
+                                }}
+                            />
+                            <Text
+                                style={{ 
+                                    color: 'white',
+                                    fontSize: 16, 
+                                    fontWeight: '500' 
+                                }}
+                            >
+                                {textA}
                             </Text>
                         </View>
                     </TouchableOpacity>

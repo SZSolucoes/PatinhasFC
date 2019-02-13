@@ -27,6 +27,7 @@ import {
     modificaOnItemRender,
     modificaClean
 } from '../../../actions/GerenciarActions';
+import { store } from '../../../App';
 
 class Gerenciar extends React.Component {
 
@@ -63,6 +64,10 @@ class Gerenciar extends React.Component {
 
     onPressCardGame(item) {
         this.props.modificaItemSelected(item.key);
+        store.dispatch({
+            type: 'modifica_itemselectedausente_jogos',
+            payload: item.key
+        });
         this.props.modificaOnItemRender(this.onItemRender);
         this.setState({ loading: true });
         setTimeout(() => 
@@ -70,7 +75,6 @@ class Gerenciar extends React.Component {
                 onBack: () => Actions.popTo('gerenciar') 
             })
         , 1000);
-        
     }
 
     onItemRender() {

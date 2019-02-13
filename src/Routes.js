@@ -15,7 +15,7 @@ import {
     Alert,
     StatusBar
 } from 'react-native';
-import { Icon } from 'react-native-elements';
+import { Icon, normalize } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 
@@ -29,6 +29,7 @@ import JogoP from './components/profile/historico/JogoP';
 import Escalacao from './components/core/escalacao/Escalacao';
 import EscalacaoG from './components/admin/gerenciar/EscalacaoG';
 import EscalacaoP from './components/profile/historico/EscalacaoP';
+import EscalacaoH from './components/admin/historico/EscalacaoH';
 import Informativos from './components/informativos/Informativos';
 import Profile from './components/profile/Profile';
 import Notifications from './components/profile/Notifications';
@@ -49,7 +50,6 @@ import ProfileEnquetes from './components/profile/enquetes/ProfileEnquetes';
 import ProfileEnquetesHistorico from './components/profile/enquetes/ProfileEnquetesHistorico';
 import ProfileFinanceiro from './components/profile/ProfileFinanceiro';
 import JogoH from './components/admin/historico/JogoH';
-import EscalacaoH from './components/admin/historico/EscalacaoH';
 import AnaliseJogadores from './components/admin/analise/jogadores/AnaliseJogadores';
 import EnqueteCadastrar from './components/admin/enquetes/EnqueteCadastrar';
 import EnqueteEditar from './components/admin/enquetes/EnqueteEditar';
@@ -64,6 +64,7 @@ import { doEndGame, checkConInfo } from './utils/jogosUtils';
 import { mappedKeyStorage } from './utils/store';
 
 import imgFinishFlag from './imgs/finishflag.png';
+import Ausentes from './components/core/ausentes/Ausentes';
 
 const AnimatedScene = Animated.createAnimatedComponent(AnimScene);
 
@@ -190,21 +191,22 @@ class Routes extends React.Component {
     
             if (
                 Actions.currentScene.includes('jogo') || 
-                Actions.currentScene.includes('escalacao')
+                Actions.currentScene.includes('escalacao') ||
+                Actions.currentScene.includes('ausentes')
             ) {
-                if ('|_jogoTab|_escalacaoTab|'.includes(Actions.currentScene)) {
+                if ('|_jogoTab|_escalacaoTab|_ausentesTab|'.includes(Actions.currentScene)) {
                     Actions.popTo('_jogos');
                     return true;
                 }
-                if ('|_jogoTabG|_escalacaoTabG|'.includes(Actions.currentScene)) {
+                if ('|_jogoTabG|_escalacaoTabG|_ausentesTabG|'.includes(Actions.currentScene)) {
                     Actions.popTo('gerenciar');
                     return true;
                 }
-                if ('|_jogoTabH|_escalacaoTabH|'.includes(Actions.currentScene)) {
+                if ('|_jogoTabH|_escalacaoTabH|_ausentesTabH|'.includes(Actions.currentScene)) {
                     Actions.popTo('historico');
                     return true;
                 }
-                if ('|_jogoTabP|_escalacaoTabP|'.includes(Actions.currentScene)) {
+                if ('|_jogoTabP|_escalacaoTabP|_ausentesTabP|'.includes(Actions.currentScene)) {
                     Actions.popTo('profileHistorico');
                     return true;
                 }
@@ -286,21 +288,22 @@ class Routes extends React.Component {
 
         if (
             Actions.currentScene.includes('jogo') || 
-            Actions.currentScene.includes('escalacao')
+            Actions.currentScene.includes('escalacao') ||
+            Actions.currentScene.includes('ausentes')
         ) {
-            if ('|_jogoTab|_escalacaoTab|'.includes(Actions.currentScene)) {
+            if ('|_jogoTab|_escalacaoTab|_ausentesTab|'.includes(Actions.currentScene)) {
                 Actions.popTo('_jogos');
                 return true;
             }
-            if ('|_jogoTabG|_escalacaoTabG|'.includes(Actions.currentScene)) {
+            if ('|_jogoTabG|_escalacaoTabG|_ausentesTabG|'.includes(Actions.currentScene)) {
                 Actions.popTo('gerenciar');
                 return true;
             }
-            if ('|_jogoTabH|_escalacaoTabH|'.includes(Actions.currentScene)) {
+            if ('|_jogoTabH|_escalacaoTabH|_ausentesTabH|'.includes(Actions.currentScene)) {
                 Actions.popTo('historico');
                 return true;
             }
-            if ('|_jogoTabP|_escalacaoTabP|'.includes(Actions.currentScene)) {
+            if ('|_jogoTabP|_escalacaoTabP|_ausentesTabP|'.includes(Actions.currentScene)) {
                 Actions.popTo('profileHistorico');
                 return true;
             }
@@ -870,7 +873,7 @@ class Routes extends React.Component {
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
-                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        labelStyle={{ fontSize: normalize(12), fontWeight: 'bold' }}
                         renderRightButton={() => this.rightButtonImagens()}
                     >
                         <Scene 
@@ -888,6 +891,13 @@ class Routes extends React.Component {
                             tabBarLabel={'Escalação'}
                             activeTintColor={'white'} 
                         />
+                        <Scene 
+                            key={'ausentesTab'}
+                            hideNavBar 
+                            component={Ausentes}
+                            tabBarLabel={'Ausentes'}
+                            activeTintColor={'white'} 
+                        />
                     </Scene>
                     <Scene 
                         key={'gerenciarJogoTab'}
@@ -901,7 +911,7 @@ class Routes extends React.Component {
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
-                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        labelStyle={{ fontSize: normalize(12), fontWeight: 'bold' }}
                         renderRightButton={() => this.rightButtonGerenciarTab()}
                     >
                         <Scene 
@@ -919,6 +929,13 @@ class Routes extends React.Component {
                             tabBarLabel={'Escalação'}
                             activeTintColor={'white'}
                         />
+                        <Scene 
+                            key={'ausentesTabG'}
+                            hideNavBar 
+                            component={Ausentes}
+                            tabBarLabel={'Ausentes'}
+                            activeTintColor={'white'}
+                        />
                     </Scene>
                     { /* HISTORICO E TABS */}
                     <Scene 
@@ -933,7 +950,7 @@ class Routes extends React.Component {
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
-                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        labelStyle={{ fontSize: normalize(12), fontWeight: 'bold' }}
                         renderRightButton={() => this.rightButtonImagens()}
                     >
                         <Scene 
@@ -951,6 +968,13 @@ class Routes extends React.Component {
                             tabBarLabel={'Escalação'}
                             activeTintColor={'white'}
                         />
+                        <Scene 
+                            key={'ausentesTabH'}
+                            hideNavBar 
+                            component={Ausentes}
+                            tabBarLabel={'Ausentes'}
+                            activeTintColor={'white'}
+                        />
                     </Scene>
                     <Scene 
                         key={'historicoJogoTabP'}
@@ -964,7 +988,7 @@ class Routes extends React.Component {
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
-                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        labelStyle={{ fontSize: normalize(12), fontWeight: 'bold' }}
                         renderRightButton={() => this.rightButtonImagens()}
                     >
                         <Scene 
@@ -982,6 +1006,13 @@ class Routes extends React.Component {
                             tabBarLabel={'Escalação'}
                             activeTintColor={'white'}
                         />
+                        <Scene 
+                            key={'ausentesTabP'}
+                            hideNavBar 
+                            component={Ausentes}
+                            tabBarLabel={'Ausentes'}
+                            activeTintColor={'white'}
+                        />
                     </Scene>
                     <Scene 
                         key={'analiseFinanceiro'}
@@ -995,7 +1026,7 @@ class Routes extends React.Component {
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
-                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        labelStyle={{ fontSize: normalize(12), fontWeight: 'bold' }}
                         //renderRightButton={() => this.rightButtonGerenciarTab()}
                     >
                         <Scene 
@@ -1026,7 +1057,7 @@ class Routes extends React.Component {
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
-                        labelStyle={{ fontFamily: 'rubik', fontWeight: 'bold' }}
+                        labelStyle={{ fontSize: normalize(12), fontWeight: 'bold' }}
                         //renderRightButton={() => this.rightButtonGerenciarTab()}
                     >
                         <Scene 

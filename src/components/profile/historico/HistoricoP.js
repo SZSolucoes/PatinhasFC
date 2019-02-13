@@ -26,6 +26,7 @@ import {
     modificaListJogos,
     modificaClean
 } from '../../../actions/HistoricoActions';
+import { store } from '../../../App';
 
 class HistoricoP extends React.Component {
 
@@ -106,6 +107,10 @@ class HistoricoP extends React.Component {
 
     onPressCardGame(item) {
         this.props.modificaItemSelected(item.key);
+        store.dispatch({
+            type: 'modifica_itemselectedausente_jogos',
+            payload: item.key
+        });
         Actions.historicoJogoTabP({ onBack: () => Actions.popTo('profileHistorico') });
     }
 

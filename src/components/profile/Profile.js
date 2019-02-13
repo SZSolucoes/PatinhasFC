@@ -19,7 +19,7 @@ import ParallaxScrollView from 'react-native-parallax-scrollview';
 import ImagePicker from 'react-native-image-crop-picker';
 import { Dialog } from 'react-native-simple-dialogs';
 import { showAlert, mappedKeyStorage } from '../../utils/store';
-import { colorAppP, colorAppS } from '../../utils/constantes';
+import { colorAppP, colorAppS, APPVERSION } from '../../utils/constantes';
 import { retrieveImgSource } from '../../utils/imageStorage';
 import { checkConInfo } from '../../utils/jogosUtils';
 import { updateUserDB, checkPerfil } from '../../utils/userUtils';
@@ -317,7 +317,7 @@ class Profile extends React.Component {
                             </View>
                             <View style={{ marginHorizontal: 10 }}>
                                 <Text style={{ fontSize: 16, color: 'black' }}>
-                                    1.0.9
+                                    {APPVERSION}
                                 </Text>
                             </View>
                         </View>

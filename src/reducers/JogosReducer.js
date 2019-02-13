@@ -6,7 +6,8 @@ const INITIAL_STATE = {
     filterLoad: false,
     loadingFooter: false,
     maxRows: 30,
-    jumpScene: ''
+    jumpScene: '',
+    itemSelectedAusente: ''
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -50,6 +51,11 @@ export default (state = INITIAL_STATE, action) => {
             return { 
                 ...state, 
                 jumpScene: action.payload
+            };
+        case 'modifica_itemselectedausente_jogos':
+            return { 
+                ...state, 
+                itemSelectedAusente: action.payload
             };
         case 'modifica_clean_jogos':
             return {
