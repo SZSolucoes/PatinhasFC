@@ -5,8 +5,9 @@ import {
 } from 'react-native';
 
 import { connect } from 'react-redux';
-import { List, ListItem, Button } from 'react-native-elements';
+import { List, Button } from 'react-native-elements';
 //import { checkConInfo } from '../../../../utils/jogosUtils';
+import ListItem from '../../../tools/ListItem';
 import AcumFaltas from './AcumFaltas';
 import {
     modificaShowModal,

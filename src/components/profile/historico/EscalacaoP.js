@@ -9,14 +9,14 @@ import {
     TouchableWithoutFeedback,
     Image
 } from 'react-native';
-import { Card, Icon, List, ListItem, Badge } from 'react-native-elements';
+import { Card, Icon, List, Badge } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import { colorAppF } from '../../../utils/constantes';
-import { retrieveImgSource } from '../../../utils/imageStorage';
 //import Campo from '../../campo/Campo';
 import { isPortrait } from '../../../utils/orientation';
 import { getPosIndex } from '../../../utils/jogosUtils';
+import ListItem from '../../tools/ListItem';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
@@ -225,7 +225,7 @@ class EscalacaoP extends React.Component {
                                     (index + 1) === numJogadores ? { borderBottomWidth: 0 } : null 
                                 }
                                 roundAvatar
-                                avatar={retrieveImgSource(imgAvt)}
+                                avatar={imgAvt}
                                 key={index}
                                 title={item.nome}
                                 subtitle={item.posicao}
@@ -275,7 +275,7 @@ class EscalacaoP extends React.Component {
                                     (index + 1) === numJogadores ? { borderBottomWidth: 0 } : null 
                                 }
                                 roundAvatar
-                                avatar={retrieveImgSource(imgAvt)}
+                                avatar={imgAvt}
                                 key={index}
                                 title={item.nome}
                                 subtitle={item.posicao}
@@ -341,7 +341,7 @@ class EscalacaoP extends React.Component {
                                     titleContainerStyle={{ marginLeft: 10 }}
                                     subtitleContainerStyle={{ marginLeft: 10 }}
                                     roundAvatar
-                                    avatar={retrieveImgSource(imgAvt)}
+                                    avatar={imgAvt}
                                     key={index}
                                     title={item.nome}
                                     rightIcon={(<View />)}

@@ -30,7 +30,6 @@ import firebase from '../../Firebase';
 import { modificaShowImageView } from '../../actions/ImagensActions';
 import { checkConInfo } from '../../utils/jogosUtils';
 import { colorAppS, colorAppF } from '../../utils/constantes';
-import { retrieveImgSource } from '../../utils/imageStorage';
 
 class Imagens extends React.Component {
 
@@ -397,7 +396,7 @@ class Imagens extends React.Component {
                             >
                                 <Image
                                     style={{ width: null, height: 200 }}
-                                    source={retrieveImgSource({ uri: item })} 
+                                    source={{ uri: item }} 
                                 />
                                 {
                                     this.props.enableButtons &&

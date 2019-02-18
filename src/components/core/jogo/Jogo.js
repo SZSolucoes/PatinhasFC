@@ -10,11 +10,11 @@ import {
 } from 'react-native';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { Card, List, ListItem } from 'react-native-elements';
+import { Card, List } from 'react-native-elements';
 import { colorAppF, colorAppP } from '../../../utils/constantes';
-import { retrieveImgSource } from '../../../utils/imageStorage';
 import { getPosIndex } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
+import ListItem from '../../tools/ListItem';
 import { modificaJogoSelected } from '../../../actions/ImagensActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
@@ -1704,7 +1704,7 @@ class Jogo extends React.Component {
                                         titleContainerStyle={{ marginLeft: 10 }}
                                         subtitleContainerStyle={{ marginLeft: 10 }}
                                         roundAvatar
-                                        avatar={retrieveImgSource(imgAvt)}
+                                        avatar={imgAvt}
                                         key={index}
                                         title={item.nome}
                                         subtitle={item.posicao}
@@ -1732,7 +1732,7 @@ class Jogo extends React.Component {
                                         titleContainerStyle={{ marginLeft: 10 }}
                                         subtitleContainerStyle={{ marginLeft: 10 }}
                                         roundAvatar
-                                        avatar={retrieveImgSource(imgAvt)}
+                                        avatar={imgAvt}
                                         key={index}
                                         title={item.nome}
                                         subtitle={item.posicao}

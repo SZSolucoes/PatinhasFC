@@ -18,12 +18,12 @@ import {
 import _ from 'lodash';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Moment from 'moment';
-import { Icon, Divider, Avatar } from 'react-native-elements';
+import { Icon, Divider } from 'react-native-elements';
 import { connect } from 'react-redux';
 import firebase from '../../Firebase';
 import { isPortrait } from '../../utils/orientation';
-import { retrieveImgSource } from '../../utils/imageStorage';
 import { checkConInfo } from '../../utils/jogosUtils';
+import Avatar from '../tools/Avatar';
 import { modificaStartUpOrDownAnim, modificaInfoMsgSelected } from '../../actions/InfoActions';
 import { modificaAnimatedHeigth } from '../../actions/JogosActions';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -222,7 +222,7 @@ class Coment extends React.Component {
                         <Avatar
                             medium
                             rounded
-                            source={retrieveImgSource(userImg)}
+                            source={userImg}
                             onPress={() => Keyboard.dismiss()}
                             activeOpacity={0.7}
                         />

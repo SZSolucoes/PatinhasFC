@@ -10,7 +10,7 @@ import {
     Keyboard,
     Text
 } from 'react-native';
-import { SearchBar, Card, List, ListItem, Icon } from 'react-native-elements';
+import { SearchBar, Card, List, Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import {
@@ -18,11 +18,11 @@ import {
     modificaFilterModalLoad,
     modificaFilterModalStr
 } from '../../../../actions/AnaliseJogadores';
-import { retrieveImgSource } from '../../../../utils/imageStorage';
 //import { checkConInfo } from '../../../../utils/jogosUtils';
 
 import perfilUserImg from '../../../../imgs/perfiluserimg.png';
 import { colorAppS } from '../../../../utils/constantes';
+import ListItem from '../../../tools/ListItem';
 
 class AcumFaltas extends React.Component {
 
@@ -87,7 +87,7 @@ class AcumFaltas extends React.Component {
                             >
                                 <ListItem
                                     roundAvatar
-                                    avatar={retrieveImgSource(imgAvt)}
+                                    avatar={imgAvt}
                                     title={item.nome}
                                     subtitle={item.email}
                                     rightIcon={(<View />)}

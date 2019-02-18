@@ -10,7 +10,7 @@ import {
     Keyboard,
     Text
 } from 'react-native';
-import { SearchBar, Card, List, ListItem, Icon } from 'react-native-elements';
+import { SearchBar, Card, List, Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import {
@@ -18,8 +18,8 @@ import {
     modificaFilterModalLoad,
     modificaFilterModalStr
 } from '../../actions/PainelAdminActions';
-import { retrieveImgSource } from '../../utils/imageStorage';
 import { checkConInfo } from '../../utils/jogosUtils';
+import ListItem from '../tools/ListItem';
 
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 
@@ -83,7 +83,7 @@ class PlayersModal extends React.Component {
                         return (
                             <ListItem
                                 roundAvatar
-                                avatar={retrieveImgSource(imgAvt)}
+                                avatar={imgAvt}
                                 key={index}
                                 title={item.nome}
                                 subtitle={item.email}

@@ -12,7 +12,7 @@ import {
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { Card, List, ListItem, CheckBox, Divider, Icon } from 'react-native-elements';
+import { Card, List, CheckBox, Divider, Icon } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
 import * as Progress from 'react-native-progress';
 import { Dialog } from 'react-native-simple-dialogs';
@@ -20,9 +20,9 @@ import ModalInput from '../../tools/ModalInput';
 import PlayersModal from './PlayersModal';
 import firebase from '../../../Firebase';
 import { colorAppF, colorAppP, colorAppS, colorAppW } from '../../../utils/constantes';
-import { retrieveImgSource } from '../../../utils/imageStorage';
 import { getPosIndex, checkConInfo } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
+import ListItem from '../../tools/ListItem';
 import { 
     modificaClean, 
     modificaCurrentTime,
@@ -2532,7 +2532,7 @@ class JogoG extends React.Component {
                                         titleContainerStyle={{ marginLeft: 10 }}
                                         subtitleContainerStyle={{ marginLeft: 10 }}
                                         roundAvatar
-                                        avatar={retrieveImgSource(imgAvt)}
+                                        avatar={imgAvt}
                                         key={index}
                                         title={item.nome}
                                         subtitle={item.posicao}
@@ -2560,7 +2560,7 @@ class JogoG extends React.Component {
                                         titleContainerStyle={{ marginLeft: 10 }}
                                         subtitleContainerStyle={{ marginLeft: 10 }}
                                         roundAvatar
-                                        avatar={retrieveImgSource(imgAvt)}
+                                        avatar={imgAvt}
                                         key={index}
                                         title={item.nome}
                                         subtitle={item.posicao}

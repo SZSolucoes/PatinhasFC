@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.evollu.react.fcm.FIRMessagingPackage;
 import com.facebook.react.ReactApplication;
+import com.dylanvann.fastimage.FastImageViewPackage;
 import cl.json.RNSharePackage;
 import cl.json.ShareApplication;
 import com.RNFetchBlob.RNFetchBlobPackage;
@@ -35,7 +36,8 @@ public class MainApplication extends Application implements ShareApplication, Re
             new PickerPackage(),
             new SvgPackage(),
             new VectorIconsPackage(),
-            new FIRMessagingPackage()
+            new FIRMessagingPackage(),
+            new FastImageViewPackage()
       );
     }
 

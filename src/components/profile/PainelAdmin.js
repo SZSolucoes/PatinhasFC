@@ -6,11 +6,12 @@ import {
 } from 'react-native';
 
 import { connect } from 'react-redux';
-import { List, ListItem, Button } from 'react-native-elements';
+import { List, Button } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
 
 import firebase from '../../Firebase';
 import { checkConInfo } from '../../utils/jogosUtils';
+import ListItem from '../tools/ListItem';
 
 import PlayersModal from './PlayersModal';
 import {

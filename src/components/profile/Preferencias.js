@@ -6,9 +6,10 @@ import {
 } from 'react-native';
 
 import { connect } from 'react-redux';
-import { CheckBox, List, ListItem } from 'react-native-elements';
+import { CheckBox, List } from 'react-native-elements';
 import { checkConInfo } from '../../utils/jogosUtils';
 import { mappedKeyStorage } from '../../utils/store';
+import ListItem from '../tools/ListItem';
 
 class Preferencias extends React.Component {
 

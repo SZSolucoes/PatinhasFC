@@ -2,7 +2,6 @@ import React from 'react';
 import {
     View,
     StyleSheet,
-    Image,
     Text,
     TouchableWithoutFeedback,
     TouchableOpacity,
@@ -12,15 +11,17 @@ import {
     ActivityIndicator,
     Platform,
     Keyboard,
-    Dimensions
+    Dimensions,
+    Modal
 } from 'react-native';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-import { Card, ListItem, Avatar, Icon } from 'react-native-elements';
+import { Card, Icon } from 'react-native-elements';
 import ModalDropdown from 'react-native-modal-dropdown';
 import { Actions } from 'react-native-router-flux';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
-import ImageView from 'react-native-image-view';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import FastImage from 'react-native-fast-image';
 import InfoActions from './InfoActions';
 import Coment from './Coment';
 import { 
@@ -42,10 +43,11 @@ import firebase from '../../Firebase';
 import imgAvatar from '../../imgs/patinhasfclogo.png';
 import { colorAppF, colorAppT } from '../../utils/constantes';
 import ShareModal from './ShareModal';
-import { retrieveImgSource } from '../../utils/imageStorage';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 import { isPortrait } from '../../utils/orientation';
 import { normalize } from '../../utils/strComplex';
+import Avatar from '../tools/Avatar';
+import ListItem from '../tools/ListItem';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -150,9 +152,9 @@ class Informativos extends React.Component {
 
     onPressImage(imagesUri, index) {
         if (imagesUri && imagesUri.length) {
-            const imagesForView = _.map(imagesUri, imgU => ({ source: imgU }));
-            this.props.modificaImagesForViewIndex(index);
+            const imagesForView = _.map(imagesUri, imgU => ({ url: imgU.uri }));
             this.props.modificaImagesForView(imagesForView);
+            this.props.modificaImagesForViewIndex(index);
             this.props.modificaShowImageView(true);
         }
     }
@@ -206,7 +208,7 @@ class Informativos extends React.Component {
         let newInfos = infos;
         if (infos && infos.length > 0) {
             newInfos = _.reverse([...infos]);
-            newInfos = newInfos.slice(0, this.props.maxRows);
+           //newInfos = newInfos.slice(0, this.props.maxRows);
             return this.renderBasedFilterOrNot(newInfos, filterStr);
         }
 
@@ -253,7 +255,7 @@ class Informativos extends React.Component {
 
         if (hasImages) {
             filtredImgs.forEach(element => {
-                imagesUri.push(retrieveImgSource({ uri: element.data }));
+                imagesUri.push({ uri: element.data });
             });
         }
 
@@ -311,12 +313,11 @@ class Informativos extends React.Component {
                 <TouchableWithoutFeedback
                     onPress={() => this.onPressImage(imgsUri, 0)}
                 >
-                    <Image
-                        resizeMode="cover"
+                    <FastImage
+                        resizeMode={FastImage.resizeMode.cover}
                         style={{ 
                             width: null, 
                             height: 200,
-                            borderWidth: 1,
                             borderRadius: 2
                         }}
                         source={imgsUri[0]}
@@ -332,12 +333,11 @@ class Informativos extends React.Component {
                         <TouchableWithoutFeedback
                             onPress={() => this.onPressImage(imgsUri, 0)}
                         >
-                            <Image
-                                resizeMode="cover"
+                            <FastImage
+                                resizeMode={FastImage.resizeMode.cover}
                                 style={{ 
                                     width: null, 
                                     height: 200,
-                                    borderWidth: 1,
                                     borderRadius: 2,
                                     marginRight: 5
                                 }}
@@ -349,12 +349,11 @@ class Informativos extends React.Component {
                         <TouchableWithoutFeedback
                             onPress={() => this.onPressImage(imgsUri, 1)}
                         >
-                            <Image
-                                resizeMode="cover"
+                            <FastImage
+                                resizeMode={FastImage.resizeMode.cover}
                                 style={{ 
                                     width: null, 
                                     height: 200,
-                                    borderWidth: 1,
                                     borderRadius: 2
                                 }}
                                 source={imgsUri[1]}
@@ -363,7 +362,7 @@ class Informativos extends React.Component {
                     </View>
                 </View>
             );
-        } else if (lenImages === 555) {
+        } else if (lenImages === 3) {
             return (
                 <View
                     style={{ flexDirection: 'row' }}
@@ -372,12 +371,11 @@ class Informativos extends React.Component {
                         <TouchableWithoutFeedback
                             onPress={() => this.onPressImage(imgsUri, 0)}
                         >
-                            <Image
-                                resizeMode="cover"
+                            <FastImage
+                                resizeMode={FastImage.resizeMode.cover}
                                 style={{ 
                                     width: null, 
                                     height: 200,
-                                    borderWidth: 1,
                                     borderRadius: 2
                                 }}
                                 source={imgsUri[0]}
@@ -389,14 +387,13 @@ class Informativos extends React.Component {
                             <TouchableWithoutFeedback
                                 onPress={() => this.onPressImage(imgsUri, 1)}
                             >
-                                <Image
-                                    resizeMode="cover"
+                                <FastImage
+                                    resizeMode={FastImage.resizeMode.cover}
                                     style={{ 
                                         width: null, 
-                                        height: 95,
-                                        borderWidth: 1,
+                                        height: 98,
                                         borderRadius: 2,
-                                        marginLeft: 5
+                                        marginLeft: 2
                                     }}
                                     source={imgsUri[1]}
                                 />
@@ -406,15 +403,14 @@ class Informativos extends React.Component {
                             <TouchableWithoutFeedback
                                 onPress={() => this.onPressImage(imgsUri, 2)}
                             >
-                                <Image
-                                    resizeMode="cover"
+                                <FastImage
+                                    resizeMode={FastImage.resizeMode.cover}
                                     style={{ 
                                         width: null, 
-                                        height: 95,
-                                        borderWidth: 1,
+                                        height: 98,
                                         borderRadius: 2,
-                                        marginLeft: 5,
-                                        marginTop: 5
+                                        marginLeft: 2,
+                                        marginTop: 1
                                     }}
                                     source={imgsUri[2]}
                                 />
@@ -433,12 +429,11 @@ class Informativos extends React.Component {
                     <TouchableWithoutFeedback
                         onPress={() => this.onPressImage(imgsUri, 0)}
                     >
-                        <Image
-                            resizeMode="cover"
+                        <FastImage
+                            resizeMode={FastImage.resizeMode.cover}
                             style={{ 
                                 width: null, 
                                 height: 200,
-                                borderWidth: 1,
                                 borderRadius: 2
                             }}
                             source={imgsUri[0]}
@@ -450,14 +445,13 @@ class Informativos extends React.Component {
                         <TouchableWithoutFeedback
                             onPress={() => this.onPressImage(imgsUri, 1)}
                         >
-                            <Image
-                                resizeMode="cover"
+                            <FastImage
+                                resizeMode={FastImage.resizeMode.cover}
                                 style={{ 
                                     width: null, 
-                                    height: 95,
-                                    borderWidth: 1,
+                                    height: 98,
                                     borderRadius: 2,
-                                    marginLeft: 5
+                                    marginLeft: 2
                                 }}
                                 source={imgsUri[1]}
                             />
@@ -477,7 +471,7 @@ class Informativos extends React.Component {
                                     zIndex: 10,
                                     flex: 1,
                                     marginLeft: 5,
-                                    marginTop: 5,
+                                    marginTop: 2,
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     backgroundColor: 'rgba(0,0,0,0.4)'
@@ -494,15 +488,14 @@ class Informativos extends React.Component {
                                 </Text>
                             </View>
                         </TouchableWithoutFeedback>
-                        <Image
-                            resizeMode="cover"
+                        <FastImage
+                            resizeMode={FastImage.resizeMode.cover}
                             style={{ 
                                 width: null, 
-                                height: 95,
-                                borderWidth: 1,
+                                height: 98,
                                 borderRadius: 2,
-                                marginLeft: 5,
-                                marginTop: 5
+                                marginLeft: 2,
+                                marginTop: 1
                             }}
                             source={imgsUri[2]}
                         />
@@ -546,7 +539,7 @@ class Informativos extends React.Component {
                     <View style={{ marginVertical: 5 }}>
                         <ListItem
                             containerStyle={{ borderBottomWidth: 0 }}
-                            avatar={retrieveImgSource(imgAvt)}
+                            avatar={imgAvt}
                             title={nomeUser}
                             subtitle={perfilUser}
                             rightIcon={(this.renderDots())}
@@ -572,13 +565,15 @@ class Informativos extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 <AnimatedFlatList
-                    ref={(ref) => { this.scrollViewRef = ref; }}
+                    //ref={(ref) => { this.scrollViewRef = ref; }}
                     data={this.dataSourceControl(this.props.listInfos, this.props.filterInfoStr)}
                     renderItem={this.renderInfos}
                     keyExtractor={this.flatListKeyExtractor}
                     style={styles.viewPrinc}
+                    initialNumToRender={5}
+                    maxToRenderPerBatch={5}
                     onEndReachedThreshold={0.01}
-                    onEndReached={() => {
+                    /* onEndReached={() => {
                         let rowsToShow = (this.lastIndexListInfos + 1) + this.fixedNumberRows;
                         const infosLength = this.props.listInfos.length;
                         if (rowsToShow > infosLength) {
@@ -589,12 +584,12 @@ class Informativos extends React.Component {
                             if (rowsToShow !== (this.lastIndexListInfos + 1)) {
                                 this.props.modificaLoadingFooter(true);
                             }
-                            _.debounce(this.addNewRows, 2000)(rowsToShow);
+                            //_.debounce(this.addNewRows, 2000)(rowsToShow);
                         } else {
                             this.props.modificaLoadingFooter(false);
                         }
-                    }}
-                    onContentSizeChange={(w, h) => { 
+                    }} */
+                    /* onContentSizeChange={(w, h) => { 
                         this.scrollViewContentSize = h;
                         const newOffSet = h - this.scrollViewHeight;
                         this.setState({ maxOffSetScrollView: newOffSet });
@@ -603,7 +598,7 @@ class Informativos extends React.Component {
                         this.scrollViewHeight = ev.nativeEvent.layout.height;
                         const newOffSet = this.scrollViewContentSize - ev.nativeEvent.layout.height;
                         this.setState({ maxOffSetScrollView: newOffSet });
-                    }}
+                    }} */
                     onScroll={
                         Animated.event(
                             [{
@@ -642,13 +637,59 @@ class Informativos extends React.Component {
                 )}
                 />
                 <ShareModal />
-                <ImageView
-                    images={this.props.imagesForView}
-                    imageIndex={this.props.imagesForViewIndex}
-                    isVisible={this.props.showImageView}
-                    renderFooter={() => (<View />)}
-                    onClose={() => this.props.modificaShowImageView(false)}
-                />
+                <Modal 
+                    visible={this.props.showImageView} 
+                    transparent
+                    onRequestClose={() => this.props.modificaShowImageView(false)}
+                >
+                    <ImageViewer
+                        imageUrls={this.props.imagesForView}
+                        index={this.props.imagesForViewIndex}
+                        isVisible={this.props.showImageView}
+                        enableSwipeDown
+                        pageAnimateTime={600}
+                        enablePreload
+                        footerContainerStyle={{ flex: 1, left: 0, right: 0 }}
+                        renderImage={(props) => <FastImage {...props} />}
+                        loadingRender={() => <ActivityIndicator />}
+                        renderFooter={() => (
+                            <View 
+                                style={{ 
+                                    flex: 1, 
+                                    flexDirection: 'row',
+                                    alignItems: 'center', 
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => this.props.modificaShowImageView(false)}
+                                >
+                                    <View 
+                                        style={{ 
+                                            flex: 1,
+                                            flexDirection: 'row',
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            paddingVertical: 15
+                                        }}
+                                    >
+                                        <Text
+                                            style={{ 
+                                                fontFamily: 'OpenSans-Bold', 
+                                                color: 'white',
+                                                textAlign: 'center',
+                                                fontSize: 14
+                                            }}
+                                        >
+                                            Fechar
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        onCancel={() => this.props.modificaShowImageView(false)}
+                    />
+                </Modal>
             </View>
         );
     }
@@ -705,7 +746,7 @@ class Informativos extends React.Component {
                                     small
                                     rounded
                                     title={'GO'}
-                                    source={retrieveImgSource(userImg)}
+                                    source={userImg}
                                     onPress={() => { 
                                         Keyboard.dismiss();
                                         Actions.replace('_perfil');

@@ -7,14 +7,13 @@ import {
     Alert
 } from 'react-native';
 import { connect } from 'react-redux';
-import { Avatar } from 'react-native-elements';
 import _ from 'lodash';
-import { retrieveImgSource } from '../../utils/imageStorage';
 import { 
     modificaShowPlayersModal,
     modificaJogador
 } from '../../actions/GerenciarActions';
 import { getPosName, checkConInfo } from '../../utils/jogosUtils';
+import Avatar from '../tools/Avatar';
 
 import imgCampo from '../../imgs/campo.jpg';
 import imgAvatar from '../../imgs/perfiluserimg.png';
@@ -68,7 +67,7 @@ class Campo extends React.Component {
 
     retrieveSource(jogador) {
         if (jogador && jogador.length > 0 && jogador[0].imgAvatar) {
-            return retrieveImgSource({ uri: jogador[0].imgAvatar });
+            return { uri: jogador[0].imgAvatar };
         } else if (jogador && jogador.length > 0) {
             return imgAvatar;
         }

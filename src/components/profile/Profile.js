@@ -14,15 +14,15 @@ import { Actions } from 'react-native-router-flux';
 import * as Progress from 'react-native-progress';
 import RNFetchBlob from 'rn-fetch-blob';
 import b64 from 'base-64';
-import { Button, List, ListItem } from 'react-native-elements';
-import ParallaxScrollView from 'react-native-parallax-scrollview';
+import { Button, List } from 'react-native-elements';
 import ImagePicker from 'react-native-image-crop-picker';
 import { Dialog } from 'react-native-simple-dialogs';
 import { showAlert, mappedKeyStorage } from '../../utils/store';
 import { colorAppP, colorAppS, APPVERSION } from '../../utils/constantes';
-import { retrieveImgSource } from '../../utils/imageStorage';
 import { checkConInfo } from '../../utils/jogosUtils';
 import { updateUserDB, checkPerfil } from '../../utils/userUtils';
+import ParallaxMenuView from '../tools/ParallaxMenuView';
+import ListItem from '../tools/ListItem';
 
 import firebase from '../../Firebase';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
@@ -189,11 +189,11 @@ class Profile extends React.Component {
 
         return (
             <View style={styles.viewPrinc}>
-                <ParallaxScrollView
+                <ParallaxMenuView
                     onPressBackgroundImg={() => checkConInfo(() => this.onPressUserImg('userBg'))}
                     onPressUserImg={() => checkConInfo(() => this.onPressUserImg('userImg'))}
-                    userImage={retrieveImgSource(userImg)}
-                    backgroundSource={retrieveImgSource(imgBg)}
+                    userImage={userImg}
+                    backgroundSource={imgBg}
                     userName={username}
                     userTitle={posicao}
                     navBarHeight={0.1}
@@ -295,7 +295,7 @@ class Profile extends React.Component {
                         onPress={() => this.onPressLogout()}
                     />
                     <View style={{ marginBottom: 100 }} />
-                </ParallaxScrollView>
+                </ParallaxMenuView>
                 <Dialog
                     animationType={'fade'}
                     visible={this.state.showAbout}

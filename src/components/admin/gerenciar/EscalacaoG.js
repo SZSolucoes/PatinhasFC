@@ -12,7 +12,7 @@ import {
     Alert,
     ActivityIndicator
 } from 'react-native';
-import { Card, Icon, List, ListItem, Badge } from 'react-native-elements';
+import { Card, Icon, List, Badge } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
@@ -21,12 +21,12 @@ import * as Progress from 'react-native-progress';
 import { Dialog } from 'react-native-simple-dialogs';
 import firebase from '../../../Firebase';
 import { colorAppF, colorAppP, colorAppS } from '../../../utils/constantes';
-import { retrieveImgSource } from '../../../utils/imageStorage';
 //import Campo from '../../campo/Campo';
 import EscalacaoPadrao from '../../campo/EscalacaoPadrao';
 import PlayersModal from './PlayersModal';
 import { isPortrait } from '../../../utils/orientation';
 import { getPosIndex, checkConInfo } from '../../../utils/jogosUtils';
+import ListItem from '../../tools/ListItem';
 import { 
     modificaShowPlayersModal,
     modificaIsSubstitute,
@@ -609,7 +609,7 @@ class EscalacaoG extends React.Component {
                                     (index + 1) === numJogadores ? { borderBottomWidth: 0 } : null 
                                 }
                                 roundAvatar
-                                avatar={retrieveImgSource(imgAvt)}
+                                avatar={imgAvt}
                                 key={index}
                                 title={item.nome}
                                 subtitle={item.posicao}
@@ -659,7 +659,7 @@ class EscalacaoG extends React.Component {
                                     (index + 1) === numJogadores ? { borderBottomWidth: 0 } : null 
                                 }
                                 roundAvatar
-                                avatar={retrieveImgSource(imgAvt)}
+                                avatar={imgAvt}
                                 key={index}
                                 title={item.nome}
                                 subtitle={item.posicao}
@@ -921,7 +921,7 @@ class EscalacaoG extends React.Component {
                                     titleContainerStyle={{ marginLeft: 10 }}
                                     subtitleContainerStyle={{ marginLeft: 10 }}
                                     roundAvatar
-                                    avatar={retrieveImgSource(imgAvt)}
+                                    avatar={imgAvt}
                                     key={index}
                                     title={item.nome}
                                     rightIcon={viewIcons}

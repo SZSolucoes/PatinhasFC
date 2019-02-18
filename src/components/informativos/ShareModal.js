@@ -10,7 +10,7 @@ import {
     Animated,
     ActivityIndicator
 } from 'react-native';
-import { Icon, Avatar } from 'react-native-elements';
+import { Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 import Toast from 'react-native-simple-toast';
 import Share from 'react-native-share';
@@ -19,7 +19,7 @@ import {
     modificaShowShareModal
 } from '../../actions/InfoActions';
 import { colorAppP } from '../../utils/constantes';
-import { retrieveImgSource } from '../../utils/imageStorage';
+import Avatar from '../tools/Avatar';
 
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 
@@ -110,7 +110,7 @@ class ShareModal extends React.Component {
         try {
             for (let index = 0; index < imgsArticle.length; index++) {
                 const element = imgsArticle[index];
-                locateCachedImgsUri.push(retrieveImgSource({ uri: element.data }).uri);
+                locateCachedImgsUri.push({ uri: element.data });
             }
     
             if (locateCachedImgsUri.length === imgsArticle.length) {
@@ -220,7 +220,7 @@ class ShareModal extends React.Component {
                                                 small
                                                 rounded
                                                 title={'avatar'}
-                                                source={retrieveImgSource(userImg)}
+                                                source={userImg}
                                                 onPress={() => false}
                                             />
                                             <View style={{ marginHorizontal: 5 }} />

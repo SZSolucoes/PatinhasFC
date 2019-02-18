@@ -14,7 +14,6 @@ import {
     Card, 
     Icon,
     SearchBar,
-    ListItem,
     Divider
 } from 'react-native-elements';
 import _ from 'lodash';
@@ -23,6 +22,7 @@ import { colorAppF } from '../../../../utils/constantes';
 import { checkConInfo } from '../../../../utils/jogosUtils';
 import { showAlert } from '../../../../utils/store';
 import { normalize } from '../../../../utils/strComplex';
+import ListItem from '../../../tools/ListItem';
 import {
     modificaFilterLoad,
     modificaFilterStr,

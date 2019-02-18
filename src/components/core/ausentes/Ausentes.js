@@ -6,11 +6,11 @@ import {
     Text,
     Image
 } from 'react-native';
-import { Card, List, ListItem, Badge } from 'react-native-elements';
+import { Card, List, Badge } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import { colorAppF } from '../../../utils/constantes';
-import { retrieveImgSource } from '../../../utils/imageStorage';
+import ListItem from '../../tools/ListItem';
 //import Campo from '../../campo/Campo';
 import imgTeam from '../../../imgs/team.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
@@ -31,8 +31,16 @@ class Ausentes extends React.Component {
     }
 
     render() {
-        const { listJogos, itemSelectedAusente } = this.props;
-        const jogo = _.filter(listJogos, (item) => item.key === itemSelectedAusente)[0];
+        const { listJogos, listJogosH, itemSelectedAusente } = this.props;
+        const jogoA = _.find(listJogos, (item) => item.key === itemSelectedAusente);
+        const jogoH = _.find(listJogosH, (itema) => itema.key === itemSelectedAusente);
+        let jogo = null;
+
+        if (jogoA) {
+            jogo = jogoA;
+        } else if (jogoH) {
+            jogo = jogoH;
+        }
 
         if (!jogo) {
             return false;
@@ -91,7 +99,7 @@ class Ausentes extends React.Component {
                                             titleContainerStyle={{ marginLeft: 10 }}
                                             subtitleContainerStyle={{ marginLeft: 10 }}
                                             roundAvatar
-                                            avatar={retrieveImgSource(imgAvt)}
+                                            avatar={imgAvt}
                                             key={index}
                                             title={item.nome}
                                             rightIcon={(<View />)}
@@ -138,7 +146,8 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     itemSelectedAusente: state.JogosReducer.itemSelectedAusente,
-    listJogos: state.JogosReducer.listJogos
+    listJogos: state.JogosReducer.listJogos,
+    listJogosH: state.HistoricoReducer.listJogos
 });
 
 export default connect(mapStateToProps, {})(Ausentes);

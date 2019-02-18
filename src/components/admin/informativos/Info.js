@@ -14,17 +14,16 @@ import {
     Icon,
     SearchBar,
     Divider,
-    ListItem,
     ButtonGroup
 } from 'react-native-elements';
 import _ from 'lodash';
 import InfoEdit from './InfoEdit';
 
 import { colorAppS, colorAppF } from '../../../utils/constantes';
-import { retrieveImgSource } from '../../../utils/imageStorage';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { showAlert } from '../../../utils/store';
 import { limitDotText } from '../../../utils/strComplex';
+import ListItem from '../../tools/ListItem';
 import firebase from '../../../Firebase';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
 import {
@@ -207,7 +206,7 @@ class Info extends React.Component {
                                 <View style={{ marginVertical: 5 }}>
                                     <ListItem
                                         containerStyle={{ borderBottomWidth: 0 }}
-                                        avatar={retrieveImgSource(imgAvt)}
+                                        avatar={imgAvt}
                                         title={nomeUser}
                                         subtitle={perfilUser}
                                         rightIcon={(this.renderIcons(item))}

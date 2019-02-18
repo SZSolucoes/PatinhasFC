@@ -1,11 +1,16 @@
 
-import _ from 'lodash';
-import RNFetchBlob from 'rn-fetch-blob';
+//import _ from 'lodash';
+//import RNFetchBlob from 'rn-fetch-blob';
 
-const images = [];
+//const images = [];
 
 export const retrieveImgSource = (source) => {
-    if (source && !!source.uri && !source.uri.slice(0, 5).includes('data')) {
+    if (source) {
+        return { uri: source };
+    } 
+       
+    return { uri: '' };
+   /*  if (source && !!source.uri && !source.uri.slice(0, 5).includes('data')) {
         const index = _.findIndex(images, (item) => source.uri === item.url);
         if (index === -1) {
             const fs = RNFetchBlob.fs;
@@ -43,6 +48,6 @@ export const retrieveImgSource = (source) => {
         return { uri: images[index].uri };
     } 
     
-    return source;
+    return source; */
 };
 

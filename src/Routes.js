@@ -73,6 +73,8 @@ class Routes extends React.Component {
     constructor(props) {
         super(props);
 
+        this.animHeigth = new Animated.Value(0);
+
         this.onBackAndroidHdl = this.onBackAndroidHdl.bind(this);
         this.renderRouter = this.renderRouter.bind(this);
         this.doTabAnimation = this.doTabAnimation.bind(this);
@@ -84,13 +86,12 @@ class Routes extends React.Component {
         this.state = {
             logged: false,
             loading: true,
-            timingNotEnd: true,
-            animHeigth: new Animated.Value(0)
+            timingNotEnd: true
         };
     }
 
     componentDidMount() {
-        setTimeout(() => this.setState({ timingNotEnd: false }), 10000);
+        setTimeout(() => this.setState({ timingNotEnd: false }), 6000);
 
         AsyncStorage.getItem(mappedKeyStorage('loginAutomaticoEnabled'))
         .then((loginAutomaticoEnabled) => {
@@ -333,7 +334,7 @@ class Routes extends React.Component {
             }
             
             Animated.timing(
-                this.state.animHeigth, 
+                this.animHeigth, 
                 {
                     toValue,
                     useNativeDriver: true,
@@ -356,7 +357,7 @@ class Routes extends React.Component {
         if (isPortrait()) {
             if (animatedHeigth === 1) {
                 Animated.timing(
-                    this.state.animHeigth, 
+                    this.animHeigth, 
                     {
                         toValue: 100,
                         useNativeDriver: true,
@@ -366,7 +367,7 @@ class Routes extends React.Component {
             } else {
                 const toValue = animatedHeigth ? Dimensions.get('screen').height : 0;
                 Animated.spring(
-                    this.state.animHeigth, 
+                    this.animHeigth, 
                     {
                         toValue,
                         useNativeDriver: true,
@@ -502,7 +503,7 @@ class Routes extends React.Component {
                     showLabel={false}
                     tabBarStyle={
                         [styles.mainTabBar, 
-                        { transform: [{ translateY: this.state.animHeigth }] }]
+                        { transform: [{ translateY: this.animHeigth }] }]
                     }
                     lazy={false}
                 >
@@ -616,7 +617,7 @@ class Routes extends React.Component {
                 showLabel={false}
                 tabBarStyle={
                     [styles.mainTabBar, 
-                    { transform: [{ translateY: this.state.animHeigth }] }]
+                    { transform: [{ translateY: this.animHeigth }] }]
                 }
                 lazy={false}
             >

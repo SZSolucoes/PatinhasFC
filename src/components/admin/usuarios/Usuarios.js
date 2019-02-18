@@ -17,16 +17,15 @@ import {
     SearchBar,
     Divider,
     List,
-    ListItem,
     ButtonGroup
 } from 'react-native-elements';
 import _ from 'lodash';
 import b64 from 'base-64';
 
 import { colorAppS, colorAppF } from '../../../utils/constantes';
-import { retrieveImgSource } from '../../../utils/imageStorage';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { showAlert } from '../../../utils/store';
+import ListItem from '../../tools/ListItem';
 import firebase from '../../../Firebase';
 import UsuarioEdit from './UsuarioEdit';
 import {
@@ -237,7 +236,7 @@ class Usuarios extends React.Component {
                         return (
                             <ListItem
                                 roundAvatar
-                                avatar={retrieveImgSource(imgAvt)}
+                                avatar={imgAvt}
                                 key={index}
                                 title={item.nome}
                                 subtitle={item.email}

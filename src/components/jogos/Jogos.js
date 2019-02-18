@@ -23,7 +23,7 @@ import Moment from 'moment';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { Card, Divider, SearchBar, Avatar, CheckBox } from 'react-native-elements';
+import { Card, Divider, SearchBar, CheckBox } from 'react-native-elements';
 import { isPortrait } from '../../utils/orientation';
 import { startFbListener, stopFbListener } from '../../utils/firebaseListeners';
 import { updateUserDB } from '../../utils/userUtils';
@@ -44,11 +44,11 @@ import { modificaJogoSelected } from '../../actions/JogoActions';
 import firebase from '../../Firebase';
 import { modificaListUsuarios } from '../../actions/UsuariosActions';
 import { colorAppT } from '../../utils/constantes';
-import { retrieveImgSource } from '../../utils/imageStorage';
 import { mappedKeyStorage } from '../../utils/store';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 import { store } from '../../App';
 import { checkConInfo } from '../../utils/jogosUtils';
+import Avatar from '../tools/Avatar';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -608,7 +608,7 @@ class Jogos extends React.Component {
                     <Card 
                         title={titulo} 
                         containerStyle={[styles.card, styles.shadowCard]}
-                        image={retrieveImgSource(imagem)}
+                        image={imagem}
                         featuredSubtitle={descricao}
                     >
                         <Text style={styles.textData}>
@@ -746,7 +746,7 @@ class Jogos extends React.Component {
                                         small
                                         rounded
                                         title={'GO'}
-                                        source={retrieveImgSource(userImg)}
+                                        source={userImg}
                                         onPress={() => { 
                                             Keyboard.dismiss();
                                             Actions.replace('_perfil');
