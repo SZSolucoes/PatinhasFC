@@ -9,9 +9,10 @@ import {
 } from 'react-native';
 
 import { connect } from 'react-redux';
-import { Card, Icon } from 'react-native-elements';
+import { Icon } from 'react-native-elements';
 import { Actions } from 'react-native-router-flux';
 import { colorAppF } from '../../utils/constantes';
+import Card from '../tools/Card';
 
 class Admin extends React.Component {
 

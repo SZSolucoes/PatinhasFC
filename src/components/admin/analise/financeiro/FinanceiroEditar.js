@@ -10,8 +10,7 @@ import {
 import { TextMask } from 'react-native-masked-text';
 
 import { connect } from 'react-redux';
-import { 
-    Card, 
+import {
     Icon,
     SearchBar,
     Divider
@@ -23,6 +22,7 @@ import { checkConInfo } from '../../../../utils/jogosUtils';
 import { showAlert } from '../../../../utils/store';
 import { normalize } from '../../../../utils/strComplex';
 import ListItem from '../../../tools/ListItem';
+import Card from '../../../tools/Card';
 import {
     modificaFilterLoad,
     modificaFilterStr,

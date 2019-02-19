@@ -10,7 +10,6 @@ import {
 
 import { connect } from 'react-redux';
 import { 
-    Card, 
     Icon,
     SearchBar,
     Divider,
@@ -24,6 +23,7 @@ import { checkConInfo } from '../../../utils/jogosUtils';
 import { showAlert } from '../../../utils/store';
 import { limitDotText } from '../../../utils/strComplex';
 import ListItem from '../../tools/ListItem';
+import Card from '../../tools/Card';
 import firebase from '../../../Firebase';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
 import {

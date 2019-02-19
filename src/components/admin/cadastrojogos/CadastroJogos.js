@@ -4,12 +4,13 @@ import {
     ScrollView, 
     StyleSheet,
     TouchableOpacity,
-    Text
+    Text,
+    Image,
+    Animated
 } from 'react-native';
 
 import { connect } from 'react-redux';
 import { 
-    Card, 
     Icon,
     SearchBar,
     Divider,
@@ -17,9 +18,10 @@ import {
 } from 'react-native-elements';
 import _ from 'lodash';
 
-import { colorAppS, colorAppF } from '../../../utils/constantes';
+import { colorAppS, colorAppF, shirtColors } from '../../../utils/constantes';
 import { showAlert } from '../../../utils/store';
 import { checkConInfo } from '../../../utils/jogosUtils';
+import Card from '../../tools/Card';
 import Versus from '../../jogos/Versus';
 import JogoEdit from './JogoEdit';
 import { modificaItemSelected } from '../../../actions/JogosActions';
@@ -43,7 +45,9 @@ class CadastroJogos extends React.Component {
             data: '',
             descricao: '',
             timeCasa: '',
+            homeshirt: '',
             timeVisit: '',
+            visitshirt: '',
             imagem: '',
             b64Str: '',
             contentType: '',
@@ -240,7 +244,9 @@ class CadastroJogos extends React.Component {
                         data={this.state.data}
                         descricao={this.state.descricao}
                         timeCasa={this.state.timeCasa}
+                        homeshirt={this.state.homeshirt}
                         timeVisit={this.state.timeVisit}
+                        visitshirt={this.state.visitshirt}
                         b64Str={this.state.b64Str}
                         contentType={this.state.contentType}
                         imgJogoUri={this.state.imgJogoUri}
@@ -257,7 +263,9 @@ class CadastroJogos extends React.Component {
                         data={this.state.itemEdit.data}
                         descricao={this.state.itemEdit.descricao}
                         timeCasa={this.state.itemEdit.timeCasa}
+                        homeshirt={this.state.itemEdit.homeshirt}
                         timeVisit={this.state.itemEdit.timeVisit}
+                        visitshirt={this.state.itemEdit.visitshirt}
                         imgJogoUri={this.state.itemEdit.imagem}
                         keyItem={this.state.itemEdit.key}
                     />);
@@ -269,7 +277,9 @@ class CadastroJogos extends React.Component {
                         data={this.state.data}
                         descricao={this.state.descricao}
                         timeCasa={this.state.timeCasa}
+                        homeshirt={this.state.homeshirt}
                         timeVisit={this.state.timeVisit}
+                        visitshirt={this.state.visitshirt}
                         b64Str={this.state.b64Str}
                         contentType={this.state.contentType}
                         imgJogoUri={this.state.imgJogoUri}
@@ -401,6 +411,52 @@ class CadastroJogos extends React.Component {
                 >
                     {this.renderSwitchType(this.state.modalOpt)}
                 </ScrollView>
+                <Animated.View
+                    style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: 120,
+                        zIndex: 99999,
+                        padding: 10,
+                        backgroundColor: 'white',
+                        borderWidth: 2,
+                        borderColor: colorAppS
+                    }}
+                >
+                    <Text
+                        style={{
+                            textAlign: 'left',
+                            fontWeight: '500',
+                            fontSize: 14,
+                        }}
+                    >
+                        TIME CASA (CAMISA)
+                    </Text>
+                    <ScrollView
+                        containerStyle={{
+                            flexGrow: '1',
+                            flexDirection: 'row'
+                        }}
+                        horizontal
+                    >
+                        {
+                            _.map(shirtColors, (ita, key) => (
+                                <Image
+                                    key={key}
+                                    source={ita}
+                                    style={{
+                                        height: 60,
+                                        width: 60,
+                                        marginHorizontal: 10,
+                                        marginTop: 5
+                                    }}
+                                />
+                            ))
+                        }
+                    </ScrollView>
+                </Animated.View>
             </View>
         );
     }

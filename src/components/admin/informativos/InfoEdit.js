@@ -4,8 +4,10 @@ import {
     StyleSheet,
     Platform,
     TouchableOpacity,
-    Image,
     ScrollView,
+    Modal,
+    Text,
+    ActivityIndicator,
     TouchableWithoutFeedback
 } from 'react-native';
 
@@ -13,8 +15,7 @@ import { connect } from 'react-redux';
 import { 
     FormLabel, 
     FormInput, 
-    FormValidationMessage, 
-    Card, 
+    FormValidationMessage,
     Button, 
     Icon
 } from 'react-native-elements';
@@ -23,7 +24,8 @@ import b64 from 'base-64';
 import _ from 'lodash';
 import RNFetchBlob from 'rn-fetch-blob';
 import ImagePicker from 'react-native-image-crop-picker';
-import ImageView from 'react-native-image-view';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import FastImage from 'react-native-fast-image';
 import { Dialog } from 'react-native-simple-dialogs';
 import * as Progress from 'react-native-progress';
 
@@ -33,9 +35,9 @@ import { colorAppF, colorAppS } from '../../../utils/constantes';
 import { checkPerfil } from '../../../utils/userUtils';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { doActiveRNFetchBlob } from '../../../utils/utilsTools';
+import Card from '../../tools/Card';
 
-class UsuarioEdit extends React.Component {
-
+class InfoEdit extends React.Component {
     constructor(props) {
         super(props);
 
@@ -369,7 +371,7 @@ class UsuarioEdit extends React.Component {
                                         imgSelected: index
                                     })}
                                 >
-                                    <Image 
+                                    <FastImage 
                                         source={{ uri: data.data }}
                                         style={{
                                             width: 80,
@@ -420,7 +422,7 @@ class UsuarioEdit extends React.Component {
 
     render() {
         const imagesForView = this.state.imgsArticleUri.map(
-            (item) => ({ source: { uri: item.data, width: 600, height: 400 } })
+            (item) => ({ url: item.data })
         );
 
         return (
@@ -581,13 +583,59 @@ class UsuarioEdit extends React.Component {
                         }}
                     />
                 </Card>
-                <ImageView
-                    images={imagesForView}
-                    imageIndex={this.state.imgSelected}
-                    isVisible={this.state.showImageView}
-                    renderFooter={() => (<View />)}
-                    onClose={() => this.setState({ showImageView: false })}
-                />
+                <Modal 
+                    visible={this.state.showImageView} 
+                    transparent
+                    onRequestClose={() => this.setState({ showImageView: false })}
+                >
+                    <ImageViewer
+                        imageUrls={imagesForView}
+                        index={this.state.imgSelected}
+                        isVisible={this.state.showImageView}
+                        enableSwipeDown
+                        pageAnimateTime={600}
+                        enablePreload
+                        footerContainerStyle={{ flex: 1, left: 0, right: 0 }}
+                        renderImage={(props) => <FastImage {...props} />}
+                        loadingRender={() => <ActivityIndicator />}
+                        renderFooter={() => (
+                            <View 
+                                style={{ 
+                                    flex: 1, 
+                                    flexDirection: 'row',
+                                    alignItems: 'center', 
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => this.setState({ showImageView: false })}
+                                >
+                                    <View 
+                                        style={{ 
+                                            flex: 1,
+                                            flexDirection: 'row',
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            paddingVertical: 15
+                                        }}
+                                    >
+                                        <Text
+                                            style={{ 
+                                                fontFamily: 'OpenSans-Bold', 
+                                                color: 'white',
+                                                textAlign: 'center',
+                                                fontSize: 16
+                                            }}
+                                        >
+                                            Fechar
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        onCancel={() => this.setState({ showImageView: false })}
+                    />
+                </Modal>
                 <Dialog
                     animationType={'fade'}
                     visible={this.state.uploadModal}
@@ -651,4 +699,4 @@ const mapStateToProps = (state) => ({
     userLevel: state.LoginReducer.userLevel
 });
 
-export default connect(mapStateToProps, {})(UsuarioEdit);
+export default connect(mapStateToProps, {})(InfoEdit);

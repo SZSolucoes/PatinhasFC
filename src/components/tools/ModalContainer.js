@@ -10,8 +10,9 @@ import {
     Keyboard,
     Text
 } from 'react-native';
-import { Card, Icon, Divider } from 'react-native-elements';
+import { Icon, Divider } from 'react-native-elements';
 import { colorAppF } from '../../utils/constantes';
+import Card from '../tools/Card';
 
 export class ModalContainer extends React.Component {
 

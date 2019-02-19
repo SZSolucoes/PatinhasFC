@@ -6,14 +6,14 @@ import {
 } from 'react-native';
 
 import { connect } from 'react-redux';
-import { 
-    Card,
+import {
     SearchBar
 } from 'react-native-elements';
 import _ from 'lodash';
 import MonthPicker from '../../tools/MonthPicker';
 
 import { colorAppF } from '../../../utils/constantes';
+import Card from '../../tools/Card';
 import {
     modificaFilterLoad,
     modificaFilterStr,

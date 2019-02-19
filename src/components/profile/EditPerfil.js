@@ -12,7 +12,6 @@ import {
     FormLabel, 
     FormInput,
     FormValidationMessage,
-    Card, 
     Button, 
     Icon
 } from 'react-native-elements';
@@ -25,6 +24,7 @@ import firebase from '../../Firebase';
 import { checkConInfo } from '../../utils/jogosUtils';
 import { showAlert, mappedKeyStorage } from '../../utils/store';
 import { updateUserDB } from '../../utils/userUtils';
+import Card from '../tools/Card';
 
 class EditPerfil extends React.Component {
 

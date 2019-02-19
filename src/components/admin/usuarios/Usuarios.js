@@ -12,7 +12,6 @@ import {
 
 import { connect } from 'react-redux';
 import { 
-    Card, 
     Icon,
     SearchBar,
     Divider,
@@ -26,6 +25,7 @@ import { colorAppS, colorAppF } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { showAlert } from '../../../utils/store';
 import ListItem from '../../tools/ListItem';
+import Card from '../../tools/Card';
 import firebase from '../../../Firebase';
 import UsuarioEdit from './UsuarioEdit';
 import {

@@ -7,9 +7,9 @@ import {
 
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { Card } from 'react-native-elements';
 import { colorAppS } from '../../../utils/constantes';
 import ListItem from '../../tools/ListItem';
+import Card from '../../tools/Card';
 
 class Analise extends React.Component {
     render() {

@@ -20,7 +20,17 @@ import { connect } from 'react-redux';
 import _ from 'lodash';
 
 import { isPortrait, isLandscape } from './utils/orientation';
+import { colorAppS } from './utils/constantes';
+
+import { store } from './App';
+import firebase from './Firebase';
+import SplashScreenAnim from './components/animations/SplashScreenAnim';
+import AnimScene from './components/tools/AnimatedScene';
+import { doEndGame, checkConInfo } from './utils/jogosUtils';
+import { mappedKeyStorage } from './utils/store';
 import AlertScl from './components/tools/AlertScl';
+import imgFinishFlag from './imgs/finishflag.png';
+
 import Login from './components/login/Login';
 import Jogos from './components/jogos/Jogos';
 import Jogo from './components/core/jogo/Jogo';
@@ -54,17 +64,8 @@ import AnaliseJogadores from './components/admin/analise/jogadores/AnaliseJogado
 import EnqueteCadastrar from './components/admin/enquetes/EnqueteCadastrar';
 import EnqueteEditar from './components/admin/enquetes/EnqueteEditar';
 import Imagens from './components/imagens/Imagens';
-import { colorAppS } from './utils/constantes';
-
-import { store } from './App';
-import firebase from './Firebase';
-import SplashScreenAnim from './components/animations/SplashScreenAnim';
-import AnimScene from './components/tools/AnimatedScene';
-import { doEndGame, checkConInfo } from './utils/jogosUtils';
-import { mappedKeyStorage } from './utils/store';
-
-import imgFinishFlag from './imgs/finishflag.png';
 import Ausentes from './components/core/ausentes/Ausentes';
+import ListLikes from './components/informativos/ListLikes';
 
 const AnimatedScene = Animated.createAnimatedComponent(AnimScene);
 
@@ -147,18 +148,6 @@ class Routes extends React.Component {
 
         BackHandler.addEventListener('hardwareBackPress', () => {
             Keyboard.dismiss();
-            store.dispatch({
-                type: 'modifica_startupordownanim_info',
-                payload: 'down'
-            });
-            store.dispatch({
-                type: 'modifica_showimageview_info',
-                payload: false
-            });
-            store.dispatch({
-                type: 'modifica_showimageview_imagens',
-                payload: false
-            });
 
             const asyncFunExec = async () => {
                 store.dispatch({
@@ -179,7 +168,7 @@ class Routes extends React.Component {
                 });
             };
 
-            asyncFunExec();
+            if (!('|listLikes|'.includes(Actions.currentScene))) asyncFunExec();
 
             if ('|mainTabBar|_jogos|_informativos|_perfil|_admin|'.includes(Actions.currentScene)) {
                 return true;
@@ -235,6 +224,7 @@ class Routes extends React.Component {
             this.doTabAnimation(nextProps.animatedHeigth);
             return false;
         }
+        
         return nextProps !== this.props || nextStates !== this.state;
     }
 
@@ -244,18 +234,6 @@ class Routes extends React.Component {
 
     onBackAndroidHdl() {
         Keyboard.dismiss();
-        store.dispatch({
-            type: 'modifica_startupordownanim_info',
-            payload: 'down'
-        });
-        store.dispatch({
-            type: 'modifica_showimageview_info',
-            payload: false
-        });
-        store.dispatch({
-            type: 'modifica_showimageview_imagens',
-            payload: false
-        });
 
         const asyncFunExec = async () => {
             store.dispatch({
@@ -276,7 +254,7 @@ class Routes extends React.Component {
             });
         };
 
-        asyncFunExec();
+        if (!('|listLikes|'.includes(Actions.currentScene))) asyncFunExec();
 
         if ('|mainTabBar|_jogos|_informativos|_perfil|_admin|'.includes(Actions.currentScene)) {
             return true;
@@ -355,7 +333,7 @@ class Routes extends React.Component {
 
     doTabAnimation(animatedHeigth) {
         if (isPortrait()) {
-            if (animatedHeigth === 1) {
+            if (animatedHeigth === 1 || store.getState().InfoReducer.startUpOrDownAnim === 'up') {
                 Animated.timing(
                     this.animHeigth, 
                     {
@@ -863,6 +841,15 @@ class Routes extends React.Component {
                         //initial
                     />
                     <Scene 
+                        key={'listLikes'}
+                        title={'Pessoas que curtiram'}
+                        component={ListLikes}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
                         key={'jogoTabBar'}
                         tabs
                         showLabel
@@ -1138,6 +1125,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     animatedHeigth: state.JogosReducer.animatedHeigth,
+    forceHiddenTab: state.JogosReducer.forceHiddenTab,
     userLevel: state.LoginReducer.userLevel
 });
 

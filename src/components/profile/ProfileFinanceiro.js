@@ -9,8 +9,7 @@ import {
 import { TextMask } from 'react-native-masked-text';
 
 import { connect } from 'react-redux';
-import { 
-    Card, 
+import {
     SearchBar,
     Divider
 } from 'react-native-elements';
@@ -19,6 +18,7 @@ import _ from 'lodash';
 import { colorAppF } from '../../utils/constantes';
 import { normalize } from '../../utils/strComplex';
 import ListItem from '../tools/ListItem';
+import Card from '../tools/Card';
 import {
     modificaFilterLoad,
     modificaFilterStr,

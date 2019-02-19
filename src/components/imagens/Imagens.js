@@ -6,12 +6,13 @@ import {
     TouchableOpacity,
     TouchableWithoutFeedback,
     Image,
+    Modal,
+    Text,
     ActivityIndicator
 } from 'react-native';
 
 import { connect } from 'react-redux';
-import { 
-    Card,
+import {
     Icon,
     Divider,
     FormLabel
@@ -21,7 +22,8 @@ import { Actions } from 'react-native-router-flux';
 import ImagePicker from 'react-native-image-crop-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import b64 from 'base-64';
-import ImageView from 'react-native-image-view';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import FastImage from 'react-native-fast-image';
 import { Dialog } from 'react-native-simple-dialogs';
 import * as Progress from 'react-native-progress';
 import Toast from 'react-native-simple-toast';
@@ -30,6 +32,7 @@ import firebase from '../../Firebase';
 import { modificaShowImageView } from '../../actions/ImagensActions';
 import { checkConInfo } from '../../utils/jogosUtils';
 import { colorAppS, colorAppF } from '../../utils/constantes';
+import Card from '../tools/Card';
 
 class Imagens extends React.Component {
 
@@ -394,7 +397,7 @@ class Imagens extends React.Component {
                             <Card 
                                 containerStyle={styles.card}
                             >
-                                <Image
+                                <FastImage
                                     style={{ width: null, height: 200 }}
                                     source={{ uri: item }} 
                                 />
@@ -453,7 +456,7 @@ class Imagens extends React.Component {
     render() {
         let imagesForView = _.filter(this.state.jogo.imagens, (img) => !img.push);
         imagesForView = imagesForView.map(
-            (item) => ({ source: { uri: item, width: 600, height: 400 } })
+            (item) => ({ url: item })
         );
 
         return (
@@ -466,13 +469,59 @@ class Imagens extends React.Component {
                     { this.renderImagensCard() }
                     <View style={{ marginVertical: 20 }} />
                 </ScrollView>
-                <ImageView
-                    images={imagesForView}
-                    imageIndex={this.state.imgSelected}
-                    isVisible={this.props.showImageView}
-                    renderFooter={() => (<View />)}
-                    onClose={() => this.props.modificaShowImageView(false)}
-                />
+                <Modal 
+                    visible={this.props.showImageView} 
+                    transparent
+                    onRequestClose={() => this.props.modificaShowImageView(false)}
+                >
+                    <ImageViewer
+                        imageUrls={imagesForView}
+                        index={this.state.imgSelected}
+                        isVisible={this.props.showImageView}
+                        enableSwipeDown
+                        pageAnimateTime={600}
+                        enablePreload
+                        footerContainerStyle={{ flex: 1, left: 0, right: 0 }}
+                        renderImage={(props) => <FastImage {...props} />}
+                        loadingRender={() => <ActivityIndicator />}
+                        renderFooter={() => (
+                            <View 
+                                style={{ 
+                                    flex: 1, 
+                                    flexDirection: 'row',
+                                    alignItems: 'center', 
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                <TouchableOpacity
+                                    onPress={() => this.props.modificaShowImageView(false)}
+                                >
+                                    <View 
+                                        style={{ 
+                                            flex: 1,
+                                            flexDirection: 'row',
+                                            alignItems: 'center', 
+                                            justifyContent: 'center',
+                                            paddingVertical: 15
+                                        }}
+                                    >
+                                        <Text
+                                            style={{ 
+                                                fontFamily: 'OpenSans-Bold', 
+                                                color: 'white',
+                                                textAlign: 'center',
+                                                fontSize: 16
+                                            }}
+                                        >
+                                            Fechar
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        onCancel={() => this.props.modificaShowImageView(false)}
+                    />
+                </Modal>
                 <Dialog
                     animationType={'fade'}
                     visible={this.state.uploadModal}

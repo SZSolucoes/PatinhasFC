@@ -9,7 +9,6 @@ import {
 
 import { connect } from 'react-redux';
 import { 
-    Card, 
     Icon,
     SearchBar
 } from 'react-native-elements';
@@ -18,6 +17,7 @@ import _ from 'lodash';
 import { colorAppF } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { showAlert } from '../../../utils/store';
+import Card from '../../tools/Card';
 import {
     modificaFilterLoad,
     modificaFilterStr,

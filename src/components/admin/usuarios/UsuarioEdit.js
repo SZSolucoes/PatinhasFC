@@ -15,7 +15,6 @@ import {
     FormLabel, 
     FormInput, 
     FormValidationMessage, 
-    Card, 
     Button, 
     Icon
 } from 'react-native-elements';
@@ -28,6 +27,7 @@ import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { usuarioAttr, updateUserDB } from '../../../utils/userUtils';
+import Card from '../../tools/Card';
 import { store } from '../../../App';
 
 class UsuarioEdit extends React.Component {

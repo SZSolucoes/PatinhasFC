@@ -23,7 +23,7 @@ import Moment from 'moment';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { Card, Divider, SearchBar, CheckBox } from 'react-native-elements';
+import { Divider, SearchBar, CheckBox } from 'react-native-elements';
 import { isPortrait } from '../../utils/orientation';
 import { startFbListener, stopFbListener } from '../../utils/firebaseListeners';
 import { updateUserDB } from '../../utils/userUtils';
@@ -49,6 +49,7 @@ import perfilUserImg from '../../imgs/perfiluserimg.png';
 import { store } from '../../App';
 import { checkConInfo } from '../../utils/jogosUtils';
 import Avatar from '../tools/Avatar';
+import Card from '../tools/Card';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -685,7 +686,9 @@ class Jogos extends React.Component {
                             }
                         )
                     }
-                    ListHeaderComponent={(<View style={{ marginTop: 60 }} />)}
+                    ListHeaderComponent={
+                        (<View style={{ marginTop: 60 + getStatusBarHeight(true) }} />)
+                    }
                     ListFooterComponent={(
                             <View style={{ marginBottom: 50 }} >
                             {

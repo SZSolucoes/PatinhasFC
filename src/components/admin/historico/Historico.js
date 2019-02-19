@@ -9,14 +9,14 @@ import {
 
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { 
-    Card,
+import {
     SearchBar
 } from 'react-native-elements';
 import _ from 'lodash';
 
 import firebase from '../../../Firebase';
 import MonthPicker from '../../tools/MonthPicker';
+import Card from '../../tools/Card';
 import { colorAppS, colorAppF, colorAppP } from '../../../utils/constantes';
 import Versus from '../../jogos/Versus';
 import { 

@@ -9,8 +9,7 @@ import {
 
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { 
-    Card,
+import {
     SearchBar,
     Icon,
     FormLabel,
@@ -19,6 +18,7 @@ import {
 import _ from 'lodash';
 
 import { colorAppS, colorAppF } from '../../../utils/constantes';
+import Card from '../../tools/Card';
 import Versus from '../../jogos/Versus';
 import { 
     modificaFilterStr, 

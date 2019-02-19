@@ -12,7 +12,7 @@ import {
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
-import { Card, List, CheckBox, Divider, Icon } from 'react-native-elements';
+import { List, CheckBox, Divider, Icon } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
 import * as Progress from 'react-native-progress';
 import { Dialog } from 'react-native-simple-dialogs';
@@ -23,6 +23,7 @@ import { colorAppF, colorAppP, colorAppS, colorAppW } from '../../../utils/const
 import { getPosIndex, checkConInfo } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
 import ListItem from '../../tools/ListItem';
+import Card from '../../tools/Card';
 import { 
     modificaClean, 
     modificaCurrentTime,
@@ -2467,7 +2468,7 @@ class JogoG extends React.Component {
     }
 
     renderEscalados(jogo) {
-        const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push).sort(
+        let jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push).sort(
             (a, b) => {
                 if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
                     return 1;
@@ -2479,7 +2480,10 @@ class JogoG extends React.Component {
                 return 0;  
             }
         );
-        const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push).sort(
+
+        jogadoresCasaFt = _.orderBy(jogadoresCasaFt, ['nome'], ['asc']);
+        
+        let jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push).sort(
             (a, b) => {
                 if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
                     return 1;
@@ -2491,6 +2495,9 @@ class JogoG extends React.Component {
                 return 0;  
             }
         );
+
+        jogadoresVisitFt = _.orderBy(jogadoresVisitFt, ['nome'], ['asc']);
+
         const numJogadoresCasa = jogadoresCasaFt.length;
         const numjogadoresVisit = jogadoresVisitFt.length;
 

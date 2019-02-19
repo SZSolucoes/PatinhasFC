@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-import { Card, Icon } from 'react-native-elements';
+import { Icon } from 'react-native-elements';
 import ModalDropdown from 'react-native-modal-dropdown';
 import { Actions } from 'react-native-router-flux';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
@@ -48,6 +48,7 @@ import { isPortrait } from '../../utils/orientation';
 import { normalize } from '../../utils/strComplex';
 import Avatar from '../tools/Avatar';
 import ListItem from '../tools/ListItem';
+import Card from '../tools/Card';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -470,8 +471,9 @@ class Informativos extends React.Component {
                                     bottom: 0,
                                     zIndex: 10,
                                     flex: 1,
-                                    marginLeft: 5,
-                                    marginTop: 2,
+                                    borderRadius: 2,
+                                    marginLeft: 2,
+                                    marginTop: 1,
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     backgroundColor: 'rgba(0,0,0,0.4)'
@@ -617,15 +619,7 @@ class Informativos extends React.Component {
                         )
                     }
                     ListHeaderComponent={
-                        (
-                        <View 
-                            style={{ 
-                                ...Platform.select({ 
-                                    ios: { marginTop: 80 }, 
-                                    android: { marginTop: 60 } 
-                                }) }} 
-                        />
-                        )
+                        (<View style={{ marginTop: 60 + getStatusBarHeight(true) }} />)
                     }
                     ListFooterComponent={(
                         <View style={{ marginBottom: 50, marginTop: 10 }} >
@@ -678,7 +672,7 @@ class Informativos extends React.Component {
                                                 fontFamily: 'OpenSans-Bold', 
                                                 color: 'white',
                                                 textAlign: 'center',
-                                                fontSize: 14
+                                                fontSize: 16
                                             }}
                                         >
                                             Fechar

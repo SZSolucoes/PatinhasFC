@@ -10,11 +10,12 @@ import {
 } from 'react-native';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { Card, List } from 'react-native-elements';
+import { List } from 'react-native-elements';
 import { colorAppF, colorAppP } from '../../../utils/constantes';
 import { getPosIndex } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
 import ListItem from '../../tools/ListItem';
+import Card from '../../tools/Card';
 import { modificaJogoSelected } from '../../../actions/ImagensActions';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
@@ -1639,7 +1640,7 @@ class Jogo extends React.Component {
     }
 
     renderEscalados(jogo) {
-        const jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push).sort(
+        let jogadoresCasaFt = _.filter(jogo.escalacao.casa, (jgCasa) => !jgCasa.push).sort(
             (a, b) => {
                 if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
                     return 1;
@@ -1651,7 +1652,9 @@ class Jogo extends React.Component {
                 return 0;  
             }
         );
-        const jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push).sort(
+        jogadoresCasaFt = _.orderBy(jogadoresCasaFt, ['nome'], ['asc']);
+
+        let jogadoresVisitFt = _.filter(jogo.escalacao.visit, (jgVisit) => !jgVisit.push).sort(
             (a, b) => {
                 if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
                     return 1;
@@ -1663,6 +1666,8 @@ class Jogo extends React.Component {
                 return 0;  
             }
         );
+        jogadoresVisitFt = _.orderBy(jogadoresVisitFt, ['nome'], ['asc']);
+
         const numJogadoresCasa = jogadoresCasaFt.length;
         const numjogadoresVisit = jogadoresVisitFt.length;
 

@@ -77,7 +77,7 @@ const Avatar = props => {
   }
 
   const renderUtils = () => {
-    if (showEditButton) {
+    if (showEditButton || (avatarStyle && avatarStyle.showEditButton)) {
       const editButtonProps = { ...editButton };
 
       const defaultEditButtonSize = (width + height) / 7;
@@ -87,7 +87,7 @@ const Avatar = props => {
         height: editButtonSize,
         borderRadius: editButtonSize / 2,
       };
-      const editButtonIconSize = editButtonSize * 0.8;
+      const editButtonIconSize = editButtonSize * 0.6;
 
       return (
         <TouchableHighlight

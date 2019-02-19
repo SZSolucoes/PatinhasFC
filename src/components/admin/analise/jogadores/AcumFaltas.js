@@ -10,7 +10,7 @@ import {
     Keyboard,
     Text
 } from 'react-native';
-import { SearchBar, Card, List, Icon } from 'react-native-elements';
+import { SearchBar, List, Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import {
@@ -23,6 +23,7 @@ import {
 import perfilUserImg from '../../../../imgs/perfiluserimg.png';
 import { colorAppS } from '../../../../utils/constantes';
 import ListItem from '../../../tools/ListItem';
+import Card from '../../../tools/Card';
 
 class AcumFaltas extends React.Component {
 

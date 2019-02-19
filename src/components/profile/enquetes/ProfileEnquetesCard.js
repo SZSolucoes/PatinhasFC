@@ -12,9 +12,10 @@ import { Circle, G, Line, Text, Svg } from 'react-native-svg';
 import { connect } from 'react-redux';
 import Toast from 'react-native-simple-toast';
 import _ from 'lodash';
-import { Card, CheckBox, Button, Text as RNEText } from 'react-native-elements';
+import { CheckBox, Button, Text as RNEText } from 'react-native-elements';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { colorAppS, colorAppP } from '../../../utils/constantes';
+import Card from '../../tools/Card';
 import firebase from '../../../Firebase';
 
 class ProfileEnquetesCard extends React.Component {

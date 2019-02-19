@@ -15,8 +15,7 @@ import { connect } from 'react-redux';
 import { 
     FormLabel, 
     FormInput, 
-    FormValidationMessage, 
-    Card, 
+    FormValidationMessage,
     Button
 } from 'react-native-elements';
 import Moment from 'moment';
@@ -28,6 +27,7 @@ import firebase from '../../../../Firebase';
 import { showAlert } from '../../../../utils/store';
 import { colorAppF } from '../../../../utils/constantes';
 import { checkConInfo } from '../../../../utils/jogosUtils';
+import Card from '../../../tools/Card';
 
 class FinanceiroCadastrar extends React.Component {
 

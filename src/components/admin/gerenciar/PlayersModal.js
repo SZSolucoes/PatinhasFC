@@ -12,7 +12,7 @@ import {
     ActivityIndicator,
     Alert
 } from 'react-native';
-import { SearchBar, Card, List, Icon, CheckBox } from 'react-native-elements';
+import { SearchBar, List, Icon, CheckBox } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import {
@@ -27,6 +27,7 @@ import { checkConInfo } from '../../../utils/jogosUtils';
 import perfilUserImg from '../../../imgs/perfiluserimg.png';
 import { colorAppS } from '../../../utils/constantes';
 import ListItem from '../../tools/ListItem';
+import Card from '../../tools/Card';
 
 class PlayersModal extends React.Component {
 

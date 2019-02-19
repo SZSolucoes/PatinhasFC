@@ -80,6 +80,7 @@ const ListItem = props => {
     onPressRightIcon,
     disabled,
     disabledStyle,
+    avatarProps,
     ...attributes
   } = props;
 
@@ -146,6 +147,7 @@ const ListItem = props => {
                 }
                 rounded={roundAvatar}
                 source={avatar}
+                {...avatarProps}
               />
             )}
         <View style={styles.titleSubtitleContainer}>
@@ -281,6 +283,7 @@ ListItem.defaultProps = {
   subtitleNumberOfLines: 1,
   rightTitleNumberOfLines: 1,
   disabled: false,
+  avatarProps: {}
 };
 
 ListItem.propTypes = {
@@ -373,6 +376,7 @@ ListItem.propTypes = {
   onPressRightIcon: PropTypes.func,
   disabled: PropTypes.bool,
   disabledStyle: ViewPropTypes.style,
+  avatarProps: PropTypes.object
 };
 
 const styles = StyleSheet.create({

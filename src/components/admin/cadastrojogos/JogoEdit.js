@@ -3,8 +3,8 @@ import {
     View,
     StyleSheet,
     Platform,
-    TouchableOpacity,
-    Image
+    Image,
+    TouchableOpacity
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -12,11 +12,11 @@ import RNFetchBlob from 'rn-fetch-blob';
 import { 
     FormLabel, 
     FormInput, 
-    FormValidationMessage, 
-    Card, 
+    FormValidationMessage,
     Button, 
     Icon
 } from 'react-native-elements';
+import FastImage from 'react-native-fast-image';
 import Moment from 'moment';
 import b64 from 'base-64';
 
@@ -24,9 +24,10 @@ import ImagePicker from 'react-native-image-crop-picker';
 import DatePicker from 'react-native-datepicker';
 import firebase from '../../../Firebase';
 import { showAlert } from '../../../utils/store';
-import { colorAppF } from '../../../utils/constantes';
+import { colorAppF, shirtColors } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { sendCadJogoPushNotifForAll } from '../../../utils/fcmPushNotifications';
+import Card from '../../tools/Card';
 
 class JogoEdit extends React.Component {
 
@@ -42,7 +43,9 @@ class JogoEdit extends React.Component {
             data: props.data ? props.data : Moment().format('DD/MM/YYYY'),
             descricao: props.descricao ? props.descricao : '',
             timeCasa: props.timeCasa ? props.timeCasa : '',
+            homeshirt: props.homeshirt ? props.homeshirt : '',
             timeVisit: props.timeVisit ? props.timeVisit : '',
+            visitshirt: props.visitshirt ? props.visitshirt : '',
             loading: props.loading ? props.loading : false,
             scrollView: props.scrollView ? props.scrollView : null
         };
@@ -192,7 +195,9 @@ class JogoEdit extends React.Component {
                             currentTime: '0',
                             endStatus: '0',
                             lockLevel: '0',
-                            imagens: [{ push: 'push' }]
+                            imagens: [{ push: 'push' }],
+                            homeshirt: '',
+                            visitshirt: ''
                         });
                 })
                 .then(() => {
@@ -275,7 +280,9 @@ class JogoEdit extends React.Component {
                     currentTime: '0',
                     endStatus: '0',
                     lockLevel: '0',
-                    imagens: [{ push: 'push' }]
+                    imagens: [{ push: 'push' }],
+                    homeshirt: '',
+                    visitshirt: ''
                 })
                 .then(() => {
                     sendCadJogoPushNotifForAll(titulo);
@@ -412,7 +419,24 @@ class JogoEdit extends React.Component {
                         multiline
                         onSubmitEditing={() => this.timeCasa.focus()}
                     />
-                    <FormLabel labelStyle={styles.text}>TIME CASA (NOME)</FormLabel>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <FormLabel labelStyle={styles.text}>TIME CASA (NOME)</FormLabel>
+                        <TouchableOpacity>
+                            <Card
+                                containerStyle={{
+                                    padding: 2
+                                }}
+                            >
+                                <Image 
+                                    source={shirtColors[this.state.homeshirt] || shirtColors.white}
+                                    style={{
+                                        height: 40,
+                                        width: 40
+                                    }}
+                                />
+                            </Card>
+                        </TouchableOpacity>
+                    </View>
                     <FormInput
                         ref={(ref) => {
                             this.timeCasa = ref;
@@ -428,7 +452,24 @@ class JogoEdit extends React.Component {
                         underlineColorAndroid={'transparent'}
                         onSubmitEditing={() => this.timeVisit.focus()}
                     />
-                    <FormLabel labelStyle={styles.text}>TIME VISITANTES (NOME)</FormLabel>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <FormLabel labelStyle={styles.text}>TIME VISITANTES (NOME)</FormLabel>
+                        <TouchableOpacity>
+                            <Card
+                                containerStyle={{
+                                    padding: 2
+                                }}
+                            >
+                                <Image 
+                                    source={shirtColors[this.state.visitshirt] || shirtColors.blue}
+                                    style={{
+                                        height: 40,
+                                        width: 40
+                                    }}
+                                />
+                            </Card>
+                        </TouchableOpacity>
+                    </View>
                     <FormInput
                         ref={(ref) => {
                             this.timeVisit = ref;
@@ -463,15 +504,15 @@ class JogoEdit extends React.Component {
                             <View style={[styles.viewImageSelect, { height: 200 }]}>
                                 { 
                                     this.state.imgJogoUri && 
-                                    (<Image 
+                                    (<FastImage
+                                        resizeMode={FastImage.resizeMode.stretch} 
                                         source={{ uri: this.state.imgJogoUri }}
                                         style={{
                                             flex: 1,
                                             alignSelf: 'stretch',
-                                            resizeMode: 'stretch',
                                             width: undefined,
                                             height: undefined
-                                            }}
+                                        }}
                                     />)
                                 }
                             </View>
@@ -506,7 +547,9 @@ class JogoEdit extends React.Component {
                                     this.props.data : Moment().format('DD/MM/YYYY'),
                                     descricao: this.props.descricao ? this.props.descricao : '',
                                     timeCasa: this.props.timeCasa ? this.props.timeCasa : '',
+                                    homeshirt: this.props.homeshirt ? this.props.homeshirt : '',
                                     timeVisit: this.props.timeVisit ? this.props.timeVisit : '',
+                                    visitshirt: this.props.visitshirt ? this.props.visitshirt : '',
                                     loading: this.props.loading ? this.props.loading : false
                                 });
                             } else {
@@ -519,7 +562,9 @@ class JogoEdit extends React.Component {
                                     data: Moment().format('DD/MM/YYYY'),
                                     descricao: '',
                                     timeCasa: '',
+                                    homeshirt: '',
                                     timeVisit: '',
+                                    visitshirt: '',
                                     loading: false
                                 });
                             }

@@ -174,11 +174,12 @@ class Profile extends React.Component {
         const imgBg = currentUser.imgBackground ? 
             { uri: currentUser.imgBackground } : perfilBgUserImg;
         const username = currentUser.nome ? currentUser.nome : 'Patinhas';
+        const level = currentUser.level || 'visitante';
         let enqueteProps = {};
         let posicao = currentUser.tipoPerfil ? checkPerfil(currentUser.tipoPerfil) : 'Visitante';
 
-        if ('0|255'.includes(currentUser.level)) {
-            posicao = checkPerfil(currentUser.level);
+        if ('0|255'.includes(level)) {
+            posicao = checkPerfil(level);
         }
         
         if (this.props.enqueteProps && 

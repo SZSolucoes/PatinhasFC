@@ -14,7 +14,6 @@ import {
     FormLabel, 
     FormInput, 
     FormValidationMessage, 
-    Card, 
     Button,
     Icon
 } from 'react-native-elements';
@@ -26,6 +25,7 @@ import { showAlert } from '../../../utils/store';
 import { colorAppF, colorAppS } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { sendEnquetePushNotifForTopic } from '../../../utils/fcmPushNotifications';
+import Card from '../../tools/Card';
 
 class EnqueteCadastrar extends React.Component {
 

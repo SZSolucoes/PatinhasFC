@@ -13,8 +13,7 @@ import { connect } from 'react-redux';
 import { 
     FormLabel, 
     FormInput, 
-    FormValidationMessage, 
-    Card, 
+    FormValidationMessage,
     Button,
     Icon
 } from 'react-native-elements';
@@ -31,6 +30,7 @@ import { showAlert } from '../../../utils/store';
 import { colorAppF, colorAppS } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { sendEnquetePushNotifForTopic } from '../../../utils/fcmPushNotifications';
+import Card from '../../tools/Card';
 
 class EnqueteEditModal extends React.Component {
     constructor(props) {

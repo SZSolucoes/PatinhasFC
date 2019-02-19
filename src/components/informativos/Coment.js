@@ -20,6 +20,7 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 import Moment from 'moment';
 import { Icon, Divider } from 'react-native-elements';
 import { connect } from 'react-redux';
+import { Actions } from 'react-native-router-flux';
 import firebase from '../../Firebase';
 import { isPortrait } from '../../utils/orientation';
 import { checkConInfo } from '../../utils/jogosUtils';
@@ -27,6 +28,7 @@ import Avatar from '../tools/Avatar';
 import { modificaStartUpOrDownAnim, modificaInfoMsgSelected } from '../../actions/InfoActions';
 import { modificaAnimatedHeigth } from '../../actions/JogosActions';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
+import { store } from '../../App';
 
 class Coment extends React.Component {
 
@@ -403,24 +405,38 @@ class Coment extends React.Component {
                                 marginHorizontal: 15
                             }}
                         >
-                            <View
-                                style={{ 
-                                    flexDirection: 'row', 
-                                    alignItems: 'center'
-                                }}
+                            <TouchableWithoutFeedback
+                                onPress={
+                                    () => 
+                                    Actions.listLikes({ 
+                                        infoMsgSelected
+                                    })
+                                }
                             >
-                                <Icon
-                                    name='thumb-up' 
-                                    type='material-community' 
-                                    size={18} color='green'
-                                />
-                                <View style={{ marginHorizontal: 3 }} />
-                                <Text
-                                    style={{ fontWeight: 'bold' }}
+                                <View
+                                    style={{ 
+                                        flexDirection: 'row', 
+                                        alignItems: 'center'
+                                    }}
                                 >
-                                    { qtdLikes }
-                                </Text>
-                            </View>
+                                    <Icon
+                                        name='thumb-up' 
+                                        type='material-community' 
+                                        size={18} color='green'
+                                    />
+                                    <View style={{ marginHorizontal: 3 }} />
+                                    <Text
+                                        style={{ fontWeight: 'bold' }}
+                                    >
+                                        { qtdLikes }
+                                    </Text>
+                                    <Icon
+                                        name='chevron-right' 
+                                        type='material-community' 
+                                        size={34} color='green'
+                                    />
+                                </View>
+                            </TouchableWithoutFeedback>
                             <TouchableWithoutFeedback
                                 style={{ alignSelf: 'flex-end' }}
                                 onPress={() => {

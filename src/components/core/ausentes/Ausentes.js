@@ -6,11 +6,12 @@ import {
     Text,
     Image
 } from 'react-native';
-import { Card, List, Badge } from 'react-native-elements';
+import { List, Badge } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import { colorAppF } from '../../../utils/constantes';
 import ListItem from '../../tools/ListItem';
+import Card from '../../tools/Card';
 //import Campo from '../../campo/Campo';
 import imgTeam from '../../../imgs/team.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
@@ -46,7 +47,9 @@ class Ausentes extends React.Component {
             return false;
         }
 
-        const jogadoresAusentes = _.filter(jogo.ausentes, (jg) => !jg.push);
+        let jogadoresAusentes = _.filter(jogo.ausentes, (jg) => !jg.push);
+        jogadoresAusentes = _.orderBy(jogadoresAusentes, ['nome'], ['asc']);
+
         const numjogadoresAusentes = jogadoresAusentes.length;
 
         if (numjogadoresAusentes === 0) {

@@ -12,7 +12,7 @@ import {
     Alert,
     ActivityIndicator
 } from 'react-native';
-import { Card, Icon, List, Badge } from 'react-native-elements';
+import { Icon, List, Badge } from 'react-native-elements';
 import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import { Actions } from 'react-native-router-flux';
@@ -27,6 +27,7 @@ import PlayersModal from './PlayersModal';
 import { isPortrait } from '../../../utils/orientation';
 import { getPosIndex, checkConInfo } from '../../../utils/jogosUtils';
 import ListItem from '../../tools/ListItem';
+import Card from '../../tools/Card';
 import { 
     modificaShowPlayersModal,
     modificaIsSubstitute,
@@ -59,6 +60,7 @@ class EscalacaoG extends React.Component {
         this.onRemoveGols = this.onRemoveGols.bind(this);
         this.onRemoveCards = this.onRemoveCards.bind(this);
         this.onRemoveSubs = this.onRemoveSubs.bind(this);
+        this.onRemoveConfirmed = this.onRemoveConfirmed.bind(this);
 
         this.onLayoutTitleVisit = this.onLayoutTitleVisit.bind(this);
         this.onLayoutVisit = this.onLayoutVisit.bind(this);
@@ -393,6 +395,58 @@ class EscalacaoG extends React.Component {
         .catch(() => false);
     }
 
+    onRemoveConfirmed(item, jogo) {
+        const asyncFunExec = async () => {
+            const dbFirebaseRef = firebase.database().ref().child(`jogos/${jogo.key}`);
+            dbFirebaseRef.once('value', snap => {
+                if (snap) {
+                    const snapVal = snap.val();
+                    if (snapVal) {
+                        const confirmados = snapVal.confirmados;
+
+                        if (confirmados instanceof Array && confirmados.length) {
+                            const filtredNewConfirms = _.filter(
+                                confirmados, ita => ita.key && (ita.key !== item.key)
+                            );
+                            dbFirebaseRef.update({
+                                confirmados: filtredNewConfirms
+                            })
+                            .then(() => Toast.show('Jogador removido', Toast.SHORT))
+                            .catch(
+                                () => Toast.show('Falha ao remover jogador confirmado', Toast.SHORT)
+                            );
+
+                            return;
+                        }
+                    }
+                }
+
+                Toast.show('Falha ao remover jogador confirmado', Toast.SHORT);
+                return;
+            }, 
+                () => Toast.show('Falha ao remover jogador confirmado', Toast.SHORT)
+            );
+        };
+
+        Alert.alert(
+            'Aviso',
+            `Confirma a remoção do jogador\n( ${item.nome} ) da lista de confirmados ?`,
+            [
+                { 
+                    text: 'Cancelar', 
+                    onPress: () => true, 
+                    style: 'cancel' 
+                },
+                { 
+                    text: 'Ok', 
+                    onPress: () => checkConInfo(
+                        () => asyncFunExec()
+                    )
+                }
+            ]
+        );
+    }
+
     async doInOrOut(jogador, inOrOut, jogo, showToast = false, lastToast = false) {
         const jogadores = jogador instanceof Array ? jogador : [jogador];
         const successT = `${jogadores.length > 1 ? 
@@ -575,7 +629,7 @@ class EscalacaoG extends React.Component {
     }
 
     renderCasaJogadores(jogo) {
-        const casaJogadores = _.filter(jogo.escalacao.casa, (item) => !item.push).sort(
+        let casaJogadores = _.filter(jogo.escalacao.casa, (item) => !item.push).sort(
             (a, b) => {
                 if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
                     return 1;
@@ -584,9 +638,11 @@ class EscalacaoG extends React.Component {
                     return -1;
                 } 
                
-                return 0;  
+                return 0;
             }
         );
+        casaJogadores = _.orderBy(casaJogadores, ['nome'], ['asc']);
+
         const numJogadores = casaJogadores.length;
 
         if (numJogadores === 0) {
@@ -625,7 +681,7 @@ class EscalacaoG extends React.Component {
     }
 
     renderVisitJogadores(jogo) {
-        const visitJogadores = _.filter(jogo.escalacao.visit, (item) => !item.push).sort(
+        let visitJogadores = _.filter(jogo.escalacao.visit, (item) => !item.push).sort(
             (a, b) => {
                 if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
                     return 1;
@@ -637,6 +693,8 @@ class EscalacaoG extends React.Component {
                 return 0;  
             }
         );
+        visitJogadores = _.orderBy(visitJogadores, ['nome'], ['asc']);
+
         const numJogadores = visitJogadores.length;
 
         if (numJogadores === 0) {
@@ -675,7 +733,9 @@ class EscalacaoG extends React.Component {
     }
 
     renderConfirmados(jogo) {
-        const jogadoresConfirmados = _.filter(jogo.confirmados, (jgCasa) => !jgCasa.push);
+        let jogadoresConfirmados = _.filter(jogo.confirmados, (jgCasa) => !jgCasa.push);
+        jogadoresConfirmados = _.orderBy(jogadoresConfirmados, ['nome'], ['asc']);
+
         const numjogadoresConfirmados = jogadoresConfirmados.length;
 
         if (numjogadoresConfirmados === 0) {
@@ -925,6 +985,7 @@ class EscalacaoG extends React.Component {
                                     key={index}
                                     title={item.nome}
                                     rightIcon={viewIcons}
+                                    onLongPress={() => this.onRemoveConfirmed(item, jogo)}
                                 />
                             );
                         })

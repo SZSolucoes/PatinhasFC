@@ -9,7 +9,7 @@ import {
     TouchableWithoutFeedback,
     Image
 } from 'react-native';
-import { Card, Icon, List, Badge } from 'react-native-elements';
+import { Icon, List, Badge } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import { colorAppF } from '../../../utils/constantes';
@@ -17,6 +17,7 @@ import { colorAppF } from '../../../utils/constantes';
 import { isPortrait } from '../../../utils/orientation';
 import { getPosIndex } from '../../../utils/jogosUtils';
 import ListItem from '../../tools/ListItem';
+import Card from '../../tools/Card';
 
 import imgHomeShirt from '../../../imgs/homeshirt.png';
 import imgVisitShirt from '../../../imgs/visitshirt.png';
@@ -191,7 +192,7 @@ class Escalacao extends React.Component {
     }
 
     renderCasaJogadores(jogo) {
-        const casaJogadores = _.filter(jogo.escalacao.casa, (item) => !item.push).sort(
+        let casaJogadores = _.filter(jogo.escalacao.casa, (item) => !item.push).sort(
             (a, b) => {
                 if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
                     return 1;
@@ -203,6 +204,8 @@ class Escalacao extends React.Component {
                 return 0;  
             }
         );
+        casaJogadores = _.orderBy(casaJogadores, ['nome'], ['asc']);
+
         const numJogadores = casaJogadores.length;
 
         if (numJogadores === 0) {
@@ -241,7 +244,7 @@ class Escalacao extends React.Component {
     }
 
     renderVisitJogadores(jogo) {
-        const visitJogadores = _.filter(jogo.escalacao.visit, (item) => !item.push).sort(
+        let visitJogadores = _.filter(jogo.escalacao.visit, (item) => !item.push).sort(
             (a, b) => {
                 if (getPosIndex(a.posvalue) > getPosIndex(b.posvalue)) {
                     return 1;
@@ -253,6 +256,8 @@ class Escalacao extends React.Component {
                 return 0;  
             }
         );
+        visitJogadores = _.orderBy(visitJogadores, ['nome'], ['asc']);
+
         const numJogadores = visitJogadores.length;
 
         if (numJogadores === 0) {
@@ -291,7 +296,9 @@ class Escalacao extends React.Component {
     }
 
     renderConfirmados(jogo) {
-        const jogadoresConfirmados = _.filter(jogo.confirmados, (jgCasa) => !jgCasa.push);
+        let jogadoresConfirmados = _.filter(jogo.confirmados, (jgCasa) => !jgCasa.push);
+        jogadoresConfirmados = _.orderBy(jogadoresConfirmados, ['nome'], ['asc']);
+
         const numjogadoresConfirmados = jogadoresConfirmados.length;
 
         if (numjogadoresConfirmados === 0) {

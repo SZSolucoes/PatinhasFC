@@ -10,7 +10,7 @@ import {
     Keyboard,
     Text
 } from 'react-native';
-import { SearchBar, Card, List, Icon } from 'react-native-elements';
+import { SearchBar, List, Icon } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import {
@@ -20,6 +20,7 @@ import {
 } from '../../actions/PainelAdminActions';
 import { checkConInfo } from '../../utils/jogosUtils';
 import ListItem from '../tools/ListItem';
+import Card from '../tools/Card';
 
 import perfilUserImg from '../../imgs/perfiluserimg.png';
 
