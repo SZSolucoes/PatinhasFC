@@ -4,9 +4,11 @@ import {
     ScrollView, 
     StyleSheet,
     TouchableOpacity,
+    TouchableWithoutFeedback,
     Text,
     Image,
-    Animated
+    Animated,
+    Dimensions
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -51,11 +53,57 @@ class CadastroJogos extends React.Component {
             imagem: '',
             b64Str: '',
             contentType: '',
-            imgJogoUri: ''
+            imgJogoUri: '',
+            sideShirt: '',
+            sideShirtText: '',
         };
 
         this.scrollView = null;
+        this.isAnimating = false;
+        this.isCasaShow = false;
+        this.isVisitShow = false;
+        this.sideShirt = '';
+        this.funExecOnEndAnimCustom = false;
+        this.screenWidth = Dimensions.get('screen').width;
+        this.animShirtView = new Animated.Value(this.screenWidth);
+        this.animFadeInorOut = new Animated.Value(0);
+        this.animFadeView = new Animated.Value(this.screenWidth);
 
+        this.animShirtView.addListener(({ value }) => {
+            if (value === this.screenWidth) {
+                if (this.sideShirt === 'casa' && 
+                    this.state.sideShirtText !== 'TIME CASA (CAMISA)'
+                ) {
+                    this.setState({
+                        sideShirt: 'casa',
+                        sideShirtText: 'TIME CASA (CAMISA)'
+                    });
+
+                    this.scrollShirt.scrollTo({ x: 0, animated: false });
+
+                    return;
+                }
+                if (this.sideShirt === 'visit' && 
+                    this.state.sideShirtText !== 'TIME VISITANTES (CAMISA)'
+                ) {
+                    this.setState({
+                        sideShirt: 'visit',
+                        sideShirtText: 'TIME VISITANTES (CAMISA)'
+                    });
+
+                    this.scrollShirt.scrollTo({ x: 0, animated: false });
+
+                    return;
+                }
+            }
+        });
+
+        this.animFadeInorOut.addListener(({ value }) => {
+            if (value === 0) this.animFadeView.setValue(this.screenWidth);
+        });
+
+        this.onAnimShirtView = this.onAnimShirtView.bind(this);
+        this.onChangeDimensions = this.onChangeDimensions.bind(this);
         this.renderEditar = this.renderEditar.bind(this);
         this.renderSwitchType = this.renderSwitchType.bind(this);
         this.onPressEditRemove = this.onPressEditRemove.bind(this);
@@ -65,14 +113,221 @@ class CadastroJogos extends React.Component {
         this.renderBasedFilterOrNot = this.renderBasedFilterOrNot.bind(this);
     }
     
+    componentDidUpdate() {
+        Dimensions.addEventListener('change', this.onChangeDimensions);
+    }
+
     componentWillUnmount() {
         this.props.modificaClean();
+        Dimensions.removeEventListener('change', this.onChangeDimensions);
+    }
+
+    onChangeDimensions(dims) {
+        this.screenWidth = dims.screen.width;
     }
 
     onPressEditRemove(item) {
         this.props.modificaRemocao(true);
         this.props.modificaItemSelected(item);
         showAlert('danger', 'Remover!', 'Confirma a remoção do jogo selecionado ?');
+    }
+
+    onAnimShirtView(side, funExecOnEndAnim = false) {
+        if (!this.isAnimating) {
+            this.isAnimating = true;
+
+            // eslint-disable-next-line no-underscore-dangle
+            const isFullWidth = this.animShirtView.__getValue() === this.screenWidth;
+            if (this.sideShirt !== side && isFullWidth) {
+                if (side === 'casa') {
+                    this.setState({
+                        sideShirt: side,
+                        sideShirtText: 'TIME CASA (CAMISA)'
+                    });
+                } else if (side === 'visit') {
+                    this.setState({
+                        sideShirt: side,
+                        sideShirtText: 'TIME VISITANTES (CAMISA)'
+                    });
+                }
+            }
+
+            this.sideShirt = side;
+            this.funExecOnEndAnimCustom = funExecOnEndAnim || this.funExecOnEndAnimCustom;
+            
+            if (!this.state.sideShirt) {
+                if (side === 'casa') {
+                    this.setState({
+                        sideShirt: side,
+                        sideShirtText: 'TIME CASA (CAMISA)'
+                    });
+                } else if (side === 'visit') {
+                    this.setState({
+                        sideShirt: side,
+                        sideShirtText: 'TIME VISITANTES (CAMISA)'
+                    });
+                }
+            }
+
+            if (side === 'casa') {
+                if (this.isVisitShow) {
+                    this.animFadeView.setValue(0);
+                    Animated.sequence([
+                        Animated.spring(
+                            this.animShirtView,
+                            {
+                                toValue: this.screenWidth,
+                                bounciness: 0,
+                                useNativeDriver: true
+                            }
+                        ),
+                        Animated.spring(
+                            this.animShirtView,
+                            {
+                                toValue: 0,
+                                //delay: 50,
+                                bounciness: 0,
+                                useNativeDriver: true
+                            }
+                        )
+                    ]).start(() => { 
+                        this.isVisitShow = false; 
+                        this.isCasaShow = true; 
+                        if (this.funExecOnEndAnimCustom) this.funExecOnEndAnimCustom();
+                        this.isAnimating = false;
+                    });
+                } else if (this.isCasaShow) {
+                    Animated.sequence([
+                        Animated.timing(
+                            this.animFadeInorOut,
+                            {
+                                toValue: 0,
+                                duration: 100,
+                                useNativeDriver: false
+                            }
+                        ),
+                        Animated.spring(
+                            this.animShirtView,
+                            {
+                                toValue: this.screenWidth,
+                                bounciness: 0,
+                                useNativeDriver: true
+                            }
+                        )
+                    ]).start(() => { 
+                        this.isCasaShow = false; 
+                        if (this.funExecOnEndAnimCustom) this.funExecOnEndAnimCustom();
+                        this.isAnimating = false; 
+                    });
+                } else {
+                    this.animFadeView.setValue(0);
+                    Animated.parallel([
+                        Animated.spring(
+                            this.animShirtView,
+                            {
+                                toValue: 0,
+                                bounciness: 0,
+                                useNativeDriver: true
+                            }
+                        ),
+                        Animated.timing(
+                            this.animFadeInorOut,
+                            {
+                                toValue: 1,
+                                duration: 200,
+                                useNativeDriver: false
+                            }
+                        )
+                    ])
+                    .start(() => { 
+                        this.isCasaShow = true; 
+                        if (this.funExecOnEndAnimCustom) this.funExecOnEndAnimCustom();
+                        this.isAnimating = false; 
+                    });
+                }
+    
+                return;
+            }
+    
+            if (side === 'visit') {
+                if (this.isCasaShow) {
+                    this.animFadeView.setValue(0);
+                    Animated.sequence([
+                        Animated.spring(
+                            this.animShirtView,
+                            {
+                                toValue: this.screenWidth,
+                                bounciness: 0,
+                                useNativeDriver: true
+                            }
+                        ),
+                        Animated.spring(
+                            this.animShirtView,
+                            {
+                                toValue: 0,
+                                //delay: 50,
+                                bounciness: 0,
+                                useNativeDriver: true
+                            }
+                        )
+                    ]).start(() => { 
+                        this.isCasaShow = false; 
+                        this.isVisitShow = true;
+                        if (this.funExecOnEndAnimCustom) this.funExecOnEndAnimCustom();
+                        this.isAnimating = false;
+                    });
+                } else if (this.isVisitShow) {
+                    Animated.sequence([
+                        Animated.timing(
+                            this.animFadeInorOut,
+                            {
+                                toValue: 0,
+                                duration: 100,
+                                useNativeDriver: false
+                            }
+                        ),
+                        Animated.spring(
+                            this.animShirtView,
+                            {
+                                toValue: this.screenWidth,
+                                bounciness: 0,
+                                useNativeDriver: true
+                            }
+                        )
+                    ]).start(() => { 
+                        this.isVisitShow = false; 
+                        if (this.funExecOnEndAnimCustom) this.funExecOnEndAnimCustom();
+                        this.isAnimating = false; 
+                    });
+                } else {
+                    this.animFadeView.setValue(0);
+                    Animated.parallel([
+                        Animated.spring(
+                            this.animShirtView,
+                            {
+                                toValue: 0,
+                                bounciness: 0,
+                                useNativeDriver: true
+                            }
+                        ),
+                        Animated.timing(
+                            this.animFadeInorOut,
+                            {
+                                toValue: 1,
+                                duration: 200,
+                                useNativeDriver: false
+                            }
+                        )
+                    ]).start(() => { 
+                        this.isVisitShow = true; 
+                        if (this.funExecOnEndAnimCustom) this.funExecOnEndAnimCustom();
+                        this.isAnimating = false; 
+                    });
+                }
+    
+                return;
+            }
+        }
     }
 
     onChangeSuperState(newState) {
@@ -112,6 +367,7 @@ class CadastroJogos extends React.Component {
                         containerStyle={styles.card}
                     >
                         <Versus
+                            jogo={item}
                             placarCasa={placarCasa} 
                             placarVisit={placarVisit}  
                         />
@@ -238,7 +494,8 @@ class CadastroJogos extends React.Component {
         switch (modalOpt) {
             case 'Cadastrar':
                 return (
-                    <JogoEdit 
+                    <JogoEdit
+                        ref={ref => (this.jogoEditRef = ref)}
                         scrollView={() => this.scrollView}
                         titulo={this.state.titulo}
                         data={this.state.data}
@@ -251,13 +508,15 @@ class CadastroJogos extends React.Component {
                         contentType={this.state.contentType}
                         imgJogoUri={this.state.imgJogoUri}
                         onChangeSuperState={(value) => this.onChangeSuperState(value)}
+                        onAnimShirtView={this.onAnimShirtView}
                     />
                 );
             case 'Editar':
                 return this.renderEditar();
             case 'Em Edição':
                 return (
-                    <JogoEdit 
+                    <JogoEdit
+                        ref={ref => (this.jogoEditRef = ref)}
                         scrollView={() => this.scrollView}
                         titulo={this.state.itemEdit.titulo}
                         data={this.state.itemEdit.data}
@@ -268,10 +527,12 @@ class CadastroJogos extends React.Component {
                         visitshirt={this.state.itemEdit.visitshirt}
                         imgJogoUri={this.state.itemEdit.imagem}
                         keyItem={this.state.itemEdit.key}
+                        onAnimShirtView={this.onAnimShirtView}
                     />);
             default:
                 return (
-                    <JogoEdit 
+                    <JogoEdit
+                        ref={ref => (this.jogoEditRef = ref)}
                         scrollView={() => this.scrollView}
                         titulo={this.state.titulo}
                         data={this.state.data}
@@ -284,6 +545,7 @@ class CadastroJogos extends React.Component {
                         contentType={this.state.contentType}
                         imgJogoUri={this.state.imgJogoUri}
                         onChangeSuperState={(value) => this.onChangeSuperState(value)}
+                        onAnimShirtView={this.onAnimShirtView}
                     />
                 );
         }
@@ -411,51 +673,101 @@ class CadastroJogos extends React.Component {
                 >
                     {this.renderSwitchType(this.state.modalOpt)}
                 </ScrollView>
+                <TouchableWithoutFeedback
+                    onPress={() => this.onAnimShirtView(this.state.sideShirt)}
+                >
+                    <Animated.View
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            bottom: 0,
+                            left: 0,
+                            backgroundColor: this.animFadeInorOut.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.5)'],
+                                extrapolate: 'clamp'
+                            }),
+                            transform: [{ translateX: this.animFadeView }]
+                        }}
+                    />
+                </TouchableWithoutFeedback>
                 <Animated.View
+                    pointerEvents={'box-none'}
                     style={{
                         position: 'absolute',
+                        top: 0,
                         bottom: 0,
                         left: 0,
                         right: 0,
-                        height: 120,
-                        zIndex: 99999,
-                        padding: 10,
-                        backgroundColor: 'white',
-                        borderWidth: 2,
-                        borderColor: colorAppS
+                        zIndex: 1000,
+                        transform: [{ translateX: this.animShirtView }]
                     }}
                 >
-                    <Text
+                    <View
                         style={{
-                            textAlign: 'left',
-                            fontWeight: '500',
-                            fontSize: 14,
+                            flex: 1,
+                            justifyContent: 'flex-end'
                         }}
                     >
-                        TIME CASA (CAMISA)
-                    </Text>
-                    <ScrollView
-                        containerStyle={{
-                            flexGrow: '1',
-                            flexDirection: 'row'
-                        }}
-                        horizontal
-                    >
-                        {
-                            _.map(shirtColors, (ita, key) => (
-                                <Image
-                                    key={key}
-                                    source={ita}
-                                    style={{
-                                        height: 60,
-                                        width: 60,
-                                        marginHorizontal: 10,
-                                        marginTop: 5
-                                    }}
-                                />
-                            ))
-                        }
-                    </ScrollView>
+                        <View 
+                            style={{
+                                height: 150,
+                                backgroundColor: 'white',
+                                padding: 10
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    textAlign: 'left',
+                                    fontWeight: '500',
+                                    fontSize: 14,
+                                }}
+                            >
+                                {this.state.sideShirtText}
+                            </Text>
+                            <ScrollView
+                                ref={ref => (this.scrollShirt = ref)}
+                                containerStyle={{
+                                    flexGrow: '1',
+                                    flexDirection: 'row'
+                                }}
+                                horizontal
+                            >
+                                {
+                                    _.map(shirtColors, (ita, key) => (
+                                        <TouchableOpacity
+                                            key={key}
+                                            onPress={() => {
+                                                if (this.jogoEditRef) {
+                                                    this.onAnimShirtView(this.state.sideShirt);
+                                                    
+                                                    this
+                                                    .jogoEditRef
+                                                    .getWrappedInstance()
+                                                    .onChooseShirtColor(this.state.sideShirt, key);
+                                                } 
+                                            }}
+                                        >
+                                            <Card
+                                                containerStyle={{
+                                                    padding: 2
+                                                }}
+                                            >
+                                                <Image
+                                                    source={ita}
+                                                    style={{
+                                                        height: 60,
+                                                        width: 60
+                                                    }}
+                                                />
+                                            </Card>
+                                        </TouchableOpacity>
+                                    ))
+                                }
+                            </ScrollView>
+                        </View>
+                    </View>
                 </Animated.View>
             </View>
         );

@@ -132,6 +132,7 @@ class Historico extends React.Component {
                             containerStyle={styles.card}
                         >
                             <Versus
+                                jogo={item}
                                 placarCasa={placarCasa} 
                                 placarVisit={placarVisit}  
                             />

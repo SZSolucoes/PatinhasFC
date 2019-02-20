@@ -20,7 +20,7 @@ import _ from 'lodash';
 import * as Progress from 'react-native-progress';
 import { Dialog } from 'react-native-simple-dialogs';
 import firebase from '../../../Firebase';
-import { colorAppF, colorAppP, colorAppS } from '../../../utils/constantes';
+import { colorAppF, colorAppP, colorAppS, shirtColors } from '../../../utils/constantes';
 //import Campo from '../../campo/Campo';
 import EscalacaoPadrao from '../../campo/EscalacaoPadrao';
 import PlayersModal from './PlayersModal';
@@ -35,8 +35,6 @@ import {
     modificaMissedPlayers
 } from '../../../actions/GerenciarActions';
 
-import imgHomeShirt from '../../../imgs/homeshirt.png';
-import imgVisitShirt from '../../../imgs/visitshirt.png';
 import imgTeam from '../../../imgs/team.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
 
@@ -927,7 +925,10 @@ class EscalacaoG extends React.Component {
                                                         height: 35, width: 30, marginRight: 5 
                                                     }}
                                                     resizeMode={'stretch'}
-                                                    source={imgHomeShirt} 
+                                                    source={
+                                                        shirtColors[jogo.homeshirt] || 
+                                                        shirtColors.white
+                                                    } 
                                                 />
                                             </View>
                                         </TouchableOpacity>
@@ -945,7 +946,10 @@ class EscalacaoG extends React.Component {
                                                         height: 35, width: 30, marginRight: 5 
                                                     }}
                                                     resizeMode={'stretch'}
-                                                    source={imgVisitShirt} 
+                                                    source={
+                                                        shirtColors[jogo.visitshirt] || 
+                                                        shirtColors.blue
+                                                    } 
                                                 />
                                             </View>
                                         </TouchableOpacity>
@@ -1033,7 +1037,9 @@ class EscalacaoG extends React.Component {
                                             <Image 
                                                 style={{ height: 40, width: 35, marginRight: 5 }}
                                                 resizeMode={'stretch'}
-                                                source={imgHomeShirt} 
+                                                source={
+                                                    shirtColors[jogo.homeshirt] || shirtColors.white
+                                                } 
                                             /> 
                                             <Text 
                                                 onPress={() => this.onToggleCasa()}
@@ -1107,7 +1113,9 @@ class EscalacaoG extends React.Component {
                                             <Image 
                                                 style={{ height: 40, width: 35, marginRight: 5 }}
                                                 resizeMode={'stretch'}
-                                                source={imgVisitShirt} 
+                                                source={
+                                                    shirtColors[jogo.visitshirt] || shirtColors.blue
+                                                } 
                                             />
                                             <Text 
                                                 onPress={() => this.onToggleVisit()}

@@ -4,7 +4,8 @@ import {
     StyleSheet,
     Platform,
     Image,
-    TouchableOpacity
+    TouchableOpacity,
+    Alert
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -43,16 +44,19 @@ class JogoEdit extends React.Component {
             data: props.data ? props.data : Moment().format('DD/MM/YYYY'),
             descricao: props.descricao ? props.descricao : '',
             timeCasa: props.timeCasa ? props.timeCasa : '',
-            homeshirt: props.homeshirt ? props.homeshirt : '',
+            homeshirt: props.homeshirt ? props.homeshirt : 'white',
             timeVisit: props.timeVisit ? props.timeVisit : '',
-            visitshirt: props.visitshirt ? props.visitshirt : '',
+            visitshirt: props.visitshirt ? props.visitshirt : 'blue',
             loading: props.loading ? props.loading : false,
-            scrollView: props.scrollView ? props.scrollView : null
+            scrollView: props.scrollView ? props.scrollView : null,
+            isCasaSelected: false,
+            isVisitSelected: false
         };
 
         this.b64Str = props.b64Str ? props.b64Str : '';
         this.contentType = props.contentType ? props.contentType : '';
 
+        this.onChooseShirtColor = this.onChooseShirtColor.bind(this);
         this.onPressSelectImg = this.onPressSelectImg.bind(this);
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
         this.setImgProperties = this.setImgProperties.bind(this);
@@ -95,10 +99,32 @@ class JogoEdit extends React.Component {
           }).catch(() => false);
     }
 
+    onChooseShirtColor(side, key) {
+        if (side === 'casa') {
+            this.setState({
+                homeshirt: key
+            });
+        } else if (side === 'visit') {
+            this.setState({
+                visitshirt: key
+            });
+        }
+    }
+
     onPressConfirmar() {
         this.setState({ loading: true });
 
-        const { titulo, data, descricao, scrollView, timeCasa, timeVisit } = this.state;
+        const { 
+            titulo, 
+            data, 
+            descricao, 
+            scrollView, 
+            timeCasa, 
+            timeVisit,
+            homeshirt,
+            visitshirt
+        } = this.state;
+
         const { keyItem, imgJogoUri } = this.props;
         const b64File = this.b64Str;
         const contentTp = this.contentType;
@@ -116,6 +142,18 @@ class JogoEdit extends React.Component {
                 animated: true
               });
             }
+
+            return;
+        }
+
+        if ((homeshirt && visitshirt) && homeshirt === visitshirt) {
+            Alert.alert(
+                'Aviso', 
+                'A camisa do time da casa deverá ser diferente da camisa do time de visitantes.'
+            );
+
+            this.setState({ loading: false, isTitValid: false });
+
             return;
         }
 
@@ -170,7 +208,10 @@ class JogoEdit extends React.Component {
                             descricao,
                             timeCasa,
                             timeVisit,
-                            imagem: url });
+                            imagem: url,
+                            homeshirt,
+                            visitshirt
+                        });
                     }
                     return dbJogosRef.push({
                             titulo, 
@@ -196,8 +237,8 @@ class JogoEdit extends React.Component {
                             endStatus: '0',
                             lockLevel: '0',
                             imagens: [{ push: 'push' }],
-                            homeshirt: '',
-                            visitshirt: ''
+                            homeshirt: 'white',
+                            visitshirt: 'blue'
                         });
                 })
                 .then(() => {
@@ -242,7 +283,9 @@ class JogoEdit extends React.Component {
                     data: dataStr, 
                     descricao,
                     timeCasa,
-                    timeVisit 
+                    timeVisit,
+                    homeshirt,
+                    visitshirt 
                 })
                 .then(() => {
                     this.setState({ loading: false, isTitValid: false });
@@ -281,8 +324,8 @@ class JogoEdit extends React.Component {
                     endStatus: '0',
                     lockLevel: '0',
                     imagens: [{ push: 'push' }],
-                    homeshirt: '',
-                    visitshirt: ''
+                    homeshirt: 'white',
+                    visitshirt: 'blue'
                 })
                 .then(() => {
                     sendCadJogoPushNotifForAll(titulo);
@@ -421,10 +464,27 @@ class JogoEdit extends React.Component {
                     />
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <FormLabel labelStyle={styles.text}>TIME CASA (NOME)</FormLabel>
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={
+                                () => {
+                                    if (this.props.onAnimShirtView) {
+                                        this.props.onAnimShirtView(
+                                            'casa',
+                                            () => 
+                                                this.setState({
+                                                    isCasaSelected: !this.state.isCasaSelected,
+                                                    isVisitSelected: false
+                                                })
+                                        );
+                                    }
+                                }
+                            }
+                        >
                             <Card
                                 containerStyle={{
-                                    padding: 2
+                                    padding: 2,
+                                    backgroundColor: this.state.isCasaSelected ?
+                                    'grey' : 'white'
                                 }}
                             >
                                 <Image 
@@ -454,10 +514,27 @@ class JogoEdit extends React.Component {
                     />
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <FormLabel labelStyle={styles.text}>TIME VISITANTES (NOME)</FormLabel>
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={
+                                () => {
+                                    if (this.props.onAnimShirtView) {
+                                        this.props.onAnimShirtView(
+                                            'visit',
+                                            () =>
+                                                this.setState({
+                                                    isVisitSelected: !this.state.isVisitSelected,
+                                                    isCasaSelected: false
+                                                })
+                                        );
+                                    }
+                                }
+                            }
+                        >
                             <Card
                                 containerStyle={{
-                                    padding: 2
+                                    padding: 2,
+                                    backgroundColor: this.state.isVisitSelected ?
+                                    'grey' : 'white'
                                 }}
                             >
                                 <Image 
@@ -547,9 +624,11 @@ class JogoEdit extends React.Component {
                                     this.props.data : Moment().format('DD/MM/YYYY'),
                                     descricao: this.props.descricao ? this.props.descricao : '',
                                     timeCasa: this.props.timeCasa ? this.props.timeCasa : '',
-                                    homeshirt: this.props.homeshirt ? this.props.homeshirt : '',
+                                    homeshirt: this.props.homeshirt ? 
+                                    this.props.homeshirt : 'white',
                                     timeVisit: this.props.timeVisit ? this.props.timeVisit : '',
-                                    visitshirt: this.props.visitshirt ? this.props.visitshirt : '',
+                                    visitshirt: this.props.visitshirt ? 
+                                    this.props.visitshirt : 'blue',
                                     loading: this.props.loading ? this.props.loading : false
                                 });
                             } else {
@@ -562,9 +641,9 @@ class JogoEdit extends React.Component {
                                     data: Moment().format('DD/MM/YYYY'),
                                     descricao: '',
                                     timeCasa: '',
-                                    homeshirt: '',
+                                    homeshirt: 'white',
                                     timeVisit: '',
-                                    visitshirt: '',
+                                    visitshirt: 'blue',
                                     loading: false
                                 });
                             }
@@ -628,4 +707,4 @@ const mapStateToProps = (state) => ({
     conInfo: state.LoginReducer.conInfo
 });
 
-export default connect(mapStateToProps, {})(JogoEdit);
+export default connect(mapStateToProps, {}, null, { withRef: true })(JogoEdit);

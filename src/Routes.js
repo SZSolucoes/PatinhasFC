@@ -66,6 +66,7 @@ import EnqueteEditar from './components/admin/enquetes/EnqueteEditar';
 import Imagens from './components/imagens/Imagens';
 import Ausentes from './components/core/ausentes/Ausentes';
 import ListLikes from './components/informativos/ListLikes';
+import Mural from './components/profile/mural/Mural';
 
 const AnimatedScene = Animated.createAnimatedComponent(AnimScene);
 
@@ -844,6 +845,15 @@ class Routes extends React.Component {
                         key={'listLikes'}
                         title={'Pessoas que curtiram'}
                         component={ListLikes}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'mural'}
+                        title={'Mural'}
+                        component={Mural}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}

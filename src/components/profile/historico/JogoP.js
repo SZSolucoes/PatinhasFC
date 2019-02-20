@@ -11,15 +11,13 @@ import {
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { List } from 'react-native-elements';
-import { colorAppF, colorAppP } from '../../../utils/constantes';
+import { colorAppF, colorAppP, shirtColors } from '../../../utils/constantes';
 import { getPosIndex } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
 import ListItem from '../../tools/ListItem';
 import Card from '../../tools/Card';
 import { modificaJogoSelected } from '../../../actions/ImagensActions';
 
-import imgHomeShirt from '../../../imgs/homeshirt.png';
-import imgVisitShirt from '../../../imgs/visitshirt.png';
 import imgBola from '../../../imgs/bolaanim.png';
 import imgYellowCard from '../../../imgs/yellowcard.png';
 import imgRedCard from '../../../imgs/redcard.png';
@@ -154,7 +152,9 @@ class JogoP extends React.Component {
                         <Image 
                             style={{ height: 80, width: 70 }}
                             resizeMode={'stretch'}
-                            source={imgHomeShirt} 
+                            source={
+                                shirtColors[jogo.homeshirt] || shirtColors.white
+                            } 
                         />
                         <Text
                             style={{
@@ -218,7 +218,9 @@ class JogoP extends React.Component {
                         <Image 
                             style={{ height: 80, width: 70 }}
                             resizeMode={'stretch'}
-                            source={imgVisitShirt}
+                            source={
+                                shirtColors[jogo.visitshirt] || shirtColors.blue
+                            }
                         />
                         <Text
                             style={{
@@ -1717,7 +1719,9 @@ class JogoP extends React.Component {
                                             <Image 
                                                 style={{ height: 40, width: 35, marginRight: 5 }}
                                                 resizeMode={'stretch'}
-                                                source={imgHomeShirt} 
+                                                source={
+                                                    shirtColors[jogo.homeshirt] || shirtColors.white
+                                                }
                                             />)
                                         }
                                     />
@@ -1745,7 +1749,9 @@ class JogoP extends React.Component {
                                             <Image 
                                                 style={{ height: 40, width: 35, marginRight: 5 }}
                                                 resizeMode={'stretch'}
-                                                source={imgVisitShirt} 
+                                                source={
+                                                    shirtColors[jogo.visitshirt] || shirtColors.blue
+                                                }
                                             />)
                                         }
                                     />

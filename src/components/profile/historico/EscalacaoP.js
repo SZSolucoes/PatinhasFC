@@ -12,15 +12,13 @@ import {
 import { Icon, List, Badge } from 'react-native-elements';
 import { connect } from 'react-redux';
 import _ from 'lodash';
-import { colorAppF } from '../../../utils/constantes';
+import { colorAppF, shirtColors } from '../../../utils/constantes';
 //import Campo from '../../campo/Campo';
 import { isPortrait } from '../../../utils/orientation';
 import { getPosIndex } from '../../../utils/jogosUtils';
 import ListItem from '../../tools/ListItem';
 import Card from '../../tools/Card';
 
-import imgHomeShirt from '../../../imgs/homeshirt.png';
-import imgVisitShirt from '../../../imgs/visitshirt.png';
 import imgTeam from '../../../imgs/team.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
 
@@ -399,7 +397,9 @@ class EscalacaoP extends React.Component {
                                             <Image 
                                                 style={{ height: 40, width: 35, marginRight: 5 }}
                                                 resizeMode={'stretch'}
-                                                source={imgHomeShirt} 
+                                                source={
+                                                    shirtColors[jogo.homeshirt] || shirtColors.white
+                                                } 
                                             /> 
                                             <Text 
                                                 onPress={() => this.onToggleCasa()}
@@ -463,7 +463,9 @@ class EscalacaoP extends React.Component {
                                             <Image 
                                                 style={{ height: 40, width: 35, marginRight: 5 }}
                                                 resizeMode={'stretch'}
-                                                source={imgVisitShirt} 
+                                                source={
+                                                    shirtColors[jogo.visitshirt] || shirtColors.blue
+                                                }
                                             />
                                             <Text 
                                                 onPress={() => this.onToggleVisit()}

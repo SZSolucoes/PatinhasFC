@@ -19,7 +19,7 @@ import { Dialog } from 'react-native-simple-dialogs';
 import ModalInput from '../../tools/ModalInput';
 import PlayersModal from './PlayersModal';
 import firebase from '../../../Firebase';
-import { colorAppF, colorAppP, colorAppS, colorAppW } from '../../../utils/constantes';
+import { colorAppF, colorAppP, colorAppS, colorAppW, shirtColors } from '../../../utils/constantes';
 import { getPosIndex, checkConInfo } from '../../../utils/jogosUtils';
 import { limitDotText, formattedSeconds, formatJogoSeconds } from '../../../utils/strComplex';
 import ListItem from '../../tools/ListItem';
@@ -36,8 +36,6 @@ import {
     modificaJogador
 } from '../../../actions/GerenciarActions';
 
-import imgHomeShirt from '../../../imgs/homeshirt.png';
-import imgVisitShirt from '../../../imgs/visitshirt.png';
 import imgBola from '../../../imgs/bolaanim.png';
 import imgYellowCard from '../../../imgs/yellowcard.png';
 import imgRedCard from '../../../imgs/redcard.png';
@@ -862,7 +860,7 @@ class JogoG extends React.Component {
                         <Image 
                             style={{ height: 80, width: 70 }}
                             resizeMode={'stretch'}
-                            source={imgHomeShirt} 
+                            source={shirtColors[jogo.homeshirt] || shirtColors.white} 
                         />
                         <Text
                             style={{
@@ -926,7 +924,7 @@ class JogoG extends React.Component {
                         <Image 
                             style={{ height: 80, width: 70 }}
                             resizeMode={'stretch'}
-                            source={imgVisitShirt}
+                            source={shirtColors[jogo.visitshirt] || shirtColors.blue}
                         />
                         <Text
                             style={{
@@ -2548,7 +2546,9 @@ class JogoG extends React.Component {
                                             <Image 
                                                 style={{ height: 40, width: 35, marginRight: 5 }}
                                                 resizeMode={'stretch'}
-                                                source={imgHomeShirt} 
+                                                source={
+                                                    shirtColors[jogo.homeshirt] || shirtColors.white
+                                                } 
                                             />)
                                         }
                                     />
@@ -2576,7 +2576,9 @@ class JogoG extends React.Component {
                                             <Image 
                                                 style={{ height: 40, width: 35, marginRight: 5 }}
                                                 resizeMode={'stretch'}
-                                                source={imgVisitShirt} 
+                                                source={
+                                                    shirtColors[jogo.visitshirt] || shirtColors.blue
+                                                }
                                             />)
                                         }
                                     />

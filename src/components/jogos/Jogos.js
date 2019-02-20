@@ -623,10 +623,11 @@ class Jogos extends React.Component {
                             }}
                         />
                         <Versus
-                            placarCasa={placarCasa} 
-                            placarVisit={placarVisit}  
+                            jogo={item}
+                            placarCasa={placarCasa}
+                            placarVisit={placarVisit}
                         />
-                        { this.renderCardFooter(item) }  
+                        { this.renderCardFooter(item) }
                     </Card>   
                 </TouchableOpacity>
                 <View style={{ marginBottom: 10 }} />

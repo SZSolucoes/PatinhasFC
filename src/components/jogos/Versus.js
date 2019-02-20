@@ -7,31 +7,34 @@ import {
 
 import { connect } from 'react-redux';
 import { Text } from 'react-native-elements';
-import imgHomeShirt from '../../imgs/homeshirt.png';
-import imgVisitShirt from '../../imgs/visitshirt.png';
+import { shirtColors } from '../../utils/constantes';
 import imgX from '../../imgs/imgx.png';
 
 class Versus extends React.PureComponent {
-
     render() {
+        const { jogo, placarCasa, placarVisit } = this.props;
         return (
             <View style={styles.viewPrinc}>
                 <Image 
-                    source={imgHomeShirt} 
+                    source={
+                        shirtColors[jogo.homeshirt] || shirtColors.white
+                    }
                     style={styles.imgBrasao} 
                 />
                 <Text h1 style={styles.text}>
-                    {this.props.placarCasa ? this.props.placarCasa : '0'}
+                    {placarCasa || '0'}
                 </Text>
                 <Image 
                     source={imgX} 
                     style={{ resizeMode: 'contain', flex: 0.7, width: 20, height: 20 }} 
                 />
                 <Text h1 style={styles.text}>
-                    {this.props.placarVisit ? this.props.placarVisit : '0'}
+                    {placarVisit || '0'}
                 </Text>
                 <Image 
-                    source={imgVisitShirt} 
+                    source={
+                        shirtColors[jogo.visitshirt] || shirtColors.blue
+                    }
                     style={styles.imgBrasao} 
                 />
             </View>

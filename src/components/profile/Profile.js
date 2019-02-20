@@ -259,6 +259,12 @@ class Profile extends React.Component {
                             onPress={() => Actions.historico()}
                         />
                         <ListItem
+                            key={'Mural'}
+                            title={'Mural'}
+                            leftIcon={{ name: 'message-text', type: 'material-community' }}
+                            onPress={() => Actions.mural()}
+                        />
+                        <ListItem
                             key={'Notificações'}
                             title={'Notificações'}
                             leftIcon={{ name: 'bell', type: 'material-community' }}
