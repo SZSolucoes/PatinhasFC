@@ -261,7 +261,7 @@ class Profile extends React.Component {
                         <ListItem
                             key={'Mural'}
                             title={'Mural'}
-                            leftIcon={{ name: 'message-text', type: 'material-community' }}
+                            leftIcon={{ name: 'chart-timeline', type: 'material-community' }}
                             onPress={() => Actions.mural()}
                         />
                         <ListItem

@@ -143,16 +143,16 @@ const styles = StyleSheet.create({
     margin: 15,
     marginBottom: 0,
     ...Platform.select({
-      ios: {
-        shadowColor: 'rgba(0,0,0, .2)',
-        shadowOffset: { height: 0, width: 0 },
-        shadowOpacity: 1,
-        shadowRadius: 1,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+        ios: {
+            shadowColor: 'rgba(0,0,0, .2)',
+            shadowOffset: { height: 0, width: 0 },
+            shadowOpacity: 1,
+            shadowRadius: 1
+        },
+        android: {
+            elevation: 2
+        }
+    })
   },
   featuredTitle: {
     fontSize: normalize(18),

@@ -3,7 +3,7 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import React from 'react';
 import GestureRecognizer, { swipeDirections, } from 'react-native-swipe-gestures';
-import { StyleSheet, Text, TouchableOpacity, View, } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Platform } from 'react-native';
 
 const DATE_FORMAT = 'DD-MM-YYYY';
 const MONTH_YEAR_FORMAT = 'MMYYYY';
@@ -63,7 +63,7 @@ class MonthSelector extends React.Component {
         <View 
             style={[
                 isDisabled === true && { flex: 1, alignItems: 'center' },
-                this.getSelectedBackgroundColor(month),
+                isDisabled === false && this.getSelectedBackgroundColor(month),
                 styles.monthStyle
             ]}
         >
@@ -94,9 +94,22 @@ class MonthSelector extends React.Component {
     }
 
     isMonthEnabled = (month) => {
+        const yearsmonthsLength = this.props.yearsmonthsAllowed.length;
+        
+        if (yearsmonthsLength) {
+            const currentMonthYear = month.format('MM/YYYY');
+            for (let index = 0; index < yearsmonthsLength; index++) {
+                const element = this.props.yearsmonthsAllowed[index];
+                if (currentMonthYear === element.formated) return true;
+            }
+            
+            return false;
+        }
+        
+        const currentYear = month.format('YYYYMM');
         const minDateYear = this.props.minDate.format('YYYYMM');
         const maxDateYear = this.props.maxDate.format('YYYYMM');
-        const currentYear = month.format('YYYYMM');
+
         if (currentYear <= maxDateYear && currentYear >= minDateYear) {
             return true;
         }
@@ -150,23 +163,45 @@ class MonthSelector extends React.Component {
                 },
             ]}
         >
-            <TouchableOpacity onPress={() => this.handNextPrevTaps(false)}>
-                {this.props.prevIcon ? 
-                    (this.props.prevIcon) : 
-                    (<Text>{this.props.prevText}</Text>)
-                }
-            </TouchableOpacity>
+            {
+                this.isYearEnabled(false) ?
+                (
+                    <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                        <TouchableOpacity onPress={() => this.handNextPrevTaps(false)}>
+                            {this.props.prevIcon ? 
+                                (this.props.prevIcon) : 
+                                (<Text style={[styles.prevTextStyle, this.props.prevTextStyle]}>
+                                    {this.props.prevText}
+                                </Text>)
+                            }
+                        </TouchableOpacity>
+                    </View>
+                )
+                :
+                (<View style={{ flex: 1 }} />)
+            }
             <View style={styles.yearViewStyle}>
-                <Text style={this.props.yearTextStyle}>
+                <Text style={[styles.yearTextStyle, this.props.yearTextStyle]}>
                     {this.state.initialView.format('YYYY')}
                 </Text>
             </View>
-            <TouchableOpacity onPress={() => this.handNextPrevTaps(true)}>
-                {this.props.nextIcon ? 
-                    (this.props.nextIcon) : 
-                    (<Text>{this.props.nextText}</Text>)
-                }
-            </TouchableOpacity>
+            {
+                this.isYearEnabled(true) ? 
+                (
+                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                        <TouchableOpacity onPress={() => this.handNextPrevTaps(true)}>
+                            {this.props.nextIcon ? 
+                                (this.props.nextIcon) : 
+                                (<Text style={[styles.nextTextStyle, this.props.nextTextStyle]}>
+                                    {this.props.nextText}
+                                </Text>)
+                            }
+                        </TouchableOpacity>
+                    </View>
+                )
+                :
+                (<View style={{ flex: 1 }} />)
+            }
         </View>
     );
 
@@ -213,7 +248,9 @@ MonthSelector.propTypes = {
     nextText: PropTypes.string,
     prevText: PropTypes.string,
     containerStyle: PropTypes.any,
-    yearTextStyle: PropTypes.any,
+    yearTextStyle: PropTypes.object,
+    prevTextStyle: PropTypes.object,
+    nextTextStyle: PropTypes.object,
     monthTextStyle: PropTypes.any,
     currentMonthTextStyle: PropTypes.any,
     monthFormat: PropTypes.string,
@@ -227,6 +264,7 @@ MonthSelector.propTypes = {
     velocityThreshold: PropTypes.number,
     directionalOffsetThreshold: PropTypes.number,
     gestureIsClickThreshold: PropTypes.number,
+    yearsmonthsAllowed: PropTypes.array,
 };
 MonthSelector.defaultProps = {
     selectedDate: moment(),
@@ -242,12 +280,14 @@ MonthSelector.defaultProps = {
     nextText: 'Próximo',
     prevText: 'Anterior',
     containerStyle: null,
-    yearTextStyle: null,
+    yearTextStyle: {},
+    prevTextStyle: {},
+    nextTextStyle: {},
     monthFormat: 'MMM',
     currentMonthTextStyle: {
         color: '#22ee11',
     },
-    monthTextStyle: { color: '#000' },
+    monthTextStyle: { color: '#000', fontWeight: '500' },
     initialView: moment(),
     onMonthTapped: month => month,
     onYearChanged: year => year,
@@ -298,6 +338,7 @@ MonthSelector.defaultProps = {
     velocityThreshold: 0.3,
     directionalOffsetThreshold: 80,
     gestureIsClickThreshold: 5,
+    yearsmonthsAllowed: []
 };
 export default MonthSelector;
 // define your styles
@@ -305,6 +346,17 @@ const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
         backgroundColor: '#fff',
+        ...Platform.select({
+            ios: {
+                shadowColor: 'rgba(0,0,0, .2)',
+                shadowOffset: { height: 0, width: 0 },
+                shadowOpacity: 1,
+                shadowRadius: 1
+            },
+            android: {
+                elevation: 2
+            }
+        })
     },
     monthStyle: {
         height: 40,
@@ -327,7 +379,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        flex: 1,
+        flex: 1.5,
     },
+    yearTextStyle: {
+        fontWeight: '600'
+    },
+    prevTextStyle: {
+        fontWeight: '600'
+    },
+    nextTextStyle: {
+        fontWeight: '600'
+    }
 });
 //# sourceMappingURL=MonthSelector.js.map

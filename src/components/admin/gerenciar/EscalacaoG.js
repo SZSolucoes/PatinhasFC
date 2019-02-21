@@ -223,12 +223,12 @@ class EscalacaoG extends React.Component {
             'Aviso', 
             alertMsg,
             [
-              { text: 'Cancelar', onPress: () => false },
-              { 
-                  text: 'OK', 
-                  onPress: () => checkConInfo(
-                  () => this.doInOrOut(nJog, true, jogo, 'true')) 
-            }
+                { text: 'Cancelar', onPress: () => false },
+                { 
+                    text: 'OK', 
+                    onPress: () => checkConInfo(
+                    () => this.doInOrOut(nJog, true, jogo, 'true')) 
+                }
             ],
             { cancelable: false }
         );

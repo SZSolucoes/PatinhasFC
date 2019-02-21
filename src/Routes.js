@@ -67,6 +67,8 @@ import Imagens from './components/imagens/Imagens';
 import Ausentes from './components/core/ausentes/Ausentes';
 import ListLikes from './components/informativos/ListLikes';
 import Mural from './components/profile/mural/Mural';
+import MuralCadastrar from './components/admin/mural/MuralCadastrar';
+import MuralEditar from './components/admin/mural/MuralEditar';
 
 const AnimatedScene = Animated.createAnimatedComponent(AnimScene);
 
@@ -1071,6 +1073,37 @@ class Routes extends React.Component {
                             hideNavBar 
                             component={EnqueteEditar}
                             tabBarLabel={'Editar'}
+                            activeTintColor={'white'}
+                        />
+                    </Scene>
+                    <Scene 
+                        key={'muralAdmin'}
+                        tabs
+                        showLabel
+                        tabBarPosition={'top'}
+                        lazy={false}
+                        swipeEnabled
+                        title={'Mural'}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        tabBarStyle={{ backgroundColor: colorAppS }}
+                        labelStyle={{ fontSize: normalize(12), fontWeight: 'bold' }}
+                        //renderRightButton={() => this.rightButtonGerenciarTab()}
+                    >
+                        <Scene 
+                            key={'muralCadastrar'}
+                            hideNavBar 
+                            component={MuralCadastrar}
+                            initial
+                            tabBarLabel={'Incluir'}
+                            activeTintColor={'white'}
+                        />
+                        <Scene 
+                            key={'muralEditar'}
+                            hideNavBar 
+                            component={MuralEditar}
+                            tabBarLabel={'Visualizar'}
                             activeTintColor={'white'}
                         />
                     </Scene>

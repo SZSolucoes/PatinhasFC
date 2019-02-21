@@ -126,6 +126,25 @@ class Admin extends React.Component {
                     <TouchableOpacity 
                         style={{ flex: 1 }} 
                         onPress={
+                            () => Actions.muralAdmin(
+                                { onBack: () => Actions.popTo('_admin') }
+                            )
+                        }
+                    >
+                        <Card 
+                            containerStyle={{ flex: 1 }}
+                            wrapperStyle={{ flex: 1 }}
+                        >
+                            <View style={styles.viewIconText}>
+                                <Icon name='chart-timeline' type='material-community' size={34} />
+                                <View style={{ marginTop: 10 }} />
+                                <Text style={styles.text}>Mural</Text>
+                            </View>
+                        </Card>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={{ flex: 1 }} 
+                        onPress={
                             () => Actions.adminEnquetes(
                                 { onBack: () => Actions.popTo('_admin') }
                             )
@@ -141,12 +160,6 @@ class Admin extends React.Component {
                                 <Text style={styles.text}>Enquetes</Text>
                             </View>
                         </Card>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                        style={{ flex: 1 }} 
-                        onPress={() => false}
-                    >
-                        <View />
                     </TouchableOpacity>
                 </View>
                 <View style={{ marginBottom: 100 }} />

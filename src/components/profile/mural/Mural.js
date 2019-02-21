@@ -6,114 +6,256 @@ import {
     View,
     Animated,
     Dimensions,
-    TouchableWithoutFeedback
+    Platform,
+    TouchableOpacity
 } from 'react-native';
+import { Icon, CheckBox } from 'react-native-elements';
 import { connect } from 'react-redux';
 import Moment from 'moment';
+import _ from 'lodash';
 import Card from '../../tools/Card';
 import MonthSelector from '../../tools/MonthSelector';
+import { colorAppT } from '../../../utils/constantes';
+import { normalize } from '../../../utils/strComplex';
+
+const textAll = 'Todo o Período';
 
 class Mural extends React.Component {
     constructor(props) {
         super(props);
 
-        this.animCalendarWidth = new Animated.Value(0);
-        this.animCalendarHeight = new Animated.Value(0);
-        this.animCalendarTranslateX = new Animated.Value(Dimensions.get('screen').width);
+        this.animCalendarWidth = new Animated.Value();
+        this.animCalendarHeight = new Animated.Value();
+        this.animCalendarTranslateX = new Animated.Value(Dimensions.get('window').width);
 
         this.calendarDims = {
-            width: Dimensions.get('screen').width,
-            height: 300
+            width: Dimensions.get('window').width,
+            height: Dimensions.get('window').width
         };
+        this.isCalendarOpened = false;
+        this.isAnimating = false;
 
         this.state = {
-            month: Moment()
+            month: Moment(),
+            monthText: textAll,
+            yearsmonthsAllowed: [
+                { 
+                    moment: Moment('18/12/2018 15:23:02', 'DD-MM-YYYY'), 
+                    formated: Moment('18/12/2018 15:23:02', 'DD-MM-YYYY').format('MM/YYYY')
+                },
+               { 
+                    moment: Moment('18/12/2019 15:23:02', 'DD-MM-YYYY'), 
+                    formated: Moment('18/12/2019 15:23:02', 'DD-MM-YYYY').format('MM/YYYY')
+                }
+            ]
         };
     }
 
     componentDidMount = () => {
-        setTimeout(() => console.log(this.calendarDims), 2000);
+        Dimensions.addEventListener('change', this.onChangeDimensions);
     }
 
-    onPressDateBtn = () => {
-        this.animCalendarWidth.setValue(0);
-        this.animCalendarHeight.setValue(0);
-        this.animCalendarTranslateX.setValue(0);
+    componentWillUnmount = () => {
+        Dimensions.removeEventListener('change', this.onChangeDimensions);
+    }
 
-        Animated.parallel([
-            Animated.spring(
-                this.animCalendarWidth,
-                {
-                    toValue: this.calendarDims.width
+    onChangeDimensions = ({ window }) => {
+        this.calendarDims.width = window.width;
+        this.calendarDims.height = window.width;
+
+        if (this.isCalendarOpened) this.onPressDateBtn(true);
+    }
+
+    onPressDateBtn = (showCalendar = false, brokeAnim = false) => {
+        if (!this.isAnimating || brokeAnim) {
+            this.isAnimating = true;
+
+            if (showCalendar) {
+                if (!this.isCalendarOpened) {
+                    this.animCalendarWidth.setValue(0);
+                    this.animCalendarHeight.setValue(0);
+                    this.animCalendarTranslateX.setValue(0);
                 }
-            ),
-            Animated.spring(
-                this.animCalendarHeight,
-                {
-                    toValue: this.calendarDims.height
-                }
-            )
-        ]).start();
+        
+                Animated.parallel([
+                    Animated.spring(
+                        this.animCalendarWidth,
+                        {
+                            toValue: this.calendarDims.width
+                        }
+                    ),
+                    Animated.spring(
+                        this.animCalendarHeight,
+                        {
+                            toValue: this.calendarDims.height
+                        }
+                    )
+                ]).start(() => {
+                    this.isCalendarOpened = true;
+                    this.isAnimating = false;
+                });
+            } else {
+                Animated.parallel([
+                    Animated.spring(
+                        this.animCalendarWidth,
+                        {
+                            toValue: 0,
+                            bounciness: 0
+                        }
+                    ),
+                    Animated.spring(
+                        this.animCalendarHeight,
+                        {
+                            toValue: 0,
+                            bounciness: 0
+                        }
+                    )
+                ]).start(() => {
+                    this.animCalendarTranslateX.setValue(this.calendarDims.width);
+                    this.isCalendarOpened = false;
+                    this.isAnimating = false;
+                });
+            }
+        }
+    }
+
+    onMonthSelected = (date) => {
+        this.setState({ month: date, monthText: date.format('MM/YYYY') });
+        this.onPressDateBtn(false, true);
     }
 
     render = () => (
         <View
             style={{ flex: 1 }}
         >
-            <TouchableWithoutFeedback
-                onPress={() => this.onPressDateBtn()}
-            >
-                <View style={{ height: 100, backgroundColor: 'yellow' }} />
-            </TouchableWithoutFeedback>
-            <ScrollView
-                contentContainerStyle={{
-                    flexGrow: 1
-                }}
-            >
-                <Card
-                    containerStyle={{
-                        padding: 0
-                    }}
-                >
-                    <Text>
-                        Mural
-                    </Text>
-                </Card>
-            </ScrollView>
-            <Animated.View
+            <View 
                 style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    zIndex: 200,
-                    overflow: 'hidden',
-                    transform: [
-                        { translateX: this.animCalendarTranslateX }, 
-                        { 
-                            scaleX: this.animCalendarWidth.interpolate({
-                                inputRange: [0, this.calendarDims.width],
-                                outputRange: [0.1, 1],
-                                extrapolate: 'clamp'
-                            }) 
+                    height: 50,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center', 
+                    backgroundColor: colorAppT,
+                    ...Platform.select({
+                        ios: {
+                            shadowColor: 'rgba(0,0,0, .2)',
+                            shadowOffset: { height: 0, width: 0 },
+                            shadowOpacity: 1,
+                            shadowRadius: 1
                         },
-                        { 
-                            scaleY: this.animCalendarHeight.interpolate({
-                                inputRange: [0, this.calendarDims.height],
-                                outputRange: [0.1, 1],
-                                extrapolate: 'clamp'
-                            }) 
+                        android: {
+                            elevation: 2
                         }
-                    ]
+                    })
                 }}
             >
-                <View>
-                    <MonthSelector
-                        selectedDate={this.state.month}
-                        onMonthTapped={(date) => this.setState({ month: date })}
+                <View style={{ flex: 1 }}>
+                    <CheckBox
+                        title={'Tudo'}
+                        checked={this.state.monthText === textAll}
+                        onPress={() => false}
+                        size={20}
+                        textStyle={{ fontSize: normalize(14), color: 'white' }}
+                        checkedColor={'white'}
+                        containerStyle={{
+                            padding: 5,
+                            backgroundColor: 'transparent'
+                        }}
                     />
                 </View>
-            </Animated.View>
+                <View 
+                    style={{ 
+                        flex: 1.5,
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <Text
+                        style={{
+                            textAlign: 'center',
+                            color: 'white',
+                            fontSize: normalize(16),
+                            fontWeight: '500'
+                        }}
+                    >
+                        {this.state.monthText}
+                    </Text>
+                </View>
+                <View 
+                    style={{ 
+                        flex: 1, 
+                        alignItems: 'flex-end', 
+                        justifyContent: 'center',
+                        paddingRight: 10
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() => this.onPressDateBtn(!this.isCalendarOpened, true)}
+                    >
+                        <Icon 
+                            name={'calendar'}
+                            type={'material-community'}
+                            size={34}
+                            color={'white'}
+                        />
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <View style={{ flex: 1 }}>
+                <ScrollView
+                    contentContainerStyle={{
+                        flexGrow: 1
+                    }}
+                >
+                    <Card
+                        containerStyle={{
+                            padding: 0
+                        }}
+                    >
+                        <Text>
+                            Mural
+                        </Text>
+                    </Card>
+                </ScrollView>
+                <Animated.View
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: this.animCalendarWidth,
+                        height: this.animCalendarHeight,
+                        zIndex: 400,
+                        overflow: 'hidden',
+                        transform: [
+                            { translateX: this.animCalendarTranslateX }, 
+                            /* { 
+                                scaleX: this.animCalendarWidth.interpolate({
+                                    inputRange: [0, this.calendarDims.width],
+                                    outputRange: [0.1, 1],
+                                    extrapolate: 'clamp'
+                                }) 
+                            },
+                            { 
+                                scaleY: this.animCalendarHeight.interpolate({
+                                    inputRange: [0, this.calendarDims.height],
+                                    outputRange: [0.1, 1],
+                                    extrapolate: 'clamp'
+                                }) 
+                            } */
+                        ]
+                    }}
+                >
+                    <View>
+                        <MonthSelector
+                            selectedDate={this.state.month}
+                            minDate={_.minBy(this.state.yearsmonthsAllowed, 'formated').moment}
+                            maxDate={_.maxBy(this.state.yearsmonthsAllowed, 'formated').moment}
+                            initialView={_.maxBy(this.state.yearsmonthsAllowed, 'formated').moment}
+                            onMonthTapped={(date) => this.onMonthSelected(date)}
+                            yearsmonthsAllowed={this.state.yearsmonthsAllowed}
+                        />
+                    </View>
+                </Animated.View>
+            </View>
         </View>
     );
 }
