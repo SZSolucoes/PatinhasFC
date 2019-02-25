@@ -22,6 +22,7 @@ class Notifications extends React.Component {
         this.state = {
             notifAllTopicEnabled: false,
             notifEnquetesEnabled: false,
+            notifMuralEnabled: false
         };
     }
 
@@ -34,6 +35,11 @@ class Notifications extends React.Component {
         AsyncStorage.getItem(mappedKeyStorage('notifEnquetesEnabled')).then((value) => {
             if (value && value === 'yes') {
                 this.setState({ notifEnquetesEnabled: true });
+            }
+        });
+        AsyncStorage.getItem(mappedKeyStorage('notifMuralEnabled')).then((value) => {
+            if (value && value === 'yes') {
+                this.setState({ notifMuralEnabled: true });
             }
         });
     }
@@ -61,6 +67,18 @@ class Notifications extends React.Component {
                 AsyncStorage.setItem(mappedKeyStorage('notifEnquetesEnabled'), 'yes').then(() => {
                     FCM.subscribeToTopic('enquetes');
                     this.setState({ notifEnquetesEnabled: true });
+                });
+            }
+        } else if (checkName === 'notifMuralEnabled') {
+            if (this.state.notifMuralEnabled) {
+                AsyncStorage.setItem(mappedKeyStorage('notifMuralEnabled'), 'no').then(() => {
+                    FCM.unsubscribeFromTopic('mural');
+                    this.setState({ notifMuralEnabled: false });
+                });
+            } else {
+                AsyncStorage.setItem(mappedKeyStorage('notifMuralEnabled'), 'yes').then(() => {
+                    FCM.subscribeToTopic('mural');
+                    this.setState({ notifMuralEnabled: true });
                 });
             }
         }
@@ -96,6 +114,22 @@ class Notifications extends React.Component {
                                 checked={this.state.notifEnquetesEnabled}
                                 onPress={() => 
                                     checkConInfo(this.onPressCheck, ['notifEnquetesEnabled'])
+                                }
+                            />
+                        )}
+                    />
+                </List>
+                <List>
+                    <ListItem
+                        title='Mural'
+                        subtitle={'Receber notificações quando uma publicação for criada.'}
+                        subtitleNumberOfLines={5}
+                        rightIcon={(
+                            <CheckBox
+                                title={this.state.notifMuralEnabled ? 'Ativo  ' : 'Inativo'}
+                                checked={this.state.notifMuralEnabled}
+                                onPress={() => 
+                                    checkConInfo(this.onPressCheck, ['notifMuralEnabled'])
                                 }
                             />
                         )}

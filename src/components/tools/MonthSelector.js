@@ -34,7 +34,7 @@ class MonthSelector extends React.Component {
     }
 
     componentWillMount = () => {
-        moment.updateLocale(this.props.localeLanguage, this.props.localeSettings);
+        moment.defineLocale(this.props.localeLanguage, this.props.localeSettings);
     }
 
     getSelectedBackgroundColor = (month) => {
@@ -97,7 +97,7 @@ class MonthSelector extends React.Component {
         const yearsmonthsLength = this.props.yearsmonthsAllowed.length;
         
         if (yearsmonthsLength) {
-            const currentMonthYear = month.format('MM/YYYY');
+            const currentMonthYear = month.format('YYYYMM');
             for (let index = 0; index < yearsmonthsLength; index++) {
                 const element = this.props.yearsmonthsAllowed[index];
                 if (currentMonthYear === element.formated) return true;
@@ -292,7 +292,7 @@ MonthSelector.defaultProps = {
     onMonthTapped: month => month,
     onYearChanged: year => year,
     monthDisabledStyle: { color: '#00000050' },
-    localeLanguage: 'pt-br',
+    localeLanguage: 'en',
     localeSettings: {
         months: 'Janeiro_Fevereiro_Março_Abril_Maio_Junho_Julho_Agosto_Setembro_Outubro_Novembro_Dezembro'.split('_'),
         monthsShort: 'Jan_Fev_Mar_Abr_Mai_Jun_Jul_Ago_Set_Out_Nov_Dez'.split('_'),

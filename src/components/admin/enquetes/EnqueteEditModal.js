@@ -38,11 +38,16 @@ class EnqueteEditModal extends React.Component {
 
         this.state = {
             loading: false,
-            isTituloNotValid: false
+            isTituloNotValid: false,
+            inputWidth: '99%'
         };
 
         this.onPressConfirmar = this.onPressConfirmar.bind(this);
         this.renderOpts = this.renderOpts.bind(this);
+    }
+
+    componentDidMount = () => {
+        setTimeout(() => this.setState({ inputWidth: 'auto' }), 100);
     }
 
     onPressConfirmar() {
@@ -122,7 +127,9 @@ class EnqueteEditModal extends React.Component {
                             autoCorrect={false}
                             containerStyle={styles.inputContainerWithBtn}
                             returnKeyType={'next'}
-                            inputStyle={[styles.text, styles.input]}
+                            inputStyle={[styles.text, styles.input, {
+                                width: this.state.inputWidth
+                            }]}
                             value={opt}
                             underlineColorAndroid={'transparent'}
                             multiline
@@ -158,7 +165,9 @@ class EnqueteEditModal extends React.Component {
                         autoCorrect={false}
                         containerStyle={styles.inputContainerWithBtn}
                         returnKeyType={'next'}
-                        inputStyle={[styles.text, styles.input]}
+                        inputStyle={[styles.text, styles.input, {
+                            width: this.state.inputWidth
+                        }]}
                         value={opt}
                         underlineColorAndroid={'transparent'}
                         multiline
@@ -206,7 +215,9 @@ class EnqueteEditModal extends React.Component {
                             }}
                             selectTextOnFocus
                             containerStyle={styles.inputContainerMargem}
-                            inputStyle={[styles.text, styles.inputMargem]} 
+                            inputStyle={[styles.text, styles.inputMargem, {
+                                width: this.state.inputWidth
+                            }]} 
                             value={this.props.titulo}
                             underlineColorAndroid={'transparent'}
                             multiline
@@ -270,8 +281,7 @@ const styles = StyleSheet.create({
         padding: Platform.OS === 'ios' ? 5 : 0
     },
     inputMargem: {
-        paddingBottom: 0, 
-        width: null,
+        paddingBottom: 0,
         color: 'black',
         height: 95
     },
@@ -287,8 +297,7 @@ const styles = StyleSheet.create({
         paddingRight: 30
     },
     input: {
-        paddingBottom: 0, 
-        width: null,
+        paddingBottom: 0,
         color: 'black',
         height: 35
     },

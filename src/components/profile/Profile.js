@@ -271,7 +271,8 @@ class Profile extends React.Component {
                             onPress={() => Actions.profileNotifiations()}
                         />
                         {
-                            this.props.userLevel && this.props.userLevel === '255' &&
+                            this.props.userLevel && 
+                            (this.props.userLevel === '255' || this.props.userLevel === '0') &&
                             (
                                 <ListItem
                                     key={'Painel Administrativo'}

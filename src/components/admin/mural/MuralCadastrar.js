@@ -20,6 +20,7 @@ import { showAlert } from '../../../utils/store';
 import { colorAppF } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import Card from '../../tools/Card';
+import { sendMuralPushNotifForTopic } from '../../../utils/fcmPushNotifications';
 
 class MuralCadastrar extends React.Component {
 
@@ -31,8 +32,13 @@ class MuralCadastrar extends React.Component {
             isDescriNotValid: false,
             titulo: '',
             descricao: '',
-            loading: false
+            loading: false,
+            inputWidth: '99%'
         };
+    }
+
+    componentDidMount = () => {
+        setTimeout(() => this.setState({ inputWidth: 'auto' }), 100);
     }
 
     onPressConfirmar = () => {
@@ -62,7 +68,10 @@ class MuralCadastrar extends React.Component {
                 usuarioKey: userLogged.key,
                 usuarioNome: userLogged.nome
             })
-            .then(() => showAlert('success', 'Sucesso!', 'Inclusão efetuada com sucesso.'))
+            .then(() => {
+                sendMuralPushNotifForTopic();
+                showAlert('success', 'Sucesso!', 'Inclusão efetuada com sucesso.');
+            })
             .catch(() => 
                 showAlert(
                     'danger', 
@@ -92,7 +101,10 @@ class MuralCadastrar extends React.Component {
                             }}
                             selectTextOnFocus
                             containerStyle={[styles.inputContainer, { height: 60 }]}
-                            inputStyle={[styles.text, styles.input, { height: 60 }]} 
+                            inputStyle={[styles.text, styles.input, { 
+                                height: 60,
+                                width: this.state.inputWidth
+                            }]} 
                             value={this.state.titulo}
                             onChangeText={(value) => {
                                 this.setState({ titulo: value });
@@ -116,7 +128,10 @@ class MuralCadastrar extends React.Component {
                                 borderWidth: 1,
                                 borderColor: '#9E9E9E' 
                             }}
-                            inputStyle={[styles.text, styles.input, { height: 120 }]} 
+                            inputStyle={[styles.text, styles.input, { 
+                                height: 120,
+                                width: this.state.inputWidth 
+                            }]} 
                             value={this.state.descricao}
                             onChangeText={(value) => {
                                 this.setState({ descricao: value });
@@ -151,7 +166,7 @@ class MuralCadastrar extends React.Component {
                             })}
                         />
                     </Card>
-                    <View style={{ marginBottom: 30 }} />
+                    <View style={{ marginBottom: 100 }} />
                 </View>
             </ScrollView>
         );
@@ -172,8 +187,7 @@ const styles = StyleSheet.create({
         height: Platform.OS === 'android' ? 45 : 40,
     },
     input: {
-        paddingBottom: 0, 
-        width: null,
+        paddingBottom: 0,
         color: 'black',
         height: 35
     },

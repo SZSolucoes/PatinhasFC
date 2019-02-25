@@ -8,7 +8,7 @@ export const usuarioAttr = {
     nome: '',
     nomeForm: '',
     dtnasc: '', 
-    tipoPerfil: 'socio',
+    tipoPerfil: 'convidado',
     imgAvatar: '',
     imgBackground: '',
     level: '1',
@@ -34,8 +34,8 @@ export const usuarioAttr = {
 
 export const checkPerfil = (perfil) => {
     switch (perfil) {
-        case 'socio':
-            return 'Sócio';
+        case 'convidado':
+            return 'Convidado';
         case 'sociopatrim':
             return 'Sócio Patrimonial';
         case 'sociocontrib':

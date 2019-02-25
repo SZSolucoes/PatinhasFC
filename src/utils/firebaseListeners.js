@@ -6,6 +6,7 @@ import { store } from '../App';
 import firebase from '../Firebase';
 import { usuarioAttr } from './userUtils';
 import { mappedKeyStorage } from './store';
+import { DEVLIST } from './constantes';
 
 let jogosListener = null;
 let infosListener = null;
@@ -28,7 +29,7 @@ export const startFbListener = (name, params) => {
         case 'jogos':
             // LISTENER FIREBASE JOGOS
             if (!jogosListener || (jogosListener && !jogosListenerOn)) {
-                jogosListener = databaseRef.child('jogos').orderByChild('endStatus').equalTo('0');
+                jogosListener = databaseRef.child('jogos');
                 jogosListener.on('value', (snapshot) => {
                     let snapVal = null;
 
@@ -37,9 +38,11 @@ export const startFbListener = (name, params) => {
                     }
 
                     if (snapVal) {
+                        let jogosList = _.map(snapVal, (value, key) => ({ key, ...value }));
+                        jogosList = _.filter(jogosList, ita => ita.endStatus === '0');
                         store.dispatch({
                             type: 'modifica_listjogos_jogos',
-                            payload: _.map(snapVal, (value, key) => ({ key, ...value }))
+                            payload: jogosList
                         });      
                     }
                 });
@@ -79,9 +82,12 @@ export const startFbListener = (name, params) => {
                     }
 
                     if (snapVal) {
+                        let usuariosList = _.map(snapVal, (value, key) => ({ key, ...value }));
+                        usuariosList = _.filter(usuariosList, ita => !DEVLIST.includes(ita.email));
+
                         store.dispatch({
                             type: 'modifica_listusuarios_usuarios',
-                            payload: _.map(snapVal, (value, key) => ({ key, ...value }))
+                            payload: usuariosList
                         });
                     }
                 });

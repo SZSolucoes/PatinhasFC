@@ -433,10 +433,10 @@ class UsuarioEdit extends React.Component {
                 return 'Sócio Contribuinte';
             case 'sociopatrim':
                 return 'Sócio Patrimonial';
-            case 'socio':
-                return 'Sócio';
+            case 'convidado':
+                return 'Convidado';
             default:
-                return 'Sócio';
+                return 'Convidado';
         }
     }
 
@@ -728,7 +728,7 @@ class UsuarioEdit extends React.Component {
                                     }
                                 }}
                             >
-                                <Picker.Item label={'Sócio'} value={'socio'} />
+                                <Picker.Item label={'Convidado'} value={'convidado'} />
                                 <Picker.Item label={'Sócio Patrimonial'} value={'sociopatrim'} />
                                 <Picker.Item label={'Sócio Contribuinte'} value={'sociocontrib'} />
                                 <Picker.Item label={'Visitante'} value={'visitante'} />
@@ -740,7 +740,7 @@ class UsuarioEdit extends React.Component {
                                     onPress={() =>
                                         ActionSheetIOS.showActionSheetWithOptions({
                                             options: [
-                                                'Sócio',
+                                                'Convidado',
                                                 'Sócio Patrimonial', 
                                                 'Sócio Contribuinte',
                                                 'Visitante',
@@ -763,8 +763,8 @@ class UsuarioEdit extends React.Component {
                                                     label = 'Sócio Patrimonial';
                                                     break;
                                                 case 0:
-                                                    value = 'socio';
-                                                    label = 'Sócio';
+                                                    value = 'convidado';
+                                                    label = 'Convidado';
                                                     break;
                                                 default:
                                             }

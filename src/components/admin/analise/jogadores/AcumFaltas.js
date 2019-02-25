@@ -76,28 +76,27 @@ class AcumFaltas extends React.Component {
             const filtredByUserLogged = _.filter(
                 usuarios, (usr) => parseInt(usr.faltas, 10) > 0
             );
+
             const newSortedUsers = _.orderBy(filtredByUserLogged, ['faltas'], ['desc']);
             usuariosView = (
-                <List containerStyle={{ marginBottom: 20 }}>
-                {
-                    newSortedUsers.map((item, index) => {
-                        const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : perfilUserImg;
-                        return (
-                            <View
-                                key={index}
-                            >
-                                <ListItem
-                                    roundAvatar
-                                    avatar={imgAvt}
-                                    title={item.nome}
-                                    subtitle={item.email}
-                                    rightIcon={(<View />)}
-                                    onPress={() => {
-                                        Keyboard.dismiss();
-                                    }}
-                                    containerStyle={{ borderBottomWidth: 0 }}
-                                />
-                                <View 
+                newSortedUsers.map((item, index) => {
+                    const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : perfilUserImg;
+                    return (
+                        <View
+                            key={index}
+                        >
+                            <ListItem
+                                roundAvatar
+                                avatar={imgAvt}
+                                title={item.nome}
+                                rightIcon={(<View />)}
+                                onPress={() => {
+                                    Keyboard.dismiss();
+                                }}
+                                containerStyle={{ borderBottomWidth: 0 }}
+                            />
+                            <TouchableWithoutFeedback>
+                                <View
                                     style={{ 
                                         flexDirection: 'row', 
                                         alignItems: 'center', 
@@ -157,13 +156,17 @@ class AcumFaltas extends React.Component {
                                         </Text>
                                     </View>
                                 </View>
-                                
-                                <View style={{ borderBottomWidth: 1, borderBottomColor: '#bbb' }} />
-                            </View>
-                        );
-                    })
-                }
-                </List>
+                            </TouchableWithoutFeedback>
+                                <View 
+                                    style={{ 
+                                        borderBottomWidth: 1,
+                                        marginVertical: 2, 
+                                        borderBottomColor: '#bbb' 
+                                    }} 
+                                />
+                        </View>
+                    );
+                })
             );
         }
 
@@ -278,11 +281,19 @@ class AcumFaltas extends React.Component {
                                             onClear={() => this.props.modificaFilterModalStr('')}
                                             placeholder='Buscar jogador...' 
                                         />
-                                        <ScrollView
-                                            style={{ height: '72%' }}
-                                        >
-                                            { this.renderBasedFilterOrNot() }
-                                        </ScrollView>
+                                        <TouchableWithoutFeedback>
+                                            <View style={{ height: '72%' }}>
+                                                <ScrollView
+                                                    keyboardShouldPersistTaps={'never'}
+                                                    style={{ flex: 1 }}
+                                                    contentContainerStyle={{
+                                                        flexGrow: 1
+                                                    }}
+                                                >
+                                                    { this.renderBasedFilterOrNot() }
+                                                </ScrollView>
+                                            </View>
+                                        </TouchableWithoutFeedback>
                                     </Card>
                                 </TouchableWithoutFeedback>
                             </View>

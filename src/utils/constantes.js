@@ -18,4 +18,10 @@ export const colorAppT = '#8F742E';
 export const colorAppF = '#DCE0E4';
 export const colorAppW = '#2E3238';
 
-export const APPVERSION = '1.0.9';
+export const APPVERSION = '1.1.1';
+
+export const DEVLIST = [
+    'roneymaia@gmail.com',
+    'suporte@szsolucoes.com.br',
+    'teolucca@hotmail.com'
+];

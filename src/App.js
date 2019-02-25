@@ -104,14 +104,25 @@ class App extends React.Component {
             const firstNotif = await FCM.getInitialNotification();
 
             if (firstNotif && firstNotif.opened_from_tray) {
-                if ((firstNotif.targetScreen && firstNotif.targetScreen === 'enquetes') ||
-                (
-                    firstNotif.local_notification && 
-                    firstNotif.title && 
-                    firstNotif.title.includes('enquete'))) {
+                const localAndTitle = (firstNotif.local_notification && !!firstNotif.title);
+
+                const enquetesNotif = (
+                    firstNotif.targetScreen && firstNotif.targetScreen === 'enquetes'
+                );
+
+                const muralNotif = (
+                    firstNotif.targetScreen && firstNotif.targetScreen === 'mural'
+                );
+
+                if (enquetesNotif || (localAndTitle && firstNotif.title.includes('enquete'))) {
                     store.dispatch({
                         type: 'modifica_jumpscene_jogos',
                         payload: 'enquetes'
+                    }); 
+                } else if (muralNotif || (localAndTitle && firstNotif.title.includes('Mural'))) {
+                    store.dispatch({
+                        type: 'modifica_jumpscene_jogos',
+                        payload: 'mural'
                     });
                 }
             }
@@ -131,6 +142,19 @@ class App extends React.Component {
                             setTimeout(() => {
                                 if (Actions.currentScene !== 'profileEnquetes') {
                                     Actions.profileEnquetes();
+                                }
+                            }, 500);
+                        }
+                    } else if ((notif.targetScreen && notif.targetScreen === 'mural') ||
+                    (
+                        notif.local_notification && 
+                        notif.title && 
+                        notif.title.includes('Mural')
+                    )) {
+                        if (!store.getState().JogosReducer.jumpScene) {
+                            setTimeout(() => {
+                                if (Actions.currentScene !== 'mural') {
+                                    Actions.mural();
                                 }
                             }, 500);
                         }
@@ -203,6 +227,9 @@ class App extends React.Component {
             const notifEnquetesEnabled = await AsyncStorage.getItem(
                 mappedKeyStorage('notifEnquetesEnabled')
             );
+            const notifMuralEnabled = await AsyncStorage.getItem(
+                mappedKeyStorage('notifMuralEnabled')
+            );
 
             if (notifAllTopicEnabled && notifAllTopicEnabled === 'yes') {
                 FCM.subscribeToTopic('all');
@@ -221,12 +248,23 @@ class App extends React.Component {
                 FCM.subscribeToTopic('enquetes'); 
                 AsyncStorage.setItem(mappedKeyStorage('notifEnquetesEnabled'), 'yes');
             }
+
+            if (notifMuralEnabled && notifMuralEnabled === 'yes') {
+                FCM.subscribeToTopic('mural');
+            } else if (notifMuralEnabled && notifMuralEnabled === 'no') {
+                FCM.unsubscribeFromTopic('mural');
+            } else {
+                FCM.subscribeToTopic('mural'); 
+                AsyncStorage.setItem(mappedKeyStorage('notifMuralEnabled'), 'yes');
+            }
         } catch (e) {
             console.error(e);
             FCM.subscribeToTopic('all'); 
             FCM.subscribeToTopic('enquetes');
+            FCM.subscribeToTopic('mural');
             AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'yes');
             AsyncStorage.setItem(mappedKeyStorage('notifEnquetesEnabled'), 'yes');
+            AsyncStorage.setItem(mappedKeyStorage('notifMuralEnabled'), 'yes');
         }
     }
 

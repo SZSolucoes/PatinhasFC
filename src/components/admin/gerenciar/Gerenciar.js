@@ -28,6 +28,7 @@ import {
     modificaClean
 } from '../../../actions/GerenciarActions';
 import { store } from '../../../App';
+import firebase from '../../../Firebase';
 
 class Gerenciar extends React.Component {
 
@@ -44,8 +45,34 @@ class Gerenciar extends React.Component {
         this.onItemRender = this.onItemRender.bind(this);
 
         this.state = {
-            loading: false
+            loading: false,
+            itemKey: ''
         };
+    }
+
+    componentDidMount = () => {
+        if (this.props.userLogged.level === '0') {
+            firebase
+            .database()
+            .ref()
+            .child('jogos')
+            .orderByChild('endStatus')
+            .equalTo('255')
+            .once('value', snap => {
+                let snapVal;
+
+                if (snap) {
+                    snapVal = snap.val();
+                }
+
+                if (snapVal) {
+                    store.dispatch({
+                        type: 'modifica_listjogos_jogos',
+                        payload: _.map(snapVal, (value, key) => ({ key, ...value }))
+                    });
+                }
+            });
+        }
     }
 
     componentWillUnmount() {
@@ -69,7 +96,7 @@ class Gerenciar extends React.Component {
             payload: item.key
         });
         this.props.modificaOnItemRender(this.onItemRender);
-        this.setState({ loading: true });
+        this.setState({ loading: true, itemKey: item.key });
         setTimeout(() => 
             Actions.gerenciarJogoTab({ 
                 onBack: () => Actions.popTo('gerenciar') 
@@ -150,7 +177,17 @@ class Gerenciar extends React.Component {
                                             backgroundColor: 'rgba(255, 255, 255, 0.8)'
                                         }}
                                     >
-                                        <ActivityIndicator size={'large'} color={colorAppS} />
+                                        {
+                                            this.state.itemKey === item.key ?
+                                            (
+                                                <ActivityIndicator 
+                                                    size={'large'} 
+                                                    color={colorAppS} 
+                                                />
+                                            )
+                                            :
+                                            (<View />)
+                                        }
                                     </TouchableOpacity>
                                 )
                             }
@@ -166,8 +203,9 @@ class Gerenciar extends React.Component {
 
     renderBasedFilterOrNot() {
         const { listJogos, filterStr } = this.props;
+
         let jogosView = null;
-        if (listJogos) {
+        if (listJogos && listJogos.length) {
             if (filterStr) {
                 jogosView = this.renderListJogos(
                     this.onFilterJogos(listJogos, filterStr)
@@ -176,6 +214,7 @@ class Gerenciar extends React.Component {
                 jogosView = this.renderListJogos(listJogos);
             }
         }
+        
         return jogosView;
     }
 
@@ -272,7 +311,8 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => ({
     listJogos: state.JogosReducer.listJogos,
     filterStr: state.GerenciarReducer.filterStr,
-    filterLoad: state.GerenciarReducer.filterLoad
+    filterLoad: state.GerenciarReducer.filterLoad,
+    userLogged: state.LoginReducer.userLogged
 });
 
 export default connect(mapStateToProps, {

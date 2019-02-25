@@ -6,7 +6,8 @@ import {
     TouchableOpacity,
     Text,
     Alert,
-    Platform
+    Platform,
+    ActivityIndicator
 } from 'react-native';
 
 import { connect } from 'react-redux';
@@ -16,13 +17,13 @@ import {
     Divider
 } from 'react-native-elements';
 import _ from 'lodash';
+import Toast from 'react-native-simple-toast';
 
 import firebase from '../../../Firebase';
-import { colorAppF } from '../../../utils/constantes';
+import { colorAppF, colorAppS } from '../../../utils/constantes';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { normalize } from '../../../utils/strComplex';
 import Card from '../../tools/Card';
-import { modificaRemocao } from '../../../actions/AlertSclActions';
 import { ModalContainer } from '../../tools/ModalContainer';
 import MuralEditarModal from './MuralEditarModal';
 
@@ -46,7 +47,8 @@ class MuralEditar extends React.Component {
             filterStr: '',
             filterLoad: false,
             showModal: false,
-            itemSelected: {}
+            itemSelected: {},
+            loading: true
         };
     }
 
@@ -56,9 +58,13 @@ class MuralEditar extends React.Component {
                 const snapVal = snap.val();
                 if (snapVal) {
                     const mappedItensMural = _.map(snapVal, (ita, key) => ({ key, ...ita }));
-                    this.setState({ muralItens: mappedItensMural });
+                    this.setState({ muralItens: mappedItensMural, loading: false });
+                    
+                    return;
                 }
-            }
+            } 
+
+            this.setState({ muralItens: [], loading: false });
         });
     }
 
@@ -83,8 +89,9 @@ class MuralEditar extends React.Component {
     }
 
     onConfirmRemove = (item) => {
-        // firebase...
-        console.log('remover', item);
+        this.firebaseRef.child(`mural/${item.key}`).remove()
+        .then(() => Toast.show('Publicação removida', Toast.SHORT))
+        .catch(() => Toast.show('Falaha ao remover publicação', Toast.SHORT));
     }
 
     onFilterMuralEdit(muralItens, filterStr) {
@@ -220,47 +227,64 @@ class MuralEditar extends React.Component {
     render() {
         return (
             <View style={styles.viewPrinc}>
-                <ScrollView 
-                    style={{ flex: 1 }} 
-                    ref={(ref) => { this.scrollView = ref; }}
-                    keyboardShouldPersistTaps={'handled'}
-                >
-                    <View>
-                        <Card 
-                            containerStyle={styles.card}
+                {
+                    this.state.loading ?
+                    (
+                        <View 
+                            style={{
+                                flex: 1,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
                         >
-                            <SearchBar
-                                round
-                                lightTheme
-                                autoCapitalize={'none'}
-                                autoCorrect={false}
-                                clearIcon={!!this.state.filterStr}
-                                showLoadingIcon={
-                                    this.state.muralItens &&
-                                    this.state.muralItens.length > 0 && 
-                                    this.state.filterLoad
-                                }
-                                containerStyle={{ 
-                                    backgroundColor: 'transparent',
-                                    borderTopWidth: 0, 
-                                    borderBottomWidth: 0
-                                }}
-                                searchIcon={{ size: 26 }}
-                                value={this.state.filterStr}
-                                onChangeText={(value) => {
-                                    this.setState({
-                                        filterStr: value,
-                                        filterLoad: true
-                                    });
-                                }}
-                                onClear={() => this.setState({ filterStr: '' })}
-                                placeholder='Buscar item no mural...' 
-                            />
-                            { this.renderBasedFilterOrNot() }
-                        </Card>
-                        <View style={{ marginBottom: 30 }} />
-                    </View>
-                </ScrollView>
+                            <ActivityIndicator size={'large'} color={colorAppS} />
+                        </View>
+                    )
+                    :
+                    (
+                        <ScrollView 
+                            style={{ flex: 1 }} 
+                            ref={(ref) => { this.scrollView = ref; }}
+                            keyboardShouldPersistTaps={'handled'}
+                        >
+                            <View>
+                                <Card 
+                                    containerStyle={styles.card}
+                                >
+                                    <SearchBar
+                                        round
+                                        lightTheme
+                                        autoCapitalize={'none'}
+                                        autoCorrect={false}
+                                        clearIcon={!!this.state.filterStr}
+                                        showLoadingIcon={
+                                            this.state.muralItens &&
+                                            this.state.muralItens.length > 0 && 
+                                            this.state.filterLoad
+                                        }
+                                        containerStyle={{ 
+                                            backgroundColor: 'transparent',
+                                            borderTopWidth: 0, 
+                                            borderBottomWidth: 0
+                                        }}
+                                        searchIcon={{ size: 26 }}
+                                        value={this.state.filterStr}
+                                        onChangeText={(value) => {
+                                            this.setState({
+                                                filterStr: value,
+                                                filterLoad: true
+                                            });
+                                        }}
+                                        onClear={() => this.setState({ filterStr: '' })}
+                                        placeholder='Buscar item no mural...' 
+                                    />
+                                    { this.renderBasedFilterOrNot() }
+                                </Card>
+                                <View style={{ marginBottom: 30 }} />
+                            </View>
+                        </ScrollView>
+                    )
+                }
                 <ModalContainer 
                     showModal={this.state.showModal}
                     closeModalToggle={() => this.setState({ showModal: !this.state.showModal })}
@@ -295,5 +319,4 @@ const mapStateToProps = (state) => ({
 });
 
 export default connect(mapStateToProps, {
-    modificaRemocao
 })(MuralEditar);

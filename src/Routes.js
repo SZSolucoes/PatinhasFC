@@ -398,8 +398,10 @@ class Routes extends React.Component {
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => checkConInfo(() => {
-                        const { listJogos } = store.getState().JogosReducer;
-                        const { itemSelected, missedPlayers } = store.getState().GerenciarReducer;
+                        const state = store.getState();
+                        const { listJogos } = state.JogosReducer;
+                        const { listUsuarios } = state.UsuariosReducer;
+                        const { itemSelected, missedPlayers } = state.GerenciarReducer;
                         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
                         if (jogo.status === '1') {
                             Alert.alert(
@@ -422,7 +424,7 @@ class Routes extends React.Component {
                                     text: 'Ok', 
                                     onPress: () => checkConInfo(
                                         () => doEndGame(
-                                            jogo, firebase, Actions, missedPlayers
+                                            jogo, firebase, Actions, missedPlayers, listUsuarios
                                         ), [], 500
                                     )
                                 }
@@ -845,7 +847,7 @@ class Routes extends React.Component {
                     />
                     <Scene 
                         key={'listLikes'}
-                        title={'Pessoas que curtiram'}
+                        title={'Curtidas'}
                         component={ListLikes}
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}

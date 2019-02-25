@@ -47,6 +47,7 @@ export const mappedKeyStorage = (key) => {
         notifAllTopicEnabled: 'UID004',
         loginAutomaticoEnabled: 'UID005',
         notifEnquetesEnabled: 'UID006',
+        notifMuralEnabled: 'UID0067'
     };
 
     return keys[key];

@@ -628,7 +628,7 @@ class Informativos extends React.Component {
                             <ActivityIndicator size={'large'} color={'white'} />
                         }
                         </View> 
-                )}
+                    )}
                 />
                 <ShareModal />
                 <Modal 

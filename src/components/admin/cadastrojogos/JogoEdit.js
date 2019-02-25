@@ -419,8 +419,8 @@ class JogoEdit extends React.Component {
                             ref={(ref) => { this.inputDate = ref; }}
                             style={[styles.inputContainer, { flex: 1 }]}
                             date={this.state.data}
-                            mode='date'
-                            format='DD/MM/YYYY'
+                            mode='datetime'
+                            format='DD/MM/YYYY - HH:mm'
                             minDate={Moment().format('DD/MM/YYYY')}
                             confirmBtnText='Ok'
                             cancelBtnText='Cancelar'
@@ -463,7 +463,7 @@ class JogoEdit extends React.Component {
                         onSubmitEditing={() => this.timeCasa.focus()}
                     />
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <FormLabel labelStyle={styles.text}>TIME CASA (NOME)</FormLabel>
+                        <FormLabel labelStyle={styles.text}>TIME CASA</FormLabel>
                         <TouchableOpacity
                             onPress={
                                 () => {
@@ -513,7 +513,7 @@ class JogoEdit extends React.Component {
                         onSubmitEditing={() => this.timeVisit.focus()}
                     />
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <FormLabel labelStyle={styles.text}>TIME VISITANTES (NOME)</FormLabel>
+                        <FormLabel labelStyle={styles.text}>TIME VISITANTES</FormLabel>
                         <TouchableOpacity
                             onPress={
                                 () => {

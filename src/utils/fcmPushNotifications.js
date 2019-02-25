@@ -70,3 +70,26 @@ export const sendEnquetePushNotifForTopic = () => {
     );
 };
 
+export const sendMuralPushNotifForTopic = () => {
+    Axios.post('https://fcm.googleapis.com/fcm/send',
+      {
+        to: '/topics/mural',
+        notification: {
+            title: 'Mural',
+            body: 'Foi realizado uma nova publicação no mural',
+            show_in_foreground: true,
+            targetScreen: 'mural'
+        }, 
+        data: {
+            targetScreen: 'mural'
+        }
+      },
+        {
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: `key=${key}`
+            }
+        }
+    );
+};
+

@@ -14,7 +14,6 @@ import {
 } from '../../../../actions/AnaliseJogadores';
 
 class AnaliseJogadores extends React.Component {
-
     constructor(props) {
         super(props);
 

@@ -148,6 +148,16 @@ class Jogos extends React.Component {
                     Actions.profileEnquetes();
                 }
             }, 1000);
+        } else if (this.props.jumpScene === 'mural') {
+            store.dispatch({
+                type: 'modifica_jumpscene_jogos',
+                payload: ''
+            });
+            setTimeout(() => {
+                if (Actions.currentScene !== 'mural') {
+                    Actions.mural();
+                }
+            }, 1000);
         }
     }
 

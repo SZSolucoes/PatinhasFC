@@ -37,9 +37,14 @@ class EnqueteEditModal extends React.Component {
             isDescriNotValid: false,
             titulo: props.itemSelected ? props.itemSelected.titulo : '',
             descricao: props.itemSelected ? props.itemSelected.descricao : '',
-            loading: false
+            loading: false,
+            inputWidth: '99%'
         };
     }
+
+    componentDidMount = () => {
+        setTimeout(() => this.setState({ inputWidth: 'auto' }), 100);
+      }
 
     componentDidUpdate(prevProps, prevState) {
         const { itemSelected } = this.props;
@@ -123,7 +128,10 @@ class EnqueteEditModal extends React.Component {
                             }}
                             selectTextOnFocus
                             containerStyle={[styles.inputContainer, { height: 60 }]}
-                            inputStyle={[styles.text, styles.input, { height: 60 }]} 
+                            inputStyle={[styles.text, styles.input, { 
+                                height: 60,
+                                width: this.state.inputWidth 
+                            }]} 
                             value={this.state.titulo}
                             onChangeText={(value) => {
                                 this.setState({ titulo: value });
@@ -147,7 +155,10 @@ class EnqueteEditModal extends React.Component {
                                 borderWidth: 1,
                                 borderColor: '#9E9E9E' 
                             }}
-                            inputStyle={[styles.text, styles.input, { height: 120 }]} 
+                            inputStyle={[styles.text, styles.input, { 
+                                height: 120,
+                                width: this.state.inputWidth
+                            }]} 
                             value={this.state.descricao}
                             onChangeText={(value) => {
                                 this.setState({ descricao: value });
@@ -182,7 +193,7 @@ class EnqueteEditModal extends React.Component {
                             })}
                         />
                     </Card>
-                    <View style={{ marginBottom: 30 }} />
+                    <View style={{ marginBottom: 100 }} />
                 </View>
             </ScrollView>
         );
@@ -221,8 +232,7 @@ const styles = StyleSheet.create({
         paddingRight: 30
     },
     input: {
-        paddingBottom: 0, 
-        width: null,
+        paddingBottom: 0,
         color: 'black',
         height: 35
     },

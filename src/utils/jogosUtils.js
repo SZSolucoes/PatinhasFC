@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import Toast from 'react-native-simple-toast';
-import Moment from 'moment';
 import { Alert, NetInfo } from 'react-native';
 import { roundTo } from './numComplex';
 import { usuarioAttr } from './userUtils';
@@ -34,7 +33,7 @@ const deParaPos = {
 export const getPosName = (posvalue) => deParaPos[posvalue].name;
 export const getPosIndex = (posvalue) => deParaPos[posvalue].index;
 
-export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
+export const doEndGame = async (jogo, firebase, Actions, missedPlayers, listUsuarios) => {
     const dbFirebaseRef = firebase.database().ref();
     const placarCasa = parseInt(jogo.placarCasa, 10);
     const placarVisit = parseInt(jogo.placarVisit, 10);
@@ -60,7 +59,6 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
 
     _.remove(jogadores, (item) => !!item.push);
 
-
     if (jogadores.length === 0) {
         Alert.alert('Aviso', 'Não há jogadores escalados para finalizar o jogo.');
         return false;
@@ -69,6 +67,11 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
     store.dispatch({
         type: 'modifica_endgamemodal_gerenciar',
         payload: true
+    });
+
+    store.dispatch({
+        type: 'modifica_endgamemodalperc_gerenciar',
+        payload: 0.02
     });
     
     // Timeout utilizado para dar tempo de renderizar o modal de loading
@@ -108,7 +111,13 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, firebase, Actions, missedPlayers), 2000);
+                            changeStsEndGame(
+                                jogo, 
+                                firebase, 
+                                Actions, 
+                                missedPlayers, 
+                                listUsuarios
+                            ), 2000);
                         }
                     })
                     .catch(() => {
@@ -141,7 +150,13 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, firebase, Actions, missedPlayers), 2000);
+                            changeStsEndGame(
+                                jogo, 
+                                firebase, 
+                                Actions, 
+                                missedPlayers,
+                                listUsuarios
+                            ), 2000);
                         }
                     })
                     .catch(() => {
@@ -180,7 +195,13 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, firebase, Actions, missedPlayers), 2000);
+                            changeStsEndGame(
+                                jogo, 
+                                firebase, 
+                                Actions, 
+                                missedPlayers,
+                                listUsuarios
+                            ), 2000);
                         }
                     })
                     .catch(() => {
@@ -213,7 +234,13 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, firebase, Actions, missedPlayers), 2000);
+                            changeStsEndGame(
+                                jogo, 
+                                firebase, 
+                                Actions, 
+                                missedPlayers,
+                                listUsuarios
+                            ), 2000);
                         }
                     })
                     .catch(() => {
@@ -249,7 +276,13 @@ export const doEndGame = (jogo, firebase, Actions, missedPlayers) => {
     
                         if (numJogs <= 0) {
                             setTimeout(() => 
-                            changeStsEndGame(jogo, firebase, Actions, missedPlayers), 2000);
+                            changeStsEndGame(
+                                jogo, 
+                                firebase, 
+                                Actions, 
+                                missedPlayers,
+                                listUsuarios
+                            ), 2000);
                         }
                     })
                     .catch(() => {
@@ -276,7 +309,7 @@ const closeEndGameModal = () => {
     });
 };
 
-const changeStsEndGame = (jogo, firebase, Actions, missedPlayers) => {
+const changeStsEndGame = (jogo, firebase, Actions, missedPlayers, listUsuarios) => {
     const dbFirebaseRef = firebase.database().ref();
 
     dbFirebaseRef.child(`jogos/${jogo.key}`).update({
@@ -284,7 +317,7 @@ const changeStsEndGame = (jogo, firebase, Actions, missedPlayers) => {
     })
     .then(() => {
         closeEndGameModal();
-        updateMissedPlayers(firebase, missedPlayers);
+        updateMissedPlayers(firebase, missedPlayers, listUsuarios, jogo);
         Actions.popTo('gerenciar');
         Toast.show(
             'Jogo finalizado',
@@ -300,12 +333,39 @@ const changeStsEndGame = (jogo, firebase, Actions, missedPlayers) => {
     });
 };
 
-const updateMissedPlayers = (firebase, missedPlayers) => {
-    if (missedPlayers && missedPlayers.length) {
-        const dbFirebaseRef = firebase.database().ref();
-        const dataAtual = Moment().format('DD/MM/YYYY HH:mm:ss');
+const updateMissedPlayers = (
+        firebase, 
+        missedPlayers = [], 
+        listUsuarios, 
+        jogo
+    ) => {
+    const confirmados = jogo.confirmados;
+    const usuariosKeysMissed = [];
 
-        missedPlayers.forEach((jogadorKey) => {
+    for (let index = 0; index < listUsuarios.length; index++) {
+        const element = listUsuarios[index];
+        
+        if (element.tipoPerfil && 'sociopatrim|sociocontrib'.includes(element.tipoPerfil)) {
+            if (
+                element.key && 
+                _.findIndex(
+                    confirmados, 
+                    ita => ita.key && 
+                    ita.key === element.key
+                ) === -1
+            ) {
+                 usuariosKeysMissed.push(element.key);
+            }  
+        }
+    }
+
+    const compMissedPlayers = [...usuariosKeysMissed, ...missedPlayers];
+
+    if (compMissedPlayers && compMissedPlayers.length) {
+        const dbFirebaseRef = firebase.database().ref();
+        const dataAtual = jogo.data;
+
+        compMissedPlayers.forEach((jogadorKey) => {
             dbFirebaseRef.child(`usuarios/${jogadorKey}`)
             .once('value', (snapshot) => {
                 const faltasH = snapshot.val().faltasHistorico || usuarioAttr.faltasHistorico;
