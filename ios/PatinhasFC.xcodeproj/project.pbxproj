@@ -329,6 +329,27 @@
 			remoteGlobalIDString = 94DDAC5C1F3D024300EED511;
 			remoteInfo = "RNSVG-tvOS";
 		};
+		C01EDFA022208BF2007C2A41 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C09824E0217A28C800B90A9A /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3A5CD9A82A9C597E7AC7EBDAD5074732;
+			remoteInfo = FLAnimatedImage;
+		};
+		C01EDFA222208BF2007C2A41 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C09824E0217A28C800B90A9A /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 4FBABC751480621B42E40CC2FF4A6E17;
+			remoteInfo = "react-native-fast-image";
+		};
+		C01EDFA422208BF2007C2A41 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C09824E0217A28C800B90A9A /* Pods.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5B9614F10E97F41376CD8AFC728C56B8;
+			remoteInfo = SDWebImage;
+		};
 		C0423CE821690089005176C1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C0423CBE21690089005176C1 /* RNShare.xcodeproj */;
@@ -843,16 +864,19 @@
 			children = (
 				C09824F1217A28C900B90A9A /* libFirebaseCore.a */,
 				C09824F3217A28C900B90A9A /* libFirebaseMessaging.a */,
+				C01EDFA122208BF2007C2A41 /* libFLAnimatedImage.a */,
 				C09824F5217A28C900B90A9A /* libGoogleToolboxForMac.a */,
 				C09824F7217A28C900B90A9A /* libnanopb.a */,
 				C09824F9217A28C900B90A9A /* libPods-PatinhasFC.a */,
 				C09824FB217A28C900B90A9A /* libProtobuf.a */,
 				C09824FD217A28C900B90A9A /* libQBImagePickerController.a */,
 				C09824FF217A28C900B90A9A /* QBImagePicker.bundle */,
+				C01EDFA322208BF2007C2A41 /* libreact-native-fast-image.a */,
 				C0982501217A28C900B90A9A /* librn-fetch-blob.a */,
 				C0982503217A28C900B90A9A /* libRNImageCropPicker.a */,
 				C0982505217A28C900B90A9A /* libRNShare.a */,
 				C0982507217A28C900B90A9A /* libRSKImageCropper.a */,
+				C01EDFA522208BF2007C2A41 /* libSDWebImage.a */,
 				C0982509217A28C900B90A9A /* libyoga.a */,
 			);
 			name = Products;
@@ -1294,6 +1318,27 @@
 			fileType = archive.ar;
 			path = "libRNSVG-tvOS.a";
 			remoteRef = C004CA3F215182EF009654A2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C01EDFA122208BF2007C2A41 /* libFLAnimatedImage.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libFLAnimatedImage.a;
+			remoteRef = C01EDFA022208BF2007C2A41 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C01EDFA322208BF2007C2A41 /* libreact-native-fast-image.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libreact-native-fast-image.a";
+			remoteRef = C01EDFA222208BF2007C2A41 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		C01EDFA522208BF2007C2A41 /* libSDWebImage.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libSDWebImage.a;
+			remoteRef = C01EDFA422208BF2007C2A41 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		C0423CE921690089005176C1 /* libRNShare.a */ = {

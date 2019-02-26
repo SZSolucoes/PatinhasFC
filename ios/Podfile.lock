@@ -23,6 +23,7 @@ PODS:
     - FirebaseInstanceID (~> 3.0)
     - GoogleToolboxForMac/Logger (~> 2.1)
     - Protobuf (~> 3.1)
+  - FLAnimatedImage (1.0.12)
   - GoogleToolboxForMac/Defines (2.1.4)
   - GoogleToolboxForMac/Logger (2.1.4):
     - GoogleToolboxForMac/Defines (= 2.1.4)
@@ -37,6 +38,11 @@ PODS:
   - QBImagePickerController (3.4.0)
   - React (0.57.0):
     - React/Core (= 0.57.0)
+  - react-native-fast-image (5.1.2):
+    - FLAnimatedImage
+    - React
+    - SDWebImage/Core
+    - SDWebImage/GIF
   - React/ART (0.57.0):
     - React/Core
   - React/Core (0.57.0):
@@ -76,11 +82,16 @@ PODS:
   - RNShare (1.1.2):
     - React
   - RSKImageCropper (2.1.0)
+  - SDWebImage/Core (4.4.2)
+  - SDWebImage/GIF (4.4.2):
+    - FLAnimatedImage (~> 1.0)
+    - SDWebImage/Core
   - yoga (0.57.0.React)
 
 DEPENDENCIES:
   - Firebase
   - Firebase/Messaging
+  - react-native-fast-image (from `../node_modules/react-native-fast-image`)
   - React/ART (from `../node_modules/react-native`)
   - React/Core (from `../node_modules/react-native`)
   - React/RCTActionSheet (from `../node_modules/react-native`)
@@ -105,15 +116,19 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseInstanceID
     - FirebaseMessaging
+    - FLAnimatedImage
     - GoogleToolboxForMac
     - nanopb
     - Protobuf
     - QBImagePickerController
     - RSKImageCropper
+    - SDWebImage
 
 EXTERNAL SOURCES:
   React:
     :path: "../node_modules/react-native"
+  react-native-fast-image:
+    :path: "../node_modules/react-native-fast-image"
   rn-fetch-blob:
     :path: "../node_modules/rn-fetch-blob"
   RNImageCropPicker:
@@ -129,17 +144,20 @@ SPEC CHECKSUMS:
   FirebaseCore: 42b3267233bd21a5abd54117ccc38ca3dd0f8e83
   FirebaseInstanceID: f3f0657372592ecdfdfe2cac604a5a75758376a6
   FirebaseMessaging: f43eb0c0e1da096e659de6f713038e74862a62cd
+  FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
   GoogleToolboxForMac: 91c824d21e85b31c2aae9bb011c5027c9b4e738f
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
   Protobuf: 0fc0ad8bec688b2a3017a139953e01374fedbd5f
   QBImagePickerController: d54cf93db6decf26baf6ed3472f336ef35cae022
   React: 1fe0eb13d90b625d94c3b117c274dcfd2e760e11
+  react-native-fast-image: cba3d9bf9c2cf8ddb643d887a686c53a5dd90a2c
   rn-fetch-blob: 76a8f798dae965bbcd146a2438f2e1d381c91ae3
   RNImageCropPicker: 32ca4b9fef4e1b7b85ba69494242122948117e06
   RNShare: d875e8e37f3e5e8eb7a103ae01e06490af1796f6
   RSKImageCropper: 0d0c6d8525a2381f03fde32a47c6703817a2feed
+  SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
   yoga: b1ce48b6cf950b98deae82838f5173ea7cf89e85
 
-PODFILE CHECKSUM: 28253f664f44ceb18750d212f31a3c6ecc694e70
+PODFILE CHECKSUM: 147e10d3c8788052724c6260f14e2db54007e448
 
 COCOAPODS: 1.5.3
