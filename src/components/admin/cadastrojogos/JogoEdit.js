@@ -237,8 +237,8 @@ class JogoEdit extends React.Component {
                             endStatus: '0',
                             lockLevel: '0',
                             imagens: [{ push: 'push' }],
-                            homeshirt: 'white',
-                            visitshirt: 'blue'
+                            homeshirt,
+                            visitshirt
                         });
                 })
                 .then(() => {
@@ -324,8 +324,8 @@ class JogoEdit extends React.Component {
                     endStatus: '0',
                     lockLevel: '0',
                     imagens: [{ push: 'push' }],
-                    homeshirt: 'white',
-                    visitshirt: 'blue'
+                    homeshirt,
+                    visitshirt
                 })
                 .then(() => {
                     sendCadJogoPushNotifForAll(titulo);

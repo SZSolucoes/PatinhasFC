@@ -75,7 +75,7 @@ class Ausentes extends React.Component {
             <View style={{ flex: 1 }}>
                 <ScrollView style={styles.viewP}>
                     {
-                        numjogadoresAusentes &&
+                        numjogadoresAusentes !== 0 &&
                         (
                             <Card
                                 containerStyle={styles.card}
@@ -132,7 +132,7 @@ class Ausentes extends React.Component {
                         )
                     }
                     {
-                        numNaoConfirmados &&
+                        numNaoConfirmados !== 0 &&
                         (
                             <Card
                                 containerStyle={styles.card}

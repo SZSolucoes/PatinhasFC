@@ -42,7 +42,7 @@ import imgRedCard from '../../../imgs/redcard.png';
 import imgCartoes from '../../../imgs/cards.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
 import imgInOut from '../../../imgs/inout.png';
-import Jogos from '../../jogos/Jogos';
+
 import { sendReminderJogoPushNotifForAll } from '../../../utils/fcmPushNotifications';
 
 class JogoG extends React.Component {
@@ -116,7 +116,7 @@ class JogoG extends React.Component {
                     seconds: this.state.seconds + 1
                 })
             , 1000);
-        } else if (Jogos.status === '2') {
+        } else if (jogo.status === '2') {
             this.setState({
                 btnStartEnabled: true,
                 btnPauseEnabled: false,

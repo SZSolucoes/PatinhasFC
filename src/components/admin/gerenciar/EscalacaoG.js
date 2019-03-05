@@ -239,7 +239,7 @@ class EscalacaoG extends React.Component {
         const jogadorGols = [];
         const gols = _.filter(
             jogo.gols, jgG => {
-                const noPlayer = !jgG.push && jgG.key !== jogador.key;
+                const noPlayer = jgG.push || (jgG.key !== jogador.key);
                 if (!noPlayer) {
                     jogadorGols.push({ ...jgG });
                 }
@@ -296,7 +296,7 @@ class EscalacaoG extends React.Component {
         const jogadorCartoes = [];
         const cartoes = _.filter(
             jogo.cartoes, jgC => {
-                const noPlayer = !jgC.push && jgC.key !== jogador.key;
+                const noPlayer = jgC.push || (jgC.key !== jogador.key);
                 if (!noPlayer) {
                     jogadorCartoes.push({ ...jgC });
                 }

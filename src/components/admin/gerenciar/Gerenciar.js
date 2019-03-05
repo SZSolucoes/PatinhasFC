@@ -31,7 +31,6 @@ import { store } from '../../../App';
 import firebase from '../../../Firebase';
 
 class Gerenciar extends React.Component {
-
     constructor(props) {
         super(props);
 

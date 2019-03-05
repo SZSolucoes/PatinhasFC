@@ -28,7 +28,6 @@ import Avatar from '../tools/Avatar';
 import { modificaStartUpOrDownAnim, modificaInfoMsgSelected } from '../../actions/InfoActions';
 import { modificaAnimatedHeigth } from '../../actions/JogosActions';
 import perfilUserImg from '../../imgs/perfiluserimg.png';
-import { store } from '../../App';
 
 class Coment extends React.Component {
 
