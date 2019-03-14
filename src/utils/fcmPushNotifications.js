@@ -1,6 +1,6 @@
 import Axios from 'axios';
 
-const key = 'AIzaSyBMDciOH6bmSk9LLPeZ0fgGbW_2HSCTOwk';
+const key = '';
 
 export const sendCadJogoPushNotifForAll = (jogo) => {
     Axios.post('https://fcm.googleapis.com/fcm/send',
