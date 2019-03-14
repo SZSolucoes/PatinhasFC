@@ -91,7 +91,7 @@ class MuralEditar extends React.Component {
     onConfirmRemove = (item) => {
         this.firebaseRef.child(`mural/${item.key}`).remove()
         .then(() => Toast.show('Publicação removida', Toast.SHORT))
-        .catch(() => Toast.show('Falaha ao remover publicação', Toast.SHORT));
+        .catch(() => Toast.show('Falha ao remover publicação', Toast.SHORT));
     }
 
     onFilterMuralEdit(muralItens, filterStr) {

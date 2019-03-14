@@ -229,7 +229,7 @@ export const updateUserDB = (
 
                             hasUpdatedSubs = _.findIndex(childVal.subs, (subs) => {
                                 if (!subs.push) {
-                                    if (!subs.jogadorIn.push && 
+                                    if (subs.jogadorIn && !subs.jogadorIn.push && 
                                         subs.jogadorIn.key === keyUser && 
                                         (subs.jogadorIn.imgAvatar !== newImg || 
                                             subs.jogadorIn.nome !== newNome)
@@ -237,7 +237,7 @@ export const updateUserDB = (
                                             return true;
                                     }
 
-                                    if (!subs.jogadorOut.push && 
+                                    if (subs.jogadorOut && !subs.jogadorOut.push && 
                                         subs.jogadorOut.key === keyUser && 
                                         (subs.jogadorOut.imgAvatar !== newImg || 
                                         subs.jogadorOut.nome !== newNome)
@@ -353,7 +353,7 @@ export const updateUserDB = (
                                                 let hasChangedSub = false;
                                                 let newSub = {};
             
-                                                if (!subs.jogadorIn.push && 
+                                                if (subs.jogadorIn && !subs.jogadorIn.push && 
                                                     subs.jogadorIn.key === keyUser && 
                                                     (subs.jogadorIn.imgAvatar !== newImg || 
                                                         subs.jogadorIn.nome !== newNome)
@@ -373,7 +373,7 @@ export const updateUserDB = (
                                                     return newSub;
                                                 }
             
-                                                if (!subs.jogadorOut.push && 
+                                                if (subs.jogadorOut && !subs.jogadorOut.push && 
                                                     subs.jogadorOut.key === keyUser && 
                                                     (subs.jogadorOut.imgAvatar !== newImg || 
                                                     subs.jogadorOut.nome !== newNome)

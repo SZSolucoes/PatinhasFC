@@ -212,14 +212,16 @@ const styles = StyleSheet.create({
         marginHorizontal: 5,
         marginVertical: 15,
         borderRadius: 5,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backgroundColor: 'white'
     },
     titleContainer: {
         flexDirection: 'row',
         paddingVertical: 10,
         paddingHorizontal: 5,
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        backgroundColor: 'white'
     }
 });
 

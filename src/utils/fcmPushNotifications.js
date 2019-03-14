@@ -1,6 +1,7 @@
 import Axios from 'axios';
+import { pushKey } from '../Firebase';
 
-const key = '';
+const key = pushKey;
 
 export const sendCadJogoPushNotifForAll = (jogo) => {
     Axios.post('https://fcm.googleapis.com/fcm/send',
