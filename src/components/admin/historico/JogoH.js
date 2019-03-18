@@ -328,7 +328,12 @@ class JogoH extends React.Component {
                                     { timeText[1] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -339,7 +344,12 @@ class JogoH extends React.Component {
                                     { timeText[0] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -388,7 +398,12 @@ class JogoH extends React.Component {
                                     { timeTextCasa[1] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -399,7 +414,12 @@ class JogoH extends React.Component {
                                     { timeTextCasa[0] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -412,7 +432,12 @@ class JogoH extends React.Component {
                                     { timeTextVisit[1] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -423,7 +448,12 @@ class JogoH extends React.Component {
                                     { timeTextVisit[0] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -500,7 +530,12 @@ class JogoH extends React.Component {
                                     { timeText[1] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -511,7 +546,12 @@ class JogoH extends React.Component {
                                     { timeText[0] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -566,7 +606,12 @@ class JogoH extends React.Component {
                                     { timeTextVisit[1] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -577,7 +622,12 @@ class JogoH extends React.Component {
                                     { timeTextVisit[0] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -590,7 +640,12 @@ class JogoH extends React.Component {
                                     { timeTextCasa[1] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -601,7 +656,12 @@ class JogoH extends React.Component {
                                     { timeTextCasa[0] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );

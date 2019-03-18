@@ -325,19 +325,57 @@ class JogoG extends React.Component {
     }
 
     onPressPlayerGol(jogador, jogo) {
-        const gols = [
-            ...jogo.gols, 
-            {
-                key: jogador.key, 
-                side: jogador.side,
-                nome: jogador.nome,
-                time: this.state.seconds.toString(),
-                indexKey: jogo.gols.length.toString()
-            }
-        ];
-        const placarCasa = parseInt(jogo.placarCasa, 10) + 1;
-        const placarVisit = parseInt(jogo.placarVisit, 10) + 1;
+        const funExec = (isContraSide = false) => {
+            const isContraNode = isContraSide ? { isContra: 'yes' } : {};
 
+            let side = jogador.side;
+            if (isContraSide) side = isContraSide;
+
+            const gols = [
+                ...jogo.gols, 
+                {
+                    key: jogador.key, 
+                    side,
+                    nome: jogador.nome,
+                    time: this.state.seconds.toString(),
+                    indexKey: jogo.gols.length.toString(),
+                    ...isContraNode
+                }
+            ];
+
+            const placarCasa = parseInt(jogo.placarCasa, 10) + 1;
+            const placarVisit = parseInt(jogo.placarVisit, 10) + 1;
+
+            let payload = {};
+            if (side === 'casa') {
+                payload = { gols, placarCasa };
+            } else {
+                payload = { gols, placarVisit };
+            }
+            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
+                ...payload
+            })
+            .then(() => {
+                Toast.show('Gol marcado', Toast.SHORT);
+
+                if (!isContraSide) {
+                    this.fbDatabaseRef
+                    .child(`usuarios/${jogador.key}/gols`).once('value', (snapshot) => {
+                        const golsPlus = parseInt(snapshot.val(), 10) + 1;
+                        this.fbDatabaseRef
+                        .child(`usuarios/${jogador.key}`).update({
+                            gols: golsPlus.toString(),
+                        })
+                        .then(() => true)
+                        .catch(() => true);
+                    });
+                }
+            })
+            .catch(() => 
+                Toast.show('Falha ao marcar o gol. Verifique a conexão', Toast.SHORT)
+            );
+        };
+        
         Alert.alert(
             'Aviso',
             `Confirma o gol para o jogador:\n${jogador.nome} ?`,
@@ -346,35 +384,14 @@ class JogoG extends React.Component {
                     onPress: () => true, 
                     style: 'cancel' 
                 },
+                { text: 'Contra', 
+                    onPress: () => checkConInfo(() => funExec(
+                        jogador.side === 'casa' ? 'visit' : 'casa'
+                    ))
+                },
                 { 
                     text: 'Ok', 
-                    onPress: () => checkConInfo(() => {
-                        let payload = {};
-                        if (jogador.side === 'casa') {
-                            payload = { gols, placarCasa };
-                        } else {
-                            payload = { gols, placarVisit };
-                        }
-                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                            ...payload
-                        })
-                        .then(() => {
-                            Toast.show('Gol marcado', Toast.SHORT);
-                            this.fbDatabaseRef
-                            .child(`usuarios/${jogador.key}/gols`).once('value', (snapshot) => {
-                                const golsPlus = parseInt(snapshot.val(), 10) + 1;
-                                this.fbDatabaseRef
-                                .child(`usuarios/${jogador.key}`).update({
-                                    gols: golsPlus.toString(),
-                                })
-                                .then(() => true)
-                                .catch(() => true);
-                            });
-                        })
-                        .catch(() => 
-                            Toast.show('Falha ao marcar o gol. Verifique a conexão', Toast.SHORT)
-                        );
-                    })
+                    onPress: () => checkConInfo(() => funExec())
                 }
             ]
         );
@@ -385,22 +402,54 @@ class JogoG extends React.Component {
     }
 
     onPressRemoveGol(jogador, jogo) {
-        const gols = [
-            ...jogo.gols
-        ];
-        let i = 0;
-        
-        gols.splice(parseInt(jogador.indexKey, 10), 1);
-
-        for (i = 0; i < gols.length; i++) {
-            if (!gols[i].push) {
-                gols[i].indexKey = i.toString();
+        const funExec = () => {
+            const gols = [
+                ...jogo.gols
+            ];
+            let i = 0;
+            
+            gols.splice(parseInt(jogador.indexKey, 10), 1);
+    
+            for (i = 0; i < gols.length; i++) {
+                if (!gols[i].push) {
+                    gols[i].indexKey = i.toString();
+                }
             }
-        }
-
-        const placarCasa = parseInt(jogo.placarCasa, 10) - 1;
-        const placarVisit = parseInt(jogo.placarVisit, 10) - 1;
-
+    
+            const placarCasa = parseInt(jogo.placarCasa, 10) - 1;
+            const placarVisit = parseInt(jogo.placarVisit, 10) - 1;
+    
+            let payload = {};
+    
+            if (jogador.side === 'casa') {
+                payload = { gols, placarCasa };
+            } else {
+                payload = { gols, placarVisit };
+            }
+    
+            this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
+                ...payload
+            })
+            .then(() => {
+                Toast.show('Gol removido', Toast.SHORT);
+                if (!jogador.isContra) {
+                    this.fbDatabaseRef
+                    .child(`usuarios/${jogador.key}/gols`).once('value', (snapshot) => {
+                        const golsLess = parseInt(snapshot.val(), 10) - 1;
+                        this.fbDatabaseRef
+                        .child(`usuarios/${jogador.key}`).update({
+                            gols: golsLess.toString()
+                        })
+                        .then(() => true)
+                        .catch(() => true);
+                    });
+                }
+            })
+            .catch(() => 
+                Toast.show('Falha ao remover o gol. Verifique a conexão', Toast.SHORT)
+            );
+        };
+        
         Alert.alert(
             'Aviso',
             `Confirma a remoção do gol para o jogador:\n${jogador.nome} ?`,
@@ -411,33 +460,7 @@ class JogoG extends React.Component {
                 },
                 { 
                     text: 'Ok', 
-                    onPress: () => checkConInfo(() => {
-                        let payload = {};
-                        if (jogador.side === 'casa') {
-                            payload = { gols, placarCasa };
-                        } else {
-                            payload = { gols, placarVisit };
-                        }
-                        this.fbDatabaseRef.child(`jogos/${jogo.key}`).update({
-                            ...payload
-                        })
-                        .then(() => {
-                            Toast.show('Gol removido', Toast.SHORT);
-                            this.fbDatabaseRef
-                            .child(`usuarios/${jogador.key}/gols`).once('value', (snapshot) => {
-                                const golsLess = parseInt(snapshot.val(), 10) - 1;
-                                this.fbDatabaseRef
-                                .child(`usuarios/${jogador.key}`).update({
-                                    gols: golsLess.toString()
-                                })
-                                .then(() => true)
-                                .catch(() => true);
-                            });
-                        })
-                        .catch(() => 
-                            Toast.show('Falha ao remover o gol. Verifique a conexão', Toast.SHORT)
-                        );
-                    })
+                    onPress: () => checkConInfo(() => funExec())
                 }
             ]
         );
@@ -645,7 +668,12 @@ class JogoG extends React.Component {
 
     onSendNotif(jogo) {
         const funExec = () => {
-            sendReminderJogoPushNotifForAll(jogo.titulo);
+            sendReminderJogoPushNotifForAll(
+                jogo.titulo, 
+                jogo, 
+                this.props.listUsuarios,
+                this.props.userLogged
+            );
             Toast.show('Notificação enviada', Toast.SHORT);
         };
         
@@ -1121,7 +1149,12 @@ class JogoG extends React.Component {
                                     { timeText[1] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -1132,7 +1165,12 @@ class JogoG extends React.Component {
                                     { timeText[0] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -1181,7 +1219,12 @@ class JogoG extends React.Component {
                                     { timeTextCasa[1] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -1192,7 +1235,12 @@ class JogoG extends React.Component {
                                     { timeTextCasa[0] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -1205,7 +1253,12 @@ class JogoG extends React.Component {
                                     { timeTextVisit[1] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -1216,7 +1269,12 @@ class JogoG extends React.Component {
                                     { timeTextVisit[0] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -1295,7 +1353,12 @@ class JogoG extends React.Component {
                                     { timeText[1] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -1306,7 +1369,12 @@ class JogoG extends React.Component {
                                     { timeText[0] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -1363,7 +1431,12 @@ class JogoG extends React.Component {
                                     { timeTextVisit[1] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -1374,7 +1447,12 @@ class JogoG extends React.Component {
                                     { timeTextVisit[0] }
                                 </Text>
                                 <Text>
-                                    { golsVisit[i].nome }
+                                    { 
+                                        golsVisit[i].isContra ?
+                                        `${golsVisit[i].nome} ( Contra )`
+                                        :
+                                        golsVisit[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -1387,7 +1465,12 @@ class JogoG extends React.Component {
                                     { timeTextCasa[1] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text> 
                         );
@@ -1398,7 +1481,12 @@ class JogoG extends React.Component {
                                     { timeTextCasa[0] }
                                 </Text>
                                 <Text>
-                                    { golsCasa[i].nome }
+                                    { 
+                                        golsCasa[i].isContra ?
+                                        `${golsCasa[i].nome} ( Contra )`
+                                        :
+                                        golsCasa[i].nome
+                                    }
                                 </Text>
                             </Text>
                         );
@@ -3033,6 +3121,8 @@ const mapStateToProps = (state) => ({
     itemSelected: state.GerenciarReducer.itemSelected,
     onItemRender: state.GerenciarReducer.onItemRender,
     listJogos: state.JogosReducer.listJogos,
+    listUsuarios: state.UsuariosReducer.listUsuarios,
+    userLogged: state.LoginReducer.userLogged,
     showTimerModal: state.JogoReducer.showTimerModal
 });
 
