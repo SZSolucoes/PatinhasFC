@@ -93,7 +93,7 @@ class Historico extends React.Component {
         this.props.modificaItemSelected(item.key);
         store.dispatch({
             type: 'modifica_itemselectedausente_jogos',
-            payload: item.key
+            payload: { key: item.key, isGerenc: false }
         });
         Actions.historicoJogoTab({ onBack: () => Actions.popTo('historico') });
     }

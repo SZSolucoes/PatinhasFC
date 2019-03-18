@@ -188,7 +188,7 @@ class Jogos extends React.Component {
         this.props.modificaJogoSelected(item.key);
         store.dispatch({
             type: 'modifica_itemselectedausente_jogos',
-            payload: item.key
+            payload: { key: item.key, isGerenc: false }
         });
         Actions.jogoTabBar({ onBack: () => Actions.popTo('_jogos') });
     }

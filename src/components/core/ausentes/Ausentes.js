@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React from 'react';
 import { 
     ScrollView,
@@ -26,7 +27,7 @@ class Ausentes extends React.Component {
         const { itemSelectedAusente } = this.props;
 
         if (nextProps.listJogos) {
-            const nj = _.filter(nextProps.listJogos, (item) => item.key === itemSelectedAusente)[0];
+            const nj = _.filter(nextProps.listJogos, (item) => item.key === itemSelectedAusente.key)[0];
                 
             if (!nj) {
                 return false;
@@ -119,8 +120,8 @@ class Ausentes extends React.Component {
 
     render = () => {
         const { listJogos, listJogosH, listUsuarios, itemSelectedAusente } = this.props;
-        const jogoA = _.find(listJogos, (item) => item.key === itemSelectedAusente);
-        const jogoH = _.find(listJogosH, (itema) => itema.key === itemSelectedAusente);
+        const jogoA = _.find(listJogos, (item) => item.key === itemSelectedAusente.key);
+        const jogoH = _.find(listJogosH, (itema) => itema.key === itemSelectedAusente.key);
         let jogo = null;
 
         if (jogoA) {
@@ -209,7 +210,10 @@ class Ausentes extends React.Component {
                                                     key={index}
                                                     title={item.nome}
                                                     rightIcon={
+                                                        itemSelectedAusente.isGerenc ?
                                                         this.renderRightConfirm(jogo, item)
+                                                        :
+                                                        <View />
                                                     }
                                                 />
                                             );
@@ -268,7 +272,10 @@ class Ausentes extends React.Component {
                                                     key={index}
                                                     title={item.nome}
                                                     rightIcon={
+                                                        itemSelectedAusente.isGerenc ?
                                                         this.renderRightConfirm(jogo, item)
+                                                        :
+                                                        <View />
                                                     }
                                                 />
                                             );

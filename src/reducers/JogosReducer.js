@@ -7,7 +7,7 @@ const INITIAL_STATE = {
     loadingFooter: false,
     maxRows: 30,
     jumpScene: '',
-    itemSelectedAusente: ''
+    itemSelectedAusente: {}
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -55,7 +55,7 @@ export default (state = INITIAL_STATE, action) => {
         case 'modifica_itemselectedausente_jogos':
             return { 
                 ...state, 
-                itemSelectedAusente: action.payload
+                itemSelectedAusente: { ...action.payload }
             };
         case 'modifica_clean_jogos':
             return {

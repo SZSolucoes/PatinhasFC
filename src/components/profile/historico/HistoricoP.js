@@ -109,7 +109,7 @@ class HistoricoP extends React.Component {
         this.props.modificaItemSelected(item.key);
         store.dispatch({
             type: 'modifica_itemselectedausente_jogos',
-            payload: item.key
+            payload: { key: item.key, isGerenc: false }
         });
         Actions.historicoJogoTabP({ onBack: () => Actions.popTo('profileHistorico') });
     }
