@@ -25,7 +25,6 @@ if (!global.atob) {
 export const store = createStore(reducers, {}, applyMiddleware(ReduxThunk));
 
 class App extends React.Component {
-
     constructor(props) {
         super(props);
 

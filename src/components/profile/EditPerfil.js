@@ -27,7 +27,6 @@ import { updateUserDB } from '../../utils/userUtils';
 import Card from '../tools/Card';
 
 class EditPerfil extends React.Component {
-
     constructor(props) {
         super(props);
 

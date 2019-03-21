@@ -37,6 +37,7 @@ import {
 
 import imgTeam from '../../../imgs/team.png';
 import imgAvatar from '../../../imgs/perfiluserimg.png';
+import { normalize } from '../../../utils/strComplex';
 
 class EscalacaoG extends React.Component {
 
@@ -71,6 +72,7 @@ class EscalacaoG extends React.Component {
         this.renderVisitJogadores = this.renderVisitJogadores.bind(this);
         this.renderIcons = this.renderIcons.bind(this);
         this.renderConfirmados = this.renderConfirmados.bind(this);
+        this.renderConfirmadosNP = this.renderConfirmadosNP.bind(this);
 
         this.state = {
             heightDim: Dimensions.get('screen').height,
@@ -230,7 +232,7 @@ class EscalacaoG extends React.Component {
                     () => this.doInOrOut(nJog, true, jogo, 'true')) 
                 }
             ],
-            { cancelable: false }
+            { cancelable: true }
         );
     }
 
@@ -731,7 +733,11 @@ class EscalacaoG extends React.Component {
     }
 
     renderConfirmados(jogo) {
-        let jogadoresConfirmados = _.filter(jogo.confirmados, (jgCasa) => !jgCasa.push);
+        let jogadoresConfirmados = _.filter(
+            jogo.confirmados, 
+            (jgCasa) => !jgCasa.push && (!jgCasa.noGame || jgCasa.noGame === 'no')
+        );
+        
         jogadoresConfirmados = _.orderBy(jogadoresConfirmados, ['nome'], ['asc']);
 
         const numjogadoresConfirmados = jogadoresConfirmados.length;
@@ -755,9 +761,9 @@ class EscalacaoG extends React.Component {
                             source={imgTeam} 
                         /> 
                         <Text 
-                            style={{ fontSize: 16, color: 'black' }}
+                            style={{ fontSize: normalize(16), color: 'black' }}
                         >
-                            Confirmados
+                            Confirmados para jogar
                         </Text>
                         <View style={{ flex: 1, alignItems: 'flex-end' }}>
                             <Badge value={numjogadoresConfirmados} />
@@ -999,6 +1005,77 @@ class EscalacaoG extends React.Component {
         );
     }
 
+    renderConfirmadosNP(jogo) {
+        let jogadoresConfirmados = _.filter(
+            jogo.confirmados, 
+            (jgCasa) => !jgCasa.push && (jgCasa.noGame && jgCasa.noGame === 'yes')
+        );
+
+        jogadoresConfirmados = _.orderBy(jogadoresConfirmados, ['nome'], ['asc']);
+
+        const numjogadoresConfirmados = jogadoresConfirmados.length;
+
+        if (numjogadoresConfirmados === 0) {
+            return false;
+        }
+
+        return (
+            <Card
+                containerStyle={styles.card}
+            >
+                <View 
+                    style={styles.titleContainer} 
+                    onLayout={this.onLayoutTitleCasa}
+                >
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image 
+                            style={{ height: 45, width: 45, marginRight: 10 }}
+                            resizeMode={'stretch'}
+                            source={imgTeam} 
+                        /> 
+                        <Text 
+                            style={{ fontSize: normalize(16), color: 'black' }}
+                        >
+                            Confirmados sem jogar
+                        </Text>
+                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                            <Badge value={numjogadoresConfirmados} />
+                        </View>
+                    </View>
+                </View>
+                <List 
+                    containerStyle={{
+                        marginTop: 0, 
+                        borderTopWidth: 0, 
+                        borderBottomWidth: 0
+                    }}
+                >
+                    {
+                        jogadoresConfirmados.map((item, index) => {
+                            const imgAvt = item.imgAvatar ? { uri: item.imgAvatar } : imgAvatar;
+                            return (
+                                <ListItem
+                                    hideChevron
+                                    containerStyle={
+                                        (index + 1) === numjogadoresConfirmados ? 
+                                        { borderBottomWidth: 0 } : null 
+                                    }
+                                    titleContainerStyle={{ marginLeft: 10 }}
+                                    subtitleContainerStyle={{ marginLeft: 10 }}
+                                    roundAvatar
+                                    avatar={imgAvt}
+                                    key={index}
+                                    title={item.nome}
+                                    onLongPress={() => this.onRemoveConfirmed(item, jogo)}
+                                />
+                            );
+                        })
+                    }
+                </List>
+            </Card>     
+        );
+    }
+
     render() {
         const { listJogos, itemSelected } = this.props;
         const jogo = _.filter(listJogos, (item) => item.key === itemSelected)[0];
@@ -1171,6 +1248,7 @@ class EscalacaoG extends React.Component {
                         </Animated.View>
                     </Card>
                     { this.renderConfirmados(jogo) }
+                    { this.renderConfirmadosNP(jogo) }
                     <View style={{ marginVertical: 60 }} />
                 </ScrollView>
                 <PlayersModal

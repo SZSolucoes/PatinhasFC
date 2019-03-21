@@ -95,7 +95,7 @@ export const sendMuralPushNotifForTopic = () => {
         to: '/topics/mural',
         notification: {
             title: 'Mural',
-            body: 'Foi realizado uma nova publicação no mural',
+            body: 'Foi realizada uma nova publicação no mural',
             show_in_foreground: true,
             targetScreen: 'mural'
         }, 

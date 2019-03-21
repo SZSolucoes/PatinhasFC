@@ -50,6 +50,7 @@ import { store } from '../../App';
 import { checkConInfo } from '../../utils/jogosUtils';
 import Avatar from '../tools/Avatar';
 import Card from '../tools/Card';
+import { normalize } from '../../utils/strComplex';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -62,8 +63,9 @@ class Jogos extends React.Component {
         this.renderListItens = this.renderListItens.bind(this);
         this.renderCardFooter = this.renderCardFooter.bind(this);
         this.onPressConfirmP = this.onPressConfirmP.bind(this);
+        this.onPressConfirmPN = this.onPressConfirmPN.bind(this);
         this.onPressConfirmAusencia = this.onPressConfirmAusencia.bind(this);
-        this.onPressRemoveP = this.onPressRemoveP.bind(this);
+        this.onPressRemovePN = this.onPressRemovePN.bind(this);
         this.onPressRemoveAusencia = this.onPressRemoveAusencia.bind(this);
         this.addNewRows = this.addNewRows.bind(this);
         this.flatListKeyExtractor = this.flatListKeyExtractor.bind(this);
@@ -205,12 +207,25 @@ class Jogos extends React.Component {
             [...item.confirmados] : [];
             const dataAtual = Moment().format('YYYY-MM-DD HH:mm:ss');
             const ausentes = newAusentesList ? { ausentes: newAusentesList } : {};
+
+            const userConfirmedNoGame = _.findIndex(
+                item.confirmados, 
+                (usuario) => 
+                usuario.key 
+                && usuario.key === b64UserKey 
+                && (usuario.noGame && usuario.noGame === 'yes') 
+            );
+
+            if (userConfirmedNoGame !== -1) {
+                newConfirmadosList.splice(userConfirmedNoGame, 1);
+            }
     
             newConfirmadosList.push({
                 key: b64UserKey,
                 imgAvatar: userLogged.imgAvatar,
                 nome: userLogged.nome,
-                horaConfirm: dataAtual
+                horaConfirm: dataAtual,
+                noGame: 'no'
             });
     
             firebase.database().ref().child(`jogos/${item.key}`).update({
@@ -237,7 +252,71 @@ class Jogos extends React.Component {
                         () => funExec(newAusentesList)) 
                     }
                 ],
-                { cancelable: false }
+                { cancelable: true }
+            );
+        } else {
+            funExec();
+        }
+    }
+
+    onPressConfirmPN(item, b64UserKey) {
+        const { userLogged } = this.props;
+
+        const userAusenteIndex = _.findIndex(
+            item.ausentes, 
+            (usuario) => usuario.key && usuario.key === b64UserKey);
+
+        const funExec = (newAusentesList = false) => {
+            const newConfirmadosList = item.confirmados ? 
+            [...item.confirmados] : [];
+            const dataAtual = Moment().format('YYYY-MM-DD HH:mm:ss');
+            const ausentes = newAusentesList ? { ausentes: newAusentesList } : {};
+
+            const userConfirmedNoGame = _.findIndex(
+                item.confirmados, 
+                (usuario) => 
+                usuario.key 
+                && usuario.key === b64UserKey 
+                && (!usuario.noGame || usuario.noGame === 'no') 
+            );
+
+            if (userConfirmedNoGame !== -1) {
+                newConfirmadosList.splice(userConfirmedNoGame, 1);
+            }
+    
+            newConfirmadosList.push({
+                key: b64UserKey,
+                imgAvatar: userLogged.imgAvatar,
+                nome: userLogged.nome,
+                horaConfirm: dataAtual,
+                noGame: 'yes'
+            });
+    
+            firebase.database().ref().child(`jogos/${item.key}`).update({
+                confirmados: newConfirmadosList,
+                ...ausentes
+            })
+            .then(() => true)
+            .catch(() => true);
+        };
+
+        if (userAusenteIndex !== -1) {
+            let newAusentesList = [];
+            newAusentesList = [...item.ausentes];
+            newAusentesList.splice(userAusenteIndex, 1);
+
+            Alert.alert(
+                'Aviso', 
+                'A ausência confirmada será removida.\nDeseja continuar ?',
+                [
+                    { text: 'Cancelar', onPress: () => false },
+                    { 
+                        text: 'OK', 
+                        onPress: () => checkConInfo(
+                        () => funExec(newAusentesList)) 
+                    }
+                ],
+                { cancelable: true }
             );
         } else {
             funExec();
@@ -288,7 +367,7 @@ class Jogos extends React.Component {
                         () => funExec(newConfirmadosList)) 
                     }
                 ],
-                { cancelable: false }
+                { cancelable: true }
             );
         } else {
             funExec();
@@ -296,6 +375,23 @@ class Jogos extends React.Component {
     }
 
     onPressRemoveP(item, b64UserKey) {
+        const indexFound = _.findIndex(
+            item.confirmados, (usuario) => usuario.key === b64UserKey
+        );
+        let newConfirmadosList = [];
+
+        if (newConfirmadosList !== -1) {
+            newConfirmadosList = [...item.confirmados];
+            newConfirmadosList.splice(indexFound, 1);
+            firebase.database().ref().child(`jogos/${item.key}`).update({
+                confirmados: newConfirmadosList
+            })
+            .then(() => true)
+            .catch(() => true);
+        }
+    }
+
+    onPressRemovePN(item, b64UserKey) {
         const indexFound = _.findIndex(
             item.confirmados, (usuario) => usuario.key === b64UserKey
         );
@@ -448,12 +544,28 @@ class Jogos extends React.Component {
             const b64UserKey = this.props.userLogged.key;
             const userConfirmed = _.findIndex(
                 item.confirmados, 
-                (usuario) => usuario.key && usuario.key === b64UserKey) !== -1;
+                (usuario) => 
+                usuario.key 
+                && usuario.key === b64UserKey
+                && (!usuario.noGame || usuario.noGame === 'no') 
+                ) !== -1;
+            const userConfirmedNoGame = _.findIndex(
+                item.confirmados, 
+                (usuario) => 
+                usuario.key 
+                && usuario.key === b64UserKey 
+                && (usuario.noGame && usuario.noGame === 'yes') 
+                ) !== -1;
             const userAusente = _.findIndex(
                 item.ausentes, 
                 (usuario) => usuario.key && usuario.key === b64UserKey) !== -1;
-            const textP = userConfirmed ? 'Presença confirmada' : 'Confirmar - Presença';
+            const textP = userConfirmed ? 'Presença confirmada (Jogar)' 
+            : 'Confirmar - Presença (Jogar)';
             const color = userConfirmed ? 'green' : 'red';
+            const textPN = userConfirmedNoGame ? 
+                'Presença confirmada (Sem jogar)' 
+                : 'Confirmar - Presença (Sem jogar)';
+            const colorN = userConfirmedNoGame ? 'green' : 'red';
             const textA = userAusente ? 'Ausência confirmada' : 'Confirmar - Ausência';
             const colorA = userAusente ? 'green' : '#343A40';
 
@@ -517,11 +629,77 @@ class Jogos extends React.Component {
                             <Text
                                 style={{ 
                                     color: 'white',
-                                    fontSize: 16, 
-                                    fontWeight: '500' 
+                                    fontSize: normalize(13),
+                                    fontWeight: '500'
                                 }}
                             >
                                 {textP}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                    <Divider
+                        style={{
+                            marginTop: 5,
+                            marginBottom: 5,
+                            height: 2
+                        }}
+                    />
+                    <TouchableOpacity
+                        onPress={() => {
+                            if (this.props.conInfo.type === 'none' ||
+                                this.props.conInfo.type === 'unknown'
+                            ) {
+                                Toast.show('Sem conexão', Toast.SHORT);
+                                return false;
+                            }
+                            
+                            if (userConfirmedNoGame) {
+                                this.onPressRemovePN(item, b64UserKey);
+                            } else {
+                                this.onPressConfirmPN(item, b64UserKey);
+                            }
+                        }}
+                    >
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                borderRadius: 5,
+                                backgroundColor: colorN,
+                                marginTop: 5,
+                                paddingVertical: 2
+                            }}
+                        >
+                            <CheckBox
+                                center
+                                containerStyle={{
+                                    marginLeft: 0,
+                                    marginRight: 10,
+                                    backgroundColor: 'transparent',
+                                    borderWidth: 0,
+                                    padding: 0
+                                }}
+                                title={(<View />)}
+                                size={22}
+                                checked={userConfirmedNoGame}
+                                checkedColor={'white'}
+                                onPress={() => {
+                                    if (userConfirmedNoGame) {
+                                        this.onPressRemovePN(item, b64UserKey);
+                                    } else {
+                                        this.onPressConfirmPN(item, b64UserKey);
+                                    }
+                                }}
+                            />
+                            <Text
+                                style={{ 
+                                    color: 'white',
+                                    fontSize: normalize(13), 
+                                    fontWeight: '500'
+                                }}
+                            >
+                                {textPN}
                             </Text>
                         </View>
                     </TouchableOpacity>

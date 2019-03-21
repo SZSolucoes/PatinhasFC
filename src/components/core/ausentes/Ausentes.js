@@ -10,6 +10,7 @@ import {
     TouchableOpacity
 } from 'react-native';
 import { List, Badge, Icon } from 'react-native-elements';
+import Toast from 'react-native-simple-toast';
 import { connect } from 'react-redux';
 import _ from 'lodash';
 import Moment from 'moment';
@@ -42,7 +43,7 @@ class Ausentes extends React.Component {
             jogo.ausentes, 
             (usuario) => usuario.key && usuario.key === user.key);
 
-        const funExec = (newAusentesList = false) => {
+        const funExec = (newAusentesList = false, noGameKey = 'no') => {
             const newConfirmadosList = jogo.confirmados ? 
             [...jogo.confirmados] : [];
             const dataAtual = Moment().format('YYYY-MM-DD HH:mm:ss');
@@ -52,15 +53,16 @@ class Ausentes extends React.Component {
                 key: user.key,
                 imgAvatar: user.imgAvatar,
                 nome: user.nome,
-                horaConfirm: dataAtual
+                horaConfirm: dataAtual,
+                noGame: noGameKey
             });
     
             firebase.database().ref().child(`jogos/${jogo.key}`).update({
                 confirmados: newConfirmadosList,
                 ...ausentes
             })
-            .then(() => true)
-            .catch(() => true);
+            .then(() => Toast.show('Confirmação efetuada', Toast.SHORT))
+            .catch(() => Toast.show('Falha ao confirmar jogador', Toast.SHORT));
         };
 
         if (userAusenteIndex !== -1) {
@@ -74,12 +76,17 @@ class Ausentes extends React.Component {
                 [
                     { text: 'Cancelar', onPress: () => false },
                     { 
-                        text: 'OK', 
+                        text: 'Sem Jogar', 
                         onPress: () => checkConInfo(
-                        () => funExec(newAusentesList)) 
+                        () => funExec(newAusentesList, 'yes')) 
+                    },
+                    { 
+                        text: 'Jogar', 
+                        onPress: () => checkConInfo(
+                        () => funExec(newAusentesList, 'no')) 
                     }
                 ],
-                { cancelable: false }
+                { cancelable: true }
             );
         } else {
             Alert.alert(
@@ -88,12 +95,17 @@ class Ausentes extends React.Component {
                 [
                     { text: 'Cancelar', onPress: () => false },
                     { 
-                        text: 'OK', 
+                        text: 'Sem Jogar', 
                         onPress: () => checkConInfo(
-                        () => funExec()) 
+                        () => funExec(false, 'yes'))
+                    },
+                    { 
+                        text: 'Jogar', 
+                        onPress: () => checkConInfo(
+                        () => funExec(false, 'no'))
                     }
                 ],
-                { cancelable: false }
+                { cancelable: true }
             );
         }
     }
