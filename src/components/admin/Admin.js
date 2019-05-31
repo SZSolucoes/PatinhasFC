@@ -75,7 +75,7 @@ class Admin extends React.Component {
                     </TouchableOpacity>
                     <TouchableOpacity 
                         style={{ flex: 1 }} 
-                        onPress={() => Actions.analise()}
+                        onPress={() => Actions.adminFinanceiroMenu()}
                     >
                         <Card 
                             containerStyle={{ flex: 1 }}
@@ -84,7 +84,7 @@ class Admin extends React.Component {
                             <View style={styles.viewIconText}>
                                 <Icon name='finance' type='material-community' size={34} />
                                 <View style={{ marginTop: 10 }} />
-                                <Text style={styles.text}>Análise</Text>
+                                <Text style={styles.text}>Financeiro</Text>
                             </View>
                         </Card>
                     </TouchableOpacity>

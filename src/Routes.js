@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React from 'react';
 import { Router, Scene, Actions } from 'react-native-router-flux';
 import { 
@@ -69,6 +70,9 @@ import ListLikes from './components/informativos/ListLikes';
 import Mural from './components/profile/mural/Mural';
 import MuralCadastrar from './components/admin/mural/MuralCadastrar';
 import MuralEditar from './components/admin/mural/MuralEditar';
+import FinanceiroMenu from './components/admin/analise/financeiro/FinanceiroMenu';
+import FinanceiroJogadores from './components/admin/analise/financeiro/jogadores/FinanceiroJogadores';
+import FinanceiroParametros from './components/admin/analise/financeiro/parametros/FinanceiroParametros';
 
 const AnimatedScene = Animated.createAnimatedComponent(AnimScene);
 
@@ -206,7 +210,7 @@ class Routes extends React.Component {
             }
 
             if ('|_financeiroCadastrar|_financeiroEditar|'.includes(Actions.currentScene)) {
-                Actions.popTo('analise');
+                Actions.popTo('adminFinanceiroMenu');
                 return true;
             }
 
@@ -292,7 +296,7 @@ class Routes extends React.Component {
         }
 
         if ('|_financeiroCadastrar|_financeiroEditar|'.includes(Actions.currentScene)) {
-            Actions.popTo('analise');
+            Actions.popTo('adminFinanceiroMenu');
             return true;
         }
 
@@ -864,6 +868,33 @@ class Routes extends React.Component {
                         //initial
                     />
                     <Scene 
+                        key={'adminFinanceiroMenu'}
+                        title={'Financeiro'}
+                        component={FinanceiroMenu}
+                        titleStyle={styles.title}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                    //initial
+                    />
+                    <Scene 
+                        key={'adminFinanceiroJogadores'}
+                        title={'Financeiro - Jogadores'}
+                        component={FinanceiroJogadores}
+                        titleStyle={styles.titlesmall}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'adminFinanceiroParametros'}
+                        title={'Financeiro - Parâmetros'}
+                        component={FinanceiroParametros}
+                        titleStyle={styles.titlesmall}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
                         key={'jogoTabBar'}
                         tabs
                         showLabel
@@ -1023,8 +1054,8 @@ class Routes extends React.Component {
                         tabBarPosition={'top'}
                         lazy={false}
                         swipeEnabled
-                        title={'Financeiro'} 
-                        titleStyle={styles.title}
+                        title={'Financeiro - Clube'} 
+                        titleStyle={styles.titlesmall}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
                         tabBarStyle={{ backgroundColor: colorAppS }}
@@ -1147,6 +1178,18 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
         textAlign: 'center'
+    },
+    titlesmall: {
+        color: 'white',
+        fontSize: normalize(14),
+        textAlign: 'center',
+        fontFamily: 'OpenSans-Regular'
+    },
+    titlevsmall: {
+        color: 'white',
+        fontSize: normalize(12),
+        textAlign: 'center',
+        fontFamily: 'OpenSans-Regular'
     },
     btLeft: {
         color: 'white'

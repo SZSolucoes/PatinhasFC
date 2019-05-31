@@ -735,7 +735,7 @@ class Informativos extends React.Component {
                                 alignItems: 'center'
                             }}
                         >
-                            <View style={{ flex: 0.5 }}>
+                            <View style={{ flex: 0.7 }}>
                                 <Avatar
                                     small
                                     rounded
@@ -750,7 +750,7 @@ class Informativos extends React.Component {
                             </View>
                             <View 
                                 style={{ 
-                                    flex: 2.5, 
+                                    flex: 2.3, 
                                     alignItems: 'center', 
                                     justifyContent: 'center', 
                                     padding: 10
