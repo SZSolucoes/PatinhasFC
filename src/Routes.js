@@ -73,6 +73,8 @@ import MuralEditar from './components/admin/mural/MuralEditar';
 import FinanceiroMenu from './components/admin/analise/financeiro/FinanceiroMenu';
 import FinanceiroJogadores from './components/admin/analise/financeiro/jogadores/FinanceiroJogadores';
 import FinanceiroParametros from './components/admin/analise/financeiro/parametros/FinanceiroParametros';
+import SearchBar from './components/tools/searchbar/SearchBar';
+import FinanceiroPlayersView from './components/profile/financeiro/FinanceiroPlayersView';
 
 const AnimatedScene = Animated.createAnimatedComponent(AnimScene);
 
@@ -874,7 +876,7 @@ class Routes extends React.Component {
                         titleStyle={styles.title}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
-                    //initial
+                        //initial
                     />
                     <Scene 
                         key={'adminFinanceiroJogadores'}
@@ -883,12 +885,29 @@ class Routes extends React.Component {
                         titleStyle={styles.titlesmall}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}
+                        renderRightButton={
+                            () => 
+                            <SearchBar 
+                                inputPlaceHolder={'Filtrar usuários...'}
+                                iconName={'filter-outline'}
+                                iconNameWithValue={'filter'}
+                            />
+                        }
                         //initial
                     />
                     <Scene 
                         key={'adminFinanceiroParametros'}
                         title={'Financeiro - Parâmetros'}
                         component={FinanceiroParametros}
+                        titleStyle={styles.titlesmall}
+                        leftButtonTextStyle={styles.btLeft}
+                        backButtonTintColor={'white'}
+                        //initial
+                    />
+                    <Scene 
+                        key={'profileFinanceiroJogadores'}
+                        title={'Financeiro - Jogadores'}
+                        component={FinanceiroPlayersView}
                         titleStyle={styles.titlesmall}
                         leftButtonTextStyle={styles.btLeft}
                         backButtonTintColor={'white'}

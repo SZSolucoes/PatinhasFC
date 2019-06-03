@@ -6,7 +6,7 @@ import { pushKey } from '../Firebase';
 const key = pushKey;
 
 export const sendCadJogoPushNotifForAll = (jogo) => {
-    Axios.post('https://fcm.googleapis.com/fcm/send',
+    /* Axios.post('https://fcm.googleapis.com/fcm/send',
       {
         to: '/topics/all',
         notification: {
@@ -24,7 +24,7 @@ export const sendCadJogoPushNotifForAll = (jogo) => {
                 Authorization: `key=${key}`
             }
         }
-    );
+    ); */
 };
 
 export const sendReminderJogoPushNotifForAll = (titulo, jogo, listUsuarios, userLogged) => {
@@ -101,6 +101,29 @@ export const sendMuralPushNotifForTopic = () => {
         }, 
         data: {
             targetScreen: 'mural'
+        }
+      },
+        {
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: `key=${key}`
+            }
+        }
+    );
+};
+
+export const sendInformativosPushNotifForTopic = () => {
+    Axios.post('https://fcm.googleapis.com/fcm/send',
+      {
+        to: '/topics/informativos',
+        notification: {
+            title: 'Informativos',
+            body: 'Foi realizada uma nova publicação em informativos',
+            show_in_foreground: true,
+            targetScreen: 'informativos'
+        }, 
+        data: {
+            targetScreen: 'informativos'
         }
       },
         {

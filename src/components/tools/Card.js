@@ -137,6 +137,7 @@ Card.propTypes = {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
+    overflow: 'hidden',
     borderColor: colors.grey5,
     borderWidth: 1,
     padding: 15,
@@ -182,6 +183,7 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     backgroundColor: 'transparent',
+    overflow: 'hidden'
   },
   divider: {
     marginBottom: 15,

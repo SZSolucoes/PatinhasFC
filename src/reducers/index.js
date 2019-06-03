@@ -15,6 +15,7 @@ import PainelAdminReducer from './PainelAdminReducer';
 import AnaliseJogadores from './AnaliseJogadores';
 import ProfileReducer from './ProfileReducer';
 import EnquetesReducer from './EnquetesReducer';
+import SearchBarReducer from '../components/tools/searchbar/SearchBarReducer';
 
 export default combineReducers({
     LoginReducer,
@@ -31,5 +32,6 @@ export default combineReducers({
     AnaliseJogadores,
     ProfileReducer,
     EnquetesReducer,
-    FinanceiroReducer
+    FinanceiroReducer,
+    SearchBarReducer
 });

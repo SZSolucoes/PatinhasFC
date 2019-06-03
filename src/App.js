@@ -229,6 +229,9 @@ class App extends React.Component {
             const notifMuralEnabled = await AsyncStorage.getItem(
                 mappedKeyStorage('notifMuralEnabled')
             );
+            const notifInformativosEnabled = await AsyncStorage.getItem(
+                mappedKeyStorage('notifInformativosEnabled')
+            );
 
             if (notifAllTopicEnabled && notifAllTopicEnabled === 'yes') {
                 FCM.subscribeToTopic('all');
@@ -256,6 +259,15 @@ class App extends React.Component {
                 FCM.subscribeToTopic('mural'); 
                 AsyncStorage.setItem(mappedKeyStorage('notifMuralEnabled'), 'yes');
             }
+
+            if (notifInformativosEnabled && notifInformativosEnabled === 'yes') {
+                FCM.subscribeToTopic('informativos');
+            } else if (notifInformativosEnabled && notifInformativosEnabled === 'no') {
+                FCM.unsubscribeFromTopic('informativos');
+            } else {
+                FCM.subscribeToTopic('informativos');
+                AsyncStorage.setItem(mappedKeyStorage('notifInformativosEnabled'), 'yes');
+            }
         } catch (e) {
             console.error(e);
             FCM.subscribeToTopic('all'); 
@@ -264,6 +276,7 @@ class App extends React.Component {
             AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'yes');
             AsyncStorage.setItem(mappedKeyStorage('notifEnquetesEnabled'), 'yes');
             AsyncStorage.setItem(mappedKeyStorage('notifMuralEnabled'), 'yes');
+            AsyncStorage.setItem(mappedKeyStorage('notifInformativosEnabled'), 'yes');
         }
     }
 

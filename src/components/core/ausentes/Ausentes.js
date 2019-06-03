@@ -38,6 +38,41 @@ class Ausentes extends React.Component {
         return nextProps !== this.props || nextStates !== this.state;
     }
 
+    onPressConfirmA = (jogo, user) => {
+        const funExec = () => {
+            const newAusentesList = jogo.ausentes ? 
+            [...jogo.ausentes] : [];
+            const dataAtual = Moment().format('YYYY-MM-DD HH:mm:ss');
+    
+            newAusentesList.push({
+                key: user.key,
+                imgAvatar: user.imgAvatar,
+                nome: user.nome,
+                horaConfirm: dataAtual
+            });
+    
+            firebase.database().ref().child(`jogos/${jogo.key}`).update({
+                ausentes: newAusentesList,
+            })
+            .then(() => Toast.show('Ausência confirmada', Toast.SHORT))
+            .catch(() => Toast.show('Falha ao confirmar ausência', Toast.SHORT));
+        };
+
+        Alert.alert(
+            'Aviso', 
+            `Deseja confirmar a ausência do jogador "${user.nome}" ?`,
+            [
+                { text: 'Cancelar', onPress: () => false },
+                { 
+                    text: 'Sim', 
+                    onPress: () => checkConInfo(
+                    () => funExec())
+                }
+            ],
+            { cancelable: true }
+        );
+    }
+
     onPressConfirmP = (jogo, user) => {
         const userAusenteIndex = _.findIndex(
             jogo.ausentes, 
@@ -110,24 +145,100 @@ class Ausentes extends React.Component {
         }
     }
 
-    renderRightConfirm = (jogo, userKey) => (
-        <TouchableOpacity
-            onPress={() => this.onPressConfirmP(jogo, userKey)}
-        >
-            <View
-                style={{
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}
+    onRemoveAusente = (jogo, item) => {
+        const asyncFunExec = async () => {
+            const dbFirebaseRef = firebase.database().ref().child(`jogos/${jogo.key}`);
+            dbFirebaseRef.once('value', snap => {
+                if (snap) {
+                    const snapVal = snap.val();
+                    if (snapVal) {
+                        const ausentes = snapVal.ausentes;
+
+                        if (ausentes instanceof Array && ausentes.length) {
+                            const filtredNewAusentes = _.filter(
+                                ausentes, ita => ita.push || (ita.key && (ita.key !== item.key))
+                            );
+                            dbFirebaseRef.update({
+                                ausentes: filtredNewAusentes
+                            })
+                            .then(() => Toast.show('Ausência removida', Toast.SHORT))
+                            .catch(
+                                () => Toast.show('Falha ao remover jogador ausente', Toast.SHORT)
+                            );
+
+                            return;
+                        }
+                    }
+                }
+
+                Toast.show('Falha ao remover jogador ausente', Toast.SHORT);
+                return;
+            }, 
+                () => Toast.show('Falha ao remover jogador ausente', Toast.SHORT)
+            );
+        };
+
+        Alert.alert(
+            'Aviso',
+            `Confirma a remoção do jogador\n( ${item.nome} ) da lista de ausentes ?`,
+            [
+                { 
+                    text: 'Cancelar', 
+                    onPress: () => true, 
+                    style: 'cancel' 
+                },
+                { 
+                    text: 'Sim', 
+                    onPress: () => checkConInfo(
+                        () => asyncFunExec()
+                    )
+                }
+            ]
+        );
+    }
+
+    renderRightConfirm = (jogo, userKey, type = '') => (
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+            { 
+                type === 'pendentes' && (
+                    <TouchableOpacity
+                        onPress={() => this.onPressConfirmA(jogo, userKey)}
+                    >
+                        <View
+                            style={{
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <Icon 
+                                name='wallet-travel'
+                                type='material-community'
+                                size={26} 
+                            />
+                        </View>
+                    </TouchableOpacity>
+                )
+            }
+            <View style={{ marginLeft: 10 }} />
+            <TouchableOpacity
+                onPress={() => this.onPressConfirmP(jogo, userKey)}
             >
-                <Icon 
-                    name='account-convert'
-                    type='material-community'
-                    size={28} 
-                />
-            </View>
-        </TouchableOpacity>
+                <View
+                    style={{
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    <Icon 
+                        name='account-convert'
+                        type='material-community'
+                        size={26} 
+                    />
+                </View>
+            </TouchableOpacity>
+        </View>
     )
 
     render = () => {
@@ -221,9 +332,10 @@ class Ausentes extends React.Component {
                                                     avatar={imgAvt}
                                                     key={index}
                                                     title={item.nome}
+                                                    onLongPress={() => this.onRemoveAusente(jogo, item)}
                                                     rightIcon={
                                                         itemSelectedAusente.isGerenc ?
-                                                        this.renderRightConfirm(jogo, item)
+                                                        this.renderRightConfirm(jogo, item, 'ausentes')
                                                         :
                                                         <View />
                                                     }
@@ -264,7 +376,7 @@ class Ausentes extends React.Component {
                                     containerStyle={{
                                         marginTop: 0, 
                                         borderTopWidth: 0, 
-                                        borderBottomWidth: 0
+                                        borderBottomWidth: 0,
                                     }}
                                 >
                                     {
@@ -285,7 +397,7 @@ class Ausentes extends React.Component {
                                                     title={item.nome}
                                                     rightIcon={
                                                         itemSelectedAusente.isGerenc ?
-                                                        this.renderRightConfirm(jogo, item)
+                                                        this.renderRightConfirm(jogo, item, 'pendentes')
                                                         :
                                                         <View />
                                                     }

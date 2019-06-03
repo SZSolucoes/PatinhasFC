@@ -1943,6 +1943,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderColor: '#e1e8ee',
         borderRadius: 5,
+        borderWidth: 1,
         ...Platform.select({
             ios: {
                 shadowColor: 'rgba(0,0,0, .2)',

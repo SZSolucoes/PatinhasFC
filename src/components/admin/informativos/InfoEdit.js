@@ -36,6 +36,7 @@ import { checkPerfil } from '../../../utils/userUtils';
 import { checkConInfo } from '../../../utils/jogosUtils';
 import { doActiveRNFetchBlob } from '../../../utils/utilsTools';
 import Card from '../../tools/Card';
+import { sendInformativosPushNotifForTopic } from '../../../utils/fcmPushNotifications';
 
 class InfoEdit extends React.Component {
     constructor(props) {
@@ -300,6 +301,8 @@ class InfoEdit extends React.Component {
                         showAlert(
                             'success', 'Sucesso!', 'Cadastro realizado com sucesso.'
                         );
+
+                        sendInformativosPushNotifForTopic();
                     }  
                 }, 500);
             }, 2000);
@@ -345,6 +348,8 @@ class InfoEdit extends React.Component {
                 .then(() => {
                     this.setState({ loading: false, isTitValid: false });
                     showAlert('success', 'Sucesso!', 'Cadastro realizado com sucesso.');
+
+                    sendInformativosPushNotifForTopic();
                 })
                 .catch(() => {
                     this.setState({ loading: false, isTitValid: false });

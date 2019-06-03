@@ -37,7 +37,7 @@ class Mural extends React.Component {
 
         this.calendarDims = {
             width: Dimensions.get('window').width,
-            height: Dimensions.get('window').width
+            height: Dimensions.get('window').height
         };
         this.isCalendarOpened = false;
         this.isAnimating = false;
@@ -98,7 +98,7 @@ class Mural extends React.Component {
 
     onChangeDimensions = ({ window }) => {
         this.calendarDims.width = window.width;
-        this.calendarDims.height = window.width;
+        this.calendarDims.height = window.height;
 
         if (this.isCalendarOpened) this.onPressDateBtn(true);
     }

@@ -406,7 +406,7 @@ class EscalacaoG extends React.Component {
 
                         if (confirmados instanceof Array && confirmados.length) {
                             const filtredNewConfirms = _.filter(
-                                confirmados, ita => ita.key && (ita.key !== item.key)
+                                confirmados, ita => ita.push || (ita.key && (ita.key !== item.key))
                             );
                             dbFirebaseRef.update({
                                 confirmados: filtredNewConfirms

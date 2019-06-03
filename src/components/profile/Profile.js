@@ -238,6 +238,18 @@ class Profile extends React.Component {
                             leftIcon={{ name: 'cash-multiple', type: 'material-community' }}
                             onPress={() => Actions.profileFinanceiro()}
                         />
+                        {
+                            this.props.userLevel && 
+                            (this.props.userLevel === '255' || this.props.userLevel === '0') &&
+                            (
+                                <ListItem
+                                    key={'Financeiro - Jogadores'}
+                                    title={'Financeiro - Jogadores'}
+                                    leftIcon={{ name: 'cash-multiple', type: 'material-community' }}
+                                    onPress={() => Actions.profileFinanceiroJogadores()}
+                                />
+                            )
+                        }
                         <ListItem
                             key={'Histórico de Enquetes'}
                             title={'Histórico de Enquetes'}
@@ -272,7 +284,7 @@ class Profile extends React.Component {
                         />
                         {
                             this.props.userLevel && 
-                            (this.props.userLevel === '255' || this.props.userLevel === '0') &&
+                            (this.props.userLevel === '255') &&
                             (
                                 <ListItem
                                     key={'Painel Administrativo'}
