@@ -58,3 +58,4 @@ android/app/google-services.json
 ios/GoogleService-Info.plist
 src/Firebase.js
 android/app/src/main/assets/index.android.bundle
+android/app/src/main/assets/index.android.bundle
