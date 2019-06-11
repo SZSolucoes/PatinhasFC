@@ -137,7 +137,6 @@ Card.propTypes = {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    overflow: 'hidden',
     borderColor: colors.grey5,
     borderWidth: 1,
     padding: 15,
@@ -145,10 +144,10 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     ...Platform.select({
         ios: {
-            shadowColor: 'rgba(0,0,0, .2)',
-            shadowOffset: { height: 0, width: 0 },
-            shadowOpacity: 1,
-            shadowRadius: 1
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.5,
+            shadowRadius: 2,
         },
         android: {
             elevation: 2

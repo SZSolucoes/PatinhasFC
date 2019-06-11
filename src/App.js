@@ -273,6 +273,7 @@ class App extends React.Component {
             FCM.subscribeToTopic('all'); 
             FCM.subscribeToTopic('enquetes');
             FCM.subscribeToTopic('mural');
+            FCM.subscribeToTopic('informativos');
             AsyncStorage.setItem(mappedKeyStorage('notifAllTopicEnabled'), 'yes');
             AsyncStorage.setItem(mappedKeyStorage('notifEnquetesEnabled'), 'yes');
             AsyncStorage.setItem(mappedKeyStorage('notifMuralEnabled'), 'yes');

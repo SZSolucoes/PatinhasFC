@@ -112,8 +112,8 @@ class FinanceiroParametros extends React.Component {
                 <Card containerStyle={styles.card}>
                     <FormLabel labelStyle={styles.text}>SÓCIO PATRIMONIAL</FormLabel>
                     <View style={{ flexDirection: 'row', paddingHorizontal: 20 }}>
-                        <View style={{ flex: 1.5, alignItems: 'flex-start', justifyContent: 'flex-end' }}>
-                            <Text>Valor: </Text>
+                        <View style={{ flex: 1.8, alignItems: 'flex-start', justifyContent: 'flex-end' }}>
+                            <Text numberOfLines={1}>Valor: </Text>
                         </View>
                         <View style={{ flex: 4, justifyContent: 'center' }}>
                             <TextInputMask
@@ -134,8 +134,8 @@ class FinanceiroParametros extends React.Component {
                         </View>
                     </View>
                     <View style={{ flexDirection: 'row', paddingHorizontal: 20 }}>
-                        <View style={{ flex: 1.5, alignItems: 'flex-start', justifyContent: 'flex-end' }}>
-                            <Text>Desconto: </Text>
+                        <View style={{ flex: 1.8, alignItems: 'flex-start', justifyContent: 'flex-end' }}>
+                            <Text numberOfLines={1}>Desconto: </Text>
                         </View>
                         <View style={{ flex: 4, justifyContent: 'center' }}>
                             <TextInputMask
@@ -160,8 +160,8 @@ class FinanceiroParametros extends React.Component {
 
                     <FormLabel labelStyle={styles.text}>SÓCIO CONTRIBUINTE</FormLabel>
                     <View style={{ flexDirection: 'row', paddingHorizontal: 20 }}>
-                        <View style={{ flex: 1.5, alignItems: 'flex-start', justifyContent: 'flex-end' }}>
-                            <Text>Valor: </Text>
+                        <View style={{ flex: 1.8, alignItems: 'flex-start', justifyContent: 'flex-end' }}>
+                            <Text numberOfLines={1}>Valor: </Text>
                         </View>
                         <View style={{ flex: 4, justifyContent: 'center' }}>
                             <TextInputMask
@@ -182,8 +182,8 @@ class FinanceiroParametros extends React.Component {
                         </View>
                     </View>
                     <View style={{ flexDirection: 'row', paddingHorizontal: 20 }}>
-                        <View style={{ flex: 1.5, alignItems: 'flex-start', justifyContent: 'flex-end' }}>
-                            <Text>Desconto: </Text>
+                        <View style={{ flex: 1.8, alignItems: 'flex-start', justifyContent: 'flex-end' }}>
+                            <Text numberOfLines={1}>Desconto: </Text>
                         </View>
                         <View style={{ flex: 4, justifyContent: 'center' }}>
                             <TextInputMask

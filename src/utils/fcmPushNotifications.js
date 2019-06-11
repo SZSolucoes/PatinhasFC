@@ -6,7 +6,7 @@ import { pushKey } from '../Firebase';
 const key = pushKey;
 
 export const sendCadJogoPushNotifForAll = (jogo) => {
-    /* Axios.post('https://fcm.googleapis.com/fcm/send',
+    Axios.post('https://fcm.googleapis.com/fcm/send',
       {
         to: '/topics/all',
         notification: {
@@ -24,7 +24,7 @@ export const sendCadJogoPushNotifForAll = (jogo) => {
                 Authorization: `key=${key}`
             }
         }
-    ); */
+    );
 };
 
 export const sendReminderJogoPushNotifForAll = (titulo, jogo, listUsuarios, userLogged) => {

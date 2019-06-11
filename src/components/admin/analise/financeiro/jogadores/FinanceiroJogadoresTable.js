@@ -24,6 +24,8 @@ import { normalize } from '../../../../../utils/strComplex';
 import { colorAppT, colorAppP } from '../../../../../utils/constantes';
 import { modifySearchValue } from '../../../../tools/searchbar/SearchBarActions';
 import MonthSelector from '../../../../tools/MonthSelector';
+import { isPortrait } from '../../../../../utils/orientation';
+import { showAlert } from '../../../../../utils/store';
 
 class FinanceiroJogadoresTable extends Component {
     constructor(props) { 
@@ -45,6 +47,7 @@ class FinanceiroJogadoresTable extends Component {
         this.isAnimating = false;
 
         this.dateAll = null;
+        this.isPortrait = isPortrait();
 
         this.yearNow = new Date().getFullYear();
         this.lengthUsers = 0;
@@ -69,6 +72,8 @@ class FinanceiroJogadoresTable extends Component {
 
     componentDidMount = () => {
         Dimensions.addEventListener('change', this.changedOrientation);
+
+        this.isPortrait = isPortrait();
 
         const dtYearGroup = parseInt(Moment().format('YYYY'), 10) - 2;
 
@@ -182,15 +187,14 @@ class FinanceiroJogadoresTable extends Component {
 
     onPressDateBtn = (showCalendar = false, brokeAnim = false) => {
         if (!this.isAnimating || brokeAnim) {
-            this.isAnimating = true;
-
-            if (showCalendar) {
+            if (showCalendar && this.isPortrait) { 
                 if (!this.isCalendarOpened) {
                     this.animCalendarWidth.setValue(0);
                     this.animCalendarHeight.setValue(0);
                     this.animCalendarTranslateX.setValue(0);
                 }
-        
+                
+                this.isAnimating = true;
                 Animated.parallel([
                     Animated.spring(
                         this.animCalendarWidth,
@@ -208,7 +212,8 @@ class FinanceiroJogadoresTable extends Component {
                     this.isCalendarOpened = true;
                     this.isAnimating = false;
                 });
-            } else {
+            } else if (this.isCalendarOpened) {
+                this.isAnimating = true;
                 Animated.parallel([
                     Animated.spring(
                         this.animCalendarWidth,
@@ -233,23 +238,61 @@ class FinanceiroJogadoresTable extends Component {
         }
     }
 
-    onPressConfirmarPagAll = () => {
+    onPressConfirmarPagAll = (listUsuarios, financeiroJogadores) => {
         const yearNumber = parseInt(this.state.month.format('YYYY'), 10);
         const monthName = this.state.month.format('MMMM');
+        let message = '';
 
-        const message = `Confirma o pagamento referente a "${monthName}" de "${yearNumber}" para todos os usuários ?`;
+        if (this.props.searchValue.trim()) {
+            message = `Confirma o pagamento referente a "${monthName}" de "${yearNumber}" para todos os usuários filtrados ?`;
+        } else {
+            message = `Confirma o pagamento referente a "${monthName}" de "${yearNumber}" para todos os usuários ?`;
+        }
 
-        console.log(message);
-        /* const funExec = () => {
-            const dbCobrancaRef = this.dbFirebaseRef
+        const funExec = () => {
+            this.setState({ loadingPag: true });
+            
+            const newListPlayers = {};
+            const yearNode = financeiroJogadores && financeiroJogadores[yearNumber] ? financeiroJogadores[yearNumber] : null;
+            for (let index = 0; index < listUsuarios.length; index++) {
+                const element = listUsuarios[index];
+                let valorIndividual = 0;
+
+                if (element.tipoPerfil === 'sociopatrim') {
+                    valorIndividual = this.state.financeiroParametros.socioPatrimValor;
+                } else if (element.tipoPerfil === 'sociocontrib') {
+                    valorIndividual = this.state.financeiroParametros.socioContribValor;
+                }
+
+                if (!valorIndividual) {
+                    Alert.alert('Aviso', 'Parâmetros financeiros não configurados.');
+                    this.setState({ loadingPag: false });
+                    return;
+                }
+
+                if (typeof valorIndividual === 'number' && valorIndividual < 0) {
+                    Alert.alert('Aviso', 'Parâmetros financeiros com configuração negativa.');
+                    this.setState({ loadingPag: false });
+                    return;
+                }
+
+                const playerCob = yearNode && yearNode[element.key] ? yearNode[element.key] : {};
+
+                newListPlayers[element.key] = { ...playerCob, [monthName.slice(0, 3).toLocaleLowerCase()]: { value: valorIndividual, typePay: 'norm' } };
+            }
+
+            const dbCobrancaYearRef = this.dbFirebaseRef
             .child(`analise/financeiroJogadores/${yearNumber}`);
 
-
-
-            dbCobrancaRef.update({
-                [params.month]: { value: valorIndividual, typePay: params.checkType }
-            }).then(() => true).catch(() => false);
-            
+            dbCobrancaYearRef.update({
+                ...newListPlayers
+            }).then(() => {
+                this.setState({ loadingPag: false });
+                showAlert('success', 'Sucesso!', 'Pagamentos realizados com sucesso.');
+            }).catch(() => {
+                this.setState({ loadingPag: false });
+                showAlert('danger', 'Ops!', 'Ocorreu um erro ao realizar os pagamentos.');
+            });
         };
 
         Alert.alert(
@@ -263,22 +306,64 @@ class FinanceiroJogadoresTable extends Component {
                 }
             ],
             { cancelable: true }
-        ); */
+        );
     }
 
-    onPressConfirmarPagAllDesc = () => {
-        console.log(this.state.month);
-        /* const funExec = () => {
-            const dbCobrancaRef = this.dbFirebaseRef
-            .child(`analise/financeiroJogadores/${params.yearNumber}/${params.playerKey}`);
+    onPressConfirmarPagAllDesc = (listUsuarios, financeiroJogadores) => {
+        const yearNumber = parseInt(this.state.month.format('YYYY'), 10);
+        const monthName = this.state.month.format('MMMM');
+        let message = '';
 
-            if (params.hasCheck) {
-                dbCobrancaRef.child(params.month).remove().then(() => true).catch(() => false);
-            } else {
-                dbCobrancaRef.update({
-                    [params.month]: { value: valorIndividual, typePay: params.checkType }
-                }).then(() => true).catch(() => false);
+        if (this.props.searchValue.trim()) {
+            message = `Confirma o pagamento com desconto referente a "${monthName}" de "${yearNumber}" para todos os usuários filtrados ?`;
+        } else {
+            message = `Confirma o pagamento com desconto referente a "${monthName}" de "${yearNumber}" para todos os usuários ?`;
+        }
+
+        const funExec = () => {
+            this.setState({ loadingPagDesc: true });
+            
+            const newListPlayers = {};
+            const yearNode = financeiroJogadores && financeiroJogadores[yearNumber] ? financeiroJogadores[yearNumber] : null;
+            for (let index = 0; index < listUsuarios.length; index++) {
+                const element = listUsuarios[index];
+                let valorIndividual = 0;
+
+                if (element.tipoPerfil === 'sociopatrim') {
+                    valorIndividual = this.state.financeiroParametros.socioPatrimValor - this.state.financeiroParametros.socioPatrimValorDesc;
+                } else if (element.tipoPerfil === 'sociocontrib') {
+                    valorIndividual = this.state.financeiroParametros.socioContribValor - this.state.financeiroParametros.socioContribValorDesc;
+                }
+
+                if (!valorIndividual) {
+                    Alert.alert('Aviso', 'Parâmetros financeiros não configurados.');
+                    this.setState({ loadingPagDesc: false });
+                    return;
+                }
+
+                if (typeof valorIndividual === 'number' && valorIndividual < 0) {
+                    Alert.alert('Aviso', 'Parâmetros financeiros com configuração negativa.');
+                    this.setState({ loadingPagDesc: false });
+                    return;
+                }
+
+                const playerCob = yearNode && yearNode[element.key] ? yearNode[element.key] : {};
+
+                newListPlayers[element.key] = { ...playerCob, [monthName.slice(0, 3).toLocaleLowerCase()]: { value: valorIndividual, typePay: 'desc' } };
             }
+
+            const dbCobrancaYearRef = this.dbFirebaseRef
+            .child(`analise/financeiroJogadores/${yearNumber}`);
+
+            dbCobrancaYearRef.update({
+                ...newListPlayers
+            }).then(() => {
+                this.setState({ loadingPagDesc: false });
+                showAlert('success', 'Sucesso!', 'Pagamentos realizados com sucesso.');
+            }).catch(() => {
+                this.setState({ loadingPagDesc: false });
+                showAlert('danger', 'Ops!', 'Ocorreu um erro ao realizar os pagamentos.');
+            });
         };
 
         Alert.alert(
@@ -292,7 +377,7 @@ class FinanceiroJogadoresTable extends Component {
                 }
             ],
             { cancelable: true }
-        ); */
+        );
     }
 
     onMonthSelected = (date) => {
@@ -302,6 +387,8 @@ class FinanceiroJogadoresTable extends Component {
     changedOrientation = ({ window }) => {
         this.calendarDims.width = window.width;
         this.calendarDims.height = window.height;
+
+        this.isPortrait = isPortrait();
 
         if (this.isCalendarOpened) this.onPressDateBtn(true);
         
@@ -474,7 +561,7 @@ class FinanceiroJogadoresTable extends Component {
         </View>
     )
 
-    renderMonthBatch = () => {
+    renderMonthBatch = (listUsuarios, financeiroJogadores) => {
         const minDate = Moment(`01-01-${parseInt(this.yearNow, 10) - 2}`, 'DD-MM-YYYY');
         const maxDate = Moment(`31-12-${parseInt(this.yearNow, 10)}`, 'DD-MM-YYYY');
 
@@ -524,20 +611,20 @@ class FinanceiroJogadoresTable extends Component {
                     <Button 
                         small
                         loading={this.state.loadingPag}
-                        disabled={this.state.loadingPag}
+                        disabled={this.state.loadingPag || this.state.loadingPagDesc}
                         loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                         title={this.state.loadingPag ? ' ' : 'Pagar todos'} 
                         buttonStyle={{ width: '100%', marginTop: 10 }}
-                        onPress={() => checkConInfo(() => this.onPressConfirmarPagAll())}
+                        onPress={() => checkConInfo(() => this.onPressConfirmarPagAll(listUsuarios, financeiroJogadores))}
                     />
                     <Button 
                         small
                         loading={this.state.loadingPagDesc}
-                        disabled={this.state.loadingPagDesc}
+                        disabled={this.state.loadingPagDesc || this.state.loadingPag}
                         loadingProps={{ size: 'large', color: 'rgba(111, 202, 186, 1)' }}
                         title={this.state.loadingPagDesc ? ' ' : 'Pagar todos com desconto'} 
                         buttonStyle={{ width: '100%', marginTop: 10 }}
-                        onPress={() => checkConInfo(() => this.onPressConfirmarPagAllDesc())}
+                        onPress={() => checkConInfo(() => this.onPressConfirmarPagAllDesc(listUsuarios, financeiroJogadores))}
                     />
                 </View>
             </Animated.View>
@@ -617,6 +704,8 @@ class FinanceiroJogadoresTable extends Component {
 
             return item.nome.toLowerCase().includes(playerName.toLowerCase());
         });
+
+        const listUsuariosPag = [...listUsuarios];
         
         this.lengthUsersMax = listUsuarios.length;
 
@@ -652,7 +741,7 @@ class FinanceiroJogadoresTable extends Component {
                         <View style={{ marginVertical: 25 }} />
                         {this.renderTotal(listUsuarios, this.state.financeiroJogadores, this.state.yearNumber)}
                     </View>
-                    {this.renderMonthBatch()}
+                    {this.renderMonthBatch(listUsuariosPag, this.state.financeiroJogadores)}
                 </View>
             </View>
         );
